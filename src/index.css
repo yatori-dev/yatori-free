@@ -1,0 +1,332 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: 'Plus Jakarta Sans', var(--font-sans);
+    --font-sans: 'Plus Jakarta Sans', 'Geist Variable', sans-serif;
+    
+    /* Shadcn mappings */
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+    --background: #fdfcff;
+    --foreground: #1a1c1e;
+    --card: #fdfcff;
+    --card-foreground: #1a1c1e;
+    --popover: #fdfcff;
+    --popover-foreground: #1a1c1e;
+    --primary: #0061a4;
+    --primary-foreground: #ffffff;
+    --secondary: #535f70;
+    --secondary-foreground: #ffffff;
+    --muted: #e0e2ec;
+    --muted-foreground: #43474e;
+    --accent: #d1e4ff;
+    --accent-foreground: #001d36;
+    --destructive: #ba1a1a;
+    --destructive-foreground: #ffffff;
+    --border: #c3c7cf;
+    --input: #73777f;
+    --ring: #0061a4;
+    --radius: 0.5rem;
+
+    /* Google Colors */
+    --google-blue: #4285F4;
+    --google-red: #EA4335;
+    --google-yellow: #FBBC05;
+    --google-green: #34A853;
+}
+
+.dark {
+    --background: #1a1c1e;
+    --foreground: #e2e2e6;
+    --card: #1e2022; /* surface container */
+    --card-foreground: #e2e2e6;
+    --popover: #1a1c1e;
+    --popover-foreground: #e2e2e6;
+    --primary: #9ecaef;
+    --primary-foreground: #003258;
+    --secondary: #bbc7db;
+    --secondary-foreground: #253140;
+    --muted: #43474e;
+    --muted-foreground: #c3c7cf;
+    --accent: #00497d;
+    --accent-foreground: #d1e4ff;
+    --destructive: #ffb4ab;
+    --destructive-foreground: #690005;
+    --border: #43474e;
+    --input: #8d9199;
+    --ring: #9ecaef;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Google-like Accent Bar */
+.google-accent-bar {
+  height: 4px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  width: 100%;
+}
+.google-accent-bar > div:nth-child(1) { background-color: var(--google-blue); }
+.google-accent-bar > div:nth-child(2) { background-color: var(--google-red); }
+.google-accent-bar > div:nth-child(3) { background-color: var(--google-yellow); }
+.google-accent-bar > div:nth-child(4) { background-color: var(--google-green); }
+
+/* Google Spinner Animation */
+.google-spinner {
+  animation: google-rotate 2s linear infinite;
+  width: 32px;
+  height: 32px;
+}
+
+.google-spinner .path {
+  stroke: var(--google-blue);
+  stroke-linecap: round;
+  animation: google-dash 1.5s ease-in-out infinite, google-colors 5.6s ease-in-out infinite;
+}
+
+@keyframes google-rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes google-dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+@keyframes google-colors {
+  0%, 100% { stroke: var(--google-blue); }
+  25% { stroke: var(--google-red); }
+  50% { stroke: var(--google-yellow); }
+  75% { stroke: var(--google-green); }
+}
+
+/* Slide Panels */
+.slide-viewport {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.slide-container {
+  display: flex;
+  width: 200%;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-pane {
+  width: 50%;
+  flex-shrink: 0;
+}
+
+/* Material Ripple (Simulated with hover transition) */
+.btn-material {
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+.btn-material:active {
+  transform: scale(0.98);
+}
+
+/* Google-style Snackbar / Chrome Infobar */
+.cn-toast {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  padding: 12px 16px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid var(--border) !important;
+  background-color: var(--card) !important;
+  color: var(--foreground) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  overflow: hidden !important;
+  min-width: 340px !important;
+  max-width: min(620px, calc(100vw - 32px)) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Google-like colored left strip */
+.cn-toast::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--google-blue);
+  transition: background-color 0.3s !important;
+}
+
+.cn-toast[data-type="success"]::before {
+  background-color: var(--google-green) !important;
+}
+
+.cn-toast[data-type="error"]::before {
+  background-color: var(--google-red) !important;
+}
+
+.cn-toast[data-type="warning"]::before {
+  background-color: var(--google-yellow) !important;
+}
+
+.cn-toast[data-type="info"]::before {
+  background-color: var(--google-blue) !important;
+}
+
+/* Custom icon sizing and alignment */
+.cn-toast [data-icon] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 20px !important;
+  margin-right: 2px !important;
+  flex-shrink: 0 !important;
+}
+
+.cn-toast[data-type="success"] [data-icon] {
+  color: var(--google-green) !important;
+}
+
+.cn-toast[data-type="error"] [data-icon] {
+  color: var(--google-red) !important;
+}
+
+.cn-toast[data-type="warning"] [data-icon] {
+  color: var(--google-yellow) !important;
+}
+
+.cn-toast[data-type="info"] [data-icon] {
+  color: var(--google-blue) !important;
+}
+
+/* Make sure the text matches Google's sleek typography */
+.cn-toast [data-title] {
+  display: block !important;
+  font-weight: 600 !important;
+  color: var(--foreground) !important;
+  line-height: 1.5 !important;
+  overflow-wrap: anywhere !important;
+}
+
+.cn-toast [data-description] {
+  display: block !important;
+  color: var(--muted-foreground) !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  margin-top: 2px !important;
+  overflow-wrap: anywhere !important;
+}
+
+.cn-toast [data-content] {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+/* Style Sonner action and close button */
+.cn-toast [data-close-button] {
+  position: absolute !important;
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: var(--muted-foreground) !important;
+  border-radius: 50% !important;
+  padding: 4px !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s, color 0.2s !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.cn-toast [data-close-button]:hover {
+  background-color: var(--accent) !important;
+  color: var(--foreground) !important;
+}
+
+/* Tabs Content Transition Animation */
+[data-slot="tabs-content"][data-state="active"] {
+  animation: tabFadeIn var(--tab-transition-duration, 0.25s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes tabFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(var(--tab-transition-start-x, 8px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+

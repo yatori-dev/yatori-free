@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yatori 任务流模式"
+  short_description: "统一任务进度流的 SSE、轮询回退、鉴权退出与去抖更新写法"
+  default_prompt: "Use $yatori-task-stream-pattern to build or refactor Yatori task progress streaming logic."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yatori UI 增量开发"
+  short_description: "按现有 shadcn 与主题变量约束新增页面、表单和面板"
+  default_prompt: "Use $yatori-shadcn-feature-workflow to add or revise a Yatori UI feature with the existing shadcn and theme conventions."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yatori API 对齐"
+  short_description: "下载官方 API 文档并逐项核对前端接口与字段定义"
+  default_prompt: "Use $yatori-api-sync to download the latest API docs and reconcile them with src/lib/api.ts."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yatori 组件拆分"
+  short_description: "按项目约束拆分巨型页面组件并收拢状态、请求与副作用"
+  default_prompt: "Use $yatori-fat-component-refactor to split a large Yatori component into focused subcomponents and hooks."
