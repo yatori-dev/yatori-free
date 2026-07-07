@@ -27,7 +27,13 @@ export interface CoursesCustom {
   answerMode?: string;
   includeCourses?: string[];
   excludeCourses?: string[];
-  coursesSettings?: unknown[];
+  coursesSettings?: CourseSetting[];
+}
+
+export interface CourseSetting {
+  name?: string;
+  includeExams?: string[];
+  excludeExams?: string[];
 }
 
 export type TaskStatus =
@@ -41,14 +47,12 @@ export type TaskStatus =
 
 export interface Account {
   id: string;
-  ownerUserId?: string;
+  ownerUserId: string;
   accountType: string;
   avatarUrl?: string;
-  url?: string;
   account: string;
-  name?: string;
-  remarkName?: string;
-  isProxy?: number;
+  name: string;
+  schoolName?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -57,6 +61,7 @@ export interface AuthSession {
   expiresAt: string | null;
   displayName: string;
   avatarUrl: string | null;
+  schoolName?: string;
   user: User;
   account: Account | null;
 }
@@ -112,13 +117,42 @@ export interface CourseDetails {
   blockedPointCount?: number;
 }
 
+export interface CourseListResponseData {
+  courses: Course[];
+}
+
+export interface TaskListResponseData {
+  tasks: Task[];
+}
+
+export interface CreateTaskRequest {
+  accountId: string;
+  autoResume?: boolean;
+  coursesCustom: CoursesCustom;
+}
+
+export interface LoginRequest {
+  account: string;
+  password: string;
+  name?: string;
+}
+
+export interface LoginData {
+  expiresAt: string;
+  displayName?: string;
+  avatarUrl?: string;
+  schoolName?: string;
+  user: User;
+  account: Account;
+}
+
 export interface Task {
   id: string;
-  ownerUserId: string;
+  ownerUserId?: string;
   accountId: string;
   status: TaskStatus;
   autoResume: boolean;
-  configSnapshot: {
+  configSnapshot?: {
     accountType: string;
     account: string;
     coursesCustom: CoursesCustom;
@@ -133,15 +167,15 @@ export interface Task {
 
 export interface TaskProgress {
   taskId: string;
-  status: TaskStatus;
+  status: TaskStatus | string;
   percent: number;
-  totalUnits: number;
-  completedUnits: number;
-  failedUnits: number;
-  currentCourse: string;
-  currentChapter: string;
-  currentKind: string;
-  currentTitle: string;
+  totalUnits?: number;
+  completedUnits?: number;
+  failedUnits?: number;
+  currentCourse?: string;
+  currentChapter?: string;
+  currentKind?: string;
+  currentTitle?: string;
   message: string;
   updatedAt?: string;
 }
@@ -234,6 +268,7 @@ export async function getCurrentSession() {
     expiresAt: data.expiresAt,
     displayName: account?.name || data.user.username,
     avatarUrl: account?.avatarUrl || null,
+    schoolName: account?.schoolName,
     user: data.user,
     account,
   } satisfies AuthSession;
@@ -242,7 +277,7 @@ export async function getCurrentSession() {
 export interface SignLog {
   id: string;
   courseName?: string;
-  signName: string;
+  signName?: string;
   result: string;
   signInActivityId?: string;
   signOutActivityId?: string;
@@ -271,6 +306,44 @@ export interface SignLogsResponseData {
   total: number;
   limit: number;
   offset: number;
+}
+
+export function login(payload: LoginRequest) {
+  return apiRequest<LoginData>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getCourses(accountId: string) {
+  return apiRequest<CourseListResponseData>(`/accounts/${encodeApiPathSegment(accountId)}/courses`);
+}
+
+export function getCourseDetails(accountId: string, classId: string) {
+  return apiRequest<CourseDetails>(
+    `/accounts/${encodeApiPathSegment(accountId)}/courses/${encodeApiPathSegment(classId)}`,
+  );
+}
+
+export function getTasks() {
+  return apiRequest<TaskListResponseData>('/tasks');
+}
+
+export function createTask(payload: CreateTaskRequest) {
+  return apiRequest<Task>('/tasks', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getTask(taskId: string) {
+  return apiRequest<Task>(`/tasks/${encodeApiPathSegment(taskId)}`);
+}
+
+export function stopTask(taskId: string) {
+  return apiRequest(`/tasks/${encodeApiPathSegment(taskId)}/stop`, {
+    method: 'POST',
+  });
 }
 
 export function startSignMonitor(accountId: string) {

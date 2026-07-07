@@ -8,11 +8,14 @@ import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
 
 import {
-  apiRequest,
-  encodeApiPathSegment,
+  createTask,
+  getCourseDetails,
+  getCourses,
   getErrorMessage,
+  getTasks,
   getUserFacingErrorMessage,
   isUnauthorizedError,
+  stopTask,
 } from '@/lib/api';
 import { extractChapterItems, getChapterTaskMetas } from '@/lib/courseChapters';
 import type { AuthSession, Course, CourseDetails, Task, CoursesCustom } from '@/lib/api';
@@ -67,14 +70,6 @@ const CourseCheckbox: React.FC<CourseCheckboxProps> = ({ checked, disabled = fal
 interface DashboardProps {
   session: AuthSession;
   onLogout: () => void;
-}
-
-interface CoursesResponseData {
-  courses?: Course[];
-}
-
-interface TasksResponseData {
-  tasks?: Task[];
 }
 
 interface SettingsFormState {
@@ -271,9 +266,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     if (!account) return;
     setCoursesLoading(true);
     try {
-      const response = await apiRequest<CoursesResponseData>(
-        `/accounts/${encodeApiPathSegment(account.id)}/courses`,
-      );
+      const response = await getCourses(account.id);
       if (response.code === 200) {
         const nextCourses = (response.data?.courses ?? []).filter((course): course is Course => {
           return typeof course?.key === 'string' && course.key.trim().length > 0;
@@ -309,7 +302,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       setTasksLoading(true);
     }
     try {
-      const response = await apiRequest<TasksResponseData>('/tasks');
+      const response = await getTasks();
       if (response.code === 200 && response.data?.tasks) {
         setTasks(response.data.tasks);
       }
@@ -332,9 +325,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     if (!account) return;
     setLoadingDetails(prev => ({ ...prev, [classId]: true }));
     try {
-      const response = await apiRequest<CourseDetails>(
-        `/accounts/${encodeApiPathSegment(account.id)}/courses/${encodeApiPathSegment(classId)}`,
-      );
+      const response = await getCourseDetails(account.id, classId);
       if (response.code === 200 && response.data) {
         const details = response.data;
         setCourseDetailsMap(prev => ({ ...prev, [classId]: details }));
@@ -469,12 +460,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     });
 
     try {
-      const createResponse = await apiRequest<Task>('/tasks', {
-        method: 'POST',
-        body: JSON.stringify({
-          accountId: account.id,
-          coursesCustom: customConfig,
-        }),
+      const createResponse = await createTask({
+        accountId: account.id,
+        coursesCustom: customConfig,
       });
 
       if (createResponse.data) {
@@ -556,9 +544,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const handleStopTask = async (taskId: string) => {
     setStoppingTaskId(taskId);
     try {
-      const response = await apiRequest(`/tasks/${encodeApiPathSegment(taskId)}/stop`, {
-        method: 'POST',
-      });
+      const response = await stopTask(taskId);
       if (response.code === 200) {
         toast.info('已发送停止请求');
         void fetchTasks({ showLoading: false });

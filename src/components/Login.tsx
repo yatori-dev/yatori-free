@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent } from './ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog';
-import { apiRequest, getUserFacingErrorMessage } from '@/lib/api';
+import { getUserFacingErrorMessage, login } from '@/lib/api';
 import type { AuthSession } from '@/lib/api';
 import { readSavedAccount, saveSavedAccount } from '@/lib/savedAccount';
 import { Eye, EyeOff } from 'lucide-react';
@@ -11,14 +11,6 @@ import { toast } from 'sonner';
 
 interface LoginProps {
   onLoginSuccess: (session: AuthSession) => void;
-}
-
-interface LoginResponseData {
-  expiresAt?: string | null;
-  displayName?: string;
-  avatarUrl?: string | null;
-  user: AuthSession['user'];
-  account?: AuthSession['account'];
 }
 
 function openExternalUrl(url: string) {
@@ -104,12 +96,9 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setIsLoading(true);
     
     try {
-      const response = await apiRequest<LoginResponseData>('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({
-          account: account.trim(),
-          password: password,
-        }),
+      const response = await login({
+        account: account.trim(),
+        password,
       });
 
       if (response.code === 200 && response.data) {
@@ -121,8 +110,9 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           expiresAt: response.data.expiresAt || null,
           displayName: response.data.displayName || response.data.user?.username || account,
           avatarUrl: response.data.avatarUrl || response.data.account?.avatarUrl || null,
+          schoolName: response.data.schoolName || response.data.account.schoolName,
           user: response.data.user,
-          account: response.data.account || null,
+          account: response.data.account,
         };
         onLoginSuccess(sessionData);
       } else {

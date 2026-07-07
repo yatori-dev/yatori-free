@@ -17,8 +17,7 @@ import {
   Hourglass
 } from 'lucide-react';
 import {
-  apiRequest,
-  encodeApiPathSegment,
+  getTask,
   getTaskProgressStreamUrl,
   isUnauthorizedError,
   TASK_PROGRESS_STREAM_EVENT,
@@ -91,7 +90,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const [showConfig, setShowConfig] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const effectiveStatus = progress?.status ?? task.status;
+  const effectiveStatus = (progress?.status ?? task.status) as Task['status'];
 
   const applyProgress = useEffectEvent((nextProgress: TaskProgress) => {
     if (nextProgress.taskId !== task.id) {
@@ -116,7 +115,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
 
   const fetchProgress = useEffectEvent(async () => {
     try {
-      const result = await apiRequest<Task>(`/tasks/${encodeApiPathSegment(task.id)}`);
+      const result = await getTask(task.id);
       if (result.code === 200 && result.data?.progress && result.data.progress.taskId === task.id) {
         applyProgress(result.data.progress);
       }
