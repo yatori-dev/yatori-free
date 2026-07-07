@@ -195,7 +195,29 @@ export function getErrorMessage(error: unknown, fallback = '请求失败') {
   return fallback;
 }
 
+function getApiErrorPayloadMessage(error: unknown) {
+  if (
+    typeof error !== 'object' ||
+    error === null ||
+    !('payload' in error) ||
+    typeof error.payload !== 'object' ||
+    error.payload === null ||
+    !('message' in error.payload) ||
+    typeof error.payload.message !== 'string'
+  ) {
+    return null;
+  }
+
+  const message = error.payload.message.trim();
+  return message || null;
+}
+
 export function getUserFacingErrorMessage(error: unknown, fallback = '请求失败') {
+  const apiMessage = getApiErrorPayloadMessage(error);
+  if (apiMessage) {
+    return apiMessage;
+  }
+
   if (isUnauthorizedError(error)) {
     return '登录已失效，请重新登录';
   }
