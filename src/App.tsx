@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Login } from './components/Login';
 import { Dashboard } from './components/Dashboard';
-import { getCurrentSession, isUnauthorizedError, type AuthSession } from './lib/api';
+import { getCurrentSession, getUserFacingErrorMessage, isAuthExitError, type AuthSession } from './lib/api';
 import { Toaster } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const AUTH_STORAGE_KEY = 'yatori-auth';
 const LOGOUT_SUPPRESSION_KEY = 'yatori-auth-logout-suppressed';
@@ -66,8 +67,11 @@ function App() {
         persistSession(currentSession);
       })
       .catch((error) => {
-        if (!isUnauthorizedError(error)) {
+        if (isAuthExitError(error)) {
+          toast.error(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
+        } else {
           console.error('Failed to restore auth session', error);
+          toast.error(getUserFacingErrorMessage(error, '恢复登录状态失败，请重新登录'));
         }
         if (!cancelled) {
           setSession(null);

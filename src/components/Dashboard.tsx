@@ -14,12 +14,12 @@ import {
   getErrorMessage,
   getTasks,
   getUserFacingErrorMessage,
-  isUnauthorizedError,
+  isAuthExitError,
   stopTask,
 } from '@/lib/api';
 import { extractChapterItems, getChapterTaskMetas } from '@/lib/courseChapters';
 import type { AuthSession, Course, CourseDetails, Task, CoursesCustom } from '@/lib/api';
-import { notifyUnauthorized } from '@/lib/notifications';
+import { notifyAuthExit } from '@/lib/notifications';
 import { TaskInlineItem } from './TaskInlineItem';
 import { SignMonitor } from './SignMonitor';
 import { 
@@ -284,8 +284,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         }
       }
     } catch (error) {
-      if (isUnauthorizedError(error)) {
-        notifyUnauthorized();
+      if (isAuthExitError(error)) {
+        notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
         onLogout();
         return;
       }
@@ -307,8 +307,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         setTasks(response.data.tasks);
       }
     } catch (error) {
-      if (isUnauthorizedError(error)) {
-        notifyUnauthorized();
+      if (isAuthExitError(error)) {
+        notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
         onLogout();
         return;
       }
@@ -331,8 +331,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         setCourseDetailsMap(prev => ({ ...prev, [classId]: details }));
       }
     } catch (error) {
-      if (isUnauthorizedError(error)) {
-        notifyUnauthorized();
+      if (isAuthExitError(error)) {
+        notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
         onLogout();
         return;
       }
@@ -476,8 +476,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         setSelectedCourses(new Set());
       }
     } catch (error) {
-      if (isUnauthorizedError(error)) {
-        notifyUnauthorized();
+      if (isAuthExitError(error)) {
+        notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
         onLogout();
         return;
       }
@@ -551,8 +551,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         void fetchCourses();
       }
     } catch (error) {
-      if (isUnauthorizedError(error)) {
-        notifyUnauthorized();
+      if (isAuthExitError(error)) {
+        notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
         onLogout();
         return;
       }

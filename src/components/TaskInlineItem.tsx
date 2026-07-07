@@ -19,11 +19,13 @@ import {
 import {
   getTask,
   getTaskProgressStreamUrl,
-  isUnauthorizedError,
+  getUserFacingErrorMessage,
+  isAuthExitError,
   TASK_PROGRESS_STREAM_EVENT,
   type Task,
   type TaskProgress,
 } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface TaskInlineItemProps {
   task: Task;
@@ -89,6 +91,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const [progress, setProgress] = useState<TaskProgress | null>(() => task.progress ?? null);
   const [showConfig, setShowConfig] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [progressErrorMessage, setProgressErrorMessage] = useState('');
 
   const effectiveStatus = (progress?.status ?? task.status) as Task['status'];
 
@@ -117,12 +120,17 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
     try {
       const result = await getTask(task.id);
       if (result.code === 200 && result.data?.progress && result.data.progress.taskId === task.id) {
+        setProgressErrorMessage('');
         applyProgress(result.data.progress);
       }
     } catch (err) {
-      if (isUnauthorizedError(err)) {
+      if (isAuthExitError(err)) {
+        toast.error(getUserFacingErrorMessage(err, '登录已失效，请重新登录'));
         onUnauthorized?.();
+        return;
       }
+
+      setProgressErrorMessage(getUserFacingErrorMessage(err, '获取任务进度失败'));
     }
   });
 
@@ -318,7 +326,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const showProgress = progress && snapshotStatuses.includes(effectiveStatus);
   const progressCourseLabel = progress?.currentCourse || progressFallback.course;
   const progressChapterLabel = progress?.currentChapter || progressFallback.chapter;
-  const taskErrorMessage = task.errorMessage || (effectiveStatus === 'failed' ? progress?.message : '');
+  const taskErrorMessage = progressErrorMessage || task.errorMessage || (effectiveStatus === 'failed' ? progress?.message : '');
   const canStopTask = stoppableStatuses.includes(task.status) || stoppableStatuses.includes(effectiveStatus);
   const isStoppingTask = task.status === 'stopping' || effectiveStatus === 'stopping';
 

@@ -247,6 +247,19 @@ export function isUnauthorizedError(error: unknown) {
   );
 }
 
+export function isForbiddenError(error: unknown) {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'status' in error &&
+    error.status === 403
+  );
+}
+
+export function isAuthExitError(error: unknown) {
+  return isUnauthorizedError(error) || isForbiddenError(error);
+}
+
 export async function apiRequest<T = unknown>(path: string, options: RequestInit = {}) {
   const headers: Record<string, string> = {};
 

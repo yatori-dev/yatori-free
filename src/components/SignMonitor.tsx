@@ -7,7 +7,7 @@ import {
   stopSignMonitor,
   getSignLogs,
   getUserFacingErrorMessage,
-  isUnauthorizedError,
+  isAuthExitError,
 } from '@/lib/api';
 import type { SignLog } from '@/lib/api';
 import {
@@ -106,7 +106,8 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
         setLogsTotal(response.data.total || 0);
       }
     } catch (error) {
-      if (isUnauthorizedError(error)) {
+      if (isAuthExitError(error)) {
+        toast.error(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
         onUnauthorized();
         return;
       }
@@ -162,7 +163,8 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
       }
       void fetchLogs(false);
     } catch (error) {
-      if (isUnauthorizedError(error)) {
+      if (isAuthExitError(error)) {
+        toast.error(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
         onUnauthorized();
         return;
       }
