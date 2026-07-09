@@ -363,6 +363,12 @@ export function login(payload: LoginRequest) {
   });
 }
 
+export function logout() {
+  return apiRequest('/auth/logout', {
+    method: 'POST',
+  });
+}
+
 export function getVersion() {
   return apiRequest<VersionData>('/version');
 }
