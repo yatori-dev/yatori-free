@@ -138,7 +138,19 @@ function getCourseDocumentTypeLabel(document: CourseDocument) {
   return extension || document.type.toUpperCase();
 }
 
+function getCourseDocumentFileName(document: CourseDocument) {
+  const extension = document.extension.trim().replace(/^\./, '');
+  const name = document.name.trim();
+
+  if (!extension || name.toLowerCase().endsWith(`.${extension.toLowerCase()}`)) {
+    return name;
+  }
+
+  return `${name}.${extension}`;
+}
+
 const TASK_SETTINGS_STORAGE_PREFIX = 'yatori-task-settings:';
+const THEME_STORAGE_KEY = 'yatori-theme';
 
 function getTaskSettingsStorageKey(accountId: string) {
   return `${TASK_SETTINGS_STORAGE_PREFIX}${accountId}`;
@@ -274,6 +286,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const toggleDarkMode = () => {
     setTheme(isDark ? 'light' : 'dark');
+    localStorage.removeItem(THEME_STORAGE_KEY);
   };
 
   const settingsForm = persistedSettingsState.accountId === currentAccountId
@@ -1011,6 +1024,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                                   <div className="mt-2 space-y-1.5 border-t border-[#edf0f2] dark:border-[#333537] pt-2">
                                                     {chapterDocuments.map((document) => {
                                                       const fileSize = formatFileSize(document.size);
+                                                      const fileName = getCourseDocumentFileName(document);
                                                       return (
                                                         <div
                                                           key={document.id}
@@ -1034,8 +1048,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                                           >
                                                             <a
                                                               href={getCourseDocumentDownloadUrl(account.id, course.key, document.id)}
-                                                              target="_blank"
-                                                              rel="noreferrer"
+                                                              download={fileName}
                                                               aria-label={`下载 ${document.name}`}
                                                             >
                                                               <Download className="h-3.5 w-3.5" />

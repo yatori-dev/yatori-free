@@ -43,18 +43,25 @@ function AuthRestoreScreen() {
           <div></div>
           <div></div>
         </div>
-        <CardContent className="flex min-h-[220px] flex-col items-center justify-center gap-6 p-8">
-          <div className="flex items-center justify-center font-semibold text-3xl tracking-tight select-none" aria-hidden="true">
-            <span className="text-[#4285F4]">Y</span>
-            <span className="text-[#EA4335]">a</span>
-            <span className="text-[#FBBC05]">t</span>
-            <span className="text-[#4285F4]">o</span>
-            <span className="text-[#34A853]">r</span>
-            <span className="text-[#EA4335]">i</span>
+        <CardContent className="flex min-h-[260px] flex-col items-center justify-center p-8">
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center justify-center font-semibold text-3xl tracking-tight select-none" aria-hidden="true">
+              <span className="text-[#4285F4]">Y</span>
+              <span className="text-[#EA4335]">a</span>
+              <span className="text-[#FBBC05]">t</span>
+              <span className="text-[#4285F4]">o</span>
+              <span className="text-[#34A853]">r</span>
+              <span className="text-[#EA4335]">i</span>
+            </div>
+            <div className="text-sm font-medium text-muted-foreground">学习通服务</div>
           </div>
-          <svg className="google-spinner" viewBox="0 0 50 50" role="status" aria-label="加载中">
-            <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4"></circle>
-          </svg>
+
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <svg className="google-spinner" viewBox="0 0 50 50" role="status" aria-label="登录中">
+              <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4"></circle>
+            </svg>
+            <div className="text-center text-xs font-medium text-muted-foreground">登录中...</div>
+          </div>
         </CardContent>
       </Card>
     </div>

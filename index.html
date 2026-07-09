@@ -21,12 +21,11 @@
     <script>
       (() => {
         try {
-          const storedTheme = localStorage.getItem('yatori-theme');
+          localStorage.removeItem('yatori-theme');
           const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          const shouldUseDark = storedTheme === 'dark' || ((!storedTheme || storedTheme === 'system') && systemDark);
 
-          document.documentElement.classList.toggle('dark', shouldUseDark);
-          document.documentElement.style.colorScheme = shouldUseDark ? 'dark' : 'light';
+          document.documentElement.classList.toggle('dark', systemDark);
+          document.documentElement.style.colorScheme = systemDark ? 'dark' : 'light';
         } catch {
           document.documentElement.classList.remove('dark');
           document.documentElement.style.colorScheme = 'light';
