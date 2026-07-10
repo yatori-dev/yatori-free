@@ -101,10 +101,8 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
     if (showLoading) setLogsLoading(true);
     try {
       const response = await getSignLogs(accountId, { limit: logsLimit, offset: logsOffset });
-      if (response.code === 200 && response.data) {
-        setLogs(response.data.logs || []);
-        setLogsTotal(response.data.total || 0);
-      }
+      setLogs(response.data.logs);
+      setLogsTotal(response.data.total);
     } catch (error) {
       if (isAuthExitError(error)) {
         toast.error(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
@@ -177,16 +175,6 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
     } finally {
       setToggleAction(null);
     }
-  };
-
-  const getResultClassName = (result: string) => {
-    if (result.includes('成功') || result.includes('已签到')) {
-      return 'text-emerald-600 dark:text-emerald-400';
-    }
-    if (result.includes('失败') || result.includes('错误')) {
-      return 'text-destructive';
-    }
-    return 'text-muted-foreground';
   };
 
   return (
@@ -269,15 +257,13 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
               <div className="divide-y divide-border/30">
                 {logs.map((log) => {
                   const logDate = formatLogDateTime(log.createdAt);
-                  const resultClassName = getResultClassName(log.result);
-
                   return (
                     <div key={log.id} className="p-4 hover:bg-muted/30 transition-colors flex flex-col gap-1.5">
                       <div className="flex items-start justify-between gap-3 min-w-0">
                         <span className="text-sm font-semibold text-foreground truncate">
-                          {log.courseName || '未知课程'}
+                          {log.courseName ?? '课程未记录'}
                         </span>
-                        <span className={`shrink-0 text-xs font-semibold ${resultClassName}`}>
+                        <span className="shrink-0 text-xs font-semibold text-muted-foreground">
                           {log.result}
                         </span>
                       </div>

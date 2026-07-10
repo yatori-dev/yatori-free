@@ -5,10 +5,13 @@ export interface ApiError extends Error {
   payload?: unknown;
 }
 
-export interface ApiResponse<T = unknown> {
+export interface ApiResponse {
   code: number;
   message: string;
-  data?: T;
+}
+
+export interface ApiDataResponse<T> extends ApiResponse {
+  data: T;
 }
 
 export interface User {
@@ -62,7 +65,7 @@ export interface AuthSession {
   avatarUrl: string | null;
   schoolName?: string;
   user: User;
-  account: Account | null;
+  account: Account;
 }
 
 export interface CurrentSessionData {
@@ -80,7 +83,7 @@ export interface Course {
   key: string;
   courseId?: string;
   courseTeacher?: string;
-  courseName?: string;
+  courseName: string;
   isstart?: boolean;
   state?: number;
   jobFinishCount?: number;
@@ -273,7 +276,28 @@ export function isAuthExitError(error: unknown) {
   return isUnauthorizedError(error) || isForbiddenError(error);
 }
 
-export async function apiRequest<T = unknown>(path: string, options: RequestInit = {}) {
+function isApiResponse(payload: unknown): payload is ApiResponse {
+  return (
+    typeof payload === 'object'
+    && payload !== null
+    && 'code' in payload
+    && typeof payload.code === 'number'
+    && Number.isFinite(payload.code)
+    && 'message' in payload
+    && typeof payload.message === 'string'
+  );
+}
+
+function createApiError(message: string, status: number, payload?: unknown): ApiError {
+  const error: ApiError = new Error(message);
+  error.status = status;
+  error.payload = payload;
+  return error;
+}
+
+export function apiRequest(path: string, options?: RequestInit): Promise<ApiResponse>;
+export function apiRequest<T>(path: string, options: RequestInit | undefined, requireData: true): Promise<ApiDataResponse<T>>;
+export async function apiRequest<T>(path: string, options: RequestInit = {}, requireData = false) {
   const headers: Record<string, string> = {};
 
   if (options.body && !('Content-Type' in (options.headers ?? {}))) {
@@ -289,34 +313,50 @@ export async function apiRequest<T = unknown>(path: string, options: RequestInit
     },
   });
 
-  const payload: ApiResponse<T> | null = await response.json().catch(() => null);
+  const rawBody = await response.text();
+  let payload: unknown = null;
 
-  const isBusinessError = payload && typeof payload.code === 'number' && ![200, 201].includes(payload.code);
-
-  if (!response.ok || isBusinessError) {
-    const error: ApiError = new Error(payload?.message || `请求失败 (${response.status})`);
-    error.status = response.status;
-    error.payload = payload;
-    throw error;
+  if (rawBody) {
+    try {
+      payload = JSON.parse(rawBody);
+    } catch {
+      throw createApiError(`接口响应不是 JSON (${response.status})`, response.status);
+    }
   }
 
-  return payload as ApiResponse<T>;
+  if (!isApiResponse(payload)) {
+    throw createApiError(`接口响应不符合约定 (${response.status})`, response.status, payload);
+  }
+
+  if (!response.ok || ![200, 201].includes(payload.code)) {
+    throw createApiError(payload.message || `请求失败 (${response.status})`, response.status, payload);
+  }
+
+  if (requireData && !('data' in payload)) {
+    throw createApiError(`接口响应缺少 data (${response.status})`, response.status, payload);
+  }
+
+  return payload as ApiResponse | ApiDataResponse<T>;
 }
 
-export async function getCurrentSession() {
-  const response = await apiRequest<CurrentSessionData>('/auth/me');
+export async function getCurrentSession(accountId?: string | null) {
+  const response = await apiRequest<CurrentSessionData>('/auth/me', undefined, true);
   const data = response.data;
 
-  if (!data) {
-    return null;
+  const account = accountId
+    ? data.accounts.find((item) => item.id === accountId)
+    : data.accounts.length === 1
+      ? data.accounts[0]
+      : undefined;
+  if (!account) {
+    throw new Error('当前会话未关联唯一账号，请重新登录');
   }
 
-  const account = data.accounts[0] ?? null;
   return {
     expiresAt: data.expiresAt,
-    displayName: account?.name || data.user.username,
-    avatarUrl: account?.avatarUrl || null,
-    schoolName: account?.schoolName,
+    displayName: account.name,
+    avatarUrl: account.avatarUrl ?? null,
+    schoolName: account.schoolName,
     user: data.user,
     account,
   } satisfies AuthSession;
@@ -360,7 +400,7 @@ export function login(payload: LoginRequest) {
   return apiRequest<LoginData>('/auth/login', {
     method: 'POST',
     body: JSON.stringify(payload),
-  });
+  }, true);
 }
 
 export function logout() {
@@ -370,16 +410,18 @@ export function logout() {
 }
 
 export function getVersion() {
-  return apiRequest<VersionData>('/version');
+  return apiRequest<VersionData>('/version', undefined, true);
 }
 
 export function getCourses(accountId: string) {
-  return apiRequest<CourseListResponseData>(`/accounts/${encodeApiPathSegment(accountId)}/courses`);
+  return apiRequest<CourseListResponseData>(`/accounts/${encodeApiPathSegment(accountId)}/courses`, undefined, true);
 }
 
 export function getCourseDetails(accountId: string, classId: string) {
   return apiRequest<CourseDetails>(
     `/accounts/${encodeApiPathSegment(accountId)}/courses/${encodeApiPathSegment(classId)}`,
+    undefined,
+    true,
   );
 }
 
@@ -388,18 +430,18 @@ export function getCourseDocumentDownloadUrl(accountId: string, classId: string,
 }
 
 export function getTasks() {
-  return apiRequest<TaskListResponseData>('/tasks');
+  return apiRequest<TaskListResponseData>('/tasks', undefined, true);
 }
 
 export function createTask(payload: CreateTaskRequest) {
   return apiRequest<Task>('/tasks', {
     method: 'POST',
     body: JSON.stringify(payload),
-  });
+  }, true);
 }
 
 export function getTask(taskId: string) {
-  return apiRequest<Task>(`/tasks/${encodeApiPathSegment(taskId)}`);
+  return apiRequest<Task>(`/tasks/${encodeApiPathSegment(taskId)}`, undefined, true);
 }
 
 export function stopTask(taskId: string) {
@@ -411,13 +453,13 @@ export function stopTask(taskId: string) {
 export function startSignMonitor(accountId: string) {
   return apiRequest<SignMonitorStatus>(`/accounts/${encodeApiPathSegment(accountId)}/sign-monitor/start`, {
     method: 'POST',
-  });
+  }, true);
 }
 
 export function stopSignMonitor(accountId: string) {
   return apiRequest<SignMonitorStatus>(`/accounts/${encodeApiPathSegment(accountId)}/sign-monitor/stop`, {
     method: 'POST',
-  });
+  }, true);
 }
 
 export function getSignLogs(accountId: string, params: { limit?: number; offset?: number }) {
@@ -430,5 +472,7 @@ export function getSignLogs(accountId: string, params: { limit?: number; offset?
   }
   return apiRequest<SignLogsResponseData>(
     `/accounts/${encodeApiPathSegment(accountId)}/sign-logs?${urlParams.toString()}`,
+    undefined,
+    true,
   );
 }

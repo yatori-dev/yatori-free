@@ -6,31 +6,16 @@ import { Toaster } from '@/components/ui/sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 
-const AUTH_STORAGE_KEY = 'yatori-auth';
+const AUTH_ACCOUNT_ID_STORAGE_KEY = 'yatori-auth-account-id';
 const LOGOUT_SUPPRESSION_KEY = 'yatori-auth-logout-suppressed';
 
-function persistSession(session: AuthSession | null) {
-  if (session) {
-    sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
+function persistAccountId(accountId: string | null) {
+  if (accountId) {
+    sessionStorage.setItem(AUTH_ACCOUNT_ID_STORAGE_KEY, accountId);
     return;
   }
 
-  sessionStorage.removeItem(AUTH_STORAGE_KEY);
-}
-
-function keepAccountReferenceIfSameUser(prevSession: AuthSession | null, nextSession: AuthSession | null) {
-  if (
-    !prevSession?.account ||
-    !nextSession?.account ||
-    prevSession.account.id !== nextSession.account.id
-  ) {
-    return nextSession;
-  }
-
-  return {
-    ...nextSession,
-    account: prevSession.account,
-  };
+  sessionStorage.removeItem(AUTH_ACCOUNT_ID_STORAGE_KEY);
 }
 
 function AuthRestoreScreen() {
@@ -69,40 +54,15 @@ function AuthRestoreScreen() {
 }
 
 function App() {
-  const [session, setSession] = useState<AuthSession | null>(() => {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-
-    const raw = sessionStorage.getItem(AUTH_STORAGE_KEY);
-    if (!raw) {
-      return null;
-    }
-
-    try {
-      const parsed: unknown = JSON.parse(raw);
-      if (
-        parsed &&
-        typeof parsed === 'object' &&
-        'user' in parsed &&
-        typeof parsed.user === 'object' &&
-        parsed.user !== null
-      ) {
-        return parsed as AuthSession;
-      }
-    } catch (error) {
-      console.error('Failed to parse auth session', error);
-      sessionStorage.removeItem(AUTH_STORAGE_KEY);
-    }
-
-    return null;
-  });
+  const [session, setSession] = useState<AuthSession | null>(null);
   const [isRestoringSession, setIsRestoringSession] = useState(() => {
-    return session === null && sessionStorage.getItem(LOGOUT_SUPPRESSION_KEY) !== '1';
+    return sessionStorage.getItem(LOGOUT_SUPPRESSION_KEY) !== '1';
   });
-  const hadCachedSessionRef = useRef(session !== null);
+  const hadCachedAccountRef = useRef(sessionStorage.getItem(AUTH_ACCOUNT_ID_STORAGE_KEY) !== null);
 
   useEffect(() => {
     let cancelled = false;
-    const hadCachedSession = hadCachedSessionRef.current;
+    const hadCachedAccount = hadCachedAccountRef.current;
 
     if (sessionStorage.getItem(LOGOUT_SUPPRESSION_KEY) === '1') {
       return () => {
@@ -110,30 +70,30 @@ function App() {
       };
     }
 
-    getCurrentSession()
+    getCurrentSession(sessionStorage.getItem(AUTH_ACCOUNT_ID_STORAGE_KEY))
       .then((currentSession) => {
         if (cancelled) {
           return;
         }
 
-        setSession((prevSession) => keepAccountReferenceIfSameUser(prevSession, currentSession));
-        persistSession(currentSession);
+        setSession(currentSession);
+        persistAccountId(currentSession.account.id);
         setIsRestoringSession(false);
       })
       .catch((error) => {
         if (isAuthExitError(error)) {
-          if (hadCachedSession) {
+          if (hadCachedAccount) {
             toast.error(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
           }
         } else {
           console.error('Failed to restore auth session', error);
-          if (hadCachedSession) {
+          if (hadCachedAccount) {
             toast.error(getUserFacingErrorMessage(error, '恢复登录状态失败，请重新登录'));
           }
         }
         if (!cancelled) {
           setSession(null);
-          persistSession(null);
+          persistAccountId(null);
           setIsRestoringSession(false);
         }
       });
@@ -147,7 +107,7 @@ function App() {
     sessionStorage.removeItem(LOGOUT_SUPPRESSION_KEY);
     setSession(newSession);
     setIsRestoringSession(false);
-    persistSession(newSession);
+    persistAccountId(newSession.account.id);
   }, []);
 
   const handleLogout = useCallback(async () => {
@@ -163,7 +123,7 @@ function App() {
     } finally {
       setSession(null);
       setIsRestoringSession(false);
-      persistSession(null);
+      persistAccountId(null);
     }
   }, []);
 

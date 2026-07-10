@@ -12,7 +12,6 @@ import {
   getCourseDocumentDownloadUrl,
   getCourseDetails,
   getCourses,
-  getErrorMessage,
   getVersion,
   getTasks,
   getUserFacingErrorMessage,
@@ -104,8 +103,8 @@ interface PersistedSettingsState {
 }
 
 const DEFAULT_PERSISTED_SETTINGS: PersistedSettingsFormState = {
-  hideEmptyTaskCourses: true,
-  doChapterTest: true,
+  hideEmptyTaskCourses: false,
+  doChapterTest: false,
 };
 
 const DEFAULT_TASK_EXECUTION_SETTINGS: TaskExecutionSettingsState = {
@@ -180,9 +179,7 @@ function createDefaultTaskExecutionSettingsState(): TaskExecutionSettingsState {
 }
 
 function readPersistedSettings(accountId: string | null | undefined): PersistedSettingsFormState {
-  if (!accountId) {
-    return createDefaultPersistedSettingsFormState();
-  }
+  if (!accountId) return createDefaultPersistedSettingsFormState();
 
   const raw = localStorage.getItem(getTaskSettingsStorageKey(accountId));
   if (!raw) {
@@ -198,8 +195,8 @@ function readPersistedSettings(accountId: string | null | undefined): PersistedS
     const settings = parsed as Partial<PersistedSettingsFormState>;
 
     return {
-      hideEmptyTaskCourses: settings.hideEmptyTaskCourses !== false,
-      doChapterTest: settings.doChapterTest !== false,
+      hideEmptyTaskCourses: settings.hideEmptyTaskCourses === true,
+      doChapterTest: settings.doChapterTest === true,
     };
   } catch (error) {
     console.error('Failed to parse task settings', error);
@@ -320,7 +317,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       workAutoSubmit: doWork ? workAutoSubmit : 0,
       doExam,
       examAutoSubmit: doExam ? examAutoSubmit : 0,
-      answerMode: 'xxt',
       includeCourses: [],
       excludeCourses: [],
       coursesSettings: [],
@@ -333,21 +329,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     setCoursesLoading(true);
     try {
       const response = await getCourses(account.id);
-      if (response.code === 200) {
-        const nextCourses = (response.data?.courses ?? []).filter((course): course is Course => {
-          return typeof course?.key === 'string' && course.key.trim().length > 0;
+      const nextCourses = response.data.courses;
+      setCourses(nextCourses);
+      const processingCourseKeys = new Set(
+        nextCourses.filter((course) => course.processing).map((course) => course.key),
+      );
+      if (processingCourseKeys.size > 0) {
+        setSelectedCourses((prev) => {
+          const next = new Set(prev);
+          processingCourseKeys.forEach((courseKey) => next.delete(courseKey));
+          return next;
         });
-        setCourses(nextCourses);
-        const processingCourseKeys = new Set(
-          nextCourses.filter((course) => course.processing).map((course) => course.key),
-        );
-        if (processingCourseKeys.size > 0) {
-          setSelectedCourses((prev) => {
-            const next = new Set(prev);
-            processingCourseKeys.forEach((courseKey) => next.delete(courseKey));
-            return next;
-          });
-        }
       }
     } catch (error) {
       if (isAuthExitError(error)) {
@@ -370,9 +362,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     }
     try {
       const response = await getTasks();
-      if (response.code === 200 && response.data?.tasks) {
-        setTasks(response.data.tasks);
-      }
+      setTasks(response.data.tasks);
     } catch (error) {
       if (isAuthExitError(error)) {
         notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
@@ -395,27 +385,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     setLoadingDetails(prev => ({ ...prev, [classId]: true }));
     try {
       const response = await getCourseDetails(account.id, classId);
-      if (response.code === 200 && response.data) {
-        const details = response.data;
-        setCourseDetailsMap(prev => ({ ...prev, [classId]: details }));
-      }
+      setCourseDetailsMap(prev => ({ ...prev, [classId]: response.data }));
     } catch (error) {
       if (isAuthExitError(error)) {
         notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
         onLogout();
-        return;
-      }
-      const errorMessage = getErrorMessage(error);
-      if (errorMessage.includes('课程章节为空')) {
-        const course = courses.find((item) => item.key === classId) ?? { key: classId };
-        setCourseDetailsMap(prev => ({
-          ...prev,
-          [classId]: {
-            course,
-            chapters: { isstart: false },
-            exams: [],
-          },
-        }));
         return;
       }
       console.error(error);
@@ -423,7 +397,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     } finally {
       setLoadingDetails(prev => ({ ...prev, [classId]: false }));
     }
-  }, [account, courses, onLogout]);
+  }, [account, onLogout]);
 
 
 
@@ -508,7 +482,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
     const processingCourses = getSelectedProcessingCourses(includeCoursesList);
     if (processingCourses.length > 0) {
-      toast.error(`以下课程已有进行中的任务：${processingCourses.map((course) => course.courseName || course.key).join('、')}`);
+      toast.error(`以下课程已有进行中的任务：${processingCourses.map((course) => course.courseName).join('、')}`);
       setCreatingTask(false);
       void fetchCourses();
       return;
@@ -529,21 +503,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     });
 
     try {
-      const createResponse = await createTask({
+      await createTask({
         accountId: account.id,
         coursesCustom: customConfig,
       });
 
-      if (createResponse.data) {
-        toast.success('任务已启动');
-        if (window.matchMedia('(max-width: 1023px)').matches) {
-          setTaskFilter('active');
-          handleTabChange('tasks');
-        }
-        void fetchTasks({ showLoading: false });
-        void fetchCourses();
-        setSelectedCourses(new Set());
+      toast.success('任务已启动');
+      if (window.matchMedia('(max-width: 1023px)').matches) {
+        setTaskFilter('active');
+        handleTabChange('tasks');
       }
+      void fetchTasks({ showLoading: false });
+      void fetchCourses();
+      setSelectedCourses(new Set());
     } catch (error) {
       if (isAuthExitError(error)) {
         notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
@@ -604,12 +576,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const handleStopTask = async (taskId: string) => {
     setStoppingTaskId(taskId);
     try {
-      const response = await stopTask(taskId);
-      if (response.code === 200) {
-        toast.info('已发送停止请求');
-        void fetchTasks({ showLoading: false });
-        void fetchCourses();
-      }
+      await stopTask(taskId);
+      toast.info('已发送停止请求');
+      void fetchTasks({ showLoading: false });
+      void fetchCourses();
     } catch (error) {
       if (isAuthExitError(error)) {
         notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
@@ -672,7 +642,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     getVersion()
       .then((response) => {
         if (!cancelled) {
-          setAppVersion(response.data?.version ?? '');
+          setAppVersion(response.data.version);
         }
       })
       .catch((error) => {
@@ -873,11 +843,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                       )}
 
                       {visibleCourses.map((course) => {
-                        const courseName = course.courseName || `课程 ${course.key}`;
-                        const jobFinishCount = course.jobFinishCount ?? 0;
-                        const jobCount = course.jobCount ?? 0;
-                        const rawJobRate = Math.round(course.jobRate ?? (jobCount > 0 ? (jobFinishCount / jobCount) * 100 : 0));
-                        const jobRate = Math.max(0, Math.min(100, rawJobRate));
+                        const jobFinishCount = course.jobFinishCount;
+                        const jobCount = course.jobCount;
+                        const hasJobProgress = typeof jobFinishCount === 'number'
+                          && typeof jobCount === 'number';
+                        const calculatedJobRate = hasJobProgress && jobCount > 0
+                          ? Math.round((jobFinishCount / jobCount) * 100)
+                          : null;
+                        const rawJobRate = course.jobRate ?? calculatedJobRate;
+                        const jobRate = rawJobRate === null ? null : Math.max(0, Math.min(100, rawJobRate));
+                        const jobProgressLabel = hasJobProgress
+                          ? `${jobFinishCount}/${jobCount} (${jobRate ?? 0}%)`
+                          : null;
                         const isProcessing = course.processing === true;
                         const processingTaskLabel = course.processingTaskId
                           ? `Task: ${course.processingTaskId.substring(0, 8)}...`
@@ -907,7 +884,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                 
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <h3 className="text-sm font-semibold truncate text-[#191c1d] dark:text-[#e3e3e3]">{courseName}</h3>
+                                    <h3 className="text-sm font-semibold truncate text-[#191c1d] dark:text-[#e3e3e3]">{course.courseName}</h3>
                                     {blockedPointCount > 0 && (
                                       <Badge className="bg-[#f3f4f6] hover:bg-[#f3f4f6] text-[#5f6368] dark:bg-[#2a2b2d] dark:hover:bg-[#2a2b2d] dark:text-[#bdc1c6] border-none">
                                         含未开放任务点 {blockedPointCount}
@@ -925,13 +902,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                     </p>
                                   ) : null}
                                   
-                                  {/* Job finished rate */}
-                                  <div className="grid grid-cols-[minmax(0,1fr)_8rem] items-center gap-3 mt-2 w-full max-w-lg">
-                                    <Progress value={jobRate} className="h-1.5 bg-gray-100 dark:bg-gray-700" />
-                                    <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap tabular-nums">
-                                      {jobFinishCount}/{jobCount} ({jobRate}%)
-                                    </span>
-                                  </div>
+                                  {jobRate !== null && jobProgressLabel && (
+                                    <div className="grid grid-cols-[minmax(0,1fr)_8rem] items-center gap-3 mt-2 w-full max-w-lg">
+                                      <Progress value={jobRate} className="h-1.5 bg-gray-100 dark:bg-gray-700" />
+                                      <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap tabular-nums">
+                                        {jobProgressLabel}
+                                      </span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
 

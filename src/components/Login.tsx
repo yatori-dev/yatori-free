@@ -101,23 +101,20 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         password,
       });
 
-      if (response.code === 200 && response.data) {
-        toast.success('登录成功');
-        saveSavedAccount({
-          account: account.trim(),
-        });
-        const sessionData: AuthSession = {
-          expiresAt: response.data.expiresAt || null,
-          displayName: response.data.displayName || response.data.user?.username || account,
-          avatarUrl: response.data.avatarUrl || response.data.account?.avatarUrl || null,
-          schoolName: response.data.schoolName || response.data.account.schoolName,
-          user: response.data.user,
-          account: response.data.account,
-        };
-        onLoginSuccess(sessionData);
-      } else {
-        throw new Error(response.message || '登录响应异常，请稍后重试');
-      }
+      const data = response.data;
+      toast.success('登录成功');
+      saveSavedAccount({
+        account: account.trim(),
+      });
+      const sessionData: AuthSession = {
+        expiresAt: data.expiresAt,
+        displayName: data.displayName ?? data.account.name,
+        avatarUrl: data.avatarUrl ?? data.account.avatarUrl ?? null,
+        schoolName: data.schoolName ?? data.account.schoolName,
+        user: data.user,
+        account: data.account,
+      };
+      onLoginSuccess(sessionData);
     } catch (error) {
       console.error(error);
       const errMsg = getUserFacingErrorMessage(error, '服务暂时不可用，请稍后重试');

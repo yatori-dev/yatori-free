@@ -1,4 +1,4 @@
-import React, { useEffect, useEffectEvent, useState } from 'react';
+import React, { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { 
@@ -73,15 +73,23 @@ function getProgressFallback(status: Task['status'], progressPercent = 0) {
 }
 
 function getAutoSubmitLabel(value: 0 | 1 | 2 | undefined) {
+  if (value === undefined) {
+    return '未记录';
+  }
+
   if (value === 2) {
-    return '智能提交';
+    return '模式 2';
   }
 
   if (value === 1) {
-    return '自动提交';
+    return '模式 1';
   }
 
-  return '仅保存';
+  return '模式 0';
+}
+
+function isTaskStatus(status: string): status is Task['status'] {
+  return ['pending', 'running', 'stopping', 'stopped', 'success', 'failed', 'partial_success'].includes(status);
 }
 
 export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseNameByIdentifier = {}, onUnauthorized, onStopTask }) => {
@@ -89,8 +97,9 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const [showConfig, setShowConfig] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [progressErrorMessage, setProgressErrorMessage] = useState('');
+  const latestProgressRequestRef = useRef(0);
 
-  const effectiveStatus = (progress?.status ?? task.status) as Task['status'];
+  const effectiveStatus = progress && isTaskStatus(progress.status) ? progress.status : task.status;
 
   const applyProgress = useEffectEvent((nextProgress: TaskProgress) => {
     if (nextProgress.taskId !== task.id) {
@@ -114,9 +123,16 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   });
 
   const fetchProgress = useEffectEvent(async () => {
+    const requestId = latestProgressRequestRef.current + 1;
+    latestProgressRequestRef.current = requestId;
+
     try {
       const result = await getTask(task.id);
-      if (result.code === 200 && result.data?.progress && result.data.progress.taskId === task.id) {
+      if (
+        requestId === latestProgressRequestRef.current
+        && result.data.progress
+        && result.data.progress.taskId === task.id
+      ) {
         setProgressErrorMessage('');
         applyProgress(result.data.progress);
       }
@@ -241,12 +257,19 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const statusInfo = getStatusDisplay(effectiveStatus);
   const snapshotStatuses: Task['status'][] = ['running', 'stopping', 'success', 'partial_success', 'failed'];
   const stoppableStatuses: Task['status'][] = ['pending', 'running', 'stopping'];
-  const totalUnits = progress?.totalUnits ?? 0;
-  const completedUnits = progress?.completedUnits ?? 0;
-  const derivedPercent = totalUnits > 0 ? Math.round((completedUnits / totalUnits) * 100) : 0;
+  const hasUnitCounts = typeof progress?.totalUnits === 'number' && typeof progress?.completedUnits === 'number';
+  const totalUnits = progress?.totalUnits;
+  const completedUnits = progress?.completedUnits;
+  const derivedPercent = typeof totalUnits === 'number' && typeof completedUnits === 'number' && totalUnits > 0
+    ? Math.round((completedUnits / totalUnits) * 100)
+    : null;
   const progressFallback = getProgressFallback(effectiveStatus, progress?.percent ?? 0);
-  const fallbackPercent = progressFallback.percent;
-  const percent = Math.max(0, Math.min(100, Math.round(totalUnits > 0 ? derivedPercent : fallbackPercent)));
+  const rawPercent = effectiveStatus === 'success'
+    ? 100
+    : ['partial_success', 'failed'].includes(effectiveStatus)
+      ? progress?.percent ?? progressFallback.percent
+      : derivedPercent ?? progress?.percent ?? progressFallback.percent;
+  const percent = Math.max(0, Math.min(100, Math.round(rawPercent)));
   const showProgress = progress && snapshotStatuses.includes(effectiveStatus);
   const progressCourseLabel = progress?.currentCourse || progressFallback.course;
   const progressChapterLabel = progress?.currentChapter || progressFallback.chapter;
@@ -254,16 +277,14 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const canStopTask = stoppableStatuses.includes(task.status) || stoppableStatuses.includes(effectiveStatus);
   const isStoppingTask = task.status === 'stopping' || effectiveStatus === 'stopping';
 
-  const coursesCustom = task.configSnapshot?.coursesCustom;
-  const doChapterTest = coursesCustom?.doChapterTest ?? true;
-  const doWork = coursesCustom?.doWork ?? false;
-  const doExam = coursesCustom?.doExam ?? true;
+  const configSnapshot = task.configSnapshot;
+  const coursesCustom = configSnapshot?.coursesCustom;
   const workAutoSubmitValue = coursesCustom?.workAutoSubmit;
   const examAutoSubmitValue = coursesCustom?.examAutoSubmit;
   const workAutoSubmitLabel = getAutoSubmitLabel(workAutoSubmitValue);
   const examAutoSubmitLabel = getAutoSubmitLabel(examAutoSubmitValue);
-  const includeCourses = coursesCustom?.includeCourses || [];
-  const displayCourses = includeCourses.map((courseIdentifier) => {
+  const includeCourses = coursesCustom?.includeCourses;
+  const displayCourses = includeCourses?.map((courseIdentifier) => {
     const normalizedIdentifier = courseIdentifier.trim();
     const mappedName = courseNameByIdentifier[normalizedIdentifier];
 
@@ -288,17 +309,22 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
             <div className="flex items-center gap-1 min-w-0 max-w-full">
               <UserIcon className="w-3 h-3 text-muted-foreground/70 shrink-0" />
               <span className="truncate max-w-[min(12rem,100%)] font-mono text-[10.5px]">
-                {task.configSnapshot?.account || '未知'}
+                {configSnapshot?.account ?? '账号未记录'}
               </span>
             </div>
           </div>
           
           {/* Targeted Courses list */}
           <div className="mt-1 flex flex-wrap gap-1 items-center min-w-0 w-full">
-            {displayCourses.length === 0 ? (
+            {displayCourses === undefined ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-medium bg-muted text-muted-foreground border border-border">
+                <BookOpen className="w-3 h-3 shrink-0" />
+                课程范围未记录
+              </span>
+            ) : displayCourses.length === 0 ? (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-medium bg-primary/10 text-primary border border-primary/20 dark:bg-primary/20 dark:text-primary-foreground/90">
                 <BookOpen className="w-3 h-3 shrink-0" />
-                所有课程
+                未选择课程
               </span>
             ) : (
               displayCourses.map((courseName, i) => (
@@ -356,7 +382,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
             <div className="flex flex-wrap justify-between items-center gap-x-3 gap-y-1 text-[10.5px] text-muted-foreground">
               <span className="shrink-0">任务点详情</span>
               <span className="font-medium font-mono text-foreground bg-muted/80 dark:bg-muted/40 px-1.5 py-0.2 rounded max-w-full wrap-anywhere">
-                已完成 {completedUnits} / 总计 {totalUnits}
+                {hasUnitCounts ? `已完成 ${completedUnits} / 总计 ${totalUnits}` : '任务点明细未提供'}
               </span>
             </div>
           </div>
@@ -385,23 +411,24 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
             <Settings2 className="w-3 h-3 text-muted-foreground" />
             <span>任务配置详情</span>
           </div>
+          {coursesCustom ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 font-sans">
             <div className="flex justify-between gap-2 min-w-0">
               <span>章节测试:</span>
-              <span className={`font-semibold ${doChapterTest ? 'text-green-600' : 'text-gray-400'}`}>
-                {doChapterTest ? '开启' : '关闭'}
+              <span className="font-semibold text-foreground">
+                {coursesCustom.doChapterTest === undefined ? '未记录' : coursesCustom.doChapterTest ? '开启' : '关闭'}
               </span>
             </div>
             <div className="flex justify-between gap-2 min-w-0">
               <span>课程作业:</span>
-              <span className={`font-semibold ${doWork ? 'text-green-600' : 'text-gray-400'}`}>
-                {doWork ? '开启' : '关闭'}
+              <span className="font-semibold text-foreground">
+                {coursesCustom.doWork === undefined ? '未记录' : coursesCustom.doWork ? '开启' : '关闭'}
               </span>
             </div>
             <div className="flex justify-between gap-2 min-w-0">
               <span>课程考试:</span>
-              <span className={`font-semibold ${doExam ? 'text-green-600' : 'text-gray-400'}`}>
-                {doExam ? '开启' : '关闭'}
+              <span className="font-semibold text-foreground">
+                {coursesCustom.doExam === undefined ? '未记录' : coursesCustom.doExam ? '开启' : '关闭'}
               </span>
             </div>
             <div className="flex justify-between gap-2 min-w-0">
@@ -419,10 +446,13 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
             <div className="flex justify-between gap-2 min-w-0">
               <span>答题模式:</span>
               <span className="font-semibold text-foreground text-right wrap-anywhere">
-                {coursesCustom?.answerMode === 'xxt' ? '学习通内置' : (coursesCustom?.answerMode || '默认')}
+                {coursesCustom.answerMode ?? '未记录'}
               </span>
             </div>
           </div>
+          ) : (
+            <div className="text-xs text-muted-foreground">任务未保存配置快照</div>
+          )}
         </div>
       )}
 
