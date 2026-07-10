@@ -339,17 +339,13 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}, req
   return payload as ApiResponse | ApiDataResponse<T>;
 }
 
-export async function getCurrentSession(accountId?: string | null) {
+export async function getCurrentSession() {
   const response = await apiRequest<CurrentSessionData>('/auth/me', undefined, true);
   const data = response.data;
 
-  const account = accountId
-    ? data.accounts.find((item) => item.id === accountId)
-    : data.accounts.length === 1
-      ? data.accounts[0]
-      : undefined;
+  const account = data.accounts[0];
   if (!account) {
-    throw new Error('当前会话未关联唯一账号，请重新登录');
+    throw new Error('当前会话未关联账号，请重新登录');
   }
 
   return {

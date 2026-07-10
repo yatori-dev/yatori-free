@@ -104,7 +104,7 @@ interface PersistedSettingsState {
 
 const DEFAULT_PERSISTED_SETTINGS: PersistedSettingsFormState = {
   hideEmptyTaskCourses: false,
-  doChapterTest: false,
+  doChapterTest: true,
 };
 
 const DEFAULT_TASK_EXECUTION_SETTINGS: TaskExecutionSettingsState = {
@@ -196,7 +196,7 @@ function readPersistedSettings(accountId: string | null | undefined): PersistedS
 
     return {
       hideEmptyTaskCourses: settings.hideEmptyTaskCourses === true,
-      doChapterTest: settings.doChapterTest === true,
+      doChapterTest: settings.doChapterTest !== false,
     };
   } catch (error) {
     console.error('Failed to parse task settings', error);

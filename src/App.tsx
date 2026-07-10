@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Login } from './components/Login';
 import { Dashboard } from './components/Dashboard';
 import { getCurrentSession, getUserFacingErrorMessage, isAuthExitError, logout, type AuthSession } from './lib/api';
@@ -6,17 +6,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 
-const AUTH_ACCOUNT_ID_STORAGE_KEY = 'yatori-auth-account-id';
 const LOGOUT_SUPPRESSION_KEY = 'yatori-auth-logout-suppressed';
-
-function persistAccountId(accountId: string | null) {
-  if (accountId) {
-    sessionStorage.setItem(AUTH_ACCOUNT_ID_STORAGE_KEY, accountId);
-    return;
-  }
-
-  sessionStorage.removeItem(AUTH_ACCOUNT_ID_STORAGE_KEY);
-}
 
 function AuthRestoreScreen() {
   return (
@@ -58,11 +48,9 @@ function App() {
   const [isRestoringSession, setIsRestoringSession] = useState(() => {
     return sessionStorage.getItem(LOGOUT_SUPPRESSION_KEY) !== '1';
   });
-  const hadCachedAccountRef = useRef(sessionStorage.getItem(AUTH_ACCOUNT_ID_STORAGE_KEY) !== null);
 
   useEffect(() => {
     let cancelled = false;
-    const hadCachedAccount = hadCachedAccountRef.current;
 
     if (sessionStorage.getItem(LOGOUT_SUPPRESSION_KEY) === '1') {
       return () => {
@@ -70,30 +58,21 @@ function App() {
       };
     }
 
-    getCurrentSession(sessionStorage.getItem(AUTH_ACCOUNT_ID_STORAGE_KEY))
+    getCurrentSession()
       .then((currentSession) => {
         if (cancelled) {
           return;
         }
 
         setSession(currentSession);
-        persistAccountId(currentSession.account.id);
         setIsRestoringSession(false);
       })
       .catch((error) => {
-        if (isAuthExitError(error)) {
-          if (hadCachedAccount) {
-            toast.error(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
-          }
-        } else {
+        if (!isAuthExitError(error)) {
           console.error('Failed to restore auth session', error);
-          if (hadCachedAccount) {
-            toast.error(getUserFacingErrorMessage(error, '恢复登录状态失败，请重新登录'));
-          }
         }
         if (!cancelled) {
           setSession(null);
-          persistAccountId(null);
           setIsRestoringSession(false);
         }
       });
@@ -107,7 +86,6 @@ function App() {
     sessionStorage.removeItem(LOGOUT_SUPPRESSION_KEY);
     setSession(newSession);
     setIsRestoringSession(false);
-    persistAccountId(newSession.account.id);
   }, []);
 
   const handleLogout = useCallback(async () => {
@@ -123,7 +101,6 @@ function App() {
     } finally {
       setSession(null);
       setIsRestoringSession(false);
-      persistAccountId(null);
     }
   }, []);
 
