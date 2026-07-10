@@ -116,11 +116,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         };
         onLoginSuccess(sessionData);
       } else {
-        throw new Error(response.message || '登录失败，请检查账号和密码');
+        throw new Error(response.message || '登录响应异常，请稍后重试');
       }
     } catch (error) {
       console.error(error);
-      const errMsg = getUserFacingErrorMessage(error, '登录失败，请检查账号或密码');
+      const errMsg = getUserFacingErrorMessage(error, '服务暂时不可用，请稍后重试');
       setPasswordError(errMsg);
       toast.error(errMsg);
     } finally {
