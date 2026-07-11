@@ -9,6 +9,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.0-06B6D4.svg?style=flat-square&logo=tailwindcss&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8.1.0-646CFF.svg?style=flat-square&logo=vite&logoColor=white)
 ![shadcn/ui](https://img.shields.io/badge/shadcn/ui-4.11.0-000000.svg?style=flat-square&logo=shadcnui&logoColor=white)
+
 ![Cloudflare Pages](https://img.shields.io/badge/Cloudflare-Pages-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
 ![Google Style](https://img.shields.io/badge/Google-Style-red.svg?style=flat-square&logo=google&logoColor=white)
 ![Material Design](https://img.shields.io/badge/Material_Design-3-blue.svg?style=flat-square&logo=materialdesign&logoColor=white)
