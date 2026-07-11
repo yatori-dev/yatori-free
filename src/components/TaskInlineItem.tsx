@@ -1,6 +1,7 @@
 import React, { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
+import { TaskStudyProgress } from './TaskStudyProgress';
 import { 
   Square, 
   Bot, 
@@ -284,6 +285,13 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const workAutoSubmitLabel = getAutoSubmitLabel(workAutoSubmitValue);
   const examAutoSubmitLabel = getAutoSubmitLabel(examAutoSubmitValue);
   const includeCourses = coursesCustom?.includeCourses;
+  const studyIncrementSettings = coursesCustom?.coursesSettings?.flatMap((setting) => {
+    if (!setting.classId || !setting.studyIncrement) {
+      return [];
+    }
+
+    return [{ classId: setting.classId, studyIncrement: setting.studyIncrement }];
+  }) ?? [];
   const displayCourses = includeCourses?.map((courseIdentifier) => {
     const normalizedIdentifier = courseIdentifier.trim();
     const mappedName = courseNameByIdentifier[normalizedIdentifier];
@@ -387,6 +395,9 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
             </div>
           </div>
 
+          {progress.studyProgress && (
+            <TaskStudyProgress courses={progress.studyProgress} />
+          )}
         </div>
       )}
 
@@ -449,6 +460,22 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
                 {coursesCustom.answerMode ?? '未记录'}
               </span>
             </div>
+            {studyIncrementSettings.length > 0 && (
+              <div className="col-span-full space-y-1 border-t border-border/50 pt-2">
+                <span>学习目标:</span>
+                {studyIncrementSettings.map((setting) => {
+                  const courseName = courseNameByIdentifier[setting.classId] ?? setting.classId;
+                  return (
+                    <div key={setting.classId} className="flex justify-between gap-2 text-foreground">
+                      <span className="truncate" title={courseName}>{courseName}</span>
+                      <span className="shrink-0 font-semibold tabular-nums">
+                        次数 +{setting.studyIncrement.visitCount} · 时长 +{setting.studyIncrement.studyMinutes} 分钟
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
           ) : (
             <div className="text-xs text-muted-foreground">任务未保存配置快照</div>

@@ -33,9 +33,16 @@ export interface CoursesCustom {
 }
 
 export interface CourseSetting {
+  classId?: string;
   name?: string;
   includeExams?: string[];
   excludeExams?: string[];
+  studyIncrement?: StudyIncrement;
+}
+
+export interface StudyIncrement {
+  visitCount: number;
+  studyMinutes: number;
 }
 
 export type TaskStatus =
@@ -127,12 +134,21 @@ export interface CourseDocument {
   size?: number;
 }
 
+export interface StudyStats {
+  available: boolean;
+  fetchedAt: string;
+  message: string;
+  visitCount?: number;
+  studyMinutes?: number;
+}
+
 export interface CourseDetails {
   course: Course;
   chapters?: unknown;
   documents?: CourseDocument[];
   works?: unknown[];
   exams?: unknown[];
+  studyStats?: StudyStats;
   blockedChapterCount?: number;
   blockedPointCount?: number;
 }
@@ -185,6 +201,23 @@ export interface Task {
   updatedAt?: string;
 }
 
+export type StudyMetricStatus = 'disabled' | 'pending' | 'running' | 'success' | 'failed' | 'skipped';
+
+export interface StudyMetricProgress {
+  baseline: number;
+  current: number;
+  target: number;
+  status: StudyMetricStatus;
+  message: string;
+}
+
+export interface CourseStudyProgress {
+  classId: string;
+  courseName: string;
+  visitCount: StudyMetricProgress;
+  studyMinutes: StudyMetricProgress;
+}
+
 export interface TaskProgress {
   taskId: string;
   status: TaskStatus | string;
@@ -197,6 +230,7 @@ export interface TaskProgress {
   currentKind?: string;
   currentTitle?: string;
   message: string;
+  studyProgress?: CourseStudyProgress[];
   updatedAt?: string;
 }
 

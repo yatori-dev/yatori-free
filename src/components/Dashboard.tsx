@@ -19,10 +19,11 @@ import {
   stopTask,
 } from '@/lib/api';
 import { extractChapterItems, getChapterDocuments, getChapterTaskMetas } from '@/lib/courseChapters';
-import type { AuthSession, Course, CourseDetails, CourseDocument, Task, CoursesCustom } from '@/lib/api';
+import type { AuthSession, Course, CourseDetails, CourseDocument, Task, CoursesCustom, StudyIncrement } from '@/lib/api';
 import { notifyAuthExit } from '@/lib/notifications';
 import { TaskInlineItem } from './TaskInlineItem';
 import { SignMonitor } from './SignMonitor';
+import { StudyIncrementSettings } from './StudyIncrementSettings';
 import { 
   LogOut, 
   Settings, 
@@ -38,7 +39,9 @@ import {
   ChevronUp,
   Download,
   FileText,
-  MapPin
+  MapPin,
+  SlidersHorizontal,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
@@ -112,6 +115,11 @@ const DEFAULT_TASK_EXECUTION_SETTINGS: TaskExecutionSettingsState = {
   workAutoSubmit: 0,
   doExam: false,
   examAutoSubmit: 0,
+};
+
+const DEFAULT_STUDY_INCREMENT: StudyIncrement = {
+  visitCount: 0,
+  studyMinutes: 0,
 };
 
 const ACTIVE_TASK_STATUSES = ['pending', 'running', 'stopping'] as const;
@@ -284,6 +292,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [taskExecutionSettings, setTaskExecutionSettings] = useState<TaskExecutionSettingsState>(
     createDefaultTaskExecutionSettingsState,
   );
+  const [studyIncrements, setStudyIncrements] = useState<Record<string, StudyIncrement>>({});
+  const [studyIncrementCourseKey, setStudyIncrementCourseKey] = useState<string | null>(null);
 
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
@@ -323,6 +333,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       ...overrides,
     };
   }, [doChapterTest, doExam, doWork, examAutoSubmit, workAutoSubmit]);
+
+  const studyIncrementCourse = useMemo(
+    () => courses.find((course) => course.key === studyIncrementCourseKey) ?? null,
+    [courses, studyIncrementCourseKey],
+  );
 
   const fetchCourses = useCallback(async () => {
     if (!account) return;
@@ -500,6 +515,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     const customConfig: CoursesCustom = buildCoursesCustom({
       includeCourses: includeCoursesList,
       excludeCourses: [],
+      coursesSettings: includeCoursesList.flatMap((classId) => {
+        const studyIncrement = studyIncrements[classId] ?? DEFAULT_STUDY_INCREMENT;
+        if (studyIncrement.visitCount === 0 && studyIncrement.studyMinutes === 0) {
+          return [];
+        }
+
+        return [{ classId, studyIncrement }];
+      }),
     });
 
     try {
@@ -571,6 +594,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const updateExamAutoSubmit = (value: SettingsFormState['examAutoSubmit']) => {
     setTaskExecutionSettings((previous) => ({ ...previous, examAutoSubmit: value }));
+  };
+
+  const saveStudyIncrement = (classId: string, value: StudyIncrement) => {
+    setStudyIncrements((previous) => ({ ...previous, [classId]: value }));
   };
 
   const handleStopTask = async (taskId: string) => {
@@ -864,19 +891,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                         const blockedPointCount = course.blockedPointCount ?? 0;
 
                         const isExpanded = expandedCourses.has(course.key);
+                        const isSelected = selectedCourses.has(course.key);
+                        const studyIncrement = studyIncrements[course.key] ?? DEFAULT_STUDY_INCREMENT;
+                        const hasStudyIncrement = studyIncrement.visitCount > 0 || studyIncrement.studyMinutes > 0;
+                        const studyIncrementSummary = [
+                          studyIncrement.visitCount > 0 ? `+${studyIncrement.visitCount}次` : null,
+                          studyIncrement.studyMinutes > 0 ? `+${studyIncrement.studyMinutes}分钟` : null,
+                        ].filter(Boolean).join(' ');
 
                         return (
                           <div key={course.key} className="border-b border-[#e1e3e4] dark:border-[#333537] last:border-0">
                             {/* Course Row */}
                             <div className={`p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors ${
-                              selectedCourses.has(course.key)
+                              isSelected
                                 ? 'bg-[#e8f0fe]/40 dark:bg-[#adc6ff]/10 hover:bg-[#e8f0fe]/60 dark:hover:bg-[#adc6ff]/15'
                                 : 'hover:bg-gray-50/50 dark:hover:bg-[#232425]'
                             }`}>
                               <div className="flex gap-4 items-center flex-1 min-w-0 w-full">
                                 {/* Course Selection Checkbox */}
                                 <CourseCheckbox
-                                  checked={selectedCourses.has(course.key)}
+                                  checked={isSelected}
                                   disabled={isProcessing}
                                   indeterminate={false}
                                   onChange={() => toggleCourseSelection(course.key)}
@@ -914,6 +948,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                               </div>
 
                               <div className="flex items-center gap-2 justify-end w-full sm:w-auto self-stretch sm:self-auto">
+                                {isSelected && !isProcessing && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setStudyIncrementCourseKey(course.key)}
+                                    className={`h-8 rounded text-xs ${
+                                      hasStudyIncrement
+                                        ? 'gap-1 bg-primary/10 px-2 text-primary hover:bg-primary/15 hover:text-primary'
+                                        : 'w-8 px-0 text-muted-foreground hover:bg-muted hover:text-foreground'
+                                    }`}
+                                    title={hasStudyIncrement ? studyIncrementSummary : '设置学习目标'}
+                                    aria-label={hasStudyIncrement ? `学习目标：${studyIncrementSummary}` : '设置学习目标'}
+                                  >
+                                    <SlidersHorizontal className="h-3.5 w-3.5" />
+                                    {hasStudyIncrement && studyIncrementSummary}
+                                  </Button>
+                                )}
                                 {canStopProcessing && (
                                   <Button
                                     variant="outline"
@@ -1462,41 +1513,49 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       </main>
 
 
-      {/* Google M3 Floating Capsule Action Bar */}
+      {/* 紧凑操作栏：手机单行排列，较宽窗口使用桌面胶囊。 */}
       {selectedCourses.size > 0 && (
-        <div className="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-5 py-2.5 bg-card/95 backdrop-blur-md shadow-md rounded-lg animate-in slide-in-from-bottom-8 fade-in duration-300 border border-border">
-          <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">
-            <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-bold bg-[#e8f0fe] dark:bg-[#adc6ff]/10 text-[#1a73e8] dark:text-[#adc6ff] rounded">
-              {selectedCourses.size}
-            </span>
-            <span>已选择课程</span>
+        <div className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-2 rounded-xl border border-border bg-card/95 p-2 shadow-md backdrop-blur-md animate-in slide-in-from-bottom-8 fade-in duration-300 sm:inset-x-auto sm:bottom-5 sm:left-1/2 sm:w-max sm:-translate-x-1/2 sm:rounded-lg sm:px-2.5 sm:py-1.5">
+          <div className="flex min-w-0 flex-1 items-center gap-2 text-sm font-medium text-foreground sm:flex-none">
+              <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-primary/10 px-2 text-xs font-bold text-primary sm:h-6 sm:min-w-6">
+                {selectedCourses.size}
+              </span>
+              <span className="truncate sm:hidden">已选</span>
+              <span className="hidden whitespace-nowrap sm:inline">已选课程</span>
           </div>
-          <div className="h-4 w-px bg-[#e1e3e4] dark:bg-[#333537]" />
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearSelection}
-              className="text-xs h-8 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2d2e30] rounded-md px-3"
-            >
-              取消
-            </Button>
-            <Button
-              size="sm"
-              onClick={createTaskWithSelection}
-              disabled={creatingTask}
-              className="bg-[#1a73e8] hover:bg-[#1557b0] text-white text-xs font-semibold h-8 px-4 rounded-md shadow-sm hover:shadow transition-colors flex items-center gap-1.5"
-            >
-              {creatingTask ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Play className="w-3.5 h-3.5 fill-current" />
-              )}
-              提交并开始任务
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            onClick={clearSelection}
+            className="h-11 w-11 shrink-0 px-0 text-muted-foreground hover:text-foreground sm:h-9 sm:w-9"
+            title="取消选择"
+            aria-label="取消选择"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={createTaskWithSelection}
+            disabled={creatingTask}
+            className="h-11 shrink-0 gap-1.5 px-3 text-xs font-semibold shadow-sm transition-colors hover:shadow sm:h-9 sm:px-3"
+          >
+            {creatingTask ? (
+              <RefreshCw className="h-4 w-4 animate-spin" />
+            ) : (
+              <Play className="h-4 w-4 fill-current" />
+            )}
+            <span className="sm:hidden">开始</span>
+            <span className="hidden sm:inline">开始任务</span>
+          </Button>
         </div>
       )}
+      <StudyIncrementSettings
+        open={studyIncrementCourseKey !== null}
+        onOpenChange={(open) => {
+          if (!open) setStudyIncrementCourseKey(null);
+        }}
+        course={studyIncrementCourse}
+        values={studyIncrements}
+        onSave={saveStudyIncrement}
+      />
       {/* Mobile Bottom Navigation Bar (MD3 Style with Fluent Design Transition) */}
       {(() => {
         const tabsList = ['courses', 'sign', 'tasks', 'settings'];
