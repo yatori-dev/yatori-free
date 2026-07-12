@@ -616,6 +616,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const saveStudyIncrement = (classId: string, value: StudyIncrement) => {
     setStudyIncrements((previous) => ({ ...previous, [classId]: value }));
+
+    if ((value.visitCount ?? 0) > 0 || (value.studyMinutes ?? 0) > 0) {
+      setSelectedCourses((previous) => new Set(previous).add(classId));
+    }
   };
 
   const handleStopTask = async (taskId: string) => {
@@ -968,23 +972,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                               </div>
 
                               <div className="flex items-center gap-2 justify-end w-full sm:w-auto self-stretch sm:self-auto">
-                                {isSelected && !isProcessing && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => openStudyIncrementSettings(course.key)}
-                                    className={`h-8 rounded text-xs ${
-                                      hasStudyIncrement
-                                        ? 'gap-1 bg-primary/10 px-2 text-primary hover:bg-primary/15 hover:text-primary'
-                                        : 'w-8 px-0 text-muted-foreground hover:bg-muted hover:text-foreground'
-                                    }`}
-                                    title={hasStudyIncrement ? studyIncrementSummary : '设置学习目标'}
-                                    aria-label={hasStudyIncrement ? `学习目标：${studyIncrementSummary}` : '设置学习目标'}
-                                  >
-                                    <SlidersHorizontal className="h-3.5 w-3.5" />
-                                    {hasStudyIncrement && studyIncrementSummary}
-                                  </Button>
-                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  disabled={isProcessing}
+                                  onClick={() => openStudyIncrementSettings(course.key)}
+                                  className={`h-8 rounded text-xs ${
+                                    hasStudyIncrement
+                                      ? 'gap-1 bg-primary/10 px-2 text-primary hover:bg-primary/15 hover:text-primary'
+                                      : 'w-8 px-0 text-muted-foreground hover:bg-muted hover:text-foreground'
+                                  }`}
+                                  title={hasStudyIncrement ? studyIncrementSummary : '设置学习目标'}
+                                  aria-label={hasStudyIncrement ? `学习目标：${studyIncrementSummary}` : '设置学习目标'}
+                                >
+                                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                                  {hasStudyIncrement && studyIncrementSummary}
+                                </Button>
                                 {canStopProcessing && (
                                   <Button
                                     variant="outline"

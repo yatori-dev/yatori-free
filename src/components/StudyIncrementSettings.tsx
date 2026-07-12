@@ -237,7 +237,7 @@ function StudyIncrementDialog({
           </div>
           <StepperField
             id={`study-visit-${course.key}`}
-            label="学习次数"
+            label="增加学习次数："
             value={draft.visitCount}
             maximum={400}
             step={1}
@@ -247,7 +247,7 @@ function StudyIncrementDialog({
           />
           <StepperField
             id={`study-minutes-${course.key}`}
-            label="学习时长"
+            label="增加学习时长："
             value={draft.studyMinutes}
             maximum={4000}
             step={10}
