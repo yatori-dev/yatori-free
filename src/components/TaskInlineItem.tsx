@@ -90,29 +90,26 @@ function getAutoSubmitLabel(value: 0 | 1 | 2 | undefined) {
   return '模式 0';
 }
 
-function isTaskStatus(status: string): status is Task['status'] {
-  return ['pending', 'running', 'stopping', 'stopped', 'success', 'failed', 'partial_success'].includes(status);
-}
-
 export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseNameByIdentifier = {}, onUnauthorized, onStopTask }) => {
   const [progress, setProgress] = useState<TaskProgress | null>(() => task.progress ?? null);
+  const [polledStatus, setPolledStatus] = useState<Task['status'] | null>(null);
   const [showConfig, setShowConfig] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [progressErrorMessage, setProgressErrorMessage] = useState('');
   const latestProgressRequestRef = useRef(0);
 
   const taskStatusIsTerminal = ['stopped', 'success', 'partial_success', 'failed'].includes(task.status);
+  const polledStatusIsTerminal = polledStatus !== null
+    && ['stopped', 'success', 'partial_success', 'failed'].includes(polledStatus);
   const effectiveStatus = taskStatusIsTerminal
     ? task.status
-    : progress && isTaskStatus(progress.status)
-      ? progress.status
-      : task.status;
+    : polledStatusIsTerminal
+      ? polledStatus
+      : task.status === 'stopping'
+        ? task.status
+        : polledStatus ?? task.status;
 
   const applyProgress = useEffectEvent((nextProgress: TaskProgress) => {
-    if (nextProgress.taskId !== task.id) {
-      return;
-    }
-
     setProgress((currentProgress) => {
       if (!currentProgress) {
         return nextProgress;
@@ -135,13 +132,12 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
 
     try {
       const result = await getTask(task.id);
-      if (
-        requestId === latestProgressRequestRef.current
-        && result.data.progress
-        && result.data.progress.taskId === task.id
-      ) {
+      if (requestId === latestProgressRequestRef.current) {
         setProgressErrorMessage('');
-        applyProgress(result.data.progress);
+        setPolledStatus(result.data.status);
+        if (result.data.progress) {
+          applyProgress(result.data.progress);
+        }
       }
     } catch (err) {
       if (isAuthExitError(err)) {
@@ -267,16 +263,25 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const hasUnitCounts = typeof progress?.totalUnits === 'number' && typeof progress?.completedUnits === 'number';
   const totalUnits = progress?.totalUnits;
   const completedUnits = progress?.completedUnits;
-  const derivedPercent = typeof totalUnits === 'number' && typeof completedUnits === 'number' && totalUnits > 0
-    ? Math.round((completedUnits / totalUnits) * 100)
+  const failedUnits = progress?.failedUnits;
+  const derivedPercent = typeof totalUnits === 'number'
+    && typeof completedUnits === 'number'
+    && typeof failedUnits === 'number'
+    && totalUnits > 0
+    ? ((completedUnits + failedUnits) / totalUnits) * 100
     : null;
-  const progressFallback = getProgressFallback(effectiveStatus, progress?.percent ?? 0);
-  const unitPercent = derivedPercent ?? progress?.percent ?? progressFallback.percent;
+  const successPercent = typeof totalUnits === 'number' && typeof completedUnits === 'number' && totalUnits > 0
+    ? (completedUnits / totalUnits) * 100
+    : null;
+  const progressFallback = getProgressFallback(effectiveStatus);
+  const unitPercent = derivedPercent ?? progressFallback.percent;
   const progressParts = [
-    unitPercent,
+    ...(derivedPercent === null ? [] : [unitPercent]),
     ...(progress?.studyProgress ? getStudyProgressPercents(progress.studyProgress) : []),
   ];
-  const calculatedPercent = progressParts.reduce((sum, percent) => sum + percent, 0) / progressParts.length;
+  const calculatedPercent = progressParts.length > 0
+    ? progressParts.reduce((sum, percent) => sum + percent, 0) / progressParts.length
+    : progressFallback.percent;
   const rawPercent = effectiveStatus === 'success'
     ? 100
     : calculatedPercent;
@@ -400,7 +405,9 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
             <div className="flex flex-wrap justify-between items-center gap-x-3 gap-y-1 text-[10.5px] text-muted-foreground">
               <span className="shrink-0">任务点详情</span>
               <span className="font-medium font-mono text-foreground bg-muted/80 dark:bg-muted/40 px-1.5 py-0.2 rounded max-w-full wrap-anywhere">
-                {hasUnitCounts ? `已完成 ${completedUnits} / 总计 ${totalUnits}` : '任务点明细未提供'}
+                {hasUnitCounts
+                  ? `已处理 ${(completedUnits ?? 0) + (failedUnits ?? 0)} / ${totalUnits} · 成功率 ${Math.round(successPercent ?? 0)}%`
+                  : '任务点明细未提供'}
               </span>
             </div>
           </div>

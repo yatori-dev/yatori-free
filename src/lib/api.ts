@@ -7,7 +7,6 @@ export interface ApiError extends Error {
 
 export interface ApiResponse {
   code: number;
-  message: string;
 }
 
 export interface ApiDataResponse<T> extends ApiResponse {
@@ -219,12 +218,9 @@ export interface CourseStudyProgress {
 }
 
 export interface TaskProgress {
-  taskId: string;
-  status: TaskStatus | string;
-  percent: number;
-  totalUnits?: number;
-  completedUnits?: number;
-  failedUnits?: number;
+  totalUnits: number;
+  completedUnits: number;
+  failedUnits: number;
   currentCourse?: string;
   currentChapter?: string;
   currentKind?: string;
@@ -317,9 +313,13 @@ function isApiResponse(payload: unknown): payload is ApiResponse {
     && 'code' in payload
     && typeof payload.code === 'number'
     && Number.isFinite(payload.code)
-    && 'message' in payload
-    && typeof payload.message === 'string'
   );
+}
+
+function getApiResponseMessage(payload: ApiResponse) {
+  return 'message' in payload && typeof payload.message === 'string'
+    ? payload.message
+    : null;
 }
 
 function createApiError(message: string, status: number, payload?: unknown): ApiError {
@@ -363,7 +363,7 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}, req
   }
 
   if (!response.ok || ![200, 201].includes(payload.code)) {
-    throw createApiError(payload.message || `请求失败 (${response.status})`, response.status, payload);
+    throw createApiError(getApiResponseMessage(payload) || `请求失败 (${response.status})`, response.status, payload);
   }
 
   if (requireData && !('data' in payload)) {
@@ -411,7 +411,6 @@ export interface SignMonitorStatus {
   status: 'stopped' | 'running' | 'reconnecting' | 'failed';
   pollIntervalSeconds?: number;
   maxRunSeconds?: number;
-  expiresAt?: string | null;
   lastError?: string;
   startedAt?: string | null;
   stoppedAt?: string | null;

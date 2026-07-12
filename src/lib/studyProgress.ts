@@ -14,21 +14,8 @@ export function getStudyMetricPercent(metric: StudyMetricProgress) {
   return clampPercent(((metric.current - metric.baseline) / targetIncrement) * 100);
 }
 
-function getMetricGroupPercent(metrics: StudyMetricProgress[]) {
-  const percents = metrics
+export function getStudyProgressPercents(courses: CourseStudyProgress[]) {
+  return courses.flatMap((course) => [course.visitCount, course.studyMinutes])
     .map(getStudyMetricPercent)
     .filter((percent): percent is number => percent !== null);
-
-  if (percents.length === 0) {
-    return null;
-  }
-
-  return percents.reduce((sum, percent) => sum + percent, 0) / percents.length;
-}
-
-export function getStudyProgressPercents(courses: CourseStudyProgress[]) {
-  return [
-    getMetricGroupPercent(courses.map((course) => course.visitCount)),
-    getMetricGroupPercent(courses.map((course) => course.studyMinutes)),
-  ].filter((percent): percent is number => percent !== null);
 }

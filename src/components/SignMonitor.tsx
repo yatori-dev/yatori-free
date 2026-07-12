@@ -40,9 +40,10 @@ function readStoredMonitorExpiresAt(accountId: string) {
   return expiresAt;
 }
 
-function parseMonitorExpiresAt(value?: string | null) {
-  if (!value) return null;
-  const expiresAt = Date.parse(value);
+function getMonitorExpiresAt(startedAt?: string | null, maxRunSeconds?: number) {
+  if (!startedAt || typeof maxRunSeconds !== 'number' || maxRunSeconds <= 0) return null;
+  const startedAtTime = Date.parse(startedAt);
+  const expiresAt = startedAtTime + maxRunSeconds * 1000;
   return Number.isFinite(expiresAt) && expiresAt > Date.now() ? expiresAt : null;
 }
 
@@ -144,7 +145,7 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
     try {
       if (action === 'start') {
         const response = await startSignMonitor(accountId);
-        const expiresAt = parseMonitorExpiresAt(response.data?.expiresAt);
+        const expiresAt = getMonitorExpiresAt(response.data.startedAt, response.data.maxRunSeconds);
         if (expiresAt) {
           localStorage.setItem(getSignMonitorExpiresStorageKey(accountId), String(expiresAt));
         } else {
