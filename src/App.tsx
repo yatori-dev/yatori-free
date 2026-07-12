@@ -32,10 +32,10 @@ function AuthRestoreScreen() {
           </div>
 
           <div className="mt-8 flex flex-col items-center gap-3">
-            <svg className="google-spinner" viewBox="0 0 50 50" role="status" aria-label="登录中">
+            <svg className="google-spinner" viewBox="0 0 50 50" role="status" aria-label="加载中">
               <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4"></circle>
             </svg>
-            <div className="text-center text-xs font-medium text-muted-foreground">登录中...</div>
+            <div className="text-center text-xs font-medium text-muted-foreground">加载中...</div>
           </div>
         </CardContent>
       </Card>
