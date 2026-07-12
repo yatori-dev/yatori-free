@@ -49,7 +49,7 @@ function StudyMetric({ icon: Icon, label, metric, unit }: StudyMetricProps) {
       </div>
       <div className="mt-2 flex items-baseline justify-between gap-2">
         <span className="text-sm font-semibold tabular-nums text-foreground">
-          本次 {formatDelta(increment, unit)}
+          已 {formatDelta(increment, unit)}
         </span>
         <span className="flex shrink-0 items-center gap-1 text-[10.5px] text-muted-foreground">
           <Target className="h-3 w-3" />
@@ -57,7 +57,7 @@ function StudyMetric({ icon: Icon, label, metric, unit }: StudyMetricProps) {
         </span>
       </div>
       <div className="mt-1 text-[10.5px] text-muted-foreground tabular-nums">
-        当前 {formatValue(metric.current, unit)} · 初始 {formatValue(metric.baseline, unit)}
+        当前 {metric.current}/{formatValue(metric.target, unit)}
       </div>
       {statusMessage && (
         <p className="mt-1.5 text-[10.5px] leading-relaxed text-destructive">

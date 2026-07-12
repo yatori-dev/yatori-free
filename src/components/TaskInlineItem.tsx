@@ -2,6 +2,7 @@ import React, { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { TaskStudyProgress } from './TaskStudyProgress';
+import { getStudyProgressPercents } from '@/lib/studyProgress';
 import { 
   Square, 
   Bot, 
@@ -270,11 +271,15 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
     ? Math.round((completedUnits / totalUnits) * 100)
     : null;
   const progressFallback = getProgressFallback(effectiveStatus, progress?.percent ?? 0);
+  const unitPercent = derivedPercent ?? progress?.percent ?? progressFallback.percent;
+  const progressParts = [
+    unitPercent,
+    ...(progress?.studyProgress ? getStudyProgressPercents(progress.studyProgress) : []),
+  ];
+  const calculatedPercent = progressParts.reduce((sum, percent) => sum + percent, 0) / progressParts.length;
   const rawPercent = effectiveStatus === 'success'
     ? 100
-    : ['partial_success', 'failed'].includes(effectiveStatus)
-      ? progress?.percent ?? progressFallback.percent
-      : derivedPercent ?? progress?.percent ?? progressFallback.percent;
+    : calculatedPercent;
   const percent = Math.max(0, Math.min(100, Math.round(rawPercent)));
   const showProgress = progress && snapshotStatuses.includes(effectiveStatus);
   const progressCourseLabel = progress?.currentCourse || progressFallback.course;
