@@ -24,6 +24,7 @@ import { notifyAuthExit } from '@/lib/notifications';
 import { TaskInlineItem } from './TaskInlineItem';
 import { SignMonitor } from './SignMonitor';
 import { StudyIncrementSettings } from './StudyIncrementSettings';
+import { EmailNotificationSettings } from './EmailNotificationSettings';
 import { 
   LogOut, 
   Settings, 
@@ -1154,10 +1155,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             <TabsContent value="settings" className="outline-none m-0">
               <Card className="bg-card shadow-sm border-none">
                 <CardHeader className="py-4 px-4 sm:px-6 border-b border-border/50">
-                  <CardTitle className="text-base font-semibold">作答控制</CardTitle>
+                  <CardTitle className="text-base font-semibold">任务设置</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 text-sm">
                   <div className="space-y-6">
+                    <EmailNotificationSettings onUnauthorized={onLogout} />
+
                     <div className="flex items-center justify-between p-4 sm:p-5 border border-border/50 rounded-lg bg-muted/25 transition-all">
                       <div className="space-y-1.5 pr-4 min-w-0">
                         <Label htmlFor="hideEmptyTaskCourses" className="text-sm font-semibold cursor-pointer block text-[#191c1d] dark:text-[#e3e3e3]">

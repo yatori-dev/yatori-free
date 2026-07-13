@@ -166,6 +166,27 @@ export interface CreateTaskRequest {
   coursesCustom: CoursesCustom;
 }
 
+export interface EmailNotificationSettings {
+  available: boolean;
+  email: string;
+  pendingEmail: string;
+  verified: boolean;
+  enabled: boolean;
+  verifiedAt: string | null;
+}
+
+export interface RequestEmailVerificationRequest {
+  email: string;
+}
+
+export interface ConfirmEmailVerificationRequest {
+  code: string;
+}
+
+export interface UpdateEmailNotificationRequest {
+  enabled: boolean;
+}
+
 export interface LoginRequest {
   account: string;
   password: string;
@@ -476,6 +497,37 @@ export function getTask(taskId: string) {
 export function stopTask(taskId: string) {
   return apiRequest(`/tasks/${encodeApiPathSegment(taskId)}/stop`, {
     method: 'POST',
+  });
+}
+
+export function getEmailNotificationSettings() {
+  return apiRequest<EmailNotificationSettings>('/notifications/email', undefined, true);
+}
+
+export function requestEmailVerification(payload: RequestEmailVerificationRequest) {
+  return apiRequest<EmailNotificationSettings>('/notifications/email/verification', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }, true);
+}
+
+export function confirmEmailVerification(payload: ConfirmEmailVerificationRequest) {
+  return apiRequest<EmailNotificationSettings>('/notifications/email/verification/confirm', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }, true);
+}
+
+export function updateEmailNotification(payload: UpdateEmailNotificationRequest) {
+  return apiRequest<EmailNotificationSettings>('/notifications/email', {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  }, true);
+}
+
+export function deleteEmailNotification() {
+  return apiRequest('/notifications/email', {
+    method: 'DELETE',
   });
 }
 

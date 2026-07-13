@@ -15,6 +15,7 @@ dist-ssr
 
 # Editor directories and files
 .vscode/*
+.playwright-mcp/
 .codex/*
 !.vscode/extensions.json
 .idea
