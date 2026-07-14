@@ -525,12 +525,6 @@ export function updateEmailNotification(payload: UpdateEmailNotificationRequest)
   }, true);
 }
 
-export function deleteEmailNotification() {
-  return apiRequest('/notifications/email', {
-    method: 'DELETE',
-  });
-}
-
 export function startSignMonitor(accountId: string) {
   return apiRequest<SignMonitorStatus>(`/accounts/${encodeApiPathSegment(accountId)}/sign-monitor/start`, {
     method: 'POST',

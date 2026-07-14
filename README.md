@@ -15,8 +15,6 @@
 ![Google Style](https://img.shields.io/badge/Google-Style-red.svg?style=flat-square&logo=google&logoColor=white)
 ![Material Design](https://img.shields.io/badge/Material_Design-3-blue.svg?style=flat-square&logo=materialdesign&logoColor=white)
 
-> 有关 Google Style 与 Material Design 的设计规范，请参考 [DESIGN.md](./DESIGN.md)
-
 ## 功能
 
 该网页服务仅需提交自身所需的任务，可无人值守在后台自动完成。提交完之后，可以关闭网页

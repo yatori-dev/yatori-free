@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Label } from './ui/label';
+import { Input } from './ui/input';
 import { Switch } from './ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Badge } from './ui/badge';
@@ -42,6 +43,7 @@ import {
   FileText,
   MapPin,
   SlidersHorizontal,
+  Search,
   X,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -90,6 +92,7 @@ interface SettingsFormState {
 }
 
 interface PersistedSettingsFormState {
+  settingsVersion: number;
   hideEmptyTaskCourses: boolean;
   doChapterTest: boolean;
 }
@@ -106,8 +109,11 @@ interface PersistedSettingsState {
   form: PersistedSettingsFormState;
 }
 
+const TASK_SETTINGS_VERSION = 1;
+
 const DEFAULT_PERSISTED_SETTINGS: PersistedSettingsFormState = {
-  hideEmptyTaskCourses: false,
+  settingsVersion: TASK_SETTINGS_VERSION,
+  hideEmptyTaskCourses: true,
   doChapterTest: true,
 };
 
@@ -202,9 +208,11 @@ function readPersistedSettings(accountId: string | null | undefined): PersistedS
     }
 
     const settings = parsed as Partial<PersistedSettingsFormState>;
+    const isCurrentSettingsVersion = settings.settingsVersion === TASK_SETTINGS_VERSION;
 
     return {
-      hideEmptyTaskCourses: settings.hideEmptyTaskCourses === true,
+      settingsVersion: TASK_SETTINGS_VERSION,
+      hideEmptyTaskCourses: isCurrentSettingsVersion ? settings.hideEmptyTaskCourses !== false : true,
       doChapterTest: settings.doChapterTest !== false,
     };
   } catch (error) {
@@ -222,6 +230,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [activeTab, setActiveTab] = useState('courses');
   const [prevTab, setPrevTab] = useState('courses');
   const [taskFilter, setTaskFilter] = useState<'active' | 'completed'>('active');
+  const [courseSearch, setCourseSearch] = useState('');
+  const [courseSearchQuery, setCourseSearchQuery] = useState('');
+  const isCourseSearchComposing = useRef(false);
 
   const handleTabChange = useCallback((tabId: string) => {
     setPrevTab(activeTab);
@@ -441,8 +452,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     return courses.filter(courseHasTaskPoints);
   }, [courses, hideEmptyTaskCourses]);
 
+  const filteredCourses = useMemo(() => {
+    const query = courseSearchQuery.trim().toLocaleLowerCase();
+    return query
+      ? visibleCourses.filter((course) => course.courseName.toLocaleLowerCase().includes(query))
+      : visibleCourses;
+  }, [courseSearchQuery, visibleCourses]);
+
   const hiddenEmptyTaskCourseCount = courses.length - visibleCourses.length;
-  const selectableCourses = visibleCourses.filter(course => !course.processing);
+  const selectableCourses = filteredCourses.filter(course => !course.processing);
   const isAllSelected = selectableCourses.length > 0 && selectableCourses.every(course => selectedCourses.has(course.key));
   const isSomeSelected = selectableCourses.length > 0 && selectableCourses.some(course => selectedCourses.has(course.key));
 
@@ -738,7 +756,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
               学习通服务
             </span>
           </div>
-          <span className="mt-1 text-[10px] leading-none font-medium text-gray-500 dark:text-gray-400 sm:order-3 sm:mt-0 sm:ml-1.5 sm:translate-y-1">
+          <span className="mt-1 text-xs leading-none font-medium text-gray-500 dark:text-gray-400 sm:order-3 sm:mt-0 sm:ml-1.5 sm:translate-y-1">
             v{appVersion}
           </span>
           <span className="hidden truncate text-sm font-medium leading-none text-gray-500 dark:text-gray-400 sm:order-2 sm:inline">
@@ -753,6 +771,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             variant="ghost" 
             onClick={toggleDarkMode}
             className="rounded-md hover:bg-gray-100 dark:hover:bg-[#2d2e30] h-8 w-8 sm:h-9 sm:w-9 text-gray-600 dark:text-gray-300"
+            aria-label={isDark ? '切换到浅色主题' : '切换到深色主题'}
           >
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </Button>
@@ -773,7 +792,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             )}
             <div className="flex min-w-0 flex-col text-left">
               <span className="max-w-[76px] truncate text-xs font-semibold sm:max-w-[100px]">{session.displayName}</span>
-              <span className="hidden max-w-[100px] truncate text-[10px] text-gray-500 dark:text-gray-400 sm:block">{session.user.username}</span>
+              <span className="hidden max-w-[100px] truncate text-xs text-gray-500 dark:text-gray-400 sm:block">{session.user.username}</span>
             </div>
             <Button
               size="icon"
@@ -796,17 +815,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       </div>
 
       {/* Main content grid */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 pb-20 lg:pb-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="contents"
+        style={tabsStyle}
+      >
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 pb-20 lg:pb-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1.55fr)_minmax(400px,0.9fr)] gap-6">
         
         {/* Left column / tabs container */}
-        <div className="lg:col-span-2 flex flex-col gap-6 min-w-0">
+        <div className="lg:col-span-1 flex flex-col gap-6 min-w-0">
           
-          <Tabs
-            value={activeTab}
-            onValueChange={handleTabChange}
-            className="w-full"
-            style={tabsStyle}
-          >
             <TabsList className="hidden lg:flex w-full justify-start bg-transparent h-auto p-0 mb-6 gap-2">
               <TabsTrigger 
                 value="courses"
@@ -834,22 +853,75 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             {/* Courses list tab content */}
             <TabsContent value="courses" className="outline-none m-0">
               <Card className="bg-card shadow-sm border-none">
-                <CardHeader className="py-4 px-6 border-b border-border/50 flex flex-row items-center justify-between space-y-0">
-                  <div>
+                <CardHeader className="flex flex-col gap-3 border-b border-border/50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:space-y-0">
+                  <div className="shrink-0">
                     <CardTitle className="text-base font-semibold">课程列表</CardTitle>
                   </div>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    disabled={coursesLoading}
-                    onClick={fetchCourses}
-                    className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-[#2d2e30]"
-                    title="刷新课程"
-                  >
-                    <RefreshCw className={`w-4 h-4 ${coursesLoading ? 'animate-spin' : ''}`} />
-                  </Button>
+                  <div className="flex min-w-0 flex-1 items-center gap-2 sm:justify-end">
+                    <div className="group relative min-w-0 flex-1 sm:max-w-xs">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-primary" />
+                      <Input
+                        type="search"
+                        value={courseSearch}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setCourseSearch(value);
+                          if (!isCourseSearchComposing.current) {
+                            setCourseSearchQuery(value);
+                          }
+                        }}
+                        onCompositionStart={() => {
+                          isCourseSearchComposing.current = true;
+                        }}
+                        onCompositionEnd={(event) => {
+                          isCourseSearchComposing.current = false;
+                          setCourseSearchQuery(event.currentTarget.value);
+                        }}
+                        placeholder="搜索课程名称"
+                        aria-label="搜索课程名称"
+                        className="course-search-input h-9 rounded-lg border-border/80 bg-background/90 pl-10 pr-10 text-sm shadow-sm transition-all duration-200 placeholder:text-muted-foreground/80 hover:border-primary/40 focus-visible:border-primary/60 focus-visible:ring-4 focus-visible:ring-primary/10"
+                      />
+                      {courseSearch && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            isCourseSearchComposing.current = false;
+                            setCourseSearch('');
+                            setCourseSearchQuery('');
+                          }}
+                          className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          aria-label="清除课程搜索"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                    {courseSearchQuery.trim() && (
+                      <span className="hidden whitespace-nowrap text-xs text-muted-foreground xl:inline" role="status">
+                        找到 {filteredCourses.length} 门课程
+                      </span>
+                    )}
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      disabled={coursesLoading}
+                      onClick={fetchCourses}
+                      className="h-8 w-8 shrink-0 rounded-full hover:bg-gray-100 dark:hover:bg-[#2d2e30]"
+                      title="刷新课程"
+                      aria-label="刷新课程"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${coursesLoading ? 'animate-spin' : ''}`} />
+                    </Button>
+                  </div>
                 </CardHeader>
-                <CardContent className="p-0">
+                <div className="border-b border-border/50 px-4 py-2 sm:px-6 xl:hidden">
+                  {courseSearchQuery.trim() && (
+                    <span className="text-xs text-muted-foreground" role="status">
+                      找到 {filteredCourses.length} 门课程
+                    </span>
+                  )}
+                </div>
+                  <CardContent className="p-0">
                   {coursesLoading ? (
                     <div className="flex flex-col items-center justify-center p-12 text-gray-500 text-sm">
                       <svg className="google-spinner" viewBox="0 0 50 50">
@@ -862,10 +934,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                       <AlertCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                       暂无关联课程，您可以尝试点击右上角刷新重试。
                     </div>
-                  ) : visibleCourses.length === 0 ? (
+                  ) : filteredCourses.length === 0 ? (
                     <div className="text-center p-12 text-gray-500 text-sm font-sans">
                       <AlertCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      没有可显示课程，可在设置中关闭隐藏无任务点课程。
+                      {courseSearchQuery.trim() ? '没有匹配的课程，请调整搜索条件。' : '没有可显示课程，可在设置中关闭隐藏无任务点课程。'}
                     </div>
                   ) : (
                     <div className="divide-y divide-[#e1e3e4] dark:divide-[#333537]">
@@ -892,7 +964,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                         </div>
                       )}
 
-                      {visibleCourses.map((course) => {
+                      {filteredCourses.map((course) => {
                         const jobFinishCount = course.jobFinishCount;
                         const jobCount = course.jobCount;
                         const hasJobProgress = typeof jobFinishCount === 'number'
@@ -1044,10 +1116,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
                                       return (
                                         <>
-                                          <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                                          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                                             章节大纲 ({chaptersWithTasks.length})
                                           </div>
-                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-1">
+                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:max-h-[300px] md:overflow-y-auto pr-1">
                                           {chaptersWithTasks.map(({ chapter: chap, taskMeta }) => {
                                             const isChapterDone = !taskMeta.isLocked && taskMeta.total > 0 && taskMeta.finished === taskMeta.total;
                                             const chapterDocuments = getChapterDocuments(chap, courseDetails.documents);
@@ -1063,7 +1135,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                                     <span className="font-medium text-[#191c1d] dark:text-[#e3e3e3]">{chap.name}</span>
                                                   </div>
                                                   <Badge
-                                                    className={`border-none text-[10px] font-sans font-normal shrink-0 ${
+                                                    className={`border-none text-xs font-sans font-normal shrink-0 ${
                                                       taskMeta.isLocked
                                                         ? 'bg-[#f3f4f6] hover:bg-[#f3f4f6] text-[#5f6368] dark:bg-[#2a2b2d] dark:hover:bg-[#2a2b2d] dark:text-[#bdc1c6]'
                                                         : isChapterDone
@@ -1090,7 +1162,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                                             <div className="truncate font-medium text-[#191c1d] dark:text-[#e3e3e3]">
                                                               {document.name}
                                                             </div>
-                                                            <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                                                            <div className="text-xs text-gray-500 dark:text-gray-400">
                                                               {getCourseDocumentTypeLabel(document)}
                                                               {fileSize ? ` · ${fileSize}` : ''}
                                                             </div>
@@ -1155,11 +1227,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             <TabsContent value="settings" className="outline-none m-0">
               <Card className="bg-card shadow-sm border-none">
                 <CardHeader className="py-4 px-4 sm:px-6 border-b border-border/50">
-                  <CardTitle className="text-base font-semibold">任务设置</CardTitle>
+                  <CardTitle className="text-base font-semibold">提交设置</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 text-sm">
                   <div className="space-y-6">
-                    <EmailNotificationSettings onUnauthorized={onLogout} />
+                    <section className="space-y-2" aria-labelledby="notification-settings-heading">
+                      <h2 id="notification-settings-heading" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        通知
+                      </h2>
+                      <EmailNotificationSettings onUnauthorized={onLogout} />
+                    </section>
+
+                    <section className="space-y-4" aria-labelledby="task-behavior-settings-heading">
+                      <div>
+                        <h2 id="task-behavior-settings-heading" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          任务行为
+                        </h2>
+                      </div>
 
                     <div className="flex items-center justify-between p-4 sm:p-5 border border-border/50 rounded-lg bg-muted/25 transition-all">
                       <div className="space-y-1.5 pr-4 min-w-0">
@@ -1213,7 +1297,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                           />
                         </div>
 
-                        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300 ${doWork ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
+                        {doWork && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <button
                             type="button"
                             disabled={!doWork}
@@ -1265,7 +1349,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                               )}
                             </div>
                           </button>
-                        </div>
+                        </div>}
                       </div>
 
                       {/* 考试自动答题 */}
@@ -1283,7 +1367,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                           />
                         </div>
 
-                        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300 ${doExam ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
+                        {doExam && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <button
                             type="button"
                             disabled={!doExam}
@@ -1335,9 +1419,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                               )}
                             </div>
                           </button>
-                        </div>
+                        </div>}
                       </div>
                     </div>
+                    </section>
                   </div>
                 </CardContent>
               </Card>
@@ -1358,6 +1443,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                     disabled={tasksLoading}
                     onClick={() => void fetchTasks()}
                     className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-[#2d2e30] shrink-0"
+                    aria-label="刷新任务列表"
                   >
                     <RefreshCw className={`w-4 h-4 ${tasksLoading ? 'animate-spin' : ''}`} />
                   </Button>
@@ -1380,7 +1466,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                           }`}
                         >
                           {chip.label}
-                          <span className={`text-[10px] px-1.5 py-0.2 rounded-sm ${
+                          <span className={`text-xs px-1.5 py-0.5 rounded-sm ${
                             taskFilter === chip.id
                               ? 'bg-[#1a73e8]/15 text-[#1a73e8] dark:bg-[#8ab4f8]/30 dark:text-[#8ab4f8]'
                               : 'bg-muted-foreground/10 text-muted-foreground'
@@ -1392,7 +1478,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                     </div>
                   )}
 
-                  <div className="max-h-[550px] w-full min-w-0 overflow-y-auto">
+                  <div className="w-full min-w-0 lg:max-h-[550px] lg:overflow-y-auto">
                     {tasksLoading && tasks.length === 0 ? (
                       <div className="text-center p-8 text-gray-500 text-sm">
                         获取任务状态中...
@@ -1427,12 +1513,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
         </div>
 
         {/* Right column / Task listing and Log streams */}
-        <div className="hidden lg:flex flex-col gap-6 min-w-0 self-start pt-[4.5rem]">
-          <Card className="bg-card shadow-sm border-none min-w-0 w-full overflow-hidden flex h-[calc(100vh-12rem)] min-h-[560px] max-h-[760px] flex-col sticky top-28">
+        <div className="hidden lg:flex flex-col gap-6 min-w-0 self-start">
+          <Card className="bg-card shadow-sm border-none min-w-0 w-full overflow-hidden flex h-[calc(100vh-8rem)] min-h-[600px] max-h-[760px] flex-col sticky top-28">
             <CardHeader className="py-4 px-6 border-b border-border/50 flex flex-row items-start justify-between gap-3 space-y-0 min-w-0">
               <div className="min-w-0">
                 <CardTitle className="text-base font-semibold">任务列表</CardTitle>
@@ -1444,6 +1529,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 disabled={tasksLoading}
                 onClick={() => void fetchTasks()}
                 className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-[#2d2e30] shrink-0"
+                aria-label="刷新任务列表"
               >
                 <RefreshCw className={`w-4 h-4 ${tasksLoading ? 'animate-spin' : ''}`} />
               </Button>
@@ -1466,7 +1552,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                       }`}
                     >
                       {chip.label}
-                      <span className={`text-[10px] px-1.5 py-0.2 rounded-sm ${
+                      <span className={`text-xs px-1.5 py-0.5 rounded-sm ${
                         taskFilter === chip.id
                           ? 'bg-[#1a73e8]/15 text-[#1a73e8] dark:bg-[#8ab4f8]/30 dark:text-[#8ab4f8]'
                           : 'bg-muted-foreground/10 text-muted-foreground'
@@ -1537,17 +1623,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         </div>
 
       </main>
+      </Tabs>
 
 
       {/* 紧凑操作栏：手机单行排列，较宽窗口使用桌面胶囊。 */}
       {selectedCourses.size > 0 && (
         <div className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-2 rounded-xl border border-border bg-card/95 p-2 shadow-md backdrop-blur-md animate-in slide-in-from-bottom-8 fade-in duration-300 sm:inset-x-auto sm:bottom-5 sm:left-1/2 sm:w-max sm:-translate-x-1/2 sm:rounded-lg sm:px-2.5 sm:py-1.5">
           <div className="flex min-w-0 flex-1 items-center gap-2 text-sm font-medium text-foreground sm:flex-none">
-              <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-primary/10 px-2 text-xs font-bold text-primary sm:h-6 sm:min-w-6">
-                {selectedCourses.size}
-              </span>
-              <span className="truncate sm:hidden">已选</span>
-              <span className="hidden whitespace-nowrap sm:inline">已选课程</span>
+              <span className="truncate">已选 {selectedCourses.size} 门课程 · 提交任务</span>
           </div>
           <Button
             variant="ghost"
@@ -1561,15 +1644,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           <Button
             onClick={createTaskWithSelection}
             disabled={creatingTask}
-            className="h-11 shrink-0 gap-1.5 px-3 text-xs font-semibold shadow-sm transition-colors hover:shadow sm:h-9 sm:px-3"
+            className="h-11 shrink-0 gap-1.5 px-3 text-sm font-semibold shadow-sm transition-colors hover:shadow sm:h-9 sm:px-3"
           >
             {creatingTask ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
             ) : (
               <Play className="h-4 w-4 fill-current" />
             )}
-            <span className="sm:hidden">开始</span>
-            <span className="hidden sm:inline">开始任务</span>
+            <span>提交任务</span>
           </Button>
         </div>
       )}
@@ -1634,7 +1716,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 <button
                   key={item.id}
                   onClick={() => handleTabChange(item.id)}
-                  className="flex-1 flex flex-col items-center justify-center gap-1 focus:outline-none relative z-10"
+                  className="relative z-10 flex flex-1 flex-col items-center justify-center gap-1 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  aria-label={item.label}
                 >
                   <div
                     className={`flex items-center justify-center w-14 h-8 rounded-full transition-colors duration-200 ${
@@ -1646,7 +1729,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                     <Icon className={`w-5 h-5 ${isActive ? 'fill-current/10' : ''}`} />
                   </div>
                   <span
-                    className={`text-[11px] transition-colors duration-200 ${
+                    className={`text-xs transition-colors duration-200 ${
                       isActive ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground'
                     }`}
                   >

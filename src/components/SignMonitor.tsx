@@ -203,10 +203,10 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
           <div className="min-w-0 flex-1">
             <CardTitle className="text-base font-semibold">自动签到</CardTitle>
             <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-              <span className="text-[9px] sm:text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-100/50 dark:border-emerald-900/30 shrink-0 select-none">普通签到</span>
-              <span className="text-[9px] sm:text-[10px] font-medium bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded border border-blue-100/50 dark:border-blue-900/30 shrink-0 select-none">手势签到</span>
-              <span className="text-[9px] sm:text-[10px] font-medium bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded border border-amber-100/50 dark:border-amber-900/30 shrink-0 select-none">位置签到</span>
-              <span className="text-[9px] sm:text-[10px] font-medium bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded border border-purple-100/50 dark:border-purple-900/30 shrink-0 select-none">签到码</span>
+              <span className="text-xs font-medium bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-100/50 dark:border-emerald-900/30 shrink-0 select-none">普通签到</span>
+              <span className="text-xs font-medium bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded border border-blue-100/50 dark:border-blue-900/30 shrink-0 select-none">手势签到</span>
+              <span className="text-xs font-medium bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded border border-amber-100/50 dark:border-amber-900/30 shrink-0 select-none">位置签到</span>
+              <span className="text-xs font-medium bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded border border-purple-100/50 dark:border-purple-900/30 shrink-0 select-none">签到码</span>
             </div>
           </div>
           <div className="flex items-center shrink-0">
@@ -252,8 +252,9 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
             variant="ghost"
             disabled={logsLoading}
             onClick={() => void fetchLogs(true, false)}
-            className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-[#2d2e30] shrink-0"
-            title="刷新日志"
+              className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-[#2d2e30] shrink-0"
+              title="刷新日志"
+              aria-label="刷新签到日志"
           >
             <RefreshCw className={`w-4 h-4 ${logsLoading ? 'animate-spin' : ''}`} />
           </Button>
@@ -303,7 +304,7 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
 
           {logsTotal > logsLimit && (
             <div className="px-4 py-3 border-t border-border/40 flex items-center justify-between bg-gray-50/10 dark:bg-[#1e2022]/10 select-none">
-              <span className="text-[11px] text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 共 {logsTotal} 条记录, 第 {Math.floor(logsOffset / logsLimit) + 1} 页
               </span>
 

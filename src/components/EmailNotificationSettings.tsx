@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import {
   confirmEmailVerification,
-  deleteEmailNotification,
   getEmailNotificationSettings,
   getUserFacingErrorMessage,
   isAuthExitError,
@@ -23,7 +21,7 @@ interface EmailNotificationSettingsProps {
   onUnauthorized: () => void;
 }
 
-type PendingAction = 'load' | 'send' | 'confirm' | 'toggle' | 'delete' | null;
+type PendingAction = 'load' | 'send' | 'confirm' | 'toggle' | null;
 const EMAIL_NOTIFICATION_CACHE_KEY = 'email-notification-settings';
 
 export function EmailNotificationSettings({ onUnauthorized }: EmailNotificationSettingsProps) {
@@ -126,35 +124,6 @@ export function EmailNotificationSettings({ onUnauthorized }: EmailNotificationS
     }
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm('确定删除邮箱通知设置？')) return;
-
-    setPendingAction('delete');
-    try {
-      await deleteEmailNotification();
-      setSettings((previous) => {
-        if (!previous) return previous;
-        const nextSettings = {
-          ...previous,
-          email: '',
-          pendingEmail: '',
-          verified: false,
-          enabled: false,
-          verifiedAt: null,
-        };
-        writeSessionCache(EMAIL_NOTIFICATION_CACHE_KEY, nextSettings);
-        return nextSettings;
-      });
-      setEmail('');
-      setVerificationCode('');
-      toast.success('邮箱通知设置已删除');
-    } catch (error) {
-      handleError(error, '删除邮箱通知设置失败');
-    } finally {
-      setPendingAction(null);
-    }
-  };
-
   const isBusy = pendingAction !== null;
   const hasVerifiedEmail = settings?.verified === true && Boolean(settings.email);
   const hasPendingEmail = Boolean(settings?.pendingEmail);
@@ -237,21 +206,6 @@ export function EmailNotificationSettings({ onUnauthorized }: EmailNotificationS
             )}
           </div>
 
-          {(hasVerifiedEmail || hasPendingEmail) && (
-            <div className="flex justify-end border-t border-border/40 pt-3">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                disabled={isBusy}
-                onClick={() => void handleDelete()}
-                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                删除邮箱
-              </Button>
-            </div>
-          )}
         </div>
       )}
     </div>

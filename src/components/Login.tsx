@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent } from './ui/card';
@@ -27,6 +27,21 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [passwordError, setPasswordError] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [dialogContent, setDialogContent] = useState<'terms' | 'privacy' | null>(null);
+  const accountPaneRef = useRef<HTMLDivElement>(null);
+  const passwordPaneRef = useRef<HTMLDivElement>(null);
+  const [viewportHeight, setViewportHeight] = useState<number>();
+
+  useLayoutEffect(() => {
+    const pane = step === 'account' ? accountPaneRef.current : passwordPaneRef.current;
+    if (!pane) return;
+
+    const updateHeight = () => setViewportHeight(pane.scrollHeight);
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(pane);
+    return () => observer.disconnect();
+  }, [accountError, agreedToTerms, isLoading, passwordError, showPassword, step]);
 
   useEffect(() => {
     let cancelled = false;
@@ -136,7 +151,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           <div></div>
         </div>
 
-        <CardContent className="p-8 md:p-10 flex flex-col items-center relative min-h-[460px]">
+        <CardContent className="p-8 md:p-10 flex flex-col items-center relative">
           {/* Google Colored Logo */}
           <div className="flex items-center justify-center font-semibold text-3xl tracking-tight mb-4 select-none">
             <span className="text-[#4285F4]">Y</span>
@@ -148,13 +163,16 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           </div>
 
           {/* Form and transition layout */}
-          <div className="w-full slide-viewport mt-2">
+          <div
+            className="w-full slide-viewport mt-2 transition-[height] duration-300 ease-out"
+            style={{ height: viewportHeight ? `${viewportHeight}px` : undefined }}
+          >
             <div 
               className="slide-container" 
               style={{ transform: step === 'password' ? 'translateX(-50%)' : 'translateX(0%)' }}
             >
               {/* Step 1: Account Input */}
-              <div className="slide-pane flex flex-col items-center">
+              <div ref={accountPaneRef} className="slide-pane flex flex-col items-center">
                 <h1 className="text-2xl text-[#191c1d] dark:text-[#e3e3e3] font-normal mb-1 font-sans">登录</h1>
                 <p className="text-sm text-[#424753] dark:text-[#a6a8ab] mb-8 font-sans">使用您的学习通账号</p>
                 
@@ -196,7 +214,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               </div>
 
               {/* Step 2: Password Input */}
-              <div className="slide-pane flex flex-col items-center">
+              <div ref={passwordPaneRef} className="slide-pane flex flex-col items-center">
                 <h1 className="text-2xl text-[#191c1d] dark:text-[#e3e3e3] font-normal mb-1 font-sans">输入密码</h1>
                 <p className="text-sm text-[#424753] dark:text-[#a6a8ab] mb-8 font-sans">请输入您的学习通登录密码</p>
 
@@ -236,6 +254,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5f6368] dark:text-[#a6a8ab] hover:text-[#191c1d]"
                         disabled={isLoading}
+                        aria-label={showPassword ? '隐藏密码' : '显示密码'}
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>

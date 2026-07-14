@@ -338,3 +338,8 @@
     transform: translateX(0);
   }
 }
+
+.course-search-input::-webkit-search-cancel-button,
+.course-search-input::-webkit-search-decoration {
+  appearance: none;
+}
