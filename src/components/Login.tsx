@@ -323,7 +323,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       
       {/* Footer Info */}
       <div className="flex gap-6 mt-8 text-xs text-[#70757a] dark:text-[#a6a8ab] font-sans">
-        <a href="https://github.com/yatori-dev/yatori-go-core" className="hover:underline">Powered by Yatori-go-core</a>
+        <a href="https://hungrym0.com" className="text-[11px] tracking-[0.03em] hover:no-underline">© 2026 HUNGRY_M0. All rights reserved.</a>
       </div>
 
       <Dialog open={dialogContent !== null} onOpenChange={(open) => !open && setDialogContent(null)}>
