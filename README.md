@@ -1,8 +1,8 @@
 # yatori-free
 
-基于 [yatori-go-core](https://github.com/yatori-dev/yatori-go-core) 二改的在线 Web 服务前端面板，**仅含学习通**的相关功能
+基于 [yatori-go-core](https://github.com/yatori-dev/yatori-go-core) 等开源项目二改的在线 Web 服务前端面板，**仅含学习通**的相关功能
 
-服务地址：https://yatori.hungrym0.com
+> **服务地址：https://yatori.hungrym0.com**
 
 ![React](https://img.shields.io/badge/React-19.2.6-61DAFB.svg?style=flat-square&logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0.2-3178C6.svg?style=flat-square&logo=typescript&logoColor=white)
@@ -17,7 +17,7 @@
 
 ## 功能
 
-该网页服务仅需提交自身所需的任务，可无人值守在后台自动完成。提交完之后，可以关闭网页
+**该网页服务仅需提交自身所需的任务，可无人值守在后台自动完成。创建任务之后，可以关闭网页**
 
 ### 1. 自动完成章节任务点
 
@@ -61,11 +61,15 @@
 - ![Cloudflare Tunnel](https://img.shields.io/badge/Cloudflare%20Tunnel-2026.7.1-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
 - ![yatori-go-core](https://img.shields.io/badge/yatori--go--core-2.0.4.9-green.svg?style=flat-square&logoColor=white)
 
-> 服务端遵循 [yatori-go-core](https://github.com/yatori-dev/yatori-go-core) 的 MIT 协议、以闭源方式提供网络服务
+> 服务端遵循 [yatori-go-core](https://github.com/yatori-dev/yatori-go-core) 等项目的开源协议，以闭源方式提供网络服务
 
 ## 社区群组
 
-**本网页服务群组仅限群成员邀请加入。** 以下是上游项目的官方QQ群组，与本网页服务内容无关：
-- [932447008](https://qm.qq.com/q/KREkme4rYc)（一群，未满）（推荐）
-- [1044155704](https://qm.qq.com/q/ZmBAjtFJi6)（二群，已满）
-- [1101685348](https://qm.qq.com/q/3MOiFau9pY)（三群，未满）（推荐）
+> [!NOTE]
+>
+> **本网页服务的群组仅限群成员邀请加入。** 
+
+> 以下是上游项目的官方QQ群组，与本网页服务内容无关：
+> - [932447008](https://qm.qq.com/q/KREkme4rYc)（一群，未满）（推荐）
+> - [1044155704](https://qm.qq.com/q/ZmBAjtFJi6)（二群，已满）
+> - [1101685348](https://qm.qq.com/q/3MOiFau9pY)（三群，未满）（推荐）
