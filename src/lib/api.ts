@@ -280,13 +280,13 @@ function getApiErrorPayloadMessage(error: unknown) {
 }
 
 export function getUserFacingErrorMessage(error: unknown, fallback = '请求失败') {
+  if (isUnauthorizedError(error)) {
+    return '登录信息已过期，请重新登录';
+  }
+
   const apiMessage = getApiErrorPayloadMessage(error);
   if (apiMessage) {
     return apiMessage;
-  }
-
-  if (isUnauthorizedError(error)) {
-    return '登录已失效，请重新登录';
   }
 
   if (
