@@ -27,6 +27,7 @@ import { TaskInlineItem } from './TaskInlineItem';
 import { SignMonitor } from './SignMonitor';
 import { StudyIncrementSettings } from './StudyIncrementSettings';
 import { EmailNotificationSettings } from './EmailNotificationSettings';
+import { OpenSourceDialog } from './OpenSourceDialog';
 import { 
   LogOut, 
   Settings, 
@@ -768,6 +769,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
         {/* User Actions */}
         <div className="flex min-w-0 items-center gap-1.5 sm:gap-4 shrink-0">
+          <OpenSourceDialog />
           <Button 
             size="icon" 
             variant="ghost" 
