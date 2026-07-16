@@ -74,14 +74,16 @@ export function TaskStudyProgress({ courses }: TaskStudyProgressProps) {
   }
 
   return (
-    <div className="space-y-2 border-t border-border/50 pt-3">
-      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
-        <BookOpen className="h-3.5 w-3.5 text-primary" />
-        学习目标进度
+    <section className="space-y-2.5 border-t border-border/60 pt-3" aria-label="学习目标进度">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
+          <BookOpen className="h-3.5 w-3.5 text-primary" />
+          学习目标进度
+        </div>
       </div>
       <div className="space-y-2">
         {courses.map((course) => (
-          <div key={course.classId} className="rounded-md border border-border/50 bg-muted/20 p-2.5">
+          <div key={course.classId} className="rounded-lg border border-border/60 bg-card/70 p-2.5">
             <p className="truncate text-[11px] font-medium text-foreground" title={course.courseName}>
               {course.courseName}
             </p>
@@ -92,6 +94,6 @@ export function TaskStudyProgress({ courses }: TaskStudyProgressProps) {
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

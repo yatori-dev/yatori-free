@@ -343,3 +343,30 @@
 .course-search-input::-webkit-search-decoration {
   appearance: none;
 }
+
+/* Keep active task progress visibly alive without competing with the value. */
+.progress-running [data-slot="progress-indicator"] {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-running [data-slot="progress-indicator"]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.35) 50%, transparent 80%);
+  transform: translateX(-100%);
+  animation: progressShimmer 2.8s ease-in-out infinite;
+}
+
+@keyframes progressShimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-running [data-slot="progress-indicator"]::after {
+    animation: none;
+  }
+}

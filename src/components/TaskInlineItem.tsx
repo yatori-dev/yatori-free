@@ -14,7 +14,6 @@ import {
   ChevronUp, 
   RefreshCw, 
   BookOpen,
-  User as UserIcon,
   Settings2,
   Hourglass
 } from 'lucide-react';
@@ -288,7 +287,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const percent = Math.max(0, Math.min(100, Math.round(rawPercent)));
   const showProgress = progress && snapshotStatuses.includes(effectiveStatus);
   const progressCourseLabel = progress?.currentCourse || progressFallback.course;
-  const progressChapterLabel = progress?.currentChapter || progressFallback.chapter;
+  const progressChapterLabel = progress?.currentChapter || (progressFallback.chapter === '--' ? '' : progressFallback.chapter);
   const taskErrorMessage = progressErrorMessage || task.errorMessage || (effectiveStatus === 'failed' ? progress?.message : '');
   const canStopTask = stoppableStatuses.includes(task.status) || stoppableStatuses.includes(effectiveStatus);
   const isStoppingTask = task.status === 'stopping' || effectiveStatus === 'stopping';
@@ -319,54 +318,44 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   });
 
   return (
-    <div className="p-3 sm:p-4 flex flex-col gap-4 bg-card border border-border rounded-lg shadow-sm hover:bg-muted/10 transition-colors duration-200 min-w-0 w-full overflow-hidden">
+    <article className="group flex min-w-0 w-full flex-col gap-4 overflow-hidden rounded-xl border border-border/70 bg-card p-3.5 shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-4">
       
       {/* Header Info */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3 min-w-0 w-full">
-        <div className="flex flex-col gap-1 min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground font-medium min-w-0">
-            <span className="font-mono bg-muted px-1.5 py-0.5 rounded text-[10px] shrink-0">
+      <div className="flex min-w-0 w-full flex-col gap-3">
+        <div className="flex min-w-0 items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <span className="shrink-0 rounded-md bg-muted px-1.5 py-1 font-mono text-[10px] text-foreground/75">
               #{task.id.substring(0, 8)}
             </span>
-            <span className="shrink-0">•</span>
-            <div className="flex items-center gap-1 min-w-0 max-w-full">
-              <UserIcon className="w-3 h-3 text-muted-foreground/70 shrink-0" />
-              <span className="truncate max-w-[min(12rem,100%)] font-mono text-[10.5px]">
-                {configSnapshot?.account ?? '账号未记录'}
-              </span>
-            </div>
           </div>
-          
-          {/* Targeted Courses list */}
-          <div className="mt-1 flex flex-wrap gap-1 items-center min-w-0 w-full">
-            {displayCourses === undefined ? (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-medium bg-muted text-muted-foreground border border-border">
-                <BookOpen className="w-3 h-3 shrink-0" />
-                课程范围未记录
-              </span>
-            ) : displayCourses.length === 0 ? (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-medium bg-primary/10 text-primary border border-primary/20 dark:bg-primary/20 dark:text-primary-foreground/90">
-                <BookOpen className="w-3 h-3 shrink-0" />
-                未选择课程
-              </span>
-            ) : (
-              displayCourses.map((courseName, i) => (
-                <span 
-                  key={i} 
-                  className="inline-flex items-center px-2 py-0.5 rounded text-[10.5px] font-medium bg-[#e8f0fe] text-[#1a73e8] border border-[#d2e3fc] dark:bg-[#8ab4f8]/15 dark:text-[#8ab4f8] dark:border-[#8ab4f8]/25 max-w-full sm:max-w-[140px] min-w-0"
-                  title={courseName}
-                >
-                  <span className="truncate min-w-0">{courseName}</span>
-                </span>
-              ))
-            )}
+
+          {/* Status Badge with custom styling */}
+          <div className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap ${statusInfo.colorClass}`}>
+          {statusInfo.icon}
+          <span>{statusInfo.label}</span>
           </div>
         </div>
 
-        {/* Status Badge with custom styling */}
-        <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold border shrink-0 self-start whitespace-nowrap ${statusInfo.colorClass}`}>
-          {statusInfo.icon}
-          <span>{statusInfo.label}</span>
+        {/* Targeted Courses list */}
+        <div className="flex min-w-0 w-full flex-wrap items-center gap-1.5">
+          <BookOpen className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          {displayCourses === undefined ? (
+            <span className="text-[10.5px] font-medium text-muted-foreground">课程范围未记录</span>
+          ) : displayCourses.length === 0 ? (
+            <span className="rounded-md border border-primary/20 bg-primary/10 px-2 py-1 text-[10.5px] font-medium text-primary dark:bg-primary/20 dark:text-primary-foreground/90">
+              未选择课程
+            </span>
+          ) : (
+            displayCourses.map((courseName, i) => (
+              <span
+                key={i}
+                className="inline-flex min-w-0 max-w-full items-center rounded-md border border-primary/15 bg-primary/8 px-2 py-1 text-[10.5px] font-medium text-primary dark:bg-primary/15 dark:text-primary-foreground/90 sm:max-w-[180px]"
+                title={courseName}
+              >
+                <span className="min-w-0 truncate">{courseName}</span>
+              </span>
+            ))
+          )}
         </div>
       </div>
 
@@ -383,28 +372,33 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
 
       {/* Progress Box (real-time data) */}
       {showProgress && (
-        <div className="bg-muted/30 dark:bg-[#161719] border border-border/50 rounded-md p-3.5 space-y-3.5 min-w-0 w-full overflow-hidden">
-          <div className="flex items-start justify-between gap-2 text-xs">
-            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-              <div className="flex items-center gap-1 font-semibold text-foreground min-w-0" title={progressCourseLabel}>
+        <div className="min-w-0 w-full space-y-3.5 overflow-hidden rounded-lg border border-border/70 bg-muted/20 p-3.5 dark:bg-muted/10">
+          <div className="flex items-end justify-between gap-3 text-xs">
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <div className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-foreground" title={progressCourseLabel}>
                 {effectiveStatus === 'running' && (
-                  <span className="w-2 h-2 rounded-full bg-blue-500 mr-1.5 shrink-0 animate-pulse"></span>
+                  <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-primary"></span>
                 )}
                 <span className="truncate">{progressCourseLabel}</span>
               </div>
-              <div className="text-[11px] text-muted-foreground truncate" title={progressChapterLabel}>
-                {progressChapterLabel}
-              </div>
+              {progressChapterLabel && (
+                <div className="truncate text-[11px] text-muted-foreground" title={progressChapterLabel}>
+                  {progressChapterLabel}
+                </div>
+              )}
             </div>
-            <span className="font-bold text-sm text-primary dark:text-primary-foreground shrink-0">{percent}%</span>
+            <span className="shrink-0 text-lg font-bold tabular-nums text-primary dark:text-primary-foreground">{percent}%</span>
           </div>
 
           <div className="space-y-1.5">
-            <Progress value={percent} className="h-1.5 bg-muted rounded overflow-hidden" />
+            <Progress
+              value={percent}
+              className={`h-2 overflow-hidden rounded-full bg-muted ${effectiveStatus === 'running' ? 'progress-running' : ''}`}
+            />
             
-            <div className="flex flex-wrap justify-between items-center gap-x-3 gap-y-1 text-[10.5px] text-muted-foreground">
-              <span className="shrink-0">任务点详情</span>
-              <span className="font-medium font-mono text-foreground bg-muted/80 dark:bg-muted/40 px-1.5 py-0.2 rounded max-w-full wrap-anywhere">
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[10.5px] text-muted-foreground">
+              <span className="shrink-0 font-medium">任务点详情</span>
+              <span className="max-w-full rounded-md bg-muted/80 px-1.5 py-1 font-mono font-medium text-foreground wrap-anywhere dark:bg-muted/40">
                 {hasUnitCounts
                   ? `已处理 ${(completedUnits ?? 0) + (failedUnits ?? 0)} / ${totalUnits} · 成功率 ${Math.round(successPercent ?? 0)}%`
                   : '任务点明细未提供'}
@@ -433,8 +427,12 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
       </div>
 
       {/* Settings Snapshot (Collapsible) */}
-      {showConfig && (
-        <div className="mt-1 p-3 bg-muted/20 dark:bg-[#161719]/40 border border-border/50 rounded-md text-[11px] text-muted-foreground space-y-2 min-w-0 w-full">
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${showConfig ? 'grid-rows-[1fr] opacity-100' : 'pointer-events-none grid-rows-[0fr] opacity-0'}`}
+        aria-hidden={!showConfig}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="mt-1 min-w-0 w-full space-y-2 rounded-md border border-border/50 bg-muted/20 p-3 text-[11px] text-muted-foreground dark:bg-[#161719]/40">
           <div className="flex items-center gap-1 text-[11px] font-semibold text-foreground pb-1 border-b border-border/50">
             <Settings2 className="w-3 h-3 text-muted-foreground" />
             <span>任务配置详情</span>
@@ -505,8 +503,9 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
           ) : (
             <div className="text-xs text-muted-foreground">任务未保存配置快照</div>
           )}
+          </div>
         </div>
-      )}
+      </div>
 
       {/* Card Action Footer */}
       <div className="flex flex-wrap items-center justify-between border-t border-border/40 pt-3 mt-1 gap-2 min-w-0 w-full">
@@ -539,6 +538,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
           </div>
         )}
       </div>
-    </div>
+    </article>
   );
 };

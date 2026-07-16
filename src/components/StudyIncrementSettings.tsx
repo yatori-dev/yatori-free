@@ -200,7 +200,7 @@ function StudyIncrementDialog({
             {loadingStats ? (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <LoaderCircle className="h-4 w-4 animate-spin" />
-                正在读取当前学习数据
+                正在读取该课程学习数据
               </div>
             ) : studyStats?.available ? (
               <div className="grid grid-cols-2 gap-3">
