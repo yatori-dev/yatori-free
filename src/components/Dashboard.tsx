@@ -857,9 +857,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             {/* Courses list tab content */}
             <TabsContent value="courses" className="outline-none m-0 lg:flex-1 lg:min-h-0">
               <Card className="bg-card shadow-sm border-none lg:flex lg:h-full lg:min-h-0 lg:flex-col">
-                <CardHeader className="flex flex-col gap-3 border-b border-border/50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:space-y-0">
-                  <div className="shrink-0">
+                <CardHeader className="flex flex-col gap-2 border-b border-border/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4 sm:space-y-0">
+                  <div className="flex items-center justify-between sm:block">
                     <CardTitle className="text-base font-semibold">课程列表</CardTitle>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      disabled={coursesLoading}
+                      onClick={fetchCourses}
+                      className="h-8 w-8 shrink-0 rounded-full hover:bg-gray-100 sm:hidden dark:hover:bg-[#2d2e30]"
+                      title="刷新课程"
+                      aria-label="刷新课程"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${coursesLoading ? 'animate-spin' : ''}`} />
+                    </Button>
                   </div>
                   <div className="flex min-w-0 flex-1 items-center gap-2 sm:justify-end">
                     <div className="group relative min-w-0 flex-1 sm:max-w-xs">
@@ -910,7 +921,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                       variant="ghost"
                       disabled={coursesLoading}
                       onClick={fetchCourses}
-                      className="h-8 w-8 shrink-0 rounded-full hover:bg-gray-100 dark:hover:bg-[#2d2e30]"
+                      className="hidden h-8 w-8 shrink-0 rounded-full hover:bg-gray-100 sm:flex dark:hover:bg-[#2d2e30]"
                       title="刷新课程"
                       aria-label="刷新课程"
                     >
@@ -918,13 +929,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                     </Button>
                   </div>
                 </CardHeader>
-                <div className="border-b border-border/50 px-4 py-2 sm:px-6 xl:hidden">
-                  {courseSearchQuery.trim() && (
+                {courseSearchQuery.trim() && (
+                  <div className="border-b border-border/50 px-4 py-2 sm:px-6 xl:hidden">
                     <span className="text-xs text-muted-foreground" role="status">
                       找到 {filteredCourses.length} 门课程
                     </span>
-                  )}
-                </div>
+                  </div>
+                )}
                   <CardContent className="p-0 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
                   {coursesLoading ? (
                     <div className="flex flex-col items-center justify-center p-12 text-gray-500 text-sm">
@@ -983,7 +994,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                           : null;
                         const isProcessing = course.processing === true;
                         const processingTaskLabel = course.processingTaskId
-                          ? `Task: ${course.processingTaskId.substring(0, 8)}...`
+                          ? course.processingTaskId.substring(0, 8)
                           : null;
                         const canStopProcessing = isProcessing && Boolean(course.processingTaskId);
                         const isStoppingProcessing = course.processingTaskId === stoppingTaskId;
@@ -1032,9 +1043,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                     )}
                                   </div>
                                   {processingTaskLabel ? (
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                      {processingTaskLabel}
-                                    </p>
+                                    <span className="mt-1 inline-flex w-fit items-center rounded-md bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                                      #{processingTaskLabel}
+                                    </span>
                                   ) : null}
                                   
                                   {jobRate !== null && jobProgressLabel && (
@@ -1057,13 +1068,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                   className={`h-8 rounded text-xs ${
                                     hasStudyIncrement
                                       ? 'gap-1 bg-primary/10 px-2 text-primary hover:bg-primary/15 hover:text-primary'
-                                      : 'w-8 px-0 text-muted-foreground hover:bg-muted hover:text-foreground'
+                                      : 'gap-1.5 px-2.5 text-muted-foreground hover:bg-muted hover:text-foreground'
                                   }`}
                                   title={hasStudyIncrement ? studyIncrementSummary : '设置学习目标'}
                                   aria-label={hasStudyIncrement ? `学习目标：${studyIncrementSummary}` : '设置学习目标'}
                                 >
                                   <SlidersHorizontal className="h-3.5 w-3.5" />
-                                  {hasStudyIncrement && studyIncrementSummary}
+                                  <span>学习目标</span>
+                                  {hasStudyIncrement && <span className="text-[10px]">{studyIncrementSummary}</span>}
                                 </Button>
                                 {canStopProcessing && (
                                   <Button
