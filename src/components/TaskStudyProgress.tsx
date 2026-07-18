@@ -38,25 +38,25 @@ function StudyMetric({ icon: Icon, label, metric, unit }: StudyMetricProps) {
 
   return (
     <div className="rounded-md border border-border/50 bg-card/60 p-2.5">
-      <div className="flex items-center justify-between gap-2 text-[11px]">
-        <span className="flex min-w-0 items-center gap-1.5 font-medium text-foreground">
+      <div className="flex min-w-0 flex-col gap-1 text-[11px]">
+        <span className="flex min-w-0 flex-1 items-center gap-1.5 font-medium text-foreground">
           <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
-          {label}
+          <span className="truncate">{label}</span>
         </span>
-        <span className="shrink-0 text-muted-foreground">
+        <span className="shrink-0 whitespace-nowrap text-muted-foreground">
           {STUDY_METRIC_STATUS_LABELS[metric.status]}
         </span>
       </div>
-      <div className="mt-2 flex items-baseline justify-between gap-2">
-        <span className="text-sm font-semibold tabular-nums text-foreground">
+      <div className="mt-2 flex flex-col items-start gap-1">
+        <span className="shrink-0 whitespace-nowrap text-sm font-semibold tabular-nums text-foreground">
           已 {formatDelta(increment, unit)}
         </span>
-        <span className="flex shrink-0 items-center gap-1 text-[10.5px] text-muted-foreground">
+        <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-[10.5px] text-muted-foreground">
           <Target className="h-3 w-3" />
           {formatDelta(targetIncrement, unit)}
         </span>
       </div>
-      <div className="mt-1 text-[10.5px] text-muted-foreground tabular-nums">
+      <div className="mt-1 whitespace-nowrap text-[10.5px] text-muted-foreground tabular-nums">
         当前 {metric.current}/{formatValue(metric.target, unit)}
       </div>
       {statusMessage && (
@@ -87,7 +87,7 @@ export function TaskStudyProgress({ courses }: TaskStudyProgressProps) {
             <p className="truncate text-[11px] font-medium text-foreground" title={course.courseName}>
               {course.courseName}
             </p>
-            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-3">
               <StudyMetric icon={Eye} label="学习次数" metric={course.visitCount} unit="次" />
               <StudyMetric icon={Clock3} label="视频观看时长" metric={course.videoStudyMinutes} unit="分钟" />
               <StudyMetric icon={FileText} label="阅读时长" metric={course.readMinutes} unit="分钟" />

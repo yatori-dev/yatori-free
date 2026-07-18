@@ -1069,7 +1069,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-2 justify-end w-full sm:w-auto self-stretch sm:self-auto">
+                              <div className="flex w-full items-center justify-end gap-2 self-stretch sm:w-52 sm:shrink-0 sm:self-auto">
                                 <Button
                                   variant="ghost"
                                   size="sm"
