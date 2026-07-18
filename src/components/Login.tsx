@@ -17,6 +17,8 @@ function openExternalUrl(url: string) {
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 
+const MAINLAND_MOBILE_PATTERN = /^1[3-9]\d{9}$/;
+
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [step, setStep] = useState<'account' | 'password'>('account');
   const [account, setAccount] = useState('');
@@ -65,6 +67,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
   const handleAccountChange = (value: string) => {
     setAccount(value);
+    setAccountError('');
 
     const trimmedAccount = value.trim();
     if (!trimmedAccount) {
@@ -86,6 +89,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     const trimmed = account.trim();
     if (!trimmed) {
       setAccountError('请输入您的学习通账号');
+      return;
+    }
+
+    if (!MAINLAND_MOBILE_PATTERN.test(trimmed)) {
+      setAccountError('请输入有效的11位手机号');
       return;
     }
     
@@ -184,6 +192,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                       type="text"
                       autoComplete="username"
                       inputMode="tel"
+                      maxLength={11}
                       placeholder="手机号"
                       value={account}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAccountChange(e.target.value)}
