@@ -15,7 +15,7 @@ export function getStudyMetricPercent(metric: StudyMetricProgress) {
 }
 
 export function getStudyProgressPercents(courses: CourseStudyProgress[]) {
-  return courses.flatMap((course) => [course.visitCount, course.videoStudyMinutes])
+  return courses.flatMap((course) => [course.visitCount, course.videoStudyMinutes, course.readMinutes])
     .map(getStudyMetricPercent)
     .filter((percent): percent is number => percent !== null);
 }

@@ -487,8 +487,8 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
                     (setting.studyIncrement.videoStudyMinutes ?? 0) > 0
                       ? `视频观看 +${setting.studyIncrement.videoStudyMinutes} 分钟`
                       : null,
-                    (setting.studyIncrement.readSeconds ?? 0) > 0
-                      ? `阅读 +${setting.studyIncrement.readSeconds} 秒`
+                    (setting.studyIncrement.readMinutes ?? 0) > 0
+                      ? `阅读 +${setting.studyIncrement.readMinutes} 分钟`
                       : null,
                   ].filter(Boolean).join(' · ');
                   return (

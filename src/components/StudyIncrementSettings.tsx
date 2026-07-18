@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AlertCircle, Clock3, Eye, LoaderCircle, Minus, Plus, SlidersHorizontal } from 'lucide-react';
+import { AlertCircle, BookOpen, Clock3, Eye, LoaderCircle, Minus, Plus, SlidersHorizontal } from 'lucide-react';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -134,7 +134,7 @@ export function StudyIncrementSettings({
     <StudyIncrementDialog
       key={course.key}
       course={course}
-      initialValue={values[course.key] ?? { visitCount: 0, videoStudyMinutes: 0, readSeconds: 0 }}
+      initialValue={values[course.key] ?? { visitCount: 0, videoStudyMinutes: 0, readMinutes: 0 }}
       studyStats={studyStats}
       statsLoaded={statsLoaded}
       loadingStats={loadingStats}
@@ -165,11 +165,11 @@ function StudyIncrementDialog({
 }: StudyIncrementDialogProps) {
   const initialVisitCount = initialValue.visitCount ?? 0;
   const initialVideoStudyMinutes = initialValue.videoStudyMinutes ?? 0;
-  const initialReadSeconds = initialValue.readSeconds ?? 0;
+  const initialReadMinutes = initialValue.readMinutes ?? 0;
   const [draft, setDraft] = useState({
     visitCount: initialVisitCount === 0 ? '' : String(initialVisitCount),
     videoStudyMinutes: initialVideoStudyMinutes === 0 ? '' : String(initialVideoStudyMinutes),
-    readSeconds: initialReadSeconds === 0 ? '' : String(initialReadSeconds),
+    readMinutes: initialReadMinutes === 0 ? '' : String(initialReadMinutes),
   });
 
   const updateDraft = (field: keyof StudyIncrement, value: string) => {
@@ -180,7 +180,7 @@ function StudyIncrementDialog({
     onSave(course.key, {
       visitCount: draft.visitCount === '' ? 0 : Number(draft.visitCount),
       videoStudyMinutes: draft.videoStudyMinutes === '' ? 0 : Number(draft.videoStudyMinutes),
-      readSeconds: draft.readSeconds === '' ? 0 : Number(draft.readSeconds),
+      readMinutes: draft.readMinutes === '' ? 0 : Number(draft.readMinutes),
     });
     onOpenChange(false);
   };
@@ -206,7 +206,7 @@ function StudyIncrementDialog({
                 正在读取该课程学习数据
               </div>
             ) : studyStats?.available ? (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="space-y-1">
                   <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Eye className="h-3.5 w-3.5" />
@@ -222,7 +222,16 @@ function StudyIncrementDialog({
                     当前视频观看时长
                   </span>
                   <div className="text-lg font-semibold tabular-nums text-foreground">
-                    {studyStats.studyMinutes ?? '--'}<span className="ml-1 text-xs font-normal text-muted-foreground">分钟</span>
+                    {studyStats.videoStudyMinutes ?? '--'}<span className="ml-1 text-xs font-normal text-muted-foreground">分钟</span>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <BookOpen className="h-3.5 w-3.5" />
+                    当前阅读时长
+                  </span>
+                  <div className="text-lg font-semibold tabular-nums text-foreground">
+                    {studyStats.readMinutes ?? '--'}<span className="ml-1 text-xs font-normal text-muted-foreground">分钟</span>
                   </div>
                 </div>
               </div>
@@ -261,12 +270,12 @@ function StudyIncrementDialog({
           <StepperField
             id={`study-read-${course.key}`}
             label="增加阅读时长："
-            value={draft.readSeconds}
-            maximum={86400}
-            step={60}
-            presets={[60, 300, 600, 1800]}
-            unit="秒"
-            onChange={(value) => updateDraft('readSeconds', value)}
+            value={draft.readMinutes}
+            maximum={4000}
+            step={10}
+            presets={[30, 60, 120, 300]}
+            unit="分钟"
+            onChange={(value) => updateDraft('readMinutes', value)}
           />
         </div>
 

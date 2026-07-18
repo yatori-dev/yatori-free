@@ -1,4 +1,4 @@
-import { BookOpen, Clock3, Eye, Target } from 'lucide-react';
+import { BookOpen, Clock3, Eye, FileText, Target } from 'lucide-react';
 import type { CourseStudyProgress, StudyMetricProgress } from '@/lib/api';
 
 interface TaskStudyProgressProps {
@@ -87,9 +87,10 @@ export function TaskStudyProgress({ courses }: TaskStudyProgressProps) {
             <p className="truncate text-[11px] font-medium text-foreground" title={course.courseName}>
               {course.courseName}
             </p>
-            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
               <StudyMetric icon={Eye} label="学习次数" metric={course.visitCount} unit="次" />
               <StudyMetric icon={Clock3} label="视频观看时长" metric={course.videoStudyMinutes} unit="分钟" />
+              <StudyMetric icon={FileText} label="阅读时长" metric={course.readMinutes} unit="分钟" />
             </div>
           </div>
         ))}

@@ -42,7 +42,7 @@ export interface CourseSetting {
 export interface StudyIncrement {
   visitCount?: number;
   videoStudyMinutes?: number;
-  readSeconds?: number;
+  readMinutes?: number;
 }
 
 export type TaskStatus =
@@ -139,7 +139,8 @@ export interface StudyStats {
   fetchedAt: string;
   message: string;
   visitCount?: number;
-  studyMinutes?: number;
+  videoStudyMinutes?: number;
+  readMinutes?: number;
 }
 
 export interface CourseDetails {
@@ -237,6 +238,7 @@ export interface CourseStudyProgress {
   courseName: string;
   visitCount: StudyMetricProgress;
   videoStudyMinutes: StudyMetricProgress;
+  readMinutes: StudyMetricProgress;
 }
 
 export interface TaskProgress {
