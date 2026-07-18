@@ -77,7 +77,7 @@ function StepperField({
             <Label id={`${id}-label`} htmlFor={id} className="text-sm font-semibold text-foreground">
               {label}
             </Label>
-            <p id={`${id}-current`} className="mt-1 flex items-baseline gap-1.5 text-sm font-medium text-foreground">
+            <p id={`${id}-current`} className="mt-1 flex shrink-0 items-baseline gap-1.5 whitespace-nowrap text-sm font-medium text-foreground">
               <span className="text-muted-foreground">当前累计</span>
               <span className="text-base font-semibold tabular-nums text-primary">
                 {currentValue ?? '--'}
@@ -231,7 +231,7 @@ function StudyIncrementDialog({
 
   return (
     <Dialog open onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] max-w-[calc(100%-2rem)] gap-0 overflow-hidden p-0 sm:max-w-xl">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] max-w-[calc(100%-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden p-0 sm:max-w-xl">
         <DialogHeader className="border-b border-border/50 px-4 py-4 pr-12 sm:px-5">
           <DialogTitle className="flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 text-primary" />
@@ -243,7 +243,7 @@ function StudyIncrementDialog({
         </DialogHeader>
 
         <form onSubmit={save} className="contents">
-          <div className="space-y-3 overflow-y-auto px-4 py-4 sm:px-5">
+          <div className="min-h-0 min-w-0 space-y-3 overflow-x-hidden overflow-y-auto px-4 py-4 sm:px-5">
             {!courseDetailsReady ? (
               <div className="flex min-h-56 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/70 bg-muted/20 p-6 text-center">
                 {courseDetailsLoading ? (
@@ -313,7 +313,7 @@ function StudyIncrementDialog({
             )}
           </div>
 
-          <div className="flex justify-end gap-2 border-t border-border/50 bg-muted/30 p-3 sm:px-5">
+          <div className="flex shrink-0 justify-end gap-2 border-t border-border/50 bg-muted/30 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-5">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
             <Button type="submit" disabled={!courseDetailsReady}>保存目标</Button>
           </div>
