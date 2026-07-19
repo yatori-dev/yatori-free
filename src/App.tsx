@@ -13,7 +13,7 @@ const LOGOUT_SUPPRESSION_KEY = 'yatori-auth-logout-suppressed';
 function AuthRestoreScreen() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] px-4 py-8 dark:bg-[#121314]" aria-busy="true">
-      <Card className="w-full max-w-[450px] overflow-hidden rounded-xl border border-[#E0E0E0] bg-white shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:border-[#333537] dark:bg-[#1f2021] md:max-w-[min(90vw,1440px)]">
+      <Card className="w-full max-w-[450px] overflow-hidden rounded-xl border border-[#E0E0E0] bg-white shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:border-[#333537] dark:bg-[#1f2021] md:max-w-[min(65.6vw,1024px)]">
         <div className="google-accent-bar" aria-hidden="true">
           <div></div>
           <div></div>

@@ -154,7 +154,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8F9FA] px-4 py-8 dark:bg-[#121314] transition-colors duration-300">
-      <Card className="w-full max-w-[450px] overflow-hidden rounded-xl border border-[#E0E0E0] bg-white shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:border-[#333537] dark:bg-[#1f2021] md:max-w-[min(90vw,1440px)]">
+      <Card className="w-full max-w-[450px] overflow-hidden rounded-xl border border-[#E0E0E0] bg-white shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:border-[#333537] dark:bg-[#1f2021] md:max-w-[min(65.6vw,1024px)]">
         {/* Google Accent Bar */}
         <div className="google-accent-bar">
           <div></div>
@@ -163,7 +163,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           <div></div>
         </div>
 
-        <CardContent className="grid p-0 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <CardContent className="grid p-0 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
           <QRCodeLogin onLoginSuccess={completeLogin} />
           <div className="relative flex min-w-0 flex-col items-center p-8 md:min-h-[516px] md:justify-center md:px-12 md:py-10">
           {/* Google Colored Logo */}
