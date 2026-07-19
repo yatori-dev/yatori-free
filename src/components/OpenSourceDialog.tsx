@@ -35,6 +35,12 @@ const OPEN_SOURCE_PROJECTS: OpenSourceProject[] = [
     description: '学习通签到协议参考',
     license: 'MIT',
     url: 'https://github.com/qintaiyang/PassChaoxing',
+  },
+  {
+    name: 'CxKitty',
+    description: '学习通扫码登录协议参考',
+    license: 'GPL-3.0',
+    url: 'https://github.com/MMitsuha/CxKitty',
   }
 ];
 
