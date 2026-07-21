@@ -49,8 +49,8 @@
 
 1. 改 `src/lib/api.ts`
 2. 改调用方类型和字段读取
-3. 跑 `npm run build`
-4. 跑 `npm run lint`
+3. 跑 `pnpm run build`
+4. 跑 `pnpm run lint`
 
 ## 8. 输出要求
 
