@@ -1,26 +1,34 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output and tool caches
+dist/
+dist-ssr/
+.wrangler/
+.playwright-mcp/
+.tmp/
+*.local
+
 # Logs
-logs
+logs/
 *.log
 pnpm-debug.log*
 
-node_modules
-dist
-dist-ssr
-.wrangler
-*.local
+# Local Codex and project instructions
+.codex/
+AGENTS.md
+*.code-workspace
 
-# Editor directories and files
+# Editor settings
 .vscode/*
-.playwright-mcp/
-.codex/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-*.code-workspace
-AGENTS.md
-.tmp/
+
+# OS files
+.DS_Store
