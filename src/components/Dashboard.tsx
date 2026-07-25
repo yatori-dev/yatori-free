@@ -283,6 +283,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   // Selection and Expandable Course Detail States
   const [selectedCourses, setSelectedCourses] = useState<Set<string>>(new Set());
   const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
+  const [fullyExpandedCourseOutlines, setFullyExpandedCourseOutlines] = useState<Set<string>>(new Set());
   const [courseDetailsMap, setCourseDetailsMap] = useState<Record<string, CourseDetails>>({});
   const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>({});
   
@@ -481,6 +482,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   };
 
   const toggleExpandCourse = (courseKey: string) => {
+    if (expandedCourses.has(courseKey)) {
+      setFullyExpandedCourseOutlines((previous) => {
+        const next = new Set(previous);
+        next.delete(courseKey);
+        return next;
+      });
+    }
+
     setExpandedCourses(prev => {
       const next = new Set(prev);
       if (next.has(courseKey)) {
@@ -492,6 +501,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         if (!existingDetails && !loadingDetails[courseKey]) {
           void loadCourseDetail(courseKey);
         }
+      }
+      return next;
+    });
+  };
+
+  const toggleFullCourseOutline = (courseKey: string) => {
+    setFullyExpandedCourseOutlines((previous) => {
+      const next = new Set(previous);
+      if (next.has(courseKey)) {
+        next.delete(courseKey);
+      } else {
+        next.add(courseKey);
       }
       return next;
     });
@@ -785,9 +806,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           onTabChange={handleTabChange}
         />
         <div className="flex min-h-0 min-w-0 flex-col">
-          <header className="sticky top-0 z-40 flex min-h-16 items-center justify-between gap-2 border-b border-border bg-card px-3 py-2.5 shadow-sm sm:px-6 lg:px-8">
-            <div className="flex min-w-0 items-center lg:hidden">
-              <div className="inline-flex min-w-0 items-end font-semibold leading-none tracking-tight" aria-label={`Yatori v${appVersion}`}>
+          <header className="sticky top-0 z-40 flex min-h-14 items-center justify-between gap-1.5 border-b border-border bg-card px-2.5 py-1.5 shadow-sm sm:min-h-16 sm:gap-2 sm:px-6 sm:py-2.5 lg:px-8">
+            <div className="flex min-w-0 shrink-0 items-center lg:hidden">
+              <div className="inline-flex min-w-0 items-center gap-1.5 font-semibold leading-none tracking-tight" aria-label={`Yatori 学习通服务 v${appVersion}`}>
                 <span className="text-xl" aria-label="Yatori">
                   <span className="text-[var(--google-blue)]">Y</span>
                   <span className="text-[var(--google-red)]">a</span>
@@ -796,18 +817,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                   <span className="text-[var(--google-green)]">r</span>
                   <span className="text-[var(--google-red)]">i</span>
                 </span>
-                <span className="ml-1 translate-y-0.5 text-[10px] font-medium tabular-nums text-muted-foreground">v{appVersion}</span>
+                <span className="flex flex-col gap-0.5 whitespace-nowrap">
+                  <span className="text-[10px] font-semibold text-foreground/80">学习通服务</span>
+                  <span className="text-[10px] font-medium tabular-nums text-muted-foreground">v{appVersion}</span>
+                </span>
               </div>
             </div>
             <h1 className="hidden min-w-0 truncate font-heading text-lg font-semibold lg:block">{currentViewTitle}</h1>
 
-            <div className="flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-4">
+            <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-4">
               <OpenSourceDialog />
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={toggleDarkMode}
-                className="h-11 w-11 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground sm:h-9 sm:w-9"
+                className="h-8 w-8 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground sm:h-9 sm:w-9"
                 aria-label={isDark ? '切换到浅色主题' : '切换到深色主题'}
               >
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -833,28 +857,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 />
               </TaskStatusDrawer>
 
-              <div className="flex min-w-0 max-w-[172px] items-center gap-1.5 rounded-md border border-border bg-muted/40 py-1 pl-1.5 pr-1.5 sm:max-w-none sm:gap-3 sm:pl-2 sm:pr-3">
+              <div
+                className="flex min-w-0 max-w-[154px] items-center gap-1 rounded-md border border-border bg-muted/40 py-0.5 pl-1 pr-1 sm:max-w-none sm:gap-3 sm:py-1 sm:pl-2 sm:pr-3"
+                aria-label={`当前用户 ${session.displayName}`}
+              >
             {session.avatarUrl ? (
               <img 
                 src={session.avatarUrl} 
                 alt="头像" 
-                className="h-7 w-7 rounded-full object-cover ring-1 ring-border"
+                className="h-6 w-6 rounded-full object-cover ring-1 ring-border sm:h-7 sm:w-7"
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground sm:h-7 sm:w-7 sm:text-xs">
                 {session.displayName.substring(0, 1).toUpperCase()}
               </div>
             )}
-            <div className="flex min-w-0 flex-col text-left">
-              <span className="max-w-[76px] truncate text-xs font-semibold sm:max-w-[100px]">{session.displayName}</span>
+            <div className="hidden min-w-0 flex-col text-left min-[360px]:flex">
+              <span className="max-w-[68px] truncate text-[11px] font-bold sm:max-w-[100px] sm:text-xs sm:font-semibold">{session.displayName}</span>
               <span className="hidden max-w-[100px] truncate text-xs text-muted-foreground sm:block">{session.user.username}</span>
             </div>
             <Button
               size="icon"
               variant="ghost"
               onClick={onLogout}
-              className="h-11 w-11 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground sm:ml-1 sm:h-6 sm:w-6"
+              className="h-8 w-8 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground sm:ml-1 sm:h-6 sm:w-6"
               title="退出登录"
               aria-label="退出登录"
             >
@@ -869,15 +896,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             <div></div>
             <div></div>
           </div>
-          <main id="dashboard-main" className="min-h-0 flex-1 pb-20 lg:overflow-y-auto lg:pb-0">
-            <div className="mx-auto w-full min-w-0 px-4 py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
+          <main id="dashboard-main" className="min-h-0 flex-1 pb-18 lg:overflow-y-auto lg:pb-0">
+            <div className="mx-auto w-full min-w-0 px-0 py-0 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
               <div className="min-w-0">
             {/* Courses list tab content */}
             <TabsContent value="courses" className="outline-none m-0 lg:flex-1 lg:min-h-0">
-              <Card className="bg-card shadow-sm border-none lg:flex lg:h-full lg:min-h-0 lg:flex-col">
-                <CardHeader className="flex flex-col gap-2 border-b border-border/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4 sm:space-y-0">
-                  <div className="flex items-center justify-between sm:block">
-                    <CardTitle className="text-base font-semibold">课程列表</CardTitle>
+              <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm sm:ring-1 lg:flex lg:h-full lg:min-h-0 lg:flex-col">
+                <CardHeader className="flex flex-row items-center gap-2 rounded-none border-b border-border/50 px-3 py-2.5 sm:justify-between sm:px-6 sm:py-4 sm:space-y-0">
+                  <div className="flex shrink-0 items-center gap-1 sm:block">
+                    <CardTitle className="whitespace-nowrap text-sm font-semibold sm:text-base">课程列表</CardTitle>
                     <Button
                       size="icon"
                       variant="ghost"
@@ -912,7 +939,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                         }}
                         placeholder="搜索课程名称"
                         aria-label="搜索课程名称"
-                        className="course-search-input h-9 rounded-lg border-border/80 bg-background/90 pl-10 pr-10 text-sm shadow-sm transition-all duration-200 placeholder:text-muted-foreground/80 hover:border-primary/40 focus-visible:border-primary/60 focus-visible:ring-4 focus-visible:ring-primary/10"
+                        className="course-search-input h-8 rounded-md border-border/80 bg-background/90 pl-9 pr-9 text-[13px] shadow-none transition-all duration-200 placeholder:text-muted-foreground/80 hover:border-primary/40 focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-primary/10 sm:h-9 sm:rounded-lg sm:pl-10 sm:pr-10 sm:text-sm sm:shadow-sm sm:focus-visible:ring-4"
                       />
                       {courseSearch && (
                         <button
@@ -976,8 +1003,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                     <div className="divide-y divide-[#e1e3e4] dark:divide-[#333537]">
                       {/* Select All Action Row */}
                       {selectableCourses.length > 0 && (
-                        <div className="px-5 py-3.5 bg-gray-50/30 dark:bg-[#232425]/30 flex items-center justify-between gap-4 border-b border-[#e1e3e4] dark:border-[#333537] select-none">
-                          <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-between gap-2 border-b border-[#e1e3e4] bg-gray-50/30 px-3 py-2.5 select-none dark:border-[#333537] dark:bg-[#232425]/30 sm:gap-4 sm:px-5 sm:py-3.5">
+                          <div className="flex items-center gap-2.5 sm:gap-4">
                             <CourseCheckbox
                               checked={isAllSelected}
                               indeterminate={isSomeSelected && !isAllSelected}
@@ -991,7 +1018,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                               {isAllSelected ? '取消全选' : '全选所有课程'}
                             </span>
                           </div>
-                          <div className="text-xs text-gray-400 dark:text-gray-500">
+                          <div className="whitespace-nowrap text-[11px] text-gray-400 dark:text-gray-500 sm:text-xs">
                             已选择 {selectedCourses.size} / {selectableCourses.length} 门课程
                           </div>
                         </div>
@@ -1019,6 +1046,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                         const blockedPointCount = course.blockedPointCount ?? 0;
 
                         const isExpanded = expandedCourses.has(course.key);
+                        const isCourseOutlineFullyExpanded = fullyExpandedCourseOutlines.has(course.key);
                         const isSelected = selectedCourses.has(course.key);
                         const studyIncrement = studyIncrements[course.key] ?? DEFAULT_STUDY_INCREMENT;
                         const studyVisitCount = studyIncrement.visitCount ?? 0;
@@ -1035,12 +1063,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                         return (
                           <div key={course.key} className="border-b border-[#e1e3e4] dark:border-[#333537] last:border-0">
                             {/* Course Row */}
-                            <div className={`p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors ${
+                            <div className={`grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-2 px-3 py-2.5 transition-colors sm:grid-cols-[auto_minmax(0,1fr)_13rem] sm:gap-x-4 sm:p-5 ${
                               isSelected
                                 ? 'bg-[#e8f0fe]/40 dark:bg-[#adc6ff]/10 hover:bg-[#e8f0fe]/60 dark:hover:bg-[#adc6ff]/15'
                                 : 'hover:bg-gray-50/50 dark:hover:bg-[#232425]'
                             }`}>
-                              <div className="flex gap-4 items-center flex-1 min-w-0 w-full">
+                              <div className="contents">
                                 {/* Course Selection Checkbox */}
                                 <CourseCheckbox
                                   checked={isSelected}
@@ -1051,7 +1079,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                 
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <h3 className="text-sm font-semibold truncate text-[#191c1d] dark:text-[#e3e3e3]">{course.courseName}</h3>
+                                    <h3 className="truncate text-[13px] font-semibold text-[#191c1d] dark:text-[#e3e3e3] sm:text-sm">{course.courseName}</h3>
                                     {blockedPointCount > 0 && (
                                       <Badge className="bg-[#f3f4f6] hover:bg-[#f3f4f6] text-[#5f6368] dark:bg-[#2a2b2d] dark:hover:bg-[#2a2b2d] dark:text-[#bdc1c6] border-none">
                                         含未开放任务点 {blockedPointCount}
@@ -1070,9 +1098,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                   ) : null}
                                   
                                   {jobRate !== null && jobProgressLabel && (
-                                    <div className="grid grid-cols-[minmax(0,1fr)_8rem] items-center gap-3 mt-2 w-full max-w-lg">
+                                    <div className="mt-1.5 grid w-full max-w-lg grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:mt-2 sm:grid-cols-[minmax(0,1fr)_8rem] sm:gap-3">
                                       <Progress value={jobRate} className="h-1.5 bg-gray-100 dark:bg-gray-700" />
-                                      <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap tabular-nums">
+                                      <span className="whitespace-nowrap text-[11px] font-semibold tabular-nums text-gray-600 dark:text-gray-300 sm:text-xs">
                                         {jobProgressLabel}
                                       </span>
                                     </div>
@@ -1080,23 +1108,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                 </div>
                               </div>
 
-                              <div className="flex w-full flex-wrap items-center justify-end gap-2 self-stretch sm:w-52 sm:flex-nowrap sm:shrink-0 sm:self-auto">
+                              <div className="flex items-center justify-end gap-1 sm:w-52 sm:flex-nowrap sm:gap-2">
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   disabled={isProcessing}
                                   onClick={() => openStudyIncrementSettings(course.key)}
-                                  className={`h-11 rounded text-xs sm:h-8 ${
+                                  className={`h-8 w-8 rounded px-0 text-[11px] sm:w-auto sm:text-xs ${
                                     hasStudyIncrement
-                                      ? 'gap-1 bg-primary/10 px-2 text-primary hover:bg-primary/15 hover:text-primary'
-                                      : 'gap-1.5 px-2.5 text-muted-foreground hover:bg-muted hover:text-foreground'
+                                      ? 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary sm:gap-1 sm:px-2'
+                                      : 'text-muted-foreground hover:bg-muted hover:text-foreground sm:gap-1.5 sm:px-2.5'
                                   }`}
                                   title={hasStudyIncrement ? studyIncrementSummary : '设置学习目标'}
                                   aria-label={hasStudyIncrement ? `学习目标：${studyIncrementSummary}` : '设置学习目标'}
                                 >
                                   <SlidersHorizontal className="h-3.5 w-3.5" />
-                                  <span>学习目标</span>
-                                  {hasStudyIncrement && <span className="text-[10px]">{studyIncrementSummary}</span>}
+                                  <span className="sr-only sm:not-sr-only">学习目标</span>
+                                  {hasStudyIncrement && <span className="hidden text-[10px] lg:inline">{studyIncrementSummary}</span>}
                                 </Button>
                                 {canStopProcessing && (
                                   <Button
@@ -1104,29 +1132,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                     size="sm"
                                     disabled={isStoppingProcessing}
                                     onClick={() => void handleStopTask(course.processingTaskId as string)}
-                                  className="h-11 gap-1 rounded border-destructive/30 text-xs text-destructive hover:border-destructive hover:bg-destructive/5 sm:h-8"
+                                  className="h-8 w-8 gap-1 rounded border-destructive/30 px-0 text-[11px] text-destructive hover:border-destructive hover:bg-destructive/5 sm:w-auto sm:px-2.5 sm:text-xs"
+                                  aria-label={isStoppingProcessing ? '停止任务中' : '停止任务'}
                                   >
                                     {isStoppingProcessing ? (
                                       <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                                     ) : (
                                       <Square className="w-3.5 h-3.5 fill-current" />
                                     )}
-                                    {isStoppingProcessing ? '停止中' : '停止'}
+                                    <span className="sr-only sm:not-sr-only">{isStoppingProcessing ? '停止中' : '停止'}</span>
                                   </Button>
                                 )}
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => toggleExpandCourse(course.key)}
-                                  className="h-11 gap-1 rounded border border-[#c2c6d5] text-xs text-[#4285F4] hover:bg-gray-50/50 dark:border-[#444748] dark:text-[#adc6ff] dark:hover:bg-[#2d2e30] sm:h-8"
+                                  className="h-8 w-8 gap-1 rounded border border-[#c2c6d5] px-0 text-[11px] text-[#4285F4] hover:bg-gray-50/50 dark:border-[#444748] dark:text-[#adc6ff] dark:hover:bg-[#2d2e30] sm:w-auto sm:px-2 sm:text-xs"
+                                  aria-label={isExpanded ? '收起章节' : '查看章节'}
                                 >
                                   {isExpanded ? (
                                     <>
-                                      收起章节 <ChevronUp className="w-3.5 h-3.5" />
+                                      <span className="sr-only sm:not-sr-only">收起章节</span> <ChevronUp className="w-3.5 h-3.5" />
                                     </>
                                   ) : (
                                     <>
-                                      查看章节 <ChevronDown className="w-3.5 h-3.5" />
+                                      <span className="sr-only sm:not-sr-only">查看章节</span> <ChevronDown className="w-3.5 h-3.5" />
                                     </>
                                   )}
                                 </Button>
@@ -1135,7 +1165,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
                             {/* Expanded Chapters Section */}
                             {isExpanded && (
-                              <div className="px-5 pb-5 pl-12 bg-gray-50/40 dark:bg-[#1a1b1c]/20 border-t border-gray-100/50 dark:border-[#333537]/50 pt-4">
+                              <div className="border-t border-gray-100/50 bg-gray-50/40 px-3 pb-3 pl-11 pt-3 dark:border-[#333537]/50 dark:bg-[#1a1b1c]/20 sm:px-5 sm:pb-5 sm:pl-12 sm:pt-4">
                                 {loadingDetails[course.key] ? (
                                   <div className="flex items-center gap-2 py-4 text-xs text-gray-500">
                                     <svg className="google-spinner h-4 w-4" viewBox="0 0 50 50">
@@ -1153,10 +1183,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
                                       return (
                                         <>
-                                          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                                            章节大纲 ({chaptersWithTasks.length})
-                                          </div>
-                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:max-h-[300px] md:overflow-y-auto pr-1">
+                                          <div className={isCourseOutlineFullyExpanded ? undefined : 'max-sm:max-h-64 max-sm:overflow-hidden'}>
+                                            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                                              章节大纲 ({chaptersWithTasks.length})
+                                            </div>
+                                            <div className="grid grid-cols-1 gap-2 pr-1 md:max-h-[300px] md:grid-cols-2 md:overflow-y-auto">
                                           {chaptersWithTasks.map(({ chapter: chap, taskMeta }) => {
                                             const isChapterDone = !taskMeta.isLocked && taskMeta.total > 0 && taskMeta.finished === taskMeta.total;
                                             const chapterDocuments = getChapterDocuments(chap, courseDetails.documents);
@@ -1229,7 +1260,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                           {chaptersWithTasks.length === 0 && (
                                             <div className="text-gray-500 text-xs py-4 text-center col-span-2">该课程没有任务点</div>
                                           )}
+                                            </div>
                                           </div>
+                                          {chaptersWithTasks.length > 3 && (
+                                            <Button
+                                              type="button"
+                                              variant="ghost"
+                                              size="sm"
+                                              className="mt-2 h-8 w-full gap-1 text-xs text-primary sm:hidden"
+                                              onClick={() => toggleFullCourseOutline(course.key)}
+                                              aria-expanded={isCourseOutlineFullyExpanded}
+                                            >
+                                              {isCourseOutlineFullyExpanded ? (
+                                                <>
+                                                  收起章节列表 <ChevronUp className="h-3.5 w-3.5" />
+                                                </>
+                                              ) : (
+                                                <>
+                                                  显示全部 {chaptersWithTasks.length} 个章节 <ChevronDown className="h-3.5 w-3.5" />
+                                                </>
+                                              )}
+                                            </Button>
+                                          )}
                                         </>
                                       );
                                     })()}
@@ -1251,7 +1303,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             </TabsContent>
 
             {/* Auto Sign-In Monitor tab content */}
-            <TabsContent value="sign" className="outline-none m-0">
+            <TabsContent value="sign" className="m-0 p-3 outline-none sm:p-0">
               {account?.id && (
                 <SignMonitor 
                   accountId={account.id} 
@@ -1263,12 +1315,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
             {/* Account Settings Configuration tab content */}
             <TabsContent value="settings" className="outline-none m-0">
-              <Card className="bg-card shadow-sm border-none">
-                <CardHeader className="py-4 px-4 sm:px-6 border-b border-border/50">
-                  <CardTitle className="text-base font-semibold">提交设置</CardTitle>
+              <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm sm:ring-1">
+                <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
+                  <CardTitle className="text-sm font-semibold sm:text-base">提交设置</CardTitle>
                 </CardHeader>
-                <CardContent className="p-4 sm:p-6 text-sm">
-                  <div className="space-y-6">
+                <CardContent className="p-3 text-sm sm:p-6">
+                  <div className="space-y-4 sm:space-y-6">
                     <section className="space-y-2" aria-labelledby="notification-settings-heading">
                       <h2 id="notification-settings-heading" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         通知
@@ -1276,15 +1328,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                       <EmailNotificationSettings onUnauthorized={onLogout} />
                     </section>
 
-                    <section className="space-y-4" aria-labelledby="task-behavior-settings-heading">
+                    <section className="space-y-3 sm:space-y-4" aria-labelledby="task-behavior-settings-heading">
                       <div>
                         <h2 id="task-behavior-settings-heading" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                           任务行为
                         </h2>
                       </div>
 
-                    <div className="flex items-center justify-between p-4 sm:p-5 border border-border/50 rounded-lg bg-muted/25 transition-all">
-                      <div className="space-y-1.5 pr-4 min-w-0">
+                    <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
+                      <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
                         <Label htmlFor="hideEmptyTaskCourses" className="text-sm font-semibold cursor-pointer block text-[#191c1d] dark:text-[#e3e3e3]">
                           隐藏无任务点课程
                         </Label>
@@ -1302,8 +1354,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                     </div>
 
                     {/* 章节测试 */}
-                    <div className="flex items-center justify-between p-4 sm:p-5 border border-border/50 rounded-lg bg-muted/25 transition-all">
-                      <div className="space-y-1.5 pr-4 min-w-0">
+                    <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
+                      <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
                         <Label htmlFor="doChapterTest" className="text-sm font-semibold cursor-pointer block text-[#191c1d] dark:text-[#e3e3e3]">
                           章节测试自动答题
                         </Label>
@@ -1319,9 +1371,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 gap-3 sm:gap-6 xl:grid-cols-2">
                       {/* 课程作业 */}
-                      <div className="space-y-4 rounded-lg border border-border/50 bg-muted/25 p-4 sm:p-5">
+                      <div className="space-y-3 rounded-md border border-border/50 bg-muted/25 p-3 sm:space-y-4 sm:rounded-lg sm:p-5">
                         <div className="flex items-center justify-between gap-3">
                           <div className="space-y-1">
                             <Label htmlFor="doWork" className="text-sm font-semibold cursor-pointer text-[#191c1d] dark:text-[#e3e3e3]">课程作业自动答题</Label>
@@ -1335,12 +1387,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                           />
                         </div>
 
-                        {doWork && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {doWork && <div className="grid grid-cols-2 gap-2 sm:gap-4 md:grid-cols-2">
                           <button
                             type="button"
                             disabled={!doWork}
                             onClick={() => updateWorkAutoSubmit(1)}
-                            className={`rounded-lg border px-4 py-3 text-left transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-between shadow-sm ${
+                            className={`flex min-h-11 items-center justify-between rounded-md border px-3 py-2 text-left shadow-sm transition-all duration-200 disabled:cursor-not-allowed sm:rounded-lg sm:px-4 sm:py-3 ${
                               doWork && workAutoSubmit === 1
                                 ? 'border-[#1a73e8] bg-[#e8f0fe]/30 dark:border-[#8ab4f8] dark:bg-[#8ab4f8]/10'
                                 : 'border-[#e1e3e4] bg-white hover:border-[#c2c6d5] dark:border-[#333537] dark:bg-[#1f2021] dark:hover:border-[#5f6368]'
@@ -1366,7 +1418,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                             type="button"
                             disabled={!doWork}
                             onClick={() => updateWorkAutoSubmit(0)}
-                            className={`rounded-lg border px-4 py-3 text-left transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-between shadow-sm ${
+                            className={`flex min-h-11 items-center justify-between rounded-md border px-3 py-2 text-left shadow-sm transition-all duration-200 disabled:cursor-not-allowed sm:rounded-lg sm:px-4 sm:py-3 ${
                               doWork && workAutoSubmit === 0
                                 ? 'border-[#1a73e8] bg-[#e8f0fe]/30 dark:border-[#8ab4f8] dark:bg-[#8ab4f8]/10'
                                 : 'border-[#e1e3e4] bg-white hover:border-[#c2c6d5] dark:border-[#333537] dark:bg-[#1f2021] dark:hover:border-[#5f6368]'
@@ -1391,7 +1443,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                       </div>
 
                       {/* 考试自动答题 */}
-                      <div className="space-y-4 rounded-lg border border-border/50 bg-muted/25 p-4 sm:p-5">
+                      <div className="space-y-3 rounded-md border border-border/50 bg-muted/25 p-3 sm:space-y-4 sm:rounded-lg sm:p-5">
                         <div className="flex items-center justify-between gap-3">
                           <div className="space-y-1">
                             <Label htmlFor="doExam" className="text-sm font-semibold cursor-pointer text-[#191c1d] dark:text-[#e3e3e3]">考试自动答题</Label>
@@ -1405,12 +1457,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                           />
                         </div>
 
-                        {doExam && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {doExam && <div className="grid grid-cols-2 gap-2 sm:gap-4 md:grid-cols-2">
                           <button
                             type="button"
                             disabled={!doExam}
                             onClick={() => updateExamAutoSubmit(1)}
-                            className={`rounded-lg border px-4 py-3 text-left transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-between shadow-sm ${
+                            className={`flex min-h-11 items-center justify-between rounded-md border px-3 py-2 text-left shadow-sm transition-all duration-200 disabled:cursor-not-allowed sm:rounded-lg sm:px-4 sm:py-3 ${
                               doExam && examAutoSubmit === 1
                                 ? 'border-[#1a73e8] bg-[#e8f0fe]/30 dark:border-[#8ab4f8] dark:bg-[#8ab4f8]/10'
                                 : 'border-[#e1e3e4] bg-white hover:border-[#c2c6d5] dark:border-[#333537] dark:bg-[#1f2021] dark:hover:border-[#5f6368]'
@@ -1436,7 +1488,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                             type="button"
                             disabled={!doExam}
                             onClick={() => updateExamAutoSubmit(0)}
-                            className={`rounded-lg border px-4 py-3 text-left transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-between shadow-sm ${
+                            className={`flex min-h-11 items-center justify-between rounded-md border px-3 py-2 text-left shadow-sm transition-all duration-200 disabled:cursor-not-allowed sm:rounded-lg sm:px-4 sm:py-3 ${
                               doExam && examAutoSubmit === 0
                                 ? 'border-[#1a73e8] bg-[#e8f0fe]/30 dark:border-[#8ab4f8] dark:bg-[#8ab4f8]/10'
                                 : 'border-[#e1e3e4] bg-white hover:border-[#c2c6d5] dark:border-[#333537] dark:bg-[#1f2021] dark:hover:border-[#5f6368]'
@@ -1467,9 +1519,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             </TabsContent>
 
             <TabsContent value="tasks" className="m-0 outline-none lg:hidden">
-              <Card className="min-w-0 overflow-hidden border-none bg-card shadow-sm">
-                <CardHeader className="border-b border-border/50 px-4 py-4 sm:px-6">
-                  <CardTitle className="text-base font-semibold">任务</CardTitle>
+              <Card className="min-w-0 overflow-hidden rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm sm:ring-1">
+                <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
+                  <CardTitle className="text-sm font-semibold sm:text-base">任务</CardTitle>
                   <CardDescription className="text-xs">查看任务运行状态与进度</CardDescription>
                 </CardHeader>
                 <CardContent className="flex min-h-0 min-w-0 flex-col p-0">
@@ -1497,14 +1549,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
       {/* 紧凑操作栏：手机单行排列，较宽窗口使用桌面胶囊。 */}
       {selectedCourses.size > 0 && (
-        <div className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-2 rounded-xl border border-border bg-card/95 p-2 shadow-md backdrop-blur-md animate-in slide-in-from-bottom-8 fade-in duration-300 sm:inset-x-auto sm:bottom-5 sm:left-1/2 sm:w-max sm:-translate-x-1/2 sm:rounded-lg sm:px-2.5 sm:py-1.5">
-          <div className="flex min-w-0 flex-1 items-center gap-2 text-sm font-medium text-foreground sm:flex-none">
+        <div className="fixed inset-x-2 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-1.5 rounded-lg border border-border bg-card/95 p-1.5 shadow-md backdrop-blur-md animate-in slide-in-from-bottom-8 fade-in duration-300 sm:inset-x-auto sm:bottom-5 sm:left-1/2 sm:w-max sm:-translate-x-1/2 sm:px-2.5 sm:py-1.5">
+          <div className="flex min-w-0 flex-1 items-center gap-2 text-xs font-medium text-foreground sm:flex-none sm:text-sm">
               <span className="truncate">已选 {selectedCourses.size} 门课程</span>
           </div>
           <Button
             variant="ghost"
             onClick={clearSelection}
-            className="h-11 w-11 shrink-0 px-0 text-muted-foreground hover:text-foreground sm:h-9 sm:w-9"
+            className="h-8 w-8 shrink-0 px-0 text-muted-foreground hover:text-foreground sm:h-9 sm:w-9"
             title="取消选择"
             aria-label="取消选择"
           >
@@ -1513,7 +1565,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           <Button
             onClick={createTaskWithSelection}
             disabled={creatingTask}
-            className="h-11 shrink-0 gap-1.5 px-3 text-sm font-semibold shadow-sm transition-colors hover:shadow sm:h-9 sm:px-3"
+            className="h-8 shrink-0 gap-1.5 px-2.5 text-xs font-semibold shadow-sm transition-colors hover:shadow sm:h-9 sm:px-3 sm:text-sm"
           >
             {creatingTask ? (
               <RefreshCw className="h-4 w-4 animate-spin" />

@@ -67,19 +67,19 @@ function StepperField({
   };
 
   return (
-    <section className="space-y-3 rounded-xl border border-border/70 bg-card p-3 shadow-xs sm:p-4" aria-labelledby={`${id}-label`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+    <section className="space-y-2 rounded-lg border border-border/70 bg-card p-2.5 shadow-xs sm:space-y-3 sm:rounded-xl sm:p-4" aria-labelledby={`${id}-label`}>
+      <div className="flex items-start justify-between gap-2 sm:gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary sm:size-8 sm:rounded-lg">
             <Icon className="h-4 w-4" />
           </span>
           <div className="min-w-0">
             <Label id={`${id}-label`} htmlFor={id} className="text-sm font-semibold text-foreground">
               {label}
             </Label>
-            <p id={`${id}-current`} className="mt-1 flex shrink-0 items-baseline gap-1.5 whitespace-nowrap text-sm font-medium text-foreground">
+            <p id={`${id}-current`} className="mt-0.5 flex shrink-0 items-baseline gap-1 whitespace-nowrap text-xs font-medium text-foreground sm:mt-1 sm:gap-1.5 sm:text-sm">
               <span className="text-muted-foreground">当前累计</span>
-              <span className="text-base font-semibold tabular-nums text-primary">
+              <span className="text-sm font-semibold tabular-nums text-primary sm:text-base">
                 {currentValue ?? '--'}
                 {currentValue !== undefined && <span className="ml-0.5 text-sm font-medium">{unit}</span>}
               </span>
@@ -90,12 +90,12 @@ function StepperField({
           上限 {maximum}{unit}
         </Badge>
       </div>
-      <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-2">
+      <div className="grid grid-cols-[2.25rem_minmax(0,1fr)_2.25rem] items-center gap-2 sm:grid-cols-[2.75rem_minmax(0,1fr)_2.75rem]">
         <Button
           type="button"
           variant="outline"
           size="icon"
-          className="h-11 w-11"
+          className="h-9 w-9 sm:h-11 sm:w-11"
           disabled={numericValue === 0}
           onClick={() => setValue(numericValue - step)}
           aria-label={`${label}减少 ${step}${unit}`}
@@ -112,7 +112,7 @@ function StepperField({
             step={step}
             value={value}
             onChange={(event) => updateValue(event.target.value)}
-            className="h-11 pr-12 text-center text-base font-semibold tabular-nums"
+            className="h-9 pr-12 text-center text-sm font-semibold tabular-nums sm:h-11 sm:text-base"
             aria-describedby={`${id}-current`}
           />
           <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground">
@@ -123,7 +123,7 @@ function StepperField({
           type="button"
           variant="outline"
           size="icon"
-          className="h-11 w-11"
+          className="h-9 w-9 sm:h-11 sm:w-11"
           disabled={numericValue === maximum}
           onClick={() => setValue(numericValue + step)}
           aria-label={`${label}增加 ${step}${unit}`}
@@ -231,8 +231,8 @@ function StudyIncrementDialog({
 
   return (
     <Dialog open onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] max-w-[calc(100%-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden p-0 sm:max-w-xl">
-        <DialogHeader className="border-b border-border/50 px-4 py-4 pr-12 sm:px-5">
+      <DialogContent className="max-h-[calc(100dvh-1rem)] max-w-[calc(100%-1rem)] grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden p-0 sm:max-h-[calc(100dvh-2rem)] sm:max-w-xl">
+        <DialogHeader className="border-b border-border/50 px-3 py-3 pr-11 sm:px-5 sm:py-4 sm:pr-12">
           <DialogTitle className="flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 text-primary" />
             学习目标
@@ -243,7 +243,7 @@ function StudyIncrementDialog({
         </DialogHeader>
 
         <form onSubmit={save} className="contents">
-          <div className="min-h-0 min-w-0 space-y-3 overflow-x-hidden overflow-y-auto px-4 py-4 sm:px-5">
+          <div className="min-h-0 min-w-0 space-y-2.5 overflow-x-hidden overflow-y-auto px-3 py-3 sm:space-y-3 sm:px-5 sm:py-4">
             {!courseDetailsReady ? (
               <div className="flex min-h-56 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/70 bg-muted/20 p-6 text-center">
                 {courseDetailsLoading ? (
@@ -269,7 +269,7 @@ function StudyIncrementDialog({
 
                 <h3 className="text-sm font-semibold text-foreground">本次增加</h3>
 
-                <div className="space-y-2.5">
+                <div className="space-y-2 sm:space-y-2.5">
                   <StepperField
                     id={`study-visit-${course.key}`}
                     icon={Eye}
@@ -313,7 +313,7 @@ function StudyIncrementDialog({
             )}
           </div>
 
-          <div className="flex shrink-0 justify-end gap-2 border-t border-border/50 bg-muted/30 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-5">
+          <div className="flex shrink-0 justify-end gap-2 border-t border-border/50 bg-muted/30 p-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] sm:px-5 sm:py-3 sm:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
             <Button type="submit" disabled={!courseDetailsReady}>保存目标</Button>
           </div>

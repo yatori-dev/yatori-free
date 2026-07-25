@@ -47,7 +47,7 @@ function SheetContent({
       <DialogPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[min(400px,calc(100vw-1rem))] max-w-full flex-col border-l border-border bg-popover text-popover-foreground shadow-xl outline-none duration-200 ease-out data-open:animate-in data-open:slide-in-from-right data-closed:animate-out data-closed:slide-out-to-right",
+          "fixed inset-y-0 right-0 z-50 flex w-[min(400px,calc(100vw-0.5rem))] max-w-full flex-col border-l border-border bg-popover text-popover-foreground shadow-xl outline-none duration-200 ease-out data-open:animate-in data-open:slide-in-from-right data-closed:animate-out data-closed:slide-out-to-right sm:w-[min(400px,calc(100vw-1rem))]",
           className,
         )}
         {...props}
@@ -59,7 +59,7 @@ function SheetContent({
 }
 
 function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="sheet-header" className={cn("flex items-start justify-between gap-3 border-b border-border/50 px-5 py-4", className)} {...props} />
+  return <div data-slot="sheet-header" className={cn("flex items-start justify-between gap-3 border-b border-border/50 px-3 py-3 sm:px-5 sm:py-4", className)} {...props} />
 }
 
 function SheetTitle(props: React.ComponentProps<typeof DialogPrimitive.Title>) {

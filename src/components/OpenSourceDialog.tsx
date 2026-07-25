@@ -55,28 +55,28 @@ export function OpenSourceDialog() {
           aria-label="查看开源项目"
           title="开源项目"
         >
-          <LibraryBig className="h-5 w-5" />
+        <LibraryBig className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] max-w-[calc(100%-2rem)] gap-0 overflow-hidden p-0 sm:max-w-2xl">
-        <DialogHeader className="border-b border-border/50 px-5 py-5 pr-12 sm:px-6">
-          <DialogTitle className="flex items-center gap-2 text-lg">
-            <LibraryBig className="h-5 w-5 text-primary" />
+      <DialogContent className="max-h-[calc(100dvh-1rem)] max-w-[calc(100%-1rem)] gap-0 overflow-hidden p-0 sm:max-h-[calc(100dvh-2rem)] sm:max-w-2xl">
+        <DialogHeader className="border-b border-border/50 px-3 py-3 pr-11 sm:px-6 sm:py-5 sm:pr-12">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <LibraryBig className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
             鸣谢
           </DialogTitle>
           <DialogDescription>本服务参考或使用了以下开源项目。在此向各位开源社区作者表示最诚挚的感谢！</DialogDescription>
         </DialogHeader>
-        <div className="grid max-h-[min(560px,calc(100dvh-10rem))] gap-2 overflow-y-auto p-4 sm:p-5">
+        <div className="grid max-h-[min(560px,calc(100dvh-8rem))] gap-1.5 overflow-y-auto p-2.5 sm:gap-2 sm:p-5">
           {OPEN_SOURCE_PROJECTS.map((project) => (
             <a
               key={project.name}
               href={project.url}
               target="_blank"
               rel="noreferrer"
-              className="group flex min-w-0 items-center gap-3 rounded-lg border border-border/70 bg-card p-3 transition-colors hover:border-primary/50 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="group flex min-w-0 items-center gap-2 rounded-md border border-border/70 bg-card p-2.5 transition-colors hover:border-primary/50 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-3 sm:rounded-lg sm:p-3"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
-                <svg className="h-6 w-6" aria-hidden="true">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted text-foreground sm:h-10 sm:w-10 sm:rounded-lg">
+                <svg className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true">
                   <use href="/icons.svg#github-icon" />
                 </svg>
               </span>

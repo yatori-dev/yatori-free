@@ -189,16 +189,16 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <Card className="bg-card shadow-sm border-none">
-        <CardHeader className="py-4 px-6 flex flex-row items-center justify-between gap-4 space-y-0">
+    <div className="flex flex-col gap-3 sm:gap-6">
+      <Card className="rounded-lg border-none bg-card py-3 shadow-sm ring-1 sm:rounded-xl sm:py-6 sm:ring-0">
+        <CardHeader className="flex flex-row items-center justify-between gap-4 px-4 py-2 sm:px-6 sm:py-4">
           <div className="min-w-0 flex-1">
             <CardTitle className="text-base font-semibold">自动签到</CardTitle>
-            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-              <span className="text-xs font-medium bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-100/50 dark:border-emerald-900/30 shrink-0 select-none">普通签到</span>
-              <span className="text-xs font-medium bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded border border-blue-100/50 dark:border-blue-900/30 shrink-0 select-none">手势签到</span>
-              <span className="text-xs font-medium bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded border border-amber-100/50 dark:border-amber-900/30 shrink-0 select-none">位置签到</span>
-              <span className="text-xs font-medium bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded border border-purple-100/50 dark:border-purple-900/30 shrink-0 select-none">签到码</span>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="shrink-0 select-none rounded border border-emerald-100/50 bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-600 dark:border-emerald-900/30 dark:bg-emerald-950/30 dark:text-emerald-400 sm:px-1.5 sm:py-0.5 sm:text-xs">普通签到</span>
+              <span className="shrink-0 select-none rounded border border-blue-100/50 bg-blue-50 px-2 py-1 text-[11px] font-medium text-blue-600 dark:border-blue-900/30 dark:bg-blue-950/30 dark:text-blue-400 sm:px-1.5 sm:py-0.5 sm:text-xs">手势签到</span>
+              <span className="shrink-0 select-none rounded border border-amber-100/50 bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-600 dark:border-amber-900/30 dark:bg-amber-950/30 dark:text-amber-400 sm:px-1.5 sm:py-0.5 sm:text-xs">位置签到</span>
+              <span className="shrink-0 select-none rounded border border-purple-100/50 bg-purple-50 px-2 py-1 text-[11px] font-medium text-purple-600 dark:border-purple-900/30 dark:bg-purple-950/30 dark:text-purple-400 sm:px-1.5 sm:py-0.5 sm:text-xs">签到码</span>
             </div>
           </div>
           <div className="flex items-center shrink-0">
@@ -206,7 +206,7 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
               type="button"
               disabled={toggleAction !== null}
               onClick={() => void handleMonitorAction(nextMonitorAction)}
-              className={`font-semibold text-sm h-9 sm:h-10 px-3 sm:px-5 rounded-md flex items-center gap-1.5 sm:gap-2 shadow-sm ${
+              className={`flex h-10 items-center gap-2 rounded-md px-4 text-sm font-semibold shadow-sm sm:px-5 ${
                 monitorStarted
                   ? 'border border-destructive/30 bg-card text-destructive hover:bg-destructive/5 hover:border-destructive'
                   : 'bg-[#1a73e8] hover:bg-[#1557b0] text-white'
@@ -230,14 +230,14 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
         </CardHeader>
       </Card>
 
-      <Card className="bg-card shadow-sm border-none min-w-0 overflow-hidden">
-        <CardHeader className="py-4 px-6 border-b border-border/50 flex flex-row items-center justify-between gap-3 space-y-0">
+      <Card className="min-w-0 overflow-hidden rounded-lg border-none bg-card py-3 shadow-sm ring-1 sm:rounded-xl sm:py-6 sm:ring-0">
+        <CardHeader className="flex flex-row items-center justify-between gap-3 border-b border-border/50 px-4 py-3 sm:px-6 sm:py-4">
           <div className="min-w-0">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base font-semibold sm:text-sm">
               <History className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <span className="truncate">签到监控记录</span>
             </CardTitle>
-            <CardDescription className="text-xs mt-1">最近的签到历史</CardDescription>
+            <CardDescription className="mt-1.5 text-[13px] sm:mt-1 sm:text-xs">最近的签到历史</CardDescription>
           </div>
           <Button
             size="icon"
@@ -270,7 +270,7 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
                 {logs.map((log) => {
                   const logDate = formatLogDateTime(log.createdAt);
                   return (
-                    <div key={log.id} className="p-4 hover:bg-muted/30 transition-colors flex flex-col gap-1.5">
+                    <div key={log.id} className="flex flex-col gap-2 p-4 transition-colors hover:bg-muted/30 sm:gap-1.5">
                       <div className="flex items-start justify-between gap-3 min-w-0">
                         <span className="text-sm font-semibold text-foreground truncate">
                           {log.courseName ?? '课程未记录'}

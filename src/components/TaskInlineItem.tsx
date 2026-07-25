@@ -231,10 +231,10 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   });
 
   return (
-    <article className="group flex min-w-0 w-full flex-col gap-4 overflow-hidden rounded-xl border border-border/70 bg-card p-3.5 shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-4">
+    <article className="group flex w-full min-w-0 flex-col gap-2.5 overflow-hidden rounded-lg border border-border/70 bg-card p-3 shadow-sm transition-shadow duration-200 hover:shadow-md sm:gap-4 sm:rounded-xl sm:p-4">
       
       {/* Header Info */}
-      <div className="flex min-w-0 w-full flex-col gap-3">
+      <div className="flex w-full min-w-0 flex-col gap-2 sm:gap-3">
         <div className="flex min-w-0 items-start justify-between gap-3">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 text-xs font-medium text-muted-foreground">
             <span className="shrink-0 rounded-md bg-muted px-1.5 py-1 font-mono text-[10px] text-foreground/75">
@@ -243,7 +243,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
           </div>
 
           {/* Status Badge with custom styling */}
-          <div className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap ${statusInfo.colorClass}`}>
+          <div className={`flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs ${statusInfo.colorClass}`}>
           {statusInfo.icon}
           <span>{statusInfo.label}</span>
           </div>
@@ -274,7 +274,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
 
       {/* Error Message Box */}
       {taskErrorMessage && (
-        <div className="p-3 bg-red-50/70 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 rounded text-xs text-red-600 dark:text-red-400 leading-relaxed flex gap-2 min-w-0 w-full">
+        <div className="flex w-full min-w-0 gap-2 rounded border border-red-100 bg-red-50/70 p-2.5 text-xs leading-relaxed text-red-600 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400 sm:p-3">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
           <div className="wrap-anywhere font-sans min-w-0">
             <span className="font-semibold block mb-0.5">任务执行异常</span>
@@ -285,7 +285,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
 
       {/* Progress Box (real-time data) */}
       {showProgress && (
-        <div className="min-w-0 w-full space-y-3.5 overflow-hidden rounded-lg border border-border/70 bg-muted/20 p-3.5 dark:bg-muted/10">
+        <div className="w-full min-w-0 space-y-2.5 overflow-hidden rounded-md border border-border/70 bg-muted/20 p-2.5 dark:bg-muted/10 sm:space-y-3.5 sm:rounded-lg sm:p-3.5">
           <div className="flex items-end justify-between gap-3 text-xs">
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <div className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-foreground" title={progressCourseLabel}>
@@ -300,7 +300,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
                 </div>
               )}
             </div>
-            <span className="shrink-0 text-lg font-bold tabular-nums text-primary">{percent}%</span>
+            <span className="shrink-0 text-base font-bold tabular-nums text-primary sm:text-lg">{percent}%</span>
           </div>
 
           <div className="space-y-1.5">
@@ -326,7 +326,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
       )}
 
       {/* Date & Time details */}
-      <div className="flex flex-col gap-1 px-1 font-mono text-xs text-muted-foreground">
+      <div className="flex flex-col gap-0.5 px-1 font-mono text-[11px] text-muted-foreground sm:gap-1 sm:text-xs">
         <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 min-w-0">
           <span className="shrink-0">启动时间:</span>
           <span className="text-right wrap-anywhere">{task.startedAt ? formatDateTime(task.startedAt) : '未启动'}</span>
@@ -424,7 +424,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
       </div>
 
       {/* Card Action Footer */}
-      <div className="flex flex-wrap items-center justify-between border-t border-border/40 pt-3 mt-1 gap-2 min-w-0 w-full">
+      <div className="mt-0.5 flex w-full min-w-0 flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-2 sm:mt-1 sm:pt-3">
         <Button
           size="sm"
           variant="ghost"

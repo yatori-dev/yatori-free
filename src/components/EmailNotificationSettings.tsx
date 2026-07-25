@@ -134,9 +134,9 @@ export function EmailNotificationSettings({ onUnauthorized }: EmailNotificationS
       : '任务成功/失败时发送邮件';
 
   return (
-    <div className="space-y-4 rounded-lg border border-border/50 bg-muted/25 p-4 sm:p-5">
+    <div className="space-y-3 rounded-md border border-border/50 bg-muted/25 p-3 sm:space-y-4 sm:rounded-lg sm:p-5">
       <div className="flex items-center justify-between gap-4">
-        <div className="min-w-0 space-y-1.5 pr-4">
+        <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
           <Label htmlFor="emailNotificationEnabled" className="block cursor-pointer text-sm font-semibold text-[#191c1d] dark:text-[#e3e3e3]">
             任务状态邮件通知
           </Label>
@@ -157,7 +157,7 @@ export function EmailNotificationSettings({ onUnauthorized }: EmailNotificationS
         <p className="text-xs text-muted-foreground">正在读取邮箱设置...</p>
       ) : (
         <div className="animate-in fade-in-0 slide-in-from-top-1 duration-300 ease-out motion-reduce:animate-none">
-          <div className={`grid grid-cols-1 gap-3 border-t border-border/40 pt-4 ${hasPendingEmail ? 'lg:grid-cols-2 lg:gap-4' : ''}`}>
+          <div className={`grid grid-cols-1 gap-2.5 border-t border-border/40 pt-3 sm:gap-3 sm:pt-4 ${hasPendingEmail ? 'lg:grid-cols-2 lg:gap-4' : ''}`}>
             <form className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2" onSubmit={handleRequestVerification}>
               <Label htmlFor="notificationEmail" className="sr-only">邮箱地址</Label>
               <Input
