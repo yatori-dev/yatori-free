@@ -774,23 +774,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     };
   }, []);
 
-  // Tab transition calculations (direction, distance, speed/duration)
+  // Tab transition calculations (fixed 10px displacement for calm navigation)
   const tabsList = ['courses', 'sign', 'tasks', 'settings'];
   const prevIndex = tabsList.indexOf(prevTab);
   const currentIndex = tabsList.indexOf(activeTab);
   const tabSwitchDistance = Math.abs(currentIndex - prevIndex);
   const isMovingRight = currentIndex >= prevIndex;
 
-  const translateVal = tabSwitchDistance === 0 ? 0 : 10 + tabSwitchDistance * 4;
+  const translateVal = tabSwitchDistance === 0 ? 0 : 10;
   const startTranslateX = tabSwitchDistance === 0 ? '0px' : (isMovingRight ? `${translateVal}px` : `-${translateVal}px`);
-  const durationMs = tabSwitchDistance === 0 ? 200 : 220 + tabSwitchDistance * 40;
+  const durationMs = 260;
 
   const tabsStyle = {
     '--tab-transition-duration': `${durationMs}ms`,
     '--tab-transition-start-x': startTranslateX,
   } as React.CSSProperties;
-  const currentViewTitle = activeTab === 'sign' ? '自动签到' : activeTab === 'settings' ? '提交设置' : '课程列表';
-
   return (
     <div className="min-h-screen bg-background text-foreground font-sans lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)] lg:overflow-hidden">
       <a href="#dashboard-main" className="sr-only z-[60] rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
@@ -828,9 +826,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 </span>
               </div>
             </div>
-            <h1 className="hidden min-w-0 truncate font-heading text-lg font-semibold lg:block">{currentViewTitle}</h1>
-
-            <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-4">
+            <div className="ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-4">
               <OpenSourceDialog />
               <Button
                 size="icon"
@@ -906,7 +902,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
               <div className="min-w-0">
             {/* Courses list tab content */}
             <TabsContent value="courses" className="outline-none m-0 lg:flex-1 lg:min-h-0">
-              <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm sm:ring-1 lg:flex lg:h-full lg:min-h-0 lg:flex-col">
+              <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:flex lg:h-full lg:min-h-0 lg:flex-col">
                 <CardHeader className="flex flex-row items-center gap-2 rounded-none border-b border-border/50 px-3 py-2.5 sm:justify-between sm:px-6 sm:py-4 sm:space-y-0">
                   <div className="flex shrink-0 items-center gap-1 sm:block">
                     <CardTitle className="whitespace-nowrap text-sm font-semibold sm:text-base">课程列表</CardTitle>
@@ -1308,19 +1304,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             </TabsContent>
 
             {/* Auto Sign-In Monitor tab content */}
-            <TabsContent value="sign" className="m-0 p-3 outline-none sm:p-0">
-              {account?.id && (
-                <SignMonitor 
-                  accountId={account.id} 
-                  onUnauthorized={onLogout} 
-                  onStatusChange={setSignMonitorActive}
-                />
-              )}
+            <TabsContent value="sign" className="m-0 outline-none">
+              <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm">
+                <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
+                  <CardTitle className="text-sm font-semibold sm:text-base">自动签到</CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 text-sm sm:p-6">
+                  {account?.id && (
+                    <SignMonitor
+                      accountId={account.id}
+                      onUnauthorized={onLogout}
+                      onStatusChange={setSignMonitorActive}
+                    />
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Account Settings Configuration tab content */}
             <TabsContent value="settings" className="outline-none m-0">
-              <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm sm:ring-1">
+              <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm">
                 <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
                   <CardTitle className="text-sm font-semibold sm:text-base">提交设置</CardTitle>
                 </CardHeader>
@@ -1554,7 +1557,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
       {/* 批量控制 Floating Control Capsule */}
       {selectedCourses.size > 0 && (
-        <div className="fixed inset-x-3 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-50 flex items-center justify-between gap-2.5 rounded-2xl border border-border/80 bg-card/95 p-2 shadow-lg backdrop-blur-md animate-in slide-in-from-bottom-6 fade-in-0 duration-300 sm:inset-x-auto sm:bottom-6 sm:left-1/2 sm:w-max sm:-translate-x-1/2 sm:px-4 sm:py-2">
+        <div className="fixed inset-x-3 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-50 flex items-center justify-between gap-2.5 rounded-2xl border border-border/80 bg-card/95 p-2 shadow-floating backdrop-blur-md animate-bottom-bar-enter sm:inset-x-auto sm:bottom-6 sm:left-1/2 sm:w-max sm:-translate-x-1/2 sm:px-4 sm:py-2">
           <div className="flex min-w-0 flex-1 items-center gap-2.5 text-xs sm:text-sm">
             <span className="font-semibold text-foreground whitespace-nowrap">
               已选 <span className="tabular-nums font-bold text-primary">{selectedCourses.size}</span> 门课程

@@ -257,7 +257,9 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const isTerminal = ['success', 'partial_success', 'failed', 'stopped'].includes(effectiveStatus);
 
   return (
-    <article className="group flex w-full min-w-0 flex-col gap-3 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-xs transition-shadow duration-200 hover:shadow-sm sm:gap-4 sm:p-5">
+    <article className={`group flex w-full min-w-0 flex-col gap-3 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-rest transition-all duration-200 ease-standard hover:shadow-raised dark:hover:bg-accent/10 sm:gap-4 sm:p-5 ${
+      effectiveStatus === 'success' ? 'animate-task-success-flash' : ''
+    }`}>
       
       {/* Task Header & Execution Status */}
       <div className="flex w-full min-w-0 flex-col gap-2.5 sm:gap-3">
@@ -393,9 +395,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
                 className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-foreground transition-opacity duration-200 animate-in fade-in"
                 title={progressCourseLabel}
               >
-                {effectiveStatus === 'running' && (
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-primary animate-ping"></span>
-                )}
                 <span className="truncate">{progressCourseLabel}</span>
               </div>
               {progressChapterLabel && (
@@ -445,7 +444,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
 
       {/* Settings Snapshot (Collapsible Drawer - Secondary) */}
       <div
-        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${showConfig ? 'grid-rows-[1fr] opacity-100' : 'pointer-events-none grid-rows-[0fr] opacity-0'}`}
+        className={`grid transition-[grid-template-rows,opacity] duration-200 ease-out ${showConfig ? 'grid-rows-[1fr] opacity-100' : 'pointer-events-none grid-rows-[0fr] opacity-0'}`}
         aria-hidden={!showConfig}
       >
         <div className="min-h-0 overflow-hidden">

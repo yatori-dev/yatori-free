@@ -22,7 +22,7 @@ function TooltipContent({ className, sideOffset = 8, ...props }: React.Component
         data-slot="tooltip-content"
         sideOffset={sideOffset}
         className={cn(
-          'z-50 max-w-56 rounded-md bg-foreground px-2.5 py-1.5 text-xs font-medium text-background shadow-md outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
+          'z-50 max-w-56 rounded-md bg-foreground px-2.5 py-1.5 text-xs font-medium text-background shadow-floating duration-140 ease-standard outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
           className,
         )}
         {...props}

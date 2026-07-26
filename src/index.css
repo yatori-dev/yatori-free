@@ -159,6 +159,16 @@
     --google-red: #EA4335;
     --google-yellow: #FBBC05;
     --google-green: #34A853;
+
+    /* Motion Easing Tokens */
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* 4-Tier Shadow Tokens */
+    --shadow-rest: 0 1px 2px rgb(15 23 42 / 0.05);
+    --shadow-raised: 0 4px 12px rgb(15 23 42 / 0.08), 0 1px 3px rgb(15 23 42 / 0.05);
+    --shadow-floating: 0 12px 32px rgb(15 23 42 / 0.14), 0 2px 8px rgb(15 23 42 / 0.08);
+    --shadow-overlay: 0 24px 64px rgb(15 23 42 / 0.20);
 }
 
 .dark {
@@ -191,6 +201,72 @@
     --danger-container: #4c0519;
     --info: #9ecaef;
     --info-container: #00497d;
+
+    /* 4-Tier Dark Mode Shadows (cleaner surface elevation) */
+    --shadow-rest: 0 1px 2px rgb(0 0 0 / 0.25);
+    --shadow-raised: 0 4px 14px rgb(0 0 0 / 0.35), 0 1px 3px rgb(0 0 0 / 0.20);
+    --shadow-floating: 0 12px 32px rgb(0 0 0 / 0.50), 0 2px 8px rgb(0 0 0 / 0.30);
+    --shadow-overlay: 0 24px 64px rgb(0 0 0 / 0.65);
+}
+
+@utility shadow-rest {
+  box-shadow: var(--shadow-rest);
+}
+
+@utility shadow-raised {
+  box-shadow: var(--shadow-raised);
+}
+
+@utility shadow-floating {
+  box-shadow: var(--shadow-floating);
+}
+
+@utility shadow-overlay {
+  box-shadow: var(--shadow-overlay);
+}
+
+@utility ease-standard {
+  transition-timing-function: var(--ease-standard);
+}
+
+@utility ease-emphasized {
+  transition-timing-function: var(--ease-emphasized);
+}
+
+@utility animate-bottom-bar-enter {
+  animation: bottomBarEnter 280ms var(--ease-emphasized) forwards;
+}
+
+@utility animate-task-success-flash {
+  animation: taskSuccessFlash 1200ms var(--ease-emphasized) forwards;
+}
+
+@keyframes bottomBarEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes taskSuccessFlash {
+  0% {
+    border-color: var(--success);
+    box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.2), var(--shadow-raised);
+  }
+  50% {
+    border-color: var(--success);
+    box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.15), var(--shadow-raised);
+  }
+  100% {
+    border-color: var(--border);
+    box-shadow: var(--shadow-rest);
+  }
 }
 
 @layer base {
@@ -280,7 +356,7 @@
   transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
 }
 .btn-material:active {
-  transform: scale(0.98);
+  transform: translateY(1px);
 }
 
 /* Google-style Snackbar / Chrome Infobar */
