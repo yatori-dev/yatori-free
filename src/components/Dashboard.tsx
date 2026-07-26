@@ -33,6 +33,7 @@ import { SignMonitor } from './SignMonitor';
 import { StudyIncrementSettings } from './StudyIncrementSettings';
 import { EmailNotificationSettings } from './EmailNotificationSettings';
 import { OpenSourceDialog } from './OpenSourceDialog';
+import { NightTaskConfirmDialog } from './dashboard/NightTaskConfirmDialog';
 import { 
   LogOut, 
   Play, 
@@ -48,6 +49,7 @@ import {
   SlidersHorizontal,
   Search,
   X,
+  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
@@ -286,6 +288,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [fullyExpandedCourseOutlines, setFullyExpandedCourseOutlines] = useState<Set<string>>(new Set());
   const [courseDetailsMap, setCourseDetailsMap] = useState<Record<string, CourseDetails>>({});
   const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>({});
+  const [nightConfirmOpen, setNightConfirmOpen] = useState(false);
   
   // Loading flags
   const [coursesLoading, setCoursesLoading] = useState(false);
@@ -534,35 +537,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     return courses.filter((course) => course.processing && courseKeySet.has(course.key));
   };
 
-  const createTaskWithSelection = async () => {
+  const executeSubmitTask = async () => {
     if (!account) return;
     setCreatingTask(true);
     
     const includeCoursesList = Array.from(selectedCourses);
-
-    if (includeCoursesList.length === 0) {
-      toast.error('请先选择课程');
-      setCreatingTask(false);
-      return;
-    }
-
-    const processingCourses = getSelectedProcessingCourses(includeCoursesList);
-    if (processingCourses.length > 0) {
-      toast.error(`以下课程已有进行中的任务：${processingCourses.map((course) => course.courseName).join('、')}`);
-      setCreatingTask(false);
-      void fetchCourses();
-      return;
-    }
-
-    const hours = new Date().getHours();
-    if (hours >= 23 || hours < 7) {
-      const proceed = window.confirm('提示：当前处于夜间时段（23:00 - 07:00），夜间执行任务可能会被学习通打回并清空进度，是否继续提交？');
-      if (!proceed) {
-        setCreatingTask(false);
-        return;
-      }
-    }
-
     const customConfig: CoursesCustom = buildCoursesCustom({
       includeCourses: includeCoursesList,
       excludeCourses: [],
@@ -613,6 +592,32 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     } finally {
       setCreatingTask(false);
     }
+  };
+
+  const createTaskWithSelection = async () => {
+    if (!account) return;
+
+    const includeCoursesList = Array.from(selectedCourses);
+
+    if (includeCoursesList.length === 0) {
+      toast.error('请先选择课程');
+      return;
+    }
+
+    const processingCourses = getSelectedProcessingCourses(includeCoursesList);
+    if (processingCourses.length > 0) {
+      toast.error(`以下课程已有进行中的任务：${processingCourses.map((course) => course.courseName).join('、')}`);
+      void fetchCourses();
+      return;
+    }
+
+    const hours = new Date().getHours();
+    if (hours >= 23 || hours < 7) {
+      setNightConfirmOpen(true);
+      return;
+    }
+
+    void executeSubmitTask();
   };
 
   const updateSettingSwitch = (key: keyof SettingsFormState, checked: boolean) => {
@@ -896,7 +901,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             <div></div>
             <div></div>
           </div>
-          <main id="dashboard-main" className="min-h-0 flex-1 pb-18 lg:overflow-y-auto lg:pb-0">
+          <main id="dashboard-main" className="min-h-0 flex-1 overflow-x-clip pb-18 lg:overflow-y-auto lg:pb-0">
             <div className="mx-auto w-full min-w-0 px-0 py-0 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
               <div className="min-w-0">
             {/* Courses list tab content */}
@@ -1061,12 +1066,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                         ].filter(Boolean).join(' ');
 
                         return (
-                          <div key={course.key} className="border-b border-[#e1e3e4] dark:border-[#333537] last:border-0">
+                          <div key={course.key} className="border-b border-border last:border-0">
                             {/* Course Row */}
                             <div className={`grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-2 px-3 py-2.5 transition-colors sm:grid-cols-[auto_minmax(0,1fr)_13rem] sm:gap-x-4 sm:p-5 ${
                               isSelected
-                                ? 'bg-[#e8f0fe]/40 dark:bg-[#adc6ff]/10 hover:bg-[#e8f0fe]/60 dark:hover:bg-[#adc6ff]/15'
-                                : 'hover:bg-gray-50/50 dark:hover:bg-[#232425]'
+                                ? 'bg-primary-container/20 hover:bg-primary-container/30'
+                                : 'hover:bg-muted/40'
                             }`}>
                               <div className="contents">
                                 {/* Course Selection Checkbox */}
@@ -1079,28 +1084,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                 
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <h3 className="truncate text-[13px] font-semibold text-[#191c1d] dark:text-[#e3e3e3] sm:text-sm">{course.courseName}</h3>
+                                    <h3 className="truncate text-xs font-semibold text-foreground sm:text-sm">{course.courseName}</h3>
                                     {blockedPointCount > 0 && (
-                                      <Badge className="bg-[#f3f4f6] hover:bg-[#f3f4f6] text-[#5f6368] dark:bg-[#2a2b2d] dark:hover:bg-[#2a2b2d] dark:text-[#bdc1c6] border-none">
+                                      <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
                                         含未开放任务点 {blockedPointCount}
                                       </Badge>
                                     )}
                                     {isProcessing && (
-                                      <Badge className="bg-[#fef7e0] hover:bg-[#fef7e0] text-[#b06000] dark:bg-[#3b2a12] dark:hover:bg-[#3b2a12] dark:text-[#f6c26b] border-none">
+                                      <Badge variant="outline" className="bg-warning-container text-warning border-warning/20">
                                         处理中
                                       </Badge>
                                     )}
                                   </div>
                                   {processingTaskLabel ? (
-                                    <span className="mt-1 inline-flex w-fit items-center rounded-md bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                                    <span className="mt-1 inline-flex w-fit items-center rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
                                       #{processingTaskLabel}
                                     </span>
                                   ) : null}
                                   
                                   {jobRate !== null && jobProgressLabel && (
                                     <div className="mt-1.5 grid w-full max-w-lg grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:mt-2 sm:grid-cols-[minmax(0,1fr)_8rem] sm:gap-3">
-                                      <Progress value={jobRate} className="h-1.5 bg-gray-100 dark:bg-gray-700" />
-                                      <span className="whitespace-nowrap text-[11px] font-semibold tabular-nums text-gray-600 dark:text-gray-300 sm:text-xs">
+                                      <Progress value={jobRate} className="h-1.5 bg-muted" />
+                                      <span className="whitespace-nowrap text-xs font-semibold tabular-nums text-muted-foreground">
                                         {jobProgressLabel}
                                       </span>
                                     </div>
@@ -1114,7 +1119,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                   size="sm"
                                   disabled={isProcessing}
                                   onClick={() => openStudyIncrementSettings(course.key)}
-                                  className={`h-8 w-8 rounded px-0 text-[11px] sm:w-auto sm:text-xs ${
+                                  className={`h-8 w-8 rounded px-0 text-xs sm:w-auto ${
                                     hasStudyIncrement
                                       ? 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary sm:gap-1 sm:px-2'
                                       : 'text-muted-foreground hover:bg-muted hover:text-foreground sm:gap-1.5 sm:px-2.5'
@@ -1124,7 +1129,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                 >
                                   <SlidersHorizontal className="h-3.5 w-3.5" />
                                   <span className="sr-only sm:not-sr-only">学习目标</span>
-                                  {hasStudyIncrement && <span className="hidden text-[10px] lg:inline">{studyIncrementSummary}</span>}
+                                  {hasStudyIncrement && <span className="hidden text-xs lg:inline">{studyIncrementSummary}</span>}
                                 </Button>
                                 {canStopProcessing && (
                                   <Button
@@ -1132,7 +1137,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                     size="sm"
                                     disabled={isStoppingProcessing}
                                     onClick={() => void handleStopTask(course.processingTaskId as string)}
-                                  className="h-8 w-8 gap-1 rounded border-destructive/30 px-0 text-[11px] text-destructive hover:border-destructive hover:bg-destructive/5 sm:w-auto sm:px-2.5 sm:text-xs"
+                                  className="h-8 w-8 gap-1 rounded border-danger/30 px-0 text-xs text-danger hover:border-danger hover:bg-danger-container/20 sm:w-auto sm:px-2.5"
                                   aria-label={isStoppingProcessing ? '停止任务中' : '停止任务'}
                                   >
                                     {isStoppingProcessing ? (
@@ -1147,7 +1152,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => toggleExpandCourse(course.key)}
-                                  className="h-8 w-8 gap-1 rounded border border-[#c2c6d5] px-0 text-[11px] text-[#4285F4] hover:bg-gray-50/50 dark:border-[#444748] dark:text-[#adc6ff] dark:hover:bg-[#2d2e30] sm:w-auto sm:px-2 sm:text-xs"
+                                  className="h-8 w-8 gap-1 rounded border border-primary/30 px-0 text-xs text-primary hover:bg-primary-container/20 sm:w-auto sm:px-2"
                                   aria-label={isExpanded ? '收起章节' : '查看章节'}
                                 >
                                   {isExpanded ? (
@@ -1547,35 +1552,59 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       </Tabs>
 
 
-      {/* 紧凑操作栏：手机单行排列，较宽窗口使用桌面胶囊。 */}
+      {/* 批量控制 Floating Control Capsule */}
       {selectedCourses.size > 0 && (
-        <div className="fixed inset-x-2 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-1.5 rounded-lg border border-border bg-card/95 p-1.5 shadow-md backdrop-blur-md animate-in slide-in-from-bottom-8 fade-in duration-300 sm:inset-x-auto sm:bottom-5 sm:left-1/2 sm:w-max sm:-translate-x-1/2 sm:px-2.5 sm:py-1.5">
-          <div className="flex min-w-0 flex-1 items-center gap-2 text-xs font-medium text-foreground sm:flex-none sm:text-sm">
-              <span className="truncate">已选 {selectedCourses.size} 门课程</span>
-          </div>
-          <Button
-            variant="ghost"
-            onClick={clearSelection}
-            className="h-8 w-8 shrink-0 px-0 text-muted-foreground hover:text-foreground sm:h-9 sm:w-9"
-            title="取消选择"
-            aria-label="取消选择"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-          <Button
-            onClick={createTaskWithSelection}
-            disabled={creatingTask}
-            className="h-8 shrink-0 gap-1.5 px-2.5 text-xs font-semibold shadow-sm transition-colors hover:shadow sm:h-9 sm:px-3 sm:text-sm"
-          >
-            {creatingTask ? (
-              <RefreshCw className="h-4 w-4 animate-spin" />
-            ) : (
-              <Play className="h-4 w-4 fill-current" />
+        <div className="fixed inset-x-3 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-50 flex items-center justify-between gap-2.5 rounded-2xl border border-border/80 bg-card/95 p-2 shadow-lg backdrop-blur-md animate-in slide-in-from-bottom-6 fade-in-0 duration-300 sm:inset-x-auto sm:bottom-6 sm:left-1/2 sm:w-max sm:-translate-x-1/2 sm:px-4 sm:py-2">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5 text-xs sm:text-sm">
+            <span className="font-semibold text-foreground whitespace-nowrap">
+              已选 <span className="tabular-nums font-bold text-primary">{selectedCourses.size}</span> 门课程
+            </span>
+            {Array.from(selectedCourses).some((key) => {
+              const inc = studyIncrements[key];
+              return (inc?.visitCount ?? 0) > 0 || (inc?.videoStudyMinutes ?? 0) > 0 || (inc?.readMinutes ?? 0) > 0;
+            }) && (
+              <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary-container/40 px-2 py-0.5 text-xs font-medium text-primary">
+                <Sparkles className="h-3 w-3" />
+                已设学习目标
+              </span>
             )}
-            <span>提交任务</span>
-          </Button>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={clearSelection}
+              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
+              title="取消选择"
+              aria-label="取消选择"
+            >
+              <X className="h-3.5 w-3.5 mr-1" />
+              清除
+            </Button>
+            <Button
+              type="button"
+              onClick={createTaskWithSelection}
+              disabled={creatingTask}
+              className="h-8 shrink-0 gap-1.5 px-3.5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary-hover shadow-xs rounded-lg transition-all"
+            >
+              {creatingTask ? (
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Play className="h-3.5 w-3.5 fill-current" />
+              )}
+              <span>提交任务</span>
+            </Button>
+          </div>
         </div>
       )}
+
+      <NightTaskConfirmDialog
+        open={nightConfirmOpen}
+        onOpenChange={setNightConfirmOpen}
+        onConfirm={executeSubmitTask}
+      />
+
       <StudyIncrementSettings
         open={studyIncrementCourseKey !== null}
         onOpenChange={(open) => {

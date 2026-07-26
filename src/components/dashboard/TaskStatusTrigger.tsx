@@ -25,7 +25,7 @@ export function TaskStatusTrigger({ activeTaskCount, className, ...props }: Task
       <Activity className="h-4 w-4" />
       <span>任务</span>
       {hasActiveTasks && (
-        <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground">
+        <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-mono text-xs font-bold leading-none text-primary-foreground">
           {activeTaskCount}
         </span>
       )}

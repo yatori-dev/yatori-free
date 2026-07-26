@@ -66,9 +66,6 @@ export function DashboardNavigation({ mode, activeTab, previousTab = activeTab, 
                 <span className={`absolute inset-y-2 left-0 w-0.5 rounded-full bg-primary transition-opacity duration-200 ${active ? 'opacity-100' : 'opacity-0'}`} />
                 <span className="relative">
                   <Icon className="h-4 w-4 shrink-0" />
-                  {item.id === 'sign' && signMonitorActive && (
-                    <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-primary ring-2 ring-card" aria-label="签到已启用" />
-                  )}
                 </span>
                 <span>{item.label}</span>
                 {item.id === 'sign' && signMonitorActive && <span className="ml-auto h-2 w-2 rounded-full bg-primary" aria-label="签到已启用" />}
@@ -106,7 +103,7 @@ export function DashboardNavigation({ mode, activeTab, previousTab = activeTab, 
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center border-t border-border bg-card px-0 pb-[calc(0.375rem+env(safe-area-inset-bottom))] pt-1.5 shadow-sm lg:hidden" aria-label="移动主导航">
-      <span className="pointer-events-none absolute top-1.5 z-0 h-8 rounded-full bg-accent" style={capsuleStyle} aria-hidden="true" />
+      <span className="pointer-events-none absolute top-2 z-0 h-8 rounded-full bg-primary-container/60 shadow-2xs" style={capsuleStyle} aria-hidden="true" />
       {mobileItems.map((item) => {
         const Icon = item.icon;
         const active = activeTab === item.id;
@@ -120,16 +117,16 @@ export function DashboardNavigation({ mode, activeTab, previousTab = activeTab, 
             className="relative z-10 flex min-h-12 flex-1 flex-col items-center justify-center gap-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-current={active ? 'page' : undefined}
           >
-            <span className={`relative flex h-8 w-12 items-center justify-center rounded-full transition-colors duration-200 ${active ? 'text-accent-foreground' : 'text-muted-foreground hover:bg-muted/50'}`}>
-              <Icon className={`h-[18px] w-[18px] ${active ? 'fill-current/10' : ''}`} />
+            <span className={`relative flex h-8 w-12 items-center justify-center rounded-full transition-colors duration-200 ${active ? 'text-primary' : 'text-muted-foreground'}`}>
+              <Icon className={`h-4 w-4 transition-transform duration-200 ${active ? 'scale-110' : ''}`} />
               {showTaskBadge && (
-                <span className="absolute -right-0.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground ring-2 ring-card">
+                <span className="absolute -right-1 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-mono text-xs font-bold text-primary-foreground ring-2 ring-card animate-in zoom-in-75 duration-200">
                   {activeTaskCount}
                 </span>
               )}
-              {showSignBadge && <span className="absolute right-1 top-0.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" aria-label="签到已启用" />}
+              {showSignBadge && <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" aria-label="签到已启用" />}
             </span>
-            <span className={`text-xs leading-none transition-colors duration-200 ${active ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground'}`}>{item.label}</span>
+            <span className={`text-xs leading-none transition-colors duration-200 ${active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground'}`}>{item.label}</span>
           </button>
         );
       })}

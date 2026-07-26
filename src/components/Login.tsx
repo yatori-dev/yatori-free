@@ -173,6 +173,12 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             <span className="text-[#EA4335]">i</span>
           </div>
 
+          {/* Step Indicator */}
+          <div className="mb-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none">
+            <span className={`h-1.5 rounded-full transition-all duration-300 ${step === 'account' ? 'w-6 bg-primary' : 'w-2 bg-muted'}`} />
+            <span className={`h-1.5 rounded-full transition-all duration-300 ${step === 'password' ? 'w-6 bg-primary' : 'w-2 bg-muted'}`} />
+          </div>
+
           {/* Form and transition layout */}
           <div
             className="w-full slide-viewport mt-2 transition-[height] duration-300 ease-out"
@@ -183,9 +189,13 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               style={{ transform: step === 'password' ? 'translateX(-50%)' : 'translateX(0%)' }}
             >
               {/* Step 1: Account Input */}
-              <div ref={accountPaneRef} className="slide-pane flex flex-col items-center">
-                <h1 className="text-2xl text-[#191c1d] dark:text-[#e3e3e3] font-normal mb-1 font-sans">登录</h1>
-                <p className="text-sm text-[#424753] dark:text-[#a6a8ab] mb-8 font-sans">使用您的学习通账号</p>
+              <div
+                ref={accountPaneRef}
+                className="slide-pane flex flex-col items-center"
+                aria-hidden={step !== 'account'}
+              >
+                <h1 className="text-2xl text-foreground font-normal mb-1 font-sans">登录</h1>
+                <p className="text-sm text-muted-foreground mb-6 font-sans">使用您的学习通账号</p>
                 
                 <form onSubmit={handleNextStep} autoComplete="on" className="w-full space-y-6">
                   <div className="space-y-2">
@@ -202,15 +212,16 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                       aria-describedby={accountError ? 'account-error' : undefined}
                       value={account}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAccountChange(e.target.value)}
-                      className="w-full h-14 px-4 border border-[#727785] dark:border-[#444748] focus:border-[#4285F4] focus:ring-1 focus:ring-[#4285F4] rounded bg-transparent dark:text-[#e3e3e3]"
-                      disabled={isLoading}
+                      className="w-full h-12 px-4 border border-input focus:border-primary focus:ring-1 focus:ring-primary rounded-lg bg-transparent text-foreground"
+                      disabled={isLoading || step !== 'account'}
+                      tabIndex={step === 'account' ? 0 : -1}
                     />
                     {accountError && (
-                      <p id="account-error" role="alert" className="ml-1 text-xs text-[#ba1a1a] dark:text-[#ffdad6]">{accountError}</p>
+                      <p id="account-error" role="alert" className="ml-1 text-xs text-danger">{accountError}</p>
                     )}
                   </div>
                   
-                  <div className="text-xs text-[#5f6368] dark:text-[#a6a8ab] leading-relaxed">
+                  <div className="text-xs text-muted-foreground leading-relaxed">
                     本服务为面向大学生的学习通课程任务提交工具，不收取任何费用，请在受信任设备上使用
                   </div>
 
@@ -219,13 +230,16 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                       href="https://hungrym0.com/blog/xxt/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm font-medium text-[#4285F4] hover:underline"
+                      className="text-sm font-medium text-primary hover:underline"
+                      tabIndex={step === 'account' ? 0 : -1}
                     >
                       了解详情
                     </a>
                     <Button 
                       type="submit" 
-                      className="bg-[#0058bd] hover:bg-[#1a73e8] text-white px-6 h-10 rounded font-medium text-sm transition-all shadow-none"
+                      className="bg-primary hover:bg-primary-hover text-primary-foreground px-6 h-10 rounded-lg font-medium text-sm transition-all shadow-none"
+                      disabled={isLoading || step !== 'account'}
+                      tabIndex={step === 'account' ? 0 : -1}
                     >
                       下一步
                     </Button>
@@ -234,9 +248,13 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               </div>
 
               {/* Step 2: Password Input */}
-              <div ref={passwordPaneRef} className="slide-pane flex flex-col items-center">
-                <h1 className="text-2xl text-[#191c1d] dark:text-[#e3e3e3] font-normal mb-1 font-sans">输入密码</h1>
-                <p className="text-sm text-[#424753] dark:text-[#a6a8ab] mb-8 font-sans">请输入您的学习通登录密码</p>
+              <div
+                ref={passwordPaneRef}
+                className="slide-pane flex flex-col items-center"
+                aria-hidden={step !== 'password'}
+              >
+                <h1 className="text-2xl text-foreground font-normal mb-1 font-sans">输入密码</h1>
+                <p className="text-sm text-muted-foreground mb-6 font-sans">请输入您的学习通登录密码</p>
 
                 <form onSubmit={handleLogin} autoComplete="on" className="w-full space-y-6">
                   <input
@@ -255,8 +273,9 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                         href="https://passport2.chaoxing.com/pwd/findpwd?version=1"
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-disabled={isLoading}
-                        className={`text-xs font-medium text-[#4285F4] hover:underline ${isLoading ? 'pointer-events-none opacity-50' : ''}`}
+                        aria-disabled={isLoading || step !== 'password'}
+                        tabIndex={step === 'password' ? 0 : -1}
+                        className={`text-xs font-medium text-primary hover:underline ${isLoading || step !== 'password' ? 'pointer-events-none opacity-50' : ''}`}
                       >
                         忘记密码
                       </a>
@@ -272,44 +291,47 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                         aria-describedby={passwordError ? 'password-error' : undefined}
                         value={password}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                        className="w-full h-14 pl-4 pr-12 border border-[#727785] dark:border-[#444748] focus:border-[#4285F4] focus:ring-1 focus:ring-[#4285F4] rounded bg-transparent dark:text-[#e3e3e3]"
-                        disabled={isLoading}
+                        className="w-full h-12 pl-4 pr-12 border border-input focus:border-primary focus:ring-1 focus:ring-primary rounded-lg bg-transparent text-foreground"
+                        disabled={isLoading || step !== 'password'}
+                        tabIndex={step === 'password' ? 0 : -1}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5f6368] dark:text-[#a6a8ab] hover:text-[#191c1d]"
-                        disabled={isLoading}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        disabled={isLoading || step !== 'password'}
+                        tabIndex={step === 'password' ? 0 : -1}
                         aria-label={showPassword ? '隐藏密码' : '显示密码'}
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
                     {passwordError && (
-                      <p id="password-error" role="alert" className="ml-1 text-xs text-[#ba1a1a] dark:text-[#ffdad6]">{passwordError}</p>
+                      <p id="password-error" role="alert" className="ml-1 text-xs text-danger">{passwordError}</p>
                     )}
                   </div>
 
                   <div className="flex flex-col gap-3">
-                    <div className="flex items-start gap-2 text-sm leading-5 text-[#424753] dark:text-[#a6a8ab]">
+                    <div className="flex items-start gap-2 text-sm leading-5 text-muted-foreground">
                       <input
                         id="agree-terms"
                         type="checkbox"
                         checked={agreedToTerms}
                         onChange={(e) => setAgreedToTerms(e.target.checked)}
-                        disabled={isLoading}
-                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#727785] accent-[#0058bd] cursor-pointer disabled:opacity-50 dark:border-[#444748]"
+                        disabled={isLoading || step !== 'password'}
+                        tabIndex={step === 'password' ? 0 : -1}
+                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-input accent-primary cursor-pointer disabled:opacity-50"
                       />
                       <div className="min-w-0">
                       <label
                         htmlFor="agree-terms"
-                        className={`cursor-pointer ${isLoading ? 'cursor-not-allowed opacity-50' : ''}`}
+                        className={`cursor-pointer ${isLoading || step !== 'password' ? 'cursor-not-allowed opacity-50' : ''}`}
                       >
                         我已阅读并同意
                       </label>{' '}
-                        <button type="button" onClick={() => setDialogContent('terms')} className="font-medium text-[#0058bd] hover:underline">服务条款</button>{' '}
+                        <button type="button" onClick={() => setDialogContent('terms')} tabIndex={step === 'password' ? 0 : -1} className="font-medium text-primary hover:underline">服务条款</button>{' '}
                         <span aria-hidden="true">和</span>{' '}
-                        <button type="button" onClick={() => setDialogContent('privacy')} className="font-medium text-[#0058bd] hover:underline">隐私政策</button>
+                        <button type="button" onClick={() => setDialogContent('privacy')} tabIndex={step === 'password' ? 0 : -1} className="font-medium text-primary hover:underline">隐私政策</button>
                       </div>
                     </div>
                   </div>
@@ -319,15 +341,17 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                       type="button"
                       variant="ghost"
                       onClick={handleBackStep}
-                      className="text-[#4285F4] hover:bg-[#e8f0fe]/30 dark:hover:bg-[#adc6ff]/10 h-10 px-4 rounded font-medium text-sm"
-                      disabled={isLoading}
+                      className="text-primary hover:bg-primary-container/30 h-10 px-4 rounded-lg font-medium text-sm"
+                      disabled={isLoading || step !== 'password'}
+                      tabIndex={step === 'password' ? 0 : -1}
                     >
                       返回
                     </Button>
                     <Button 
                       type="submit" 
-                      disabled={isLoading || !agreedToTerms}
-                      className="bg-[#0058bd] hover:bg-[#1a73e8] text-white px-8 h-10 rounded font-medium text-sm transition-all shadow-none relative min-w-[80px]"
+                      disabled={isLoading || !agreedToTerms || step !== 'password'}
+                      tabIndex={step === 'password' ? 0 : -1}
+                      className="bg-primary hover:bg-primary-hover text-primary-foreground px-8 h-10 rounded-lg font-medium text-sm transition-all shadow-none relative min-w-[80px]"
                     >
                       {isLoading ? '正在登录...' : '登录'}
                     </Button>

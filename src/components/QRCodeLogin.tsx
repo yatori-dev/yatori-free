@@ -181,78 +181,102 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
 
   const canRefresh = !isCreating && !isExchanging;
   const statusMessage = error || (session ? getStatusMessage(session) : '');
-  const isError = Boolean(error) || session?.status === 'failed';
   const isExpired = session?.status === 'expired';
-  const shouldShowStatus = Boolean(error) || ['scanned', 'confirmed', 'failed'].includes(session?.status ?? '');
+  const isScanned = session?.status === 'scanned';
+  const isConfirmed = session?.status === 'confirmed';
+  const isError = Boolean(error) || session?.status === 'failed';
 
   return (
-    <section className="login-qr-pane hidden min-h-[516px] flex-col items-center justify-center border-r border-[#E0E3E7] bg-white px-10 py-12 text-center dark:border-[#333537] dark:bg-[#1f2021] md:flex">
+    <section className="login-qr-pane hidden min-h-[516px] flex-col items-center justify-center border-r border-border bg-card px-10 py-12 text-center md:flex">
       <div className="mb-5 flex items-center justify-center font-semibold text-3xl tracking-tight select-none" aria-hidden="true">
-        <span className="text-[#4285F4]">Y</span>
-        <span className="text-[#EA4335]">a</span>
-        <span className="text-[#FBBC05]">t</span>
-        <span className="text-[#4285F4]">o</span>
-        <span className="text-[#34A853]">r</span>
-        <span className="text-[#EA4335]">i</span>
+        <span className="text-[var(--google-blue)]">Y</span>
+        <span className="text-[var(--google-red)]">a</span>
+        <span className="text-[var(--google-yellow)]">t</span>
+        <span className="text-[var(--google-blue)]">o</span>
+        <span className="text-[var(--google-green)]">r</span>
+        <span className="text-[var(--google-red)]">i</span>
       </div>
-      <h1 className="text-[28px] font-normal tracking-[-0.02em] text-[#202124] dark:text-[#e8eaed]">扫码登录</h1>
-      <p className="mt-2 text-sm text-[#5f6368] dark:text-[#a6a8ab]">使用学习通 App 扫码</p>
+      <h1 className="text-2xl font-normal tracking-tight text-foreground">扫码登录</h1>
+      <p className="mt-2 text-sm text-muted-foreground">使用学习通 App 扫码</p>
 
-      <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-2xl border border-[#DADCE0] bg-white p-3 shadow-[0_1px_2px_rgba(60,64,67,0.12)] dark:border-[#444748] dark:bg-[#f8f9fa]">
-        {session?.qrContent ? (
-          <QRCodeSVG
-            value={session.qrContent}
-            size={176}
-            level="M"
-            includeMargin={false}
-            title="学习通登录二维码"
-          />
-        ) : isCreating ? (
-          <svg
-            className="google-spinner"
-            viewBox="0 0 50 50"
-            role="status"
-            aria-label="正在生成二维码"
-          >
-            <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4" />
-          </svg>
-        ) : error ? (
-          <p className="px-4 text-sm leading-6 text-[#ba1a1a] dark:text-[#ffb4ab]">二维码暂时无法生成</p>
-        ) : null}
-        {shouldShowStatus && !isExpired && (
-          <div
-            className="absolute inset-0 flex items-center justify-center bg-white/90 px-5 text-center backdrop-blur-[1px] dark:bg-[#1f2021]/90"
-            aria-live="polite"
-            role={isError ? 'alert' : 'status'}
-          >
-            <p className={isError ? 'text-sm leading-6 text-[#ba1a1a] dark:text-[#ffb4ab]' : 'text-sm leading-6 font-medium text-[#3c4043] dark:text-[#e8eaed]'}>
-              {statusMessage}
-            </p>
+      {/* Dynamic QR / Scanned Morphing Card */}
+      {isScanned || isConfirmed ? (
+        <div className="mt-7 flex h-[208px] w-[208px] flex-col items-center justify-center gap-3 rounded-2xl border border-primary/20 bg-primary-container/20 p-4 shadow-sm backdrop-blur-xs animate-in zoom-in-95 duration-300">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg shadow-sm">
+            {session?.scannedName ? session.scannedName.substring(0, 1) : '通'}
           </div>
-        )}
-        {isExpired && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/95 px-4 text-[#202124] backdrop-blur-[1px] dark:bg-[#1f2021]/95 dark:text-[#e8eaed]">
-            <p className="text-base font-medium">二维码已过期</p>
-            <Button
-              type="button"
-              size="sm"
-              className="h-9 gap-2 bg-[#1967d2] px-3 text-white hover:bg-[#185abc]"
-              disabled={!canRefresh}
-              onClick={() => void createSession()}
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-sm font-semibold text-foreground truncate max-w-[170px]">
+              {session?.scannedName || '学习通账号'}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {isConfirmed ? '已确认，跳转中...' : '已扫码，请在手机端确认'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            <span className="h-2 w-2 rounded-full bg-primary animate-ping" />
+            <span>{isConfirmed ? '验证通过' : '等待确认'}</span>
+          </div>
+        </div>
+      ) : (
+        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-2xl border border-border bg-white p-3 shadow-xs">
+          {session?.qrContent ? (
+            <QRCodeSVG
+              value={session.qrContent}
+              size={176}
+              level="M"
+              includeMargin={false}
+              title="学习通登录二维码"
+            />
+          ) : isCreating ? (
+            <svg
+              className="google-spinner"
+              viewBox="0 0 50 50"
+              role="status"
+              aria-label="正在生成二维码"
             >
-              <RefreshCw className="h-4 w-4" />
-              刷新二维码
-            </Button>
-          </div>
-        )}
-      </div>
+              <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4" />
+            </svg>
+          ) : error ? (
+            <p className="px-4 text-sm leading-6 text-danger">二维码暂时无法生成</p>
+          ) : null}
 
-      {!isExpired && (
+          {isError && (
+            <div
+              className="absolute inset-0 flex items-center justify-center bg-card/90 px-5 text-center backdrop-blur-xs"
+              aria-live="polite"
+              role="alert"
+            >
+              <p className="text-sm leading-6 text-danger">
+                {statusMessage}
+              </p>
+            </div>
+          )}
+
+          {isExpired && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card/95 px-4 text-foreground backdrop-blur-xs">
+              <p className="text-base font-medium">二维码已过期</p>
+              <Button
+                type="button"
+                size="sm"
+                className="h-9 gap-2 bg-primary px-3 text-primary-foreground hover:bg-primary-hover"
+                disabled={!canRefresh}
+                onClick={() => void createSession()}
+              >
+                <RefreshCw className="h-4 w-4" />
+                刷新二维码
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!isExpired && !isScanned && !isConfirmed && (
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          className="mt-5 h-9 gap-2 px-3 text-[#1967d2] hover:bg-[#e8f0fe] dark:text-[#a8c7fa] dark:hover:bg-[#a8c7fa]/10"
+          className="mt-5 h-9 gap-2 px-3 text-primary hover:bg-primary-container/30"
           disabled={!canRefresh}
           onClick={() => void createSession()}
         >
