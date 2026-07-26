@@ -57,7 +57,7 @@
 - ![net/http](https://img.shields.io/badge/net/http-1.26.5-blue.svg?style=flat-square&logo=go&logoColor=white)
 - ![SQLite](https://img.shields.io/badge/SQLite-3-yellow.svg?style=flat-square&logo=sqlite&logoColor=white)
 - ![systemd](https://img.shields.io/badge/systemd-257-red.svg?style=flat-square&logo=systemd&logoColor=white)
-- ![Cloudflare Tunnel](https://img.shields.io/badge/Cloudflare%20Tunnel-2026.7.2-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
+- ![Cloudflare Tunnel](https://img.shields.io/badge/Cloudflare%20Tunnel-2026.7.3-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
 - ![yatori-go-core](https://img.shields.io/badge/yatori--go--core-2.0.4.9-green.svg?style=flat-square&logoColor=white)
 
 > 服务端遵循 [yatori-go-core](https://github.com/yatori-dev/yatori-go-core) 等项目的开源协议，以闭源方式提供网络服务

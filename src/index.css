@@ -87,6 +87,14 @@
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
+    --color-success: var(--success);
+    --color-success-container: var(--success-container);
+    --color-warning: var(--warning);
+    --color-warning-container: var(--warning-container);
+    --color-danger: var(--danger);
+    --color-danger-container: var(--danger-container);
+    --color-info: var(--info);
+    --color-info-container: var(--info-container);
     --color-destructive: var(--destructive);
     --color-accent-foreground: var(--accent-foreground);
     --color-accent: var(--accent);
@@ -96,6 +104,8 @@
     --color-secondary: var(--secondary);
     --color-primary-foreground: var(--primary-foreground);
     --color-primary: var(--primary);
+    --color-primary-hover: var(--primary-hover);
+    --color-primary-container: var(--primary-container);
     --color-popover-foreground: var(--popover-foreground);
     --color-popover: var(--popover);
     --color-card-foreground: var(--card-foreground);
@@ -121,6 +131,8 @@
     --popover-foreground: #1a1c1e;
     --primary: #0061a4;
     --primary-foreground: #ffffff;
+    --primary-hover: #0058bd;
+    --primary-container: #d1e4ff;
     --secondary: #535f70;
     --secondary-foreground: #ffffff;
     --muted: #e0e2ec;
@@ -133,6 +145,14 @@
     --input: #73777f;
     --ring: #0061a4;
     --radius: 0.5rem;
+    --success: #15803d;
+    --success-container: #dcfce7;
+    --warning: #b45309;
+    --warning-container: #fef3c7;
+    --danger: #b42318;
+    --danger-container: #fee4e2;
+    --info: #0061a4;
+    --info-container: #d1e4ff;
 
     /* Google Colors */
     --google-blue: #4285F4;
@@ -150,6 +170,8 @@
     --popover-foreground: #e2e2e6;
     --primary: #9ecaef;
     --primary-foreground: #003258;
+    --primary-hover: #9ecaef;
+    --primary-container: #00497d;
     --secondary: #bbc7db;
     --secondary-foreground: #253140;
     --muted: #43474e;
@@ -161,6 +183,14 @@
     --border: #43474e;
     --input: #8d9199;
     --ring: #9ecaef;
+    --success: #86efac;
+    --success-container: #14532d;
+    --warning: #fcd34d;
+    --warning-container: #78350f;
+    --danger: #fda4af;
+    --danger-container: #4c0519;
+    --info: #9ecaef;
+    --info-container: #00497d;
 }
 
 @layer base {

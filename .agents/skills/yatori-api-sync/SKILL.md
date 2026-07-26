@@ -42,8 +42,12 @@ Check these files first:
 - `src/lib/api.ts`
 - `src/components/Login.tsx`
 - `src/components/Dashboard.tsx`
+- `src/components/QRCodeLogin.tsx`
 - `src/components/SignMonitor.tsx`
 - `src/components/TaskInlineItem.tsx`
+- `src/hooks/useTaskProgressPolling.ts`
+- `src/components/EmailNotificationSettings.tsx`
+- `src/components/StudyIncrementSettings.tsx`
 
 ## Resources
 

@@ -7,11 +7,12 @@ description: Refactor oversized Yatori frontend components into smaller modules 
 
 Use this skill when a page component is turning into a mess.
 
-Current hotspots already justify this skill. `Dashboard.tsx` is about 1,800 lines and is the primary split target:
+Current hotspots already justify this skill. `Dashboard.tsx` is about 1,600 lines and remains the primary split target. Its task navigation and task drawer have already moved into `src/components/dashboard/`, and task-detail polling has moved into `src/hooks/useTaskProgressPolling.ts`:
 
 - `src/components/Dashboard.tsx`
 - `src/components/SignMonitor.tsx`
 - `src/components/TaskInlineItem.tsx`
+- `src/hooks/useTaskProgressPolling.ts`
 
 Do not start a broad rewrite only because a file is large. First isolate a user-visible feature boundary and preserve existing behavior.
 
@@ -56,7 +57,7 @@ Do not invent a hook just to reduce line count.
 Create a hook only if it owns one of these:
 
 - fetch lifecycle
-- stream lifecycle
+- polling lifecycle
 - local persistence
 - derived selection logic reused across multiple components
 

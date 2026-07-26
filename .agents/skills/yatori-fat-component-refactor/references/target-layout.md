@@ -10,8 +10,13 @@ src/components/
   dashboard/
     CourseListSection.tsx
     CourseRow.tsx
-    TaskSidebar.tsx
+    DashboardNavigation.tsx
+    TaskStatusContent.tsx
+    TaskStatusDrawer.tsx
+    TaskStatusTrigger.tsx
     TaskSettingsPanel.tsx
+  hooks/
+    useTaskProgressPolling.ts
 ```
 
 ## SignMonitor 类页面

@@ -8,15 +8,15 @@ breakpoints:
   tablet: '640px - 1023px'
   desktop: '>= 1024px'
 colors:
-  background: '#F8FAFC'
-  surface: '#FFFFFF'
-  surface-muted: '#F1F5F9'
-  text: '#0F172A'
-  text-muted: '#475569'
-  border: '#CBD5E1'
-  primary: '#1A73E8'
-  primary-hover: '#1557B0'
-  primary-container: '#E8F0FE'
+  background: '#FDFCFF'
+  surface: '#FDFCFF'
+  surface-muted: '#E0E2EC'
+  text: '#1A1C1E'
+  text-muted: '#43474E'
+  border: '#C3C7CF'
+  primary: '#0061A4'
+  primary-hover: '#0058BD'
+  primary-container: '#D1E4FF'
   brand-blue: '#4285F4'
   brand-red: '#EA4335'
   brand-yellow: '#FBBC05'
@@ -27,8 +27,8 @@ colors:
   warning-container: '#FEF3C7'
   danger: '#B42318'
   danger-container: '#FEE4E2'
-  info: '#1A73E8'
-  info-container: '#E8F0FE'
+  info: '#0061A4'
+  info-container: '#D1E4FF'
 typography:
   family: 'Plus Jakarta Sans, system-ui, sans-serif'
   heading-weight: 650
@@ -91,7 +91,7 @@ spacing:
 
 ### 5. 单一来源
 
-品牌色、操作色、状态色、字体、圆角、阴影和动效必须来自本文件定义的 Token。业务组件禁止直接写入新的十六进制颜色。
+品牌色、操作色、状态色、字体、圆角、阴影和动效以 `src/index.css` 的运行时 Token 为准。本文件记录其设计语义。新增或重构业务组件不得引入新的裸十六进制颜色；已有裸色类在改动对应区域时收敛。
 
 ## 颜色 Token
 
@@ -99,15 +99,15 @@ spacing:
 
 | Token | Light | Dark | 用途 |
 | --- | --- | --- | --- |
-| `background` | `#F8FAFC` | `#0F172A` | 页面背景 |
-| `surface` | `#FFFFFF` | `#111827` | 卡片、面板、输入框 |
-| `surface-muted` | `#F1F5F9` | `#1E293B` | 次级区域、禁用区域背景 |
-| `text` | `#0F172A` | `#F8FAFC` | 主标题、正文、关键数值 |
-| `text-muted` | `#475569` | `#CBD5E1` | 描述、辅助信息、时间 |
-| `border` | `#CBD5E1` | `#334155` | 边框、分隔线 |
-| `primary` | `#1A73E8` | `#8AB4F8` | 主按钮、当前导航、链接、焦点 |
-| `primary-hover` | `#1557B0` | `#AECBFA` | 主操作悬停 |
-| `primary-container` | `#E8F0FE` | `#1E3A5F` | 选中背景、轻量提示 |
+| `background` | `#FDFCFF` | `#1A1C1E` | 页面背景 |
+| `surface` | `#FDFCFF` | `#1E2022` | 卡片、面板、输入框 |
+| `surface-muted` | `#E0E2EC` | `#43474E` | 次级区域、禁用区域背景 |
+| `text` | `#1A1C1E` | `#E2E2E6` | 主标题、正文、关键数值 |
+| `text-muted` | `#43474E` | `#C3C7CF` | 描述、辅助信息、时间 |
+| `border` | `#C3C7CF` | `#43474E` | 边框、分隔线 |
+| `primary` | `#0061A4` | `#9ECAEF` | 主按钮、当前导航、链接、焦点 |
+| `primary-hover` | `#0058BD` | `#9ECAEF` | 主操作悬停 |
+| `primary-container` | `#D1E4FF` | `#00497D` | 选中背景、轻量提示 |
 
 操作层只保留一个主色系：`primary`。Google 品牌四色属于品牌 Token，不参与业务状态表达，也不在每个组件中随意混用。
 
@@ -132,10 +132,10 @@ spacing:
 | `warning-container` | `#FEF3C7` | `#78350F` | 警告背景 |
 | `danger` | `#B42318` | `#FDA4AF` | 失败、停止、不可恢复错误 |
 | `danger-container` | `#FEE4E2` | `#4C0519` | 错误背景 |
-| `info` | `#1A73E8` | `#8AB4F8` | 信息、进行中、普通提示 |
-| `info-container` | `#E8F0FE` | `#1E3A5F` | 信息背景 |
+| `info` | `#0061A4` | `#9ECAEF` | 信息、进行中、普通提示 |
+| `info-container` | `#D1E4FF` | `#00497D` | 信息背景 |
 
-状态 Badge 使用语义变体：`success`、`warning`、`danger`、`info`、`neutral`。品牌绿只用于品牌标识，不能代替 `success`；品牌红不能代替 `danger`。
+状态 Badge 复用现有 `default`、`secondary`、`destructive`、`outline` 变体或已定义的语义样式。品牌绿只用于品牌标识，不能代替成功状态；品牌红不能代替失败状态。
 
 ### 品牌使用
 
@@ -178,8 +178,7 @@ Yatori 使用 Google 风格四色文字标识或四色 SVG 标识。登录页和
 
 桌面端使用全高应用壳：
 
-- `>= 1366px` 显示 `240px` 展开侧栏，放品牌、课程、签到、设置和版本。
-- `1024px - 1365px` 收成 `64px` 图标栏，图标必须有键盘可达的 Tooltip。
+- `>= 1024px` 显示 `240px` 展开侧栏，放品牌、课程、签到、设置和版本。
 - 主工作区占剩余宽度，顶栏放当前页面标题、任务入口、主题、账号和退出。
 - 任务只在需要时从右侧抽屉打开，不参与主工作区宽度计算。
 - 课程列表支持搜索、状态筛选和批量选择，不受常驻任务栏挤压。
@@ -239,7 +238,7 @@ Yatori 使用 Google 风格四色文字标识或四色 SVG 标识。登录页和
 
 - 当前项同时使用文字颜色、背景或下划线表达。
 - 所有原生按钮保留 `focus-visible` 样式。
-- 移动端底部导航图标尺寸统一为 `20px`，文字尺寸为 `12px`。
+- 移动端底部导航图标尺寸为 `18px`，文字尺寸为 `12px`。
 - 导航切换动画只做轻微位移或淡入，不使用明显弹跳。
 
 ### Dialog
@@ -277,6 +276,7 @@ Yatori 使用 Google 风格四色文字标识或四色 SVG 标识。登录页和
 | `pending` | `warning` | 等待原因、开始时间 |
 | `running` | `info` | 当前课程、进度、停止操作 |
 | `stopping` | `warning` | 停止请求已发送 |
+| `stopped` | `neutral` | 已停止、结束时间 |
 | `success` | `success` | 完成结果、结束时间 |
 | `partial_success` | `warning` | 已完成项、失败项、后续建议 |
 | `failed` | `danger` | 错误原因、重试或退出操作 |
@@ -314,7 +314,7 @@ Yatori 使用 Google 风格四色文字标识或四色 SVG 标识。登录页和
 
 ## 实施约束
 
-- 业务组件不直接写十六进制颜色。
+- 新增或重构的业务组件不直接写十六进制颜色；已有裸色类随所属区域改动逐步迁移。
 - 业务组件不创建新的字体、圆角和阴影体系。
 - 共用状态样式放入 `src/components/ui/` 的变体定义。
 - 页面级布局放在业务组件，跨页面 Token 放在 `src/index.css`。
