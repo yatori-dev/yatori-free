@@ -58,7 +58,7 @@
 - ![SQLite](https://img.shields.io/badge/SQLite-3-yellow.svg?style=flat-square&logo=sqlite&logoColor=white)
 - ![systemd](https://img.shields.io/badge/systemd-257-red.svg?style=flat-square&logo=systemd&logoColor=white)
 - ![Cloudflare Tunnel](https://img.shields.io/badge/Cloudflare%20Tunnel-2026.7.3-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
-- ![yatori-go-core](https://img.shields.io/badge/yatori--go--core-2.0.4.9-green.svg?style=flat-square&logoColor=white)
+- ![yatori-go-core](https://img.shields.io/badge/yatori--go--core-2.0.5.0-green.svg?style=flat-square&logoColor=white)
 
 > 服务端遵循 [yatori-go-core](https://github.com/yatori-dev/yatori-go-core) 等项目的开源协议，以闭源方式提供网络服务
 
@@ -66,9 +66,4 @@
 
 > [!NOTE]
 >
-> **本网页服务的群组仅限群成员邀请加入。** 
-
-> 以下是上游项目的官方QQ群组，与本网页服务内容无关：
-> - [932447008](https://qm.qq.com/q/KREkme4rYc)（一群，未满）（推荐）
-> - [1044155704](https://qm.qq.com/q/ZmBAjtFJi6)（二群，已满）
-> - [1101685348](https://qm.qq.com/q/3MOiFau9pY)（三群，未满）（推荐）
+> **本网页服务的QQ群组仅限群成员邀请加入。** 
