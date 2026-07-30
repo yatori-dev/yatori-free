@@ -187,7 +187,7 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
   const isError = Boolean(error) || session?.status === 'failed';
 
   return (
-    <section className="login-qr-pane hidden min-h-[516px] flex-col items-center justify-center border-r border-border bg-card px-10 py-12 text-center md:flex">
+    <section className="login-qr-pane hidden min-h-[516px] flex-col items-center justify-center border-r border-border bg-transparent px-10 py-12 text-center md:flex">
       <div className="mb-5 flex items-center justify-center font-semibold text-3xl tracking-tight select-none" aria-hidden="true">
         <span className="text-[var(--google-blue)]">Y</span>
         <span className="text-[var(--google-red)]">a</span>
