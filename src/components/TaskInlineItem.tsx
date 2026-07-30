@@ -41,6 +41,16 @@ function formatDateTime(value?: string | null) {
   return `${m}-${d} ${hr}:${min}:${sec}`;
 }
 
+function getCompactErrorMessage(message: string) {
+  const detail = message.includes(':') ? message.slice(message.indexOf(':') + 1) : message;
+  const meaningfulParts = detail
+    .split(/[，,]/)
+    .map((part) => part.trim())
+    .filter((part) => part && !/\s0\s*(?:门|个|项)$/.test(part));
+
+  return meaningfulParts.join('，') || message;
+}
+
 function getProgressFallback(status: Task['status'], progressPercent = 0) {
   switch (status) {
     case 'success':
@@ -95,7 +105,7 @@ const STAGES = [
 ];
 
 export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseNameByIdentifier = {}, snapshot, onStopTask }) => {
-  const [showConfig, setShowConfig] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const taskProgress = task.progress ?? null;
   const snapshotProgress = snapshot?.progress ?? null;
@@ -221,6 +231,16 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const examAutoSubmitValue = coursesCustom?.examAutoSubmit;
   const workAutoSubmitLabel = getAutoSubmitLabel(workAutoSubmitValue);
   const examAutoSubmitLabel = getAutoSubmitLabel(examAutoSubmitValue);
+  const enabledAutomationLabels = [
+    coursesCustom?.doChapterTest ? '章节测试' : null,
+    coursesCustom?.doWork ? '课程作业' : null,
+    coursesCustom?.doExam ? '课程考试' : null,
+  ].filter(Boolean) as string[];
+  const hasRecordedAutomation = coursesCustom !== undefined && [
+    coursesCustom.doChapterTest,
+    coursesCustom.doWork,
+    coursesCustom.doExam,
+  ].some((value) => value !== undefined);
   const includeCourses = coursesCustom?.includeCourses;
   const studyIncrementSettings = coursesCustom?.coursesSettings?.flatMap((setting) => {
     if (!setting.classId || !setting.studyIncrement) {
@@ -255,6 +275,31 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   })();
 
   const isTerminal = ['success', 'partial_success', 'failed', 'stopped'].includes(effectiveStatus);
+  const processedUnits = (completedUnits ?? 0) + (failedUnits ?? 0);
+  const terminalSummary = (() => {
+    if (effectiveStatus === 'success') {
+      return hasUnitCounts && totalUnits ? `已完成 ${processedUnits} / ${totalUnits} 个任务点` : '任务已完成';
+    }
+    if (effectiveStatus === 'stopped') {
+      return hasUnitCounts && totalUnits ? `停止前已处理 ${processedUnits} / ${totalUnits} 个任务点` : '任务已停止';
+    }
+
+    const unitSummary = hasUnitCounts && totalUnits
+      ? (failedUnits ?? 0) > 0
+        ? `任务点失败 ${failedUnits} 个`
+        : processedUnits >= totalUnits
+          ? '任务点已完成'
+          : `已处理 ${processedUnits} / ${totalUnits} 个任务点`
+      : '';
+    const compactError = taskErrorMessage ? getCompactErrorMessage(taskErrorMessage) : '';
+    const errorSummary = (failedUnits ?? 0) > 0
+      ? compactError
+          .split('，')
+          .filter((part) => !part.startsWith('任务点失败'))
+          .join('，')
+      : compactError;
+    return [unitSummary, errorSummary].filter(Boolean).join('，') || (effectiveStatus === 'failed' ? '任务未成功完成' : '部分任务未完成');
+  })();
 
   return (
     <article className={`group flex w-full min-w-0 flex-col gap-3 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-rest transition-all duration-200 ease-standard hover:shadow-raised dark:hover:bg-accent/10 sm:gap-4 sm:p-5 ${
@@ -346,36 +391,25 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
           </div>
         </div>
       ) : (
-        /* Completed Track Collapse (终态结果摘要) */
-        <div className={`flex items-center justify-between rounded-xl border p-3 text-xs font-medium ${
+        <div className={`flex min-w-0 items-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium ${
           effectiveStatus === 'success'
             ? 'border-success/30 bg-success-container/30 text-success'
             : effectiveStatus === 'failed'
               ? 'border-danger/30 bg-danger-container/30 text-danger'
-              : 'border-border bg-muted/30 text-muted-foreground'
+              : effectiveStatus === 'partial_success'
+                ? 'border-warning/30 bg-warning-container/30 text-warning'
+                : 'border-border bg-muted/30 text-muted-foreground'
         }`}>
-          <div className="flex items-center gap-2">
-            {effectiveStatus === 'success' && <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />}
-            {effectiveStatus === 'failed' && <XCircle className="h-4 w-4 shrink-0 text-danger" />}
-            {effectiveStatus === 'stopped' && <Square className="h-4 w-4 shrink-0 text-muted-foreground" />}
-            {effectiveStatus === 'partial_success' && <AlertCircle className="h-4 w-4 shrink-0 text-warning" />}
-            <span className="font-semibold">
-              {effectiveStatus === 'success' && '任务执行完成'}
-              {effectiveStatus === 'partial_success' && '任务部分完成'}
-              {effectiveStatus === 'failed' && '任务未成功完成'}
-              {effectiveStatus === 'stopped' && '任务已停止运行'}
-            </span>
-          </div>
-          {hasUnitCounts && (
-            <span className="tabular-nums font-mono opacity-90">
-              已处理 {(completedUnits ?? 0) + (failedUnits ?? 0)} / {totalUnits} 任务点
-            </span>
-          )}
+          {effectiveStatus === 'success' && <CheckCircle2 className="h-4 w-4 shrink-0" />}
+          {effectiveStatus === 'failed' && <XCircle className="h-4 w-4 shrink-0" />}
+          {effectiveStatus === 'stopped' && <Square className="h-4 w-4 shrink-0" />}
+          {effectiveStatus === 'partial_success' && <AlertCircle className="h-4 w-4 shrink-0" />}
+          <span className="min-w-0 wrap-anywhere">{terminalSummary}</span>
         </div>
       )}
 
       {/* Error Message Box */}
-      {taskErrorMessage && (
+      {taskErrorMessage && !isTerminal && (
         <div className="flex w-full min-w-0 gap-2.5 rounded-lg border border-danger/30 bg-danger-container/40 p-3 text-xs leading-relaxed text-danger">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <div className="wrap-anywhere font-sans min-w-0">
@@ -429,7 +463,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
       )}
 
       {/* Date & Time details */}
-      <div className="flex flex-col gap-1 px-1 font-mono text-xs text-muted-foreground">
+      {!isTerminal && <div className="flex flex-col gap-1 px-1 font-mono text-xs text-muted-foreground">
         <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 min-w-0">
           <span className="shrink-0">启动时间:</span>
           <span className="text-right wrap-anywhere">{task.startedAt ? formatDateTime(task.startedAt) : '未启动'}</span>
@@ -440,62 +474,79 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
             <span className="text-right wrap-anywhere">{formatDateTime(task.stoppedAt)}</span>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Settings Snapshot (Collapsible Drawer - Secondary) */}
       <div
-        className={`grid transition-[grid-template-rows,opacity] duration-200 ease-out ${showConfig ? 'grid-rows-[1fr] opacity-100' : 'pointer-events-none grid-rows-[0fr] opacity-0'}`}
-        aria-hidden={!showConfig}
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-standard motion-reduce:transition-none ${showDetails ? 'grid-rows-[1fr] opacity-100' : 'pointer-events-none grid-rows-[0fr] opacity-0'}`}
+        aria-hidden={!showDetails}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className="mt-1 min-w-0 w-full space-y-2 rounded-lg border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground">
+          {isTerminal && (
+            <div className="mb-3 space-y-3">
+              {taskErrorMessage && (
+                <div className="flex w-full min-w-0 gap-2.5 rounded-lg border border-danger/30 bg-danger-container/30 p-3 text-xs leading-relaxed text-danger">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div className="min-w-0 wrap-anywhere">
+                    <span className="mb-0.5 block font-semibold">异常详情</span>
+                    {taskErrorMessage}
+                  </div>
+                </div>
+              )}
+              <div className="flex flex-col gap-1 px-1 font-mono text-xs text-muted-foreground">
+                <div className="flex min-w-0 flex-wrap justify-between gap-x-3 gap-y-0.5">
+                  <span className="shrink-0">启动时间</span>
+                  <span className="text-right wrap-anywhere">{task.startedAt ? formatDateTime(task.startedAt) : '未启动'}</span>
+                </div>
+                {task.stoppedAt && (
+                  <div className="flex min-w-0 flex-wrap justify-between gap-x-3 gap-y-0.5">
+                    <span className="shrink-0">结束时间</span>
+                    <span className="text-right wrap-anywhere">{formatDateTime(task.stoppedAt)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          <div className="mt-1 min-w-0 w-full space-y-3 rounded-lg border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5 border-b border-border/50 pb-1.5 text-xs font-semibold text-foreground">
               <Settings2 className="w-3.5 h-3.5 text-muted-foreground" />
-              <span>任务配置详情</span>
+              <span>任务配置</span>
             </div>
             {coursesCustom ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 font-sans">
-                <div className="flex justify-between gap-2 min-w-0">
-                  <span>章节测试:</span>
-                  <span className="font-semibold text-foreground">
-                    {coursesCustom.doChapterTest === undefined ? '未记录' : coursesCustom.doChapterTest ? '开启' : '关闭'}
+              <div className="space-y-2 font-sans">
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                  <span className="shrink-0">自动答题</span>
+                  <span className="text-right font-semibold text-foreground wrap-anywhere">
+                    {enabledAutomationLabels.length > 0
+                      ? enabledAutomationLabels.join('、')
+                      : hasRecordedAutomation
+                        ? '未开启'
+                        : '未记录'}
                   </span>
                 </div>
-                <div className="flex justify-between gap-2 min-w-0">
-                  <span>课程作业:</span>
-                  <span className="font-semibold text-foreground">
-                    {coursesCustom.doWork === undefined ? '未记录' : coursesCustom.doWork ? '开启' : '关闭'}
-                  </span>
-                </div>
-                <div className="flex justify-between gap-2 min-w-0">
-                  <span>课程考试:</span>
-                  <span className="font-semibold text-foreground">
-                    {coursesCustom.doExam === undefined ? '未记录' : coursesCustom.doExam ? '开启' : '关闭'}
-                  </span>
-                </div>
-                <div className="flex justify-between gap-2 min-w-0">
-                  <span>作业提交:</span>
-                  <span className={`font-semibold ${workAutoSubmitValue ? 'text-success' : 'text-muted-foreground'}`}>
-                    {workAutoSubmitLabel}
-                  </span>
-                </div>
-                <div className="flex justify-between gap-2 min-w-0">
-                  <span>考试提交:</span>
-                  <span className={`font-semibold ${examAutoSubmitValue ? 'text-success' : 'text-muted-foreground'}`}>
-                    {examAutoSubmitLabel}
-                  </span>
-                </div>
-                <div className="flex justify-between gap-2 min-w-0">
-                  <span>答题模式:</span>
-                  <span className="font-semibold text-foreground text-right wrap-anywhere">
-                    {coursesCustom.answerMode ?? '未记录'}
-                  </span>
-                </div>
+                {coursesCustom.doWork && (
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <span className="shrink-0">作业提交</span>
+                    <span className="text-right font-semibold text-foreground">{workAutoSubmitLabel}</span>
+                  </div>
+                )}
+                {coursesCustom.doExam && (
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <span className="shrink-0">考试提交</span>
+                    <span className="text-right font-semibold text-foreground">{examAutoSubmitLabel}</span>
+                  </div>
+                )}
+                {coursesCustom.answerMode && (
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <span className="shrink-0">答题模式</span>
+                    <span className="text-right font-semibold text-foreground wrap-anywhere">{coursesCustom.answerMode}</span>
+                  </div>
+                )}
                 {studyIncrementSettings.length > 0 && (
-                  <div className="col-span-full space-y-1 border-t border-border/50 pt-2">
+                  <div className="space-y-1.5 border-t border-border/50 pt-2.5">
                     <span className="flex items-center gap-1">
                       <Sparkles className="h-3 w-3 text-primary" />
-                      学习目标:
+                      学习目标
                     </span>
                     {studyIncrementSettings.map((setting) => {
                       const courseName = courseNameByIdentifier[setting.classId] ?? setting.classId;
@@ -534,11 +585,12 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
         <Button
           size="sm"
           variant="ghost"
-          onClick={() => setShowConfig(!showConfig)}
+          onClick={() => setShowDetails(!showDetails)}
+          aria-expanded={showDetails}
           className="h-8 text-xs text-muted-foreground hover:text-foreground hover:bg-muted px-3 flex items-center gap-1.5 transition-colors shrink-0"
         >
-          {showConfig ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-          配置参数
+          {showDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          {isTerminal ? (showDetails ? '收起详情' : '查看详情') : '配置参数'}
         </Button>
         
         {canStopTask && (
