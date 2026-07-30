@@ -30,7 +30,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: .node-version
+          node-version: 24.14.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
