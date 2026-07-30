@@ -1348,11 +1348,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                         <Label htmlFor="hideEmptyTaskCourses" className="text-sm font-semibold cursor-pointer block text-[#191c1d] dark:text-[#e3e3e3]">
                           隐藏无任务点课程
                         </Label>
-                        {hiddenEmptyTaskCourseCount > 0 && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                            当前已隐藏 {hiddenEmptyTaskCourseCount} 门
-                          </p>
-                        )}
+                        <div
+                          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none ${hiddenEmptyTaskCourseCount > 0 ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+                          aria-hidden={hiddenEmptyTaskCourseCount === 0}
+                        >
+                          <div className="min-h-0 overflow-hidden">
+                            <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                              当前已隐藏 {hiddenEmptyTaskCourseCount} 门
+                            </p>
+                          </div>
+                        </div>
                       </div>
                       <Switch
                         id="hideEmptyTaskCourses"
@@ -1379,7 +1384,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
                     <div className="grid grid-cols-1 gap-3 sm:gap-6 xl:grid-cols-2">
                       {/* 课程作业 */}
-                      <div className="space-y-3 rounded-md border border-border/50 bg-muted/25 p-3 sm:space-y-4 sm:rounded-lg sm:p-5">
+                      <div className="rounded-md border border-border/50 bg-muted/25 p-3 sm:rounded-lg sm:p-5">
                         <div className="flex items-center justify-between gap-3">
                           <div className="space-y-1">
                             <Label htmlFor="doWork" className="text-sm font-semibold cursor-pointer text-[#191c1d] dark:text-[#e3e3e3]">课程作业自动答题</Label>
@@ -1392,8 +1397,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                           />
                         </div>
 
-                        {doWork && <div className="grid grid-cols-2 gap-2 sm:gap-4 md:grid-cols-2">
-                          <button
+                        <div
+                          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none ${doWork ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+                          aria-hidden={!doWork}
+                        >
+                          <div className="min-h-0 overflow-hidden">
+                            <div className="grid grid-cols-2 gap-2 pt-3 sm:gap-4 sm:pt-4 md:grid-cols-2">
+                              <button
                             type="button"
                             disabled={!doWork}
                             onClick={() => updateWorkAutoSubmit(1)}
@@ -1417,7 +1427,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                 <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-[#121314]" />
                               )}
                             </div>
-                          </button>
+                              </button>
 
                           <button
                             type="button"
@@ -1443,12 +1453,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                 <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-[#121314]" />
                               )}
                             </div>
-                          </button>
-                        </div>}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
                       {/* 考试自动答题 */}
-                      <div className="space-y-3 rounded-md border border-border/50 bg-muted/25 p-3 sm:space-y-4 sm:rounded-lg sm:p-5">
+                      <div className="rounded-md border border-border/50 bg-muted/25 p-3 sm:rounded-lg sm:p-5">
                         <div className="flex items-center justify-between gap-3">
                           <div className="space-y-1">
                             <Label htmlFor="doExam" className="text-sm font-semibold cursor-pointer text-[#191c1d] dark:text-[#e3e3e3]">考试自动答题</Label>
@@ -1461,8 +1473,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                           />
                         </div>
 
-                        {doExam && <div className="grid grid-cols-2 gap-2 sm:gap-4 md:grid-cols-2">
-                          <button
+                        <div
+                          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none ${doExam ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+                          aria-hidden={!doExam}
+                        >
+                          <div className="min-h-0 overflow-hidden">
+                            <div className="grid grid-cols-2 gap-2 pt-3 sm:gap-4 sm:pt-4 md:grid-cols-2">
+                              <button
                             type="button"
                             disabled={!doExam}
                             onClick={() => updateExamAutoSubmit(1)}
@@ -1486,7 +1503,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                 <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-[#121314]" />
                               )}
                             </div>
-                          </button>
+                              </button>
 
                           <button
                             type="button"
@@ -1512,8 +1529,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                 <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-[#121314]" />
                               )}
                             </div>
-                          </button>
-                        </div>}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     </section>
@@ -1523,7 +1542,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             </TabsContent>
 
             <TabsContent value="tasks" className="m-0 outline-none lg:hidden">
-              <Card className="min-w-0 overflow-hidden rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm sm:ring-1">
+              <Card className="min-w-0 overflow-hidden rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm sm:ring-0">
                 <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
                   <CardTitle className="text-sm font-semibold sm:text-base">任务</CardTitle>
                   <CardDescription className="text-xs">查看任务运行状态与进度</CardDescription>
