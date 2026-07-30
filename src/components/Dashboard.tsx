@@ -1348,10 +1348,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                         <Label htmlFor="hideEmptyTaskCourses" className="text-sm font-semibold cursor-pointer block text-[#191c1d] dark:text-[#e3e3e3]">
                           隐藏无任务点课程
                         </Label>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                          开启后，课程列表不显示任务点为 0 的课程
-                          {hiddenEmptyTaskCourseCount > 0 ? `，当前已隐藏 ${hiddenEmptyTaskCourseCount} 门` : ''}
-                        </p>
+                        {hiddenEmptyTaskCourseCount > 0 && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                            当前已隐藏 {hiddenEmptyTaskCourseCount} 门
+                          </p>
+                        )}
                       </div>
                       <Switch
                         id="hideEmptyTaskCourses"
@@ -1367,9 +1368,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                         <Label htmlFor="doChapterTest" className="text-sm font-semibold cursor-pointer block text-[#191c1d] dark:text-[#e3e3e3]">
                           章节测试自动答题
                         </Label>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                          开启后，将自动完成所选课程的章节测试任务点
-                        </p>
                       </div>
                       <Switch
                         id="doChapterTest"
@@ -1385,7 +1383,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                         <div className="flex items-center justify-between gap-3">
                           <div className="space-y-1">
                             <Label htmlFor="doWork" className="text-sm font-semibold cursor-pointer text-[#191c1d] dark:text-[#e3e3e3]">课程作业自动答题</Label>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">开启后，将自动作答所选课程中的作业</p>
                           </div>
                           <Switch
                             id="doWork"
@@ -1455,7 +1452,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                         <div className="flex items-center justify-between gap-3">
                           <div className="space-y-1">
                             <Label htmlFor="doExam" className="text-sm font-semibold cursor-pointer text-[#191c1d] dark:text-[#e3e3e3]">考试自动答题</Label>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">开启后，将自动作答所选课程中已开放的考试</p>
                           </div>
                           <Switch
                             id="doExam"
