@@ -199,7 +199,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 
                 <form onSubmit={handleNextStep} autoComplete="on" className="w-full space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="account">手机号</Label>
+                    <Label htmlFor="account">账号</Label>
                     <Input
                       id="account"
                       name="username"
