@@ -291,8 +291,29 @@ function getApiErrorPayloadMessage(error: unknown) {
     return null;
   }
 
-  const message = error.payload.message.trim();
-  return message || null;
+  const payload = error.payload as Record<string, unknown>;
+  const data = typeof payload.data === 'object' && payload.data !== null
+    ? payload.data as Record<string, unknown>
+    : null;
+
+  // Backend integrations may keep the upstream failure detail in data.detail
+  // while using a generic top-level message for the API operation.
+  const candidates = [
+    data?.detail,
+    data?.message,
+    data?.error,
+    payload.detail,
+    payload.error,
+    payload.message,
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return candidate.trim();
+    }
+  }
+
+  return null;
 }
 
 export function getUserFacingErrorMessage(error: unknown, fallback = '请求失败') {

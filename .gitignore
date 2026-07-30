@@ -16,7 +16,7 @@ logs/
 *.log
 pnpm-debug.log*
 
-# Local Codex and project instructions
+# Local project instructions
 .codex/
 AGENTS.md
 *.code-workspace
@@ -33,3 +33,4 @@ AGENTS.md
 
 # OS files
 .DS_Store
+.env
