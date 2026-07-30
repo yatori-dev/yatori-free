@@ -7,6 +7,8 @@ export interface ApiError extends Error {
 
 export interface ApiResponse {
   code: number;
+  message?: string;
+  error?: string;
 }
 
 export interface ApiDataResponse<T> extends ApiResponse {
@@ -283,37 +285,12 @@ function getApiErrorPayloadMessage(error: unknown) {
     typeof error !== 'object' ||
     error === null ||
     !('payload' in error) ||
-    typeof error.payload !== 'object' ||
-    error.payload === null ||
-    !('message' in error.payload) ||
-    typeof error.payload.message !== 'string'
+    !isApiResponse(error.payload)
   ) {
     return null;
   }
 
-  const payload = error.payload as Record<string, unknown>;
-  const data = typeof payload.data === 'object' && payload.data !== null
-    ? payload.data as Record<string, unknown>
-    : null;
-
-  // Backend integrations may keep the upstream failure detail in data.detail
-  // while using a generic top-level message for the API operation.
-  const candidates = [
-    data?.detail,
-    data?.message,
-    data?.error,
-    payload.detail,
-    payload.error,
-    payload.message,
-  ];
-
-  for (const candidate of candidates) {
-    if (typeof candidate === 'string' && candidate.trim()) {
-      return candidate.trim();
-    }
-  }
-
-  return null;
+  return getApiResponseMessage(error.payload);
 }
 
 export function getUserFacingErrorMessage(error: unknown, fallback = '请求失败') {
@@ -375,8 +352,12 @@ function isApiResponse(payload: unknown): payload is ApiResponse {
 }
 
 function getApiResponseMessage(payload: ApiResponse) {
-  return 'message' in payload && typeof payload.message === 'string'
-    ? payload.message
+  if (payload.error === 'INVALID_CREDENTIALS') {
+    return '学习通账号或密码错误';
+  }
+
+  return typeof payload.message === 'string' && payload.message.trim()
+    ? payload.message.trim()
     : null;
 }
 
