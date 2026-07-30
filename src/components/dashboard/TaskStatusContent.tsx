@@ -35,7 +35,15 @@ export function TaskStatusContent({
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <div className="flex items-center justify-between gap-3 border-b border-border/50 px-3 py-1.5 sm:px-5 sm:py-3">
         {tasks.length > 0 ? (
-          <div className="flex min-w-0 gap-5 overflow-x-auto no-scrollbar" role="group" aria-label="任务状态筛选">
+          <div
+            className="relative flex min-w-0 overflow-x-auto no-scrollbar"
+            role="group"
+            aria-label="任务状态筛选"
+          >
+            <span
+              aria-hidden="true"
+              className={`pointer-events-none absolute bottom-0 left-0 h-0.5 w-20 rounded-full bg-primary transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none ${taskFilter === 'completed' ? 'translate-x-20' : 'translate-x-0'}`}
+            />
             {[
               { id: 'active' as const, label: '进行中', count: taskCounts.active },
               { id: 'completed' as const, label: '已结束', count: taskCounts.completed },
@@ -44,9 +52,9 @@ export function TaskStatusContent({
                 key={filter.id}
                 type="button"
                 onClick={() => onTaskFilterChange(filter.id)}
-                className={`relative flex min-h-9 shrink-0 items-center gap-1.5 px-0.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-11 ${
+                className={`relative flex min-h-9 w-20 shrink-0 items-center justify-center gap-1.5 px-0.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-11 ${
                   taskFilter === filter.id
-                    ? 'text-foreground after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:rounded-full after:bg-primary'
+                    ? 'text-foreground'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
                 aria-pressed={taskFilter === filter.id}
