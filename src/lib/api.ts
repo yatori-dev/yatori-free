@@ -352,10 +352,6 @@ function isApiResponse(payload: unknown): payload is ApiResponse {
 }
 
 function getApiResponseMessage(payload: ApiResponse) {
-  if (payload.error === 'INVALID_CREDENTIALS') {
-    return '学习通账号或密码错误';
-  }
-
   return typeof payload.message === 'string' && payload.message.trim()
     ? payload.message.trim()
     : null;
