@@ -34,6 +34,7 @@ import { StudyIncrementSettings } from './StudyIncrementSettings';
 import { EmailNotificationSettings } from './EmailNotificationSettings';
 import { OpenSourceDialog } from './OpenSourceDialog';
 import { NightTaskConfirmDialog } from './dashboard/NightTaskConfirmDialog';
+import { LogoutConfirmDialog } from './dashboard/LogoutConfirmDialog';
 import { 
   LogOut, 
   Play, 
@@ -289,6 +290,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [courseDetailsMap, setCourseDetailsMap] = useState<Record<string, CourseDetails>>({});
   const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>({});
   const [nightConfirmOpen, setNightConfirmOpen] = useState(false);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   
   // Loading flags
   const [coursesLoading, setCoursesLoading] = useState(false);
@@ -881,7 +883,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             <Button
               size="icon"
               variant="ghost"
-              onClick={onLogout}
+              onClick={() => setLogoutConfirmOpen(true)}
               className="h-8 w-8 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground sm:ml-1 sm:h-6 sm:w-6"
               title="退出登录"
               aria-label="退出登录"
@@ -1621,6 +1623,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         open={nightConfirmOpen}
         onOpenChange={setNightConfirmOpen}
         onConfirm={executeSubmitTask}
+      />
+      <LogoutConfirmDialog
+        open={logoutConfirmOpen}
+        onOpenChange={setLogoutConfirmOpen}
+        onConfirm={() => {
+          setLogoutConfirmOpen(false);
+          onLogout();
+        }}
       />
 
       <StudyIncrementSettings
