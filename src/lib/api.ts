@@ -432,10 +432,23 @@ export interface SignLog {
   courseName?: string;
   signName?: string;
   result: string;
+  activityStatus?: number;
+  activityTime?: string;
+  personalStatus?: number | null;
   signInActivityId?: string;
   signOutActivityId?: string;
   signOutPublishAt?: string | null;
+  signType?: string;
+  signedCount?: number | null;
+  submittedAt?: string;
+  totalCount?: number | null;
   createdAt: string;
+}
+
+export interface SignHistoryError {
+  classId: string;
+  courseName: string;
+  error: string;
 }
 
 export interface SignMonitorStatus {
@@ -458,6 +471,7 @@ export interface SignLogsResponseData {
   total: number;
   limit: number;
   offset: number;
+  errors: SignHistoryError[];
 }
 
 export function login(payload: LoginRequest) {

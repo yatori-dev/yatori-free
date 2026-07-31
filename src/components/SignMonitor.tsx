@@ -10,6 +10,7 @@ import {
   isAuthExitError,
 } from '@/lib/api';
 import type { SignLog } from '@/lib/api';
+import type { SignHistoryError } from '@/lib/api';
 import type { SignLogsResponseData } from '@/lib/api';
 import { getSessionCached, readSessionCache, writeSessionCache } from '@/lib/sessionCache';
 import {
@@ -80,6 +81,9 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
   );
   const [logs, setLogs] = useState<SignLog[]>(() => initialLogs?.logs ?? []);
   const [logsTotal, setLogsTotal] = useState(() => initialLogs?.total ?? 0);
+  const [historyErrors, setHistoryErrors] = useState<SignHistoryError[]>(
+    () => initialLogs?.errors ?? [],
+  );
   const [logsLoading, setLogsLoading] = useState(() => initialLogs === undefined);
   const [toggleAction, setToggleAction] = useState<'start' | 'stop' | null>(null);
   const [monitorState, setMonitorState] = useState(() => ({
@@ -113,6 +117,7 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
       writeSessionCache(cacheKey, data);
       setLogs(data.logs);
       setLogsTotal(data.total);
+      setHistoryErrors(data.errors);
     } catch (error) {
       if (isAuthExitError(error)) {
         toast.error(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
@@ -290,6 +295,25 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
         </CardHeader>
 
         <CardContent className="p-0">
+          {historyErrors.length > 0 && (
+            <div
+              className="border-b border-warning/25 bg-warning-container/45 px-4 py-3 text-xs text-warning sm:px-6"
+              role="alert"
+            >
+              <div className="flex items-start gap-2">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <div className="min-w-0 space-y-1">
+                  <p className="font-semibold">{historyErrors.length} 门课程的签到历史读取失败</p>
+                  {historyErrors.map((item) => (
+                    <p key={item.classId} className="break-words text-muted-foreground">
+                      {item.courseName}：{item.error}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="max-h-[600px] min-h-[260px] overflow-y-auto">
             {logsLoading && logs.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-12 text-muted-foreground text-xs h-full">
