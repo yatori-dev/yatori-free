@@ -30,7 +30,8 @@ This repository has a hard rule: read the latest official API doc first, then co
 
 - Always download the latest doc before changing frontend API code.
 - The official doc is a live-updating OpenAPI JSON endpoint. Do not commit downloaded docs, generated outputs, or API snapshots.
-- The fetch script reads the API doc secret from `YATORI_API_DOC_SECRET`, or from an explicit `-Secret` / `-Url` argument.
+- The fetch script reads the API doc secret from `YATORI_API_DOC_SECRET`, then the repository root `.env`, or from an explicit `-Secret` / `-Url` argument.
+- Send the secret with the `X-Docs-Secret` request header. Do not print it or add it to generated output.
 - Prefer changing `src/lib/api.ts` before touching UI components.
 - If the doc and frontend disagree, trust the doc unless the user says otherwise.
 - When the backend shape is unclear, call that out instead of inventing a type.
