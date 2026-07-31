@@ -117,7 +117,7 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
       writeSessionCache(cacheKey, data);
       setLogs(data.logs);
       setLogsTotal(data.total);
-      setHistoryErrors(data.errors);
+      setHistoryErrors(Array.isArray(data.errors) ? data.errors : []);
     } catch (error) {
       if (isAuthExitError(error)) {
         toast.error(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
