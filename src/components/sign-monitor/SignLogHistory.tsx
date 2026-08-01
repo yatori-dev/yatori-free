@@ -126,14 +126,14 @@ export function SignLogHistory({
   );
   const courseGroups = useMemo(() => {
     const groups = new Map<string, SignLog[]>();
-    visibleLogs.forEach((log) => {
+    sortedLogs.forEach((log) => {
       const courseName = log.courseName ?? '课程未记录';
       const group = groups.get(courseName) ?? [];
       group.push(log);
       groups.set(courseName, group);
     });
     return [...groups.entries()];
-  }, [visibleLogs]);
+  }, [sortedLogs]);
   const currentPage = Math.floor(offset / limit) + 1;
   const pageCount = Math.max(1, Math.ceil(total / limit));
   const signedCount = useMemo(
@@ -258,6 +258,7 @@ export function SignLogHistory({
                           className="sticky top-0 z-10 flex min-h-11 w-full items-center gap-3 border-b border-border/40 bg-muted/80 px-4 py-2 text-left backdrop-blur-sm transition-colors duration-200 ease-standard hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset sm:px-6"
                           aria-expanded={!isCollapsed}
                           aria-controls={panelId}
+                          aria-label={`${courseName}，${courseLogs.length} 条`}
                           onClick={() => toggleCourse(courseName)}
                         >
                           <ChevronDown
@@ -303,92 +304,94 @@ export function SignLogHistory({
             <span className="tabular-nums text-foreground">{total}</span> 条
           </p>
 
-          <form
-            className="flex items-center justify-between gap-1 sm:justify-end"
-            aria-label="签到记录分页"
-            onSubmit={(event) => {
-              event.preventDefault();
-              submitPageInput();
-            }}
-          >
-            <div className="flex items-center gap-1">
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="h-11 w-11 rounded-lg"
-                disabled={currentPage === 1}
-                title="第一页"
-                aria-label="第一页"
-                onClick={() => goToPage(1)}
-              >
-                <ChevronsLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="h-11 w-11 rounded-lg"
-                disabled={currentPage === 1}
-                title="上一页"
-                aria-label="上一页"
-                onClick={() => goToPage(currentPage - 1)}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-            </div>
+          {view === 'time' && (
+            <form
+              className="flex items-center justify-between gap-1 sm:justify-end"
+              aria-label="签到记录分页"
+              onSubmit={(event) => {
+                event.preventDefault();
+                submitPageInput();
+              }}
+            >
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="h-11 w-11 rounded-lg"
+                  disabled={currentPage === 1}
+                  title="第一页"
+                  aria-label="第一页"
+                  onClick={() => goToPage(1)}
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="h-11 w-11 rounded-lg"
+                  disabled={currentPage === 1}
+                  title="上一页"
+                  aria-label="上一页"
+                  onClick={() => goToPage(currentPage - 1)}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              </div>
 
-            <label className="flex h-11 items-center gap-1 rounded-lg border border-input bg-card px-2 text-xs text-muted-foreground focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
-              <span className="sr-only">当前页码</span>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={pageInput}
-                onChange={(event) => setPageDraft({
-                  page: currentPage,
-                  value: event.target.value.replace(/\D/g, ''),
-                })}
-                onKeyDown={(event) => {
-                  if (event.key !== 'Enter') return;
-                  event.preventDefault();
-                  submitPageInput();
-                }}
-                onBlur={submitPageInput}
-                className="w-7 bg-transparent text-center font-semibold tabular-nums text-foreground outline-none"
-                aria-label={`当前第 ${currentPage} 页，共 ${pageCount} 页`}
-              />
-              <span aria-hidden="true">/</span>
-              <span className="min-w-4 tabular-nums" aria-hidden="true">{pageCount}</span>
-            </label>
+              <label className="flex h-11 items-center gap-1 rounded-lg border border-input bg-card px-2 text-xs text-muted-foreground focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
+                <span className="sr-only">当前页码</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={pageInput}
+                  onChange={(event) => setPageDraft({
+                    page: currentPage,
+                    value: event.target.value.replace(/\D/g, ''),
+                  })}
+                  onKeyDown={(event) => {
+                    if (event.key !== 'Enter') return;
+                    event.preventDefault();
+                    submitPageInput();
+                  }}
+                  onBlur={submitPageInput}
+                  className="w-7 bg-transparent text-center font-semibold tabular-nums text-foreground outline-none"
+                  aria-label={`当前第 ${currentPage} 页，共 ${pageCount} 页`}
+                />
+                <span aria-hidden="true">/</span>
+                <span className="min-w-4 tabular-nums" aria-hidden="true">{pageCount}</span>
+              </label>
 
-            <div className="flex items-center gap-1">
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="h-11 w-11 rounded-lg"
-                disabled={currentPage === pageCount}
-                title="下一页"
-                aria-label="下一页"
-                onClick={() => goToPage(currentPage + 1)}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="h-11 w-11 rounded-lg"
-                disabled={currentPage === pageCount}
-                title="最后一页"
-                aria-label="最后一页"
-                onClick={() => goToPage(pageCount)}
-              >
-                <ChevronsRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </form>
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="h-11 w-11 rounded-lg"
+                  disabled={currentPage === pageCount}
+                  title="下一页"
+                  aria-label="下一页"
+                  onClick={() => goToPage(currentPage + 1)}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="h-11 w-11 rounded-lg"
+                  disabled={currentPage === pageCount}
+                  title="最后一页"
+                  aria-label="最后一页"
+                  onClick={() => goToPage(pageCount)}
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </form>
+          )}
         </div>
       </CardContent>
     </Card>
