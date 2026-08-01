@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import {
   AlertCircle,
-  ArrowDownUp,
+  ChevronsLeft,
+  ChevronsRight,
   ChevronLeft,
   ChevronRight,
-  History,
-  Layers3,
+  ClipboardCheck,
   RefreshCw,
   Users,
 } from 'lucide-react';
@@ -18,10 +18,10 @@ import {
   getSignLogTimeValue,
   getSignResultClassName,
   getSignTypeBadge,
+  isSignResultSuccess,
 } from './sign-log-presentation';
-
-type SignLogView = 'time' | 'course';
-type SignLogOrder = 'newest' | 'oldest';
+import { SignLogViewMenu } from './SignLogViewMenu';
+import type { SignLogView } from './SignLogViewMenu';
 
 interface SignLogHistoryProps {
   errors: SignHistoryError[];
@@ -29,8 +29,7 @@ interface SignLogHistoryProps {
   loading: boolean;
   logs: SignLog[];
   offset: number;
-  onNextPage: () => void;
-  onPreviousPage: () => void;
+  onPageChange: (offset: number) => void;
   onRefresh: () => void;
   total: number;
 }
@@ -99,19 +98,23 @@ export function SignLogHistory({
   loading,
   logs,
   offset,
-  onNextPage,
-  onPreviousPage,
+  onPageChange,
   onRefresh,
   total,
 }: SignLogHistoryProps) {
   const [view, setView] = useState<SignLogView>('time');
-  const [order, setOrder] = useState<SignLogOrder>('newest');
   const sortedLogs = useMemo(() => (
     [...logs].sort((left, right) => {
-      const difference = getSignLogTimeValue(right) - getSignLogTimeValue(left);
-      return order === 'newest' ? difference : -difference;
+      const timeDifference = getSignLogTimeValue(right) - getSignLogTimeValue(left);
+      if (view === 'time') return timeDifference;
+
+      const courseDifference = (left.courseName ?? '课程未记录').localeCompare(
+        right.courseName ?? '课程未记录',
+        'zh-CN',
+      );
+      return courseDifference || timeDifference;
     })
-  ), [logs, order]);
+  ), [logs, view]);
   const visibleLogs = useMemo(
     () => sortedLogs.slice(offset, offset + limit),
     [limit, offset, sortedLogs],
@@ -128,51 +131,53 @@ export function SignLogHistory({
   }, [visibleLogs]);
   const currentPage = Math.floor(offset / limit) + 1;
   const pageCount = Math.max(1, Math.ceil(total / limit));
+  const signedCount = useMemo(
+    () => logs.filter((log) => isSignResultSuccess(log.result)).length,
+    [logs],
+  );
+  const [pageDraft, setPageDraft] = useState(() => ({
+    page: currentPage,
+    value: String(currentPage),
+  }));
+  const pageInput = pageDraft.page === currentPage ? pageDraft.value : String(currentPage);
+
+  const goToPage = (requestedPage: number) => {
+    const page = Math.min(pageCount, Math.max(1, requestedPage));
+    setPageDraft({ page, value: String(page) });
+    onPageChange((page - 1) * limit);
+  };
+
+  const submitPageInput = () => {
+    const requestedPage = Number.parseInt(pageInput, 10);
+    goToPage(Number.isFinite(requestedPage) ? requestedPage : currentPage);
+  };
 
   return (
-    <Card className="min-w-0 overflow-hidden rounded-xl border border-border bg-card p-0 shadow-xs">
-      <CardHeader className="flex flex-col gap-3 border-b border-border/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
+    <Card className="min-w-0 overflow-visible rounded-xl border border-border bg-card p-0 shadow-xs">
+      <CardHeader className="relative z-20 flex flex-col gap-3 border-b border-border/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
         <div className="min-w-0">
           <CardTitle className="flex items-center gap-2 text-sm font-semibold sm:text-base">
-            <History className="h-4 w-4 shrink-0 text-primary" />
-            <span className="truncate">签到监控记录</span>
+            <ClipboardCheck className="h-4 w-4 shrink-0 text-primary" />
+            <span className="truncate">账户签到记录</span>
           </CardTitle>
-          <CardDescription className="mt-1 text-xs">最近捕获的签到历史</CardDescription>
+          <CardDescription className="mt-1 text-xs">全部课程签到信息</CardDescription>
         </div>
 
         <div className="flex min-w-0 items-center gap-2">
-          <label className="relative min-w-0 flex-1 sm:w-[104px] sm:flex-none">
-            <span className="sr-only">记录视图</span>
-            <Layers3 className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <select
-              value={view}
-              onChange={(event) => setView(event.target.value as SignLogView)}
-              className="h-10 w-full rounded-lg border border-input bg-card pl-8 pr-2 text-xs font-medium text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:h-8"
-            >
-              <option value="time">按时间</option>
-              <option value="course">按课程</option>
-            </select>
-          </label>
-
-          <label className="relative min-w-0 flex-1 sm:w-[112px] sm:flex-none">
-            <span className="sr-only">时间排序</span>
-            <ArrowDownUp className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <select
-              value={order}
-              onChange={(event) => setOrder(event.target.value as SignLogOrder)}
-              className="h-10 w-full rounded-lg border border-input bg-card pl-8 pr-2 text-xs font-medium text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:h-8"
-            >
-              <option value="newest">最新优先</option>
-              <option value="oldest">最早优先</option>
-            </select>
-          </label>
+          <SignLogViewMenu
+            value={view}
+            onChange={(value) => {
+              setView(value);
+              onPageChange(0);
+            }}
+          />
 
           <Button
             size="icon"
             variant="ghost"
             disabled={loading}
             onClick={onRefresh}
-            className="h-10 w-10 shrink-0 rounded-lg hover:bg-muted sm:h-8 sm:w-8"
+            className="h-11 w-11 shrink-0 rounded-lg hover:bg-muted sm:h-10 sm:w-10"
             title="刷新日志"
             aria-label="刷新签到日志"
           >
@@ -181,7 +186,7 @@ export function SignLogHistory({
         </div>
       </CardHeader>
 
-      <CardContent className="p-0">
+      <CardContent className="relative z-0 overflow-hidden rounded-b-xl p-0">
         {errors.length > 0 && (
           <div
             className="border-b border-warning/25 bg-warning-container/45 px-4 py-3 text-xs text-warning sm:px-6"
@@ -190,7 +195,7 @@ export function SignLogHistory({
             <div className="flex items-start gap-2">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               <div className="min-w-0 space-y-1">
-                <p className="font-semibold">{errors.length} 门课程的签到历史读取失败</p>
+                <p className="font-semibold">{errors.length} 门课程的签到记录读取失败</p>
                 {errors.map((item) => (
                   <p key={item.classId} className="break-words text-muted-foreground">
                     {item.courseName}：{item.error}
@@ -207,12 +212,12 @@ export function SignLogHistory({
               <svg className="google-spinner" viewBox="0 0 50 50">
                 <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4" />
               </svg>
-              <p className="mt-4">拉取签到日志中...</p>
+              <p className="mt-4">读取账户签到记录中...</p>
             </div>
           ) : logs.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-2 p-12 text-center text-xs text-muted-foreground">
               <AlertCircle className="h-8 w-8 text-muted" />
-              <p>暂无签到日志记录</p>
+              <p>暂无签到记录</p>
             </div>
           ) : view === 'course' ? (
             <div className="divide-y divide-border/60">
@@ -237,38 +242,100 @@ export function SignLogHistory({
           )}
         </div>
 
-        {total > limit && (
-          <div className="flex items-center justify-between border-t border-border/50 bg-muted/20 px-4 py-3 select-none">
-            <span className="text-xs text-muted-foreground">
-              共 {total} 条 · 第 {currentPage}/{pageCount} 页
-            </span>
+        <div className="flex flex-col gap-3 border-t border-border/50 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <p className="text-xs text-muted-foreground" aria-live="polite">
+            已签到 <span className="font-semibold tabular-nums text-success">{signedCount}</span>
+            {' / '}
+            <span className="tabular-nums text-foreground">{total}</span> 条
+          </p>
 
-            <div className="flex gap-1">
+          <form
+            className="flex items-center justify-between gap-1 sm:justify-end"
+            aria-label="签到记录分页"
+            onSubmit={(event) => {
+              event.preventDefault();
+              submitPageInput();
+            }}
+          >
+            <div className="flex items-center gap-1">
               <Button
+                type="button"
                 size="icon"
                 variant="ghost"
-                className="h-10 w-10 rounded-lg sm:h-8 sm:w-8"
-                disabled={offset === 0}
+                className="h-11 w-11 rounded-lg"
+                disabled={currentPage === 1}
+                title="第一页"
+                aria-label="第一页"
+                onClick={() => goToPage(1)}
+              >
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="h-11 w-11 rounded-lg"
+                disabled={currentPage === 1}
                 title="上一页"
                 aria-label="上一页"
-                onClick={onPreviousPage}
+                onClick={() => goToPage(currentPage - 1)}
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
+            </div>
+
+            <label className="flex h-11 items-center gap-1 rounded-lg border border-input bg-card px-2 text-xs text-muted-foreground focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
+              <span className="sr-only">当前页码</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={pageInput}
+                onChange={(event) => setPageDraft({
+                  page: currentPage,
+                  value: event.target.value.replace(/\D/g, ''),
+                })}
+                onKeyDown={(event) => {
+                  if (event.key !== 'Enter') return;
+                  event.preventDefault();
+                  submitPageInput();
+                }}
+                onBlur={submitPageInput}
+                className="w-7 bg-transparent text-center font-semibold tabular-nums text-foreground outline-none"
+                aria-label={`当前第 ${currentPage} 页，共 ${pageCount} 页`}
+              />
+              <span aria-hidden="true">/</span>
+              <span className="min-w-4 tabular-nums" aria-hidden="true">{pageCount}</span>
+            </label>
+
+            <div className="flex items-center gap-1">
               <Button
+                type="button"
                 size="icon"
                 variant="ghost"
-                className="h-10 w-10 rounded-lg sm:h-8 sm:w-8"
-                disabled={offset + limit >= total}
+                className="h-11 w-11 rounded-lg"
+                disabled={currentPage === pageCount}
                 title="下一页"
                 aria-label="下一页"
-                onClick={onNextPage}
+                onClick={() => goToPage(currentPage + 1)}
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="h-11 w-11 rounded-lg"
+                disabled={currentPage === pageCount}
+                title="最后一页"
+                aria-label="最后一页"
+                onClick={() => goToPage(pageCount)}
+              >
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
             </div>
-          </div>
-        )}
+          </form>
+        </div>
       </CardContent>
     </Card>
   );

@@ -28,8 +28,12 @@ export function getSignTypeBadge(log: SignLog) {
   return SIGN_TYPE_BADGES[0];
 }
 
+export function isSignResultSuccess(result: string) {
+  return result.includes('成功') || result.includes('完成') || result.includes('已签到');
+}
+
 export function getSignResultClassName(result: string) {
-  if (result.includes('成功') || result.includes('完成') || result.includes('已签到')) {
+  if (isSignResultSuccess(result)) {
     return 'border-success/25 bg-success-container/60 text-success';
   }
   if (result.includes('失败') || result.includes('异常')) {

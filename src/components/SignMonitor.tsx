@@ -270,17 +270,10 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
         loading={logsLoading}
         logs={logs}
         offset={logsOffset}
-        onNextPage={() => setLogsPage((previous) => ({
+        onPageChange={(offset) => setLogsPage({
           accountId,
-          offset: (previous.accountId === accountId ? previous.offset : 0) + SIGN_LOGS_PAGE_SIZE,
-        }))}
-        onPreviousPage={() => setLogsPage((previous) => ({
-          accountId,
-          offset: Math.max(
-            0,
-            (previous.accountId === accountId ? previous.offset : 0) - SIGN_LOGS_PAGE_SIZE,
-          ),
-        }))}
+          offset,
+        })}
         onRefresh={() => void fetchLogs(true, false)}
         total={logsTotal}
       />
