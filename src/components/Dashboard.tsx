@@ -791,6 +791,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     '--tab-transition-duration': `${durationMs}ms`,
     '--tab-transition-start-x': startTranslateX,
   } as React.CSSProperties;
+  const desktopViewTitle = {
+    courses: '课程列表',
+    sign: '自动签到',
+    tasks: '任务',
+    settings: '提交设置',
+  }[activeTab];
+
   return (
     <div className="min-h-screen bg-background text-foreground font-sans lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)] lg:overflow-hidden">
       <a href="#dashboard-main" className="sr-only z-[60] rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
@@ -828,6 +835,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 </span>
               </div>
             </div>
+            <h1 className="hidden min-w-0 truncate text-base font-semibold text-foreground lg:block">
+              {desktopViewTitle}
+            </h1>
             <div className="ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-4">
               <OpenSourceDialog />
               <Button
@@ -906,7 +916,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             <TabsContent value="courses" className="outline-none m-0 lg:flex-1 lg:min-h-0">
               <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:flex lg:h-full lg:min-h-0 lg:flex-col">
                 <CardHeader className="flex flex-row items-center gap-2 rounded-none border-b border-border/50 px-3 py-2.5 sm:justify-between sm:px-6 sm:py-4 sm:space-y-0">
-                  <div className="flex shrink-0 items-center gap-1 sm:block">
+                  <div className="flex shrink-0 items-center gap-1 sm:block lg:hidden">
                     <CardTitle className="whitespace-nowrap text-sm font-semibold sm:text-base">课程列表</CardTitle>
                     <Button
                       size="icon"
@@ -920,7 +930,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                       <RefreshCw className={`w-4 h-4 ${coursesLoading ? 'animate-spin' : ''}`} />
                     </Button>
                   </div>
-                  <div className="flex min-w-0 flex-1 items-center gap-2 sm:justify-end">
+                  <div className="flex min-w-0 flex-1 items-center gap-2 sm:justify-end lg:justify-start">
                     <div className="group relative min-w-0 flex-1 sm:max-w-xs">
                       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-primary" />
                       <Input
@@ -1307,8 +1317,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
             {/* Auto Sign-In Monitor tab content */}
             <TabsContent value="sign" className="m-0 outline-none">
-              <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm">
-                <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
+              <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:py-0">
+                <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4 lg:hidden">
                   <CardTitle className="text-sm font-semibold sm:text-base">自动签到</CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 text-sm sm:p-6">
@@ -1325,8 +1335,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
             {/* Account Settings Configuration tab content */}
             <TabsContent value="settings" className="outline-none m-0">
-              <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm">
-                <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
+              <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:py-0">
+                <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4 lg:hidden">
                   <CardTitle className="text-sm font-semibold sm:text-base">提交设置</CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 text-sm sm:p-6">
