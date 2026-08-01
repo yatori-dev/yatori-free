@@ -50,8 +50,3 @@ export function saveSavedAccount(account: SavedAccount) {
   }));
   clearDeprecatedCredentials();
 }
-
-export function clearSavedAccount() {
-  localStorage.removeItem(SAVED_ACCOUNT_KEY);
-  clearDeprecatedCredentials();
-}

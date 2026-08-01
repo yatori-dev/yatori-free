@@ -7,5 +7,3 @@ export function notifyAuthExit(message = '登录已失效，请重新登录') {
     id: UNAUTHORIZED_TOAST_ID,
   });
 }
-
-export const notifyUnauthorized = notifyAuthExit;
