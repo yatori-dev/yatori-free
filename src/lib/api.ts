@@ -601,3 +601,46 @@ export function getSignLogs(accountId: string, params: { limit?: number; offset?
     true,
   );
 }
+
+const SIGN_LOGS_BATCH_SIZE = 1000;
+
+export async function getAllSignLogs(accountId: string) {
+  const logs = new Map<string, SignLog>();
+  const errors = new Map<string, SignHistoryError>();
+  let offset = 0;
+  let total: number;
+  let latestResponse: ApiDataResponse<SignLogsResponseData>;
+
+  do {
+    latestResponse = await getSignLogs(accountId, {
+      limit: SIGN_LOGS_BATCH_SIZE,
+      offset,
+    });
+    const page = latestResponse.data;
+    total = page.total;
+    page.logs.forEach((log) => logs.set(log.id, log));
+    if (Array.isArray(page.errors)) {
+      page.errors.forEach((error) => errors.set(`${error.classId}:${error.error}`, error));
+    }
+
+    if (page.logs.length === 0) {
+      if (offset < total) {
+        throw new Error('签到记录未完整返回');
+      }
+      break;
+    }
+
+    offset += page.logs.length;
+  } while (offset < total);
+
+  return {
+    ...latestResponse,
+    data: {
+      logs: [...logs.values()],
+      total,
+      limit: logs.size,
+      offset: 0,
+      errors: [...errors.values()],
+    },
+  } satisfies ApiDataResponse<SignLogsResponseData>;
+}

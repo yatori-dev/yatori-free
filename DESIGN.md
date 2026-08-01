@@ -29,6 +29,10 @@ colors:
   danger-container: '#FEE4E2'
   info: '#0061A4'
   info-container: '#D1E4FF'
+  sign-location: '#0E7490'
+  sign-location-container: '#CFFAFE'
+  sign-code: '#BE185D'
+  sign-code-container: '#FCE7F3'
 typography:
   family: 'Plus Jakarta Sans, system-ui, sans-serif'
   heading-weight: 650
@@ -142,6 +146,17 @@ spacing:
 Yatori 使用 Google 风格四色文字标识或四色 SVG 标识。登录页和恢复会话页可以使用四色横条，作为明确的品牌锚点。
 
 品牌色只表达品牌，不表达任务状态。任务状态始终使用语义 Token。
+
+### 签到类别色
+
+签到类别色只区分签到方式，不表达成功或失败：
+
+| 类别 | Token | 颜色语义 |
+| --- | --- | --- |
+| 普通签到 | `info` | 信息蓝 |
+| 手势签到 | `warning` | 琥珀黄 |
+| 位置签到 | `sign-location` | 青色 |
+| 签到码 | `sign-code` | 品红 |
 
 ## 字体与文字
 
@@ -290,7 +305,7 @@ Yatori 使用 Google 风格四色文字标识或四色 SVG 标识。登录页和
 - 顶部：当前监测状态、支持的签到类型、启动或停止操作。
 - 下方：签到历史、刷新、分页和空状态。
 
-签到类型使用统一的 `info`、`success`、`warning`、`neutral` 语义，不为每种类型分配独立品牌色。
+签到类型使用类别色区分；签到结果继续使用 `success`、`warning`、`danger` 等状态色。类别色不能代替结果状态。
 
 ## 动效
 

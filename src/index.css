@@ -95,6 +95,10 @@
     --color-danger-container: var(--danger-container);
     --color-info: var(--info);
     --color-info-container: var(--info-container);
+    --color-sign-location: var(--sign-location);
+    --color-sign-location-container: var(--sign-location-container);
+    --color-sign-code: var(--sign-code);
+    --color-sign-code-container: var(--sign-code-container);
     --color-destructive: var(--destructive);
     --color-accent-foreground: var(--accent-foreground);
     --color-accent: var(--accent);
@@ -153,6 +157,10 @@
     --danger-container: #fee4e2;
     --info: #0061a4;
     --info-container: #d1e4ff;
+    --sign-location: #0e7490;
+    --sign-location-container: #cffafe;
+    --sign-code: #be185d;
+    --sign-code-container: #fce7f3;
 
     /* Google Colors */
     --google-blue: #4285F4;
@@ -201,6 +209,10 @@
     --danger-container: #4c0519;
     --info: #9ecaef;
     --info-container: #00497d;
+    --sign-location: #67e8f9;
+    --sign-location-container: #164e63;
+    --sign-code: #f9a8d4;
+    --sign-code-container: #831843;
 
     /* 4-Tier Dark Mode Shadows (cleaner surface elevation) */
     --shadow-rest: 0 1px 2px rgb(0 0 0 / 0.25);

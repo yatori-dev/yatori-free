@@ -7,7 +7,7 @@ import { SIGN_TYPE_BADGES } from './sign-monitor/sign-log-presentation';
 import {
   startSignMonitor,
   stopSignMonitor,
-  getSignLogs,
+  getAllSignLogs,
   getUserFacingErrorMessage,
   isAuthExitError,
 } from '@/lib/api';
@@ -27,9 +27,10 @@ import {
 import { toast } from 'sonner';
 
 const SIGN_LOGS_CACHE_PREFIX = 'sign-logs:';
+const SIGN_LOGS_PAGE_SIZE = 10;
 
-function getSignLogsCacheKey(accountId: string, limit: number, offset: number) {
-  return `${SIGN_LOGS_CACHE_PREFIX}${accountId}:${limit}:${offset}`;
+function getSignLogsCacheKey(accountId: string) {
+  return `${SIGN_LOGS_CACHE_PREFIX}${accountId}:all`;
 }
 
 function getMonitorExpiresAt(startedAt?: string | null, maxRunSeconds?: number) {
@@ -59,9 +60,8 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
   onUnauthorized,
   onStatusChange,
 }) => {
-  const logsLimit = 10;
   const initialLogs = readSessionCache<SignLogsResponseData>(
-    getSignLogsCacheKey(accountId, logsLimit, 0),
+    getSignLogsCacheKey(accountId),
   );
   const [logs, setLogs] = useState<SignLog[]>(() => initialLogs?.logs ?? []);
   const [logsTotal, setLogsTotal] = useState(() => initialLogs?.total ?? 0);
@@ -90,9 +90,9 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
   const fetchLogs = useCallback(async (showLoading = true, useCache = true) => {
     if (showLoading) setLogsLoading(true);
     try {
-      const cacheKey = getSignLogsCacheKey(accountId, logsLimit, logsOffset);
+      const cacheKey = getSignLogsCacheKey(accountId);
       const loadLogs = async () => {
-        const response = await getSignLogs(accountId, { limit: logsLimit, offset: logsOffset });
+        const response = await getAllSignLogs(accountId);
         return response.data;
       };
       const data = useCache
@@ -102,6 +102,14 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
       setLogs(data.logs);
       setLogsTotal(data.total);
       setHistoryErrors(Array.isArray(data.errors) ? data.errors : []);
+      setLogsPage((previous) => {
+        const previousOffset = previous.accountId === accountId ? previous.offset : 0;
+        const maxOffset = Math.max(
+          0,
+          Math.floor((Math.max(0, data.total - 1)) / SIGN_LOGS_PAGE_SIZE) * SIGN_LOGS_PAGE_SIZE,
+        );
+        return { accountId, offset: Math.min(previousOffset, maxOffset) };
+      });
     } catch (error) {
       if (isAuthExitError(error)) {
         toast.error(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
@@ -113,7 +121,7 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
     } finally {
       if (showLoading) setLogsLoading(false);
     }
-  }, [accountId, logsLimit, logsOffset, onUnauthorized]);
+  }, [accountId, onUnauthorized]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -258,17 +266,20 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
 
       <SignLogHistory
         errors={historyErrors}
-        limit={logsLimit}
+        limit={SIGN_LOGS_PAGE_SIZE}
         loading={logsLoading}
         logs={logs}
         offset={logsOffset}
         onNextPage={() => setLogsPage((previous) => ({
           accountId,
-          offset: (previous.accountId === accountId ? previous.offset : 0) + logsLimit,
+          offset: (previous.accountId === accountId ? previous.offset : 0) + SIGN_LOGS_PAGE_SIZE,
         }))}
         onPreviousPage={() => setLogsPage((previous) => ({
           accountId,
-          offset: Math.max(0, (previous.accountId === accountId ? previous.offset : 0) - logsLimit),
+          offset: Math.max(
+            0,
+            (previous.accountId === accountId ? previous.offset : 0) - SIGN_LOGS_PAGE_SIZE,
+          ),
         }))}
         onRefresh={() => void fetchLogs(true, false)}
         total={logsTotal}

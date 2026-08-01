@@ -112,16 +112,20 @@ export function SignLogHistory({
       return order === 'newest' ? difference : -difference;
     })
   ), [logs, order]);
+  const visibleLogs = useMemo(
+    () => sortedLogs.slice(offset, offset + limit),
+    [limit, offset, sortedLogs],
+  );
   const courseGroups = useMemo(() => {
     const groups = new Map<string, SignLog[]>();
-    sortedLogs.forEach((log) => {
+    visibleLogs.forEach((log) => {
       const courseName = log.courseName ?? '课程未记录';
       const group = groups.get(courseName) ?? [];
       group.push(log);
       groups.set(courseName, group);
     });
     return [...groups.entries()];
-  }, [sortedLogs]);
+  }, [visibleLogs]);
   const currentPage = Math.floor(offset / limit) + 1;
   const pageCount = Math.max(1, Math.ceil(total / limit));
 
@@ -228,7 +232,7 @@ export function SignLogHistory({
             </div>
           ) : (
             <div className="divide-y divide-border/40">
-              {sortedLogs.map((log) => <SignLogRow key={log.id} log={log} />)}
+              {visibleLogs.map((log) => <SignLogRow key={log.id} log={log} />)}
             </div>
           )}
         </div>

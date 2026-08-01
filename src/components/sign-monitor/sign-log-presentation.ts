@@ -11,11 +11,11 @@ export const SIGN_TYPE_BADGES = [
   },
   {
     label: '位置签到',
-    className: 'border-success/25 bg-success-container/60 text-success',
+    className: 'border-sign-location/25 bg-sign-location-container/60 text-sign-location',
   },
   {
     label: '签到码',
-    className: 'border-border bg-muted/70 text-foreground',
+    className: 'border-sign-code/25 bg-sign-code-container/60 text-sign-code',
   },
 ] as const;
 
