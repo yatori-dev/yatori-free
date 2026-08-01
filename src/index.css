@@ -259,6 +259,14 @@
   animation: taskSuccessFlash 1200ms var(--ease-emphasized) forwards;
 }
 
+@utility animate-sign-log-page-forward {
+  animation: signLogPageForward 220ms var(--ease-emphasized) both;
+}
+
+@utility animate-sign-log-page-backward {
+  animation: signLogPageBackward 220ms var(--ease-emphasized) both;
+}
+
 @keyframes bottomBarEnter {
   0% {
     opacity: 0;
@@ -284,6 +292,28 @@
   100% {
     border-color: var(--border);
     box-shadow: var(--shadow-rest);
+  }
+}
+
+@keyframes signLogPageForward {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes signLogPageBackward {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 

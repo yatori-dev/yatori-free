@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import {
   AlertCircle,
+  ChevronDown,
   ChevronsLeft,
   ChevronsRight,
   ChevronLeft,
@@ -104,6 +105,9 @@ export function SignLogHistory({
   total,
 }: SignLogHistoryProps) {
   const [view, setView] = useState<SignLogView>('time');
+  const [collapsedCourses, setCollapsedCourses] = useState<Set<string>>(() => new Set());
+  const [pageDirection, setPageDirection] = useState<'forward' | 'backward'>('forward');
+  const coursePanelId = useId();
   const sortedLogs = useMemo(() => (
     [...logs].sort((left, right) => {
       const timeDifference = getSignLogTimeValue(right) - getSignLogTimeValue(left);
@@ -144,8 +148,21 @@ export function SignLogHistory({
 
   const goToPage = (requestedPage: number) => {
     const page = Math.min(pageCount, Math.max(1, requestedPage));
+    setPageDirection(page >= currentPage ? 'forward' : 'backward');
     setPageDraft({ page, value: String(page) });
     onPageChange((page - 1) * limit);
+  };
+
+  const toggleCourse = (courseName: string) => {
+    setCollapsedCourses((current) => {
+      const next = new Set(current);
+      if (next.has(courseName)) {
+        next.delete(courseName);
+      } else {
+        next.add(courseName);
+      }
+      return next;
+    });
   };
 
   const submitPageInput = () => {
@@ -168,6 +185,7 @@ export function SignLogHistory({
           <SignLogViewMenu
             value={view}
             onChange={(value) => {
+              setPageDirection('backward');
               setView(value);
               onPageChange(0);
             }}
@@ -220,25 +238,60 @@ export function SignLogHistory({
               <AlertCircle className="h-8 w-8 text-muted" />
               <p>暂无签到记录</p>
             </div>
-          ) : view === 'course' ? (
-            <div className="divide-y divide-border/60">
-              {courseGroups.map(([courseName, courseLogs]) => (
-                <section key={courseName}>
-                  <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border/40 bg-muted/80 px-4 py-2 backdrop-blur-sm sm:px-6">
-                    <h3 className="truncate text-xs font-semibold text-foreground sm:text-sm">{courseName}</h3>
-                    <Badge variant="outline" className="bg-card/80 text-muted-foreground">
-                      {courseLogs.length} 条
-                    </Badge>
-                  </div>
-                  <div className="divide-y divide-border/40">
-                    {courseLogs.map((log) => <SignLogRow key={log.id} log={log} showCourse={false} />)}
-                  </div>
-                </section>
-              ))}
-            </div>
           ) : (
-            <div className="divide-y divide-border/40">
-              {visibleLogs.map((log) => <SignLogRow key={log.id} log={log} />)}
+            <div
+              key={`${view}-${offset}`}
+              className={pageDirection === 'forward'
+                ? 'animate-sign-log-page-forward'
+                : 'animate-sign-log-page-backward'}
+            >
+              {view === 'course' ? (
+                <div className="divide-y divide-border/60">
+                  {courseGroups.map(([courseName, courseLogs], index) => {
+                    const isCollapsed = collapsedCourses.has(courseName);
+                    const panelId = `${coursePanelId}-course-${index}`;
+
+                    return (
+                      <section key={courseName}>
+                        <button
+                          type="button"
+                          className="sticky top-0 z-10 flex min-h-11 w-full items-center gap-3 border-b border-border/40 bg-muted/80 px-4 py-2 text-left backdrop-blur-sm transition-colors duration-200 ease-standard hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset sm:px-6"
+                          aria-expanded={!isCollapsed}
+                          aria-controls={panelId}
+                          onClick={() => toggleCourse(courseName)}
+                        >
+                          <ChevronDown
+                            className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-standard ${isCollapsed ? '-rotate-90' : ''}`}
+                            aria-hidden="true"
+                          />
+                          <h3 className="min-w-0 flex-1 truncate text-xs font-semibold text-foreground sm:text-sm">
+                            {courseName}
+                          </h3>
+                          <Badge variant="outline" className="shrink-0 bg-card/80 text-muted-foreground">
+                            {courseLogs.length} 条
+                          </Badge>
+                        </button>
+                        <div
+                          id={panelId}
+                          className={`grid transition-[grid-template-rows,opacity] duration-200 ease-standard ${isCollapsed ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'}`}
+                        >
+                          <div className="min-h-0 overflow-hidden">
+                            <div className="divide-y divide-border/40">
+                              {courseLogs.map((log) => (
+                                <SignLogRow key={log.id} log={log} showCourse={false} />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="divide-y divide-border/40">
+                  {visibleLogs.map((log) => <SignLogRow key={log.id} log={log} />)}
+                </div>
+              )}
             </div>
           )}
         </div>
