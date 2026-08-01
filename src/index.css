@@ -95,6 +95,8 @@
     --color-danger-container: var(--danger-container);
     --color-info: var(--info);
     --color-info-container: var(--info-container);
+    --color-sign-photo: var(--sign-photo);
+    --color-sign-photo-container: var(--sign-photo-container);
     --color-sign-location: var(--sign-location);
     --color-sign-location-container: var(--sign-location-container);
     --color-sign-code: var(--sign-code);
@@ -157,6 +159,8 @@
     --danger-container: #fee4e2;
     --info: #0061a4;
     --info-container: #d1e4ff;
+    --sign-photo: #4338ca;
+    --sign-photo-container: #e0e7ff;
     --sign-location: #0e7490;
     --sign-location-container: #cffafe;
     --sign-code: #be185d;
@@ -209,6 +213,8 @@
     --danger-container: #4c0519;
     --info: #9ecaef;
     --info-container: #00497d;
+    --sign-photo: #c7d2fe;
+    --sign-photo-container: #312e81;
     --sign-location: #67e8f9;
     --sign-location-container: #164e63;
     --sign-code: #f9a8d4;

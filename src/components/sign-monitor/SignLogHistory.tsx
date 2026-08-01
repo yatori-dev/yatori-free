@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import {
   getSignLogTimestamp,
   getSignLogTimeValue,
+  getSignDisplayName,
   getSignResultClassName,
   getSignTypeBadge,
   isSignResultSuccess,
@@ -62,7 +63,7 @@ function SignLogRow({ log, showCourse = true }: { log: SignLog; showCourse?: boo
           </span>
         ) : (
           <span className="truncate text-xs text-muted-foreground sm:text-sm">
-            {log.signName ?? signType.label}
+            {getSignDisplayName(log)}
           </span>
         )}
         <Badge
@@ -86,7 +87,7 @@ function SignLogRow({ log, showCourse = true }: { log: SignLog; showCourse?: boo
       </div>
 
       <Badge variant="outline" className={signType.className}>
-        {log.signName ?? signType.label}
+        {getSignDisplayName(log)}
       </Badge>
     </div>
   );

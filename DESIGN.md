@@ -29,6 +29,8 @@ colors:
   danger-container: '#FEE4E2'
   info: '#0061A4'
   info-container: '#D1E4FF'
+  sign-photo: '#4338CA'
+  sign-photo-container: '#E0E7FF'
   sign-location: '#0E7490'
   sign-location-container: '#CFFAFE'
   sign-code: '#BE185D'
@@ -154,9 +156,10 @@ Yatori 使用 Google 风格四色文字标识或四色 SVG 标识。登录页和
 | 类别 | Token | 颜色语义 |
 | --- | --- | --- |
 | 普通签到 | `info` | 信息蓝 |
+| 拍照签到 | `sign-photo` | 靛蓝 |
 | 手势签到 | `warning` | 琥珀黄 |
 | 位置签到 | `sign-location` | 青色 |
-| 签到码 | `sign-code` | 品红 |
+| 签到码签到 | `sign-code` | 品红 |
 
 ## 字体与文字
 

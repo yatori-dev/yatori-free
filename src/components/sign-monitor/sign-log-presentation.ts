@@ -6,6 +6,10 @@ export const SIGN_TYPE_BADGES = [
     className: 'border-info/25 bg-info-container/60 text-info',
   },
   {
+    label: '拍照签到',
+    className: 'border-sign-photo/25 bg-sign-photo-container/60 text-sign-photo',
+  },
+  {
     label: '手势签到',
     className: 'border-warning/25 bg-warning-container/60 text-warning',
   },
@@ -14,7 +18,7 @@ export const SIGN_TYPE_BADGES = [
     className: 'border-sign-location/25 bg-sign-location-container/60 text-sign-location',
   },
   {
-    label: '签到码',
+    label: '签到码签到',
     className: 'border-sign-code/25 bg-sign-code-container/60 text-sign-code',
   },
 ] as const;
@@ -22,10 +26,18 @@ export const SIGN_TYPE_BADGES = [
 export function getSignTypeBadge(log: SignLog) {
   const value = `${log.signType ?? ''} ${log.signName ?? ''}`;
 
-  if (value.includes('位置')) return SIGN_TYPE_BADGES[2];
-  if (value.includes('手势')) return SIGN_TYPE_BADGES[1];
-  if (value.includes('签到码') || value.includes('二维码')) return SIGN_TYPE_BADGES[3];
+  if (log.signType?.toLowerCase() === 'photo') return SIGN_TYPE_BADGES[1];
+  if (value.includes('位置')) return SIGN_TYPE_BADGES[3];
+  if (value.includes('手势')) return SIGN_TYPE_BADGES[2];
+  if (value.includes('签到码') || value.includes('二维码')) return SIGN_TYPE_BADGES[4];
   return SIGN_TYPE_BADGES[0];
+}
+
+export function getSignDisplayName(log: SignLog) {
+  const signType = getSignTypeBadge(log);
+  return log.signType?.toLowerCase() === 'photo'
+    ? signType.label
+    : (log.signName ?? signType.label);
 }
 
 export function isSignResultSuccess(result: string) {
