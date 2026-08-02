@@ -172,7 +172,7 @@ export function SignLogHistory({
 
   return (
     <Card className="min-w-0 overflow-visible rounded-xl border border-border bg-card p-0 shadow-xs">
-      <CardHeader className="relative z-20 flex flex-col gap-3 border-b border-border/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
+      <CardHeader className="relative z-20 flex flex-row items-start justify-between gap-2 border-b border-border/60 px-4 py-3 sm:items-center sm:px-6 sm:py-4">
         <div className="min-w-0">
           <CardTitle className="flex items-center gap-2 text-sm font-semibold sm:text-base">
             <ClipboardCheck className="h-4 w-4 shrink-0 text-primary" />
@@ -181,7 +181,7 @@ export function SignLogHistory({
           <CardDescription className="mt-1 text-xs">全部课程签到信息</CardDescription>
         </div>
 
-        <div className="flex min-w-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <SignLogViewMenu
             value={view}
             onChange={(value) => {

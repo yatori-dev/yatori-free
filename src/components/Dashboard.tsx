@@ -26,6 +26,7 @@ import { hasActiveStoredSignMonitor } from '@/lib/signMonitor';
 import { isActiveTaskStatus } from '@/lib/taskStatus';
 import { useTaskProgressPolling } from '@/hooks/useTaskProgressPolling';
 import { DashboardNavigation, type MobileDashboardTabId } from './dashboard/DashboardNavigation';
+import { CourseBulkSelectionMenu } from './dashboard/CourseBulkSelectionMenu';
 import { TaskStatusContent } from './dashboard/TaskStatusContent';
 import { TaskStatusDrawer } from './dashboard/TaskStatusDrawer';
 import { TaskStatusTrigger } from './dashboard/TaskStatusTrigger';
@@ -467,8 +468,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const hiddenEmptyTaskCourseCount = courses.length - visibleCourses.length;
   const selectableCourses = filteredCourses.filter(course => !course.processing);
+  const incompleteSelectableCourses = visibleCourses.filter((course) => {
+    if (course.processing) return false;
+    if (typeof course.jobCount !== 'number' || typeof course.jobFinishCount !== 'number') return false;
+    return course.jobFinishCount < course.jobCount;
+  });
   const isAllSelected = selectableCourses.length > 0 && selectableCourses.every(course => selectedCourses.has(course.key));
   const isSomeSelected = selectableCourses.length > 0 && selectableCourses.some(course => selectedCourses.has(course.key));
+  const isAllIncompleteSelected = incompleteSelectableCourses.length > 0
+    && incompleteSelectableCourses.every(course => selectedCourses.has(course.key));
 
   const handleToggleSelectAll = () => {
     if (isAllSelected) {
@@ -484,6 +492,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         return next;
       });
     }
+  };
+
+  const handleToggleSelectIncomplete = () => {
+    if (isAllIncompleteSelected) {
+      setSelectedCourses((prev) => {
+        const next = new Set(prev);
+        incompleteSelectableCourses.forEach((course) => next.delete(course.key));
+        return next;
+      });
+      return;
+    }
+
+    setSelectedCourses((prev) => {
+      const next = new Set(prev);
+      incompleteSelectableCourses.forEach((course) => next.add(course.key));
+      return next;
+    });
   };
 
   const toggleExpandCourse = (courseKey: string) => {
@@ -1017,19 +1042,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                       {/* Select All Action Row */}
                       {selectableCourses.length > 0 && (
                         <div className="flex items-center justify-between gap-2 border-b border-[#e1e3e4] bg-gray-50/30 px-3 py-2.5 select-none dark:border-[#333537] dark:bg-[#232425]/30 sm:gap-4 sm:px-5 sm:py-3.5">
-                          <div className="flex items-center gap-2.5 sm:gap-4">
-                            <CourseCheckbox
-                              checked={isAllSelected}
-                              indeterminate={isSomeSelected && !isAllSelected}
-                              onChange={handleToggleSelectAll}
-                              disabled={selectableCourses.length === 0}
+                          <div className="flex min-w-0 items-center gap-2.5 sm:gap-4">
+                            <CourseBulkSelectionMenu
+                              allSelected={isAllSelected}
+                              allSelectionIndeterminate={isSomeSelected && !isAllSelected}
+                              incompleteAvailable={incompleteSelectableCourses.length > 0}
+                              incompleteSelected={isAllIncompleteSelected}
+                              onToggleAll={handleToggleSelectAll}
+                              onToggleIncomplete={handleToggleSelectIncomplete}
                             />
-                            <span 
-                              className="text-xs font-semibold text-gray-600 dark:text-gray-400 cursor-pointer"
-                              onClick={handleToggleSelectAll}
-                            >
-                              {isAllSelected ? '取消全选' : '全选所有课程'}
-                            </span>
                           </div>
                           <div className="whitespace-nowrap text-[11px] text-gray-400 dark:text-gray-500 sm:text-xs">
                             已选择 {selectedCourses.size} / {selectableCourses.length} 门课程

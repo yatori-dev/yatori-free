@@ -196,9 +196,13 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
                 <CardTitle className="text-base font-semibold text-foreground">自动签到监测</CardTitle>
                 <Badge variant="outline" className="text-xs text-muted-foreground">未运行</Badge>
               </div>
-              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              <div className="no-scrollbar flex min-w-0 items-center gap-1.5 overflow-x-auto pt-1 pb-1 sm:flex-wrap sm:overflow-visible">
                 {SIGN_TYPE_BADGES.map((item) => (
-                  <Badge key={item.label} variant="outline" className={item.className}>
+                  <Badge
+                    key={item.label}
+                    variant="outline"
+                    className={`shrink-0 px-1.5 py-0.5 text-[11px] leading-4 ${item.className}`}
+                  >
                     {item.label}
                   </Badge>
                 ))}

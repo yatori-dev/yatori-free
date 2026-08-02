@@ -54,7 +54,7 @@ export function SignLogViewMenu({ onChange, value }: SignLogViewMenuProps) {
   };
 
   return (
-    <div ref={rootRef} className="relative min-w-0 flex-1 sm:flex-none">
+    <div ref={rootRef} className="relative shrink-0">
       <Button
         ref={triggerRef}
         type="button"
@@ -67,7 +67,7 @@ export function SignLogViewMenu({ onChange, value }: SignLogViewMenuProps) {
           event.preventDefault();
           setOpen(true);
         }}
-        className="h-11 w-full min-w-0 justify-between gap-2 rounded-lg bg-card px-3 text-xs font-medium shadow-none sm:h-10 sm:w-32"
+        className="h-10 justify-between gap-2 rounded-lg bg-card px-3 text-xs font-medium shadow-none sm:w-32"
       >
         <span className="flex min-w-0 items-center gap-2">
           <ListFilter className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
