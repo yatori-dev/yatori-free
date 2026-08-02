@@ -19,8 +19,8 @@ import {
   isAuthExitError,
   stopTask,
 } from '@/lib/api';
-import { extractChapterItems, getChapterDocuments, getChapterTaskMetas } from '@/lib/courseChapters';
-import type { AuthSession, Course, CourseDetails, CourseDocument, Task, CoursesCustom, StudyIncrement } from '@/lib/api';
+import { extractChapterItems, getChapterDocuments, getChapterTaskMetas, getCourseTaskPointGroups } from '@/lib/courseChapters';
+import type { AuthSession, Course, CourseDetails, CourseDocument, CourseTaskPointKind, Task, CoursesCustom, StudyIncrement } from '@/lib/api';
 import { notifyAuthExit } from '@/lib/notifications';
 import { hasActiveStoredSignMonitor } from '@/lib/signMonitor';
 import { isActiveTaskStatus } from '@/lib/taskStatus';
@@ -138,13 +138,29 @@ const DEFAULT_STUDY_INCREMENT: StudyIncrement = {
 };
 
 function courseHasTaskPoints(course: Course) {
-  const hasKnownTaskCount = typeof course.jobCount === 'number' || typeof course.blockedPointCount === 'number';
+  const hasKnownTaskCount = typeof course.jobCount === 'number'
+    || typeof course.blockedPointCount === 'number'
+    || typeof course.taskPointCount === 'number';
   if (!hasKnownTaskCount) {
     return true;
   }
 
-  return (course.jobCount ?? 0) > 0 || (course.blockedPointCount ?? 0) > 0;
+  return (course.jobCount ?? 0) > 0
+    || (course.blockedPointCount ?? 0) > 0
+    || (course.taskPointCount ?? 0) > 0;
 }
+
+const COURSE_TASK_POINT_KIND_LABELS: Record<CourseTaskPointKind, string> = {
+  video: '视频',
+  audio: '音频',
+  chapter_test: '章节测验',
+  document: '文档',
+  reading: '阅读',
+  hyperlink: '链接',
+  live: '直播',
+  discussion: '讨论',
+  other: '其他',
+};
 
 function formatFileSize(size?: number) {
   if (typeof size !== 'number' || !Number.isFinite(size) || size <= 0) {
@@ -1210,21 +1226,40 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                 ) : courseDetailsMap[course.key] ? (
                                   <div className="space-y-2">
                                     {(() => {
-                                      const courseDetails = courseDetailsMap[course.key];
-                                      const chapterItems = extractChapterItems(courseDetails.chapters);
-                                      const chaptersWithTasks = getChapterTaskMetas(chapterItems)
-                                        .filter(({ taskMeta }) => taskMeta.hasTaskPoints);
+                                       const courseDetails = courseDetailsMap[course.key];
+                                       const chapterItems = extractChapterItems(courseDetails.chapters);
+                                       const taskPointGroups = getCourseTaskPointGroups(courseDetails.taskPoints);
+                                       const chaptersWithTasks = taskPointGroups.length > 0
+                                         ? taskPointGroups.map(({ chapter, taskPoints }) => ({
+                                           chapter,
+                                           taskPoints,
+                                           taskMeta: {
+                                             total: taskPoints.length,
+                                             finished: taskPoints.filter((taskPoint) => taskPoint.completed === true).length,
+                                             isLocked: false,
+                                             hasTaskPoints: true,
+                                           },
+                                         }))
+                                         : getChapterTaskMetas(chapterItems)
+                                           .filter(({ taskMeta }) => taskMeta.hasTaskPoints)
+                                           .map(({ chapter, taskMeta }) => ({ chapter, taskMeta, taskPoints: [] }));
 
-                                      return (
-                                        <>
-                                          <div className={isCourseOutlineFullyExpanded ? undefined : 'max-sm:max-h-64 max-sm:overflow-hidden'}>
+                                       return (
+                                         <>
+                                           {courseDetails.taskPointsIncomplete && (
+                                             <div className="flex items-start gap-2 rounded-md bg-warning-container/40 px-2.5 py-2 text-xs text-warning" role="status">
+                                               <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                               <span>部分章节任务点读取失败，当前大纲可能不完整。</span>
+                                             </div>
+                                           )}
+                                           <div className={isCourseOutlineFullyExpanded ? undefined : 'max-sm:max-h-64 max-sm:overflow-hidden'}>
                                             <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
                                               章节大纲 ({chaptersWithTasks.length})
                                             </div>
                                             <div className="grid grid-cols-1 gap-2 pr-1 md:max-h-[300px] md:grid-cols-2 md:overflow-y-auto">
-                                          {chaptersWithTasks.map(({ chapter: chap, taskMeta }) => {
-                                            const isChapterDone = !taskMeta.isLocked && taskMeta.total > 0 && taskMeta.finished === taskMeta.total;
-                                            const chapterDocuments = getChapterDocuments(chap, courseDetails.documents);
+                                          {chaptersWithTasks.map(({ chapter: chap, taskMeta, taskPoints }) => {
+                                             const isChapterDone = !taskMeta.isLocked && taskMeta.total > 0 && taskMeta.finished === taskMeta.total;
+                                             const chapterDocuments = getChapterDocuments(chap, courseDetails.documents);
 
                                             return (
                                               <div
@@ -1245,9 +1280,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                                           : 'bg-[#fef7e0] hover:bg-[#fef7e0] text-[#b06000] dark:bg-[#3b2a12] dark:hover:bg-[#3b2a12] dark:text-[#f6c26b]'
                                                     }`}
                                                   >
-                                                    {taskMeta.isLocked ? `未开放任务点: ${taskMeta.total}` : `任务点: ${taskMeta.finished}/${taskMeta.total}`}
+                                                    {taskPoints.length > 0
+                                                      ? `模块: ${taskMeta.finished}/${taskMeta.total}`
+                                                      : taskMeta.isLocked
+                                                        ? `未开放任务点: ${taskMeta.total}`
+                                                        : `任务点: ${taskMeta.finished}/${taskMeta.total}`}
                                                   </Badge>
                                                 </div>
+
+                                                {taskPoints.length > 0 && (
+                                                  <div className="mt-2 space-y-1.5 border-t border-[#edf0f2] dark:border-[#333537] pt-2">
+                                                    {taskPoints.map((taskPoint) => (
+                                                      <div
+                                                        key={taskPoint.id}
+                                                        className="flex items-center gap-2 rounded bg-[#f8fafd] px-2 py-1.5 dark:bg-[#252628]"
+                                                      >
+                                                        <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary">
+                                                          {COURSE_TASK_POINT_KIND_LABELS[taskPoint.kind]}
+                                                        </span>
+                                                        <span className="min-w-0 flex-1 truncate text-[#191c1d] dark:text-[#e3e3e3]" title={taskPoint.title}>
+                                                          {taskPoint.title || taskPoint.module}
+                                                        </span>
+                                                        {taskPoint.completed !== undefined && (
+                                                          <span className={taskPoint.completed ? 'shrink-0 text-[11px] text-success' : 'shrink-0 text-[11px] text-muted-foreground'}>
+                                                            {taskPoint.completed ? '已完成' : '未完成'}
+                                                          </span>
+                                                        )}
+                                                      </div>
+                                                    ))}
+                                                  </div>
+                                                )}
 
                                                 {account?.id && chapterDocuments.length > 0 && (
                                                   <div className="mt-2 space-y-1.5 border-t border-[#edf0f2] dark:border-[#333537] pt-2">
@@ -1292,7 +1354,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                                             );
                                           })}
                                           {chaptersWithTasks.length === 0 && (
-                                            <div className="text-gray-500 text-xs py-4 text-center col-span-2">该课程没有任务点</div>
+                                            <div className="text-gray-500 text-xs py-4 text-center col-span-2">
+                                              {courseDetails.taskPointsIncomplete ? '课程任务点读取不完整' : '该课程没有任务点'}
+                                            </div>
                                           )}
                                             </div>
                                           </div>

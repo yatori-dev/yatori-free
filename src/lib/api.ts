@@ -102,6 +102,34 @@ export interface Course {
   processingTaskId?: string;
   blockedChapterCount?: number;
   blockedPointCount?: number;
+  taskPointCount?: number;
+  taskPoints?: CourseTaskPoint[];
+  taskPointsIncomplete?: boolean;
+}
+
+export type CourseTaskPointKind =
+  | 'video'
+  | 'audio'
+  | 'chapter_test'
+  | 'document'
+  | 'reading'
+  | 'hyperlink'
+  | 'live'
+  | 'discussion'
+  | 'other';
+
+export interface CourseTaskPoint {
+  id: string;
+  kind: CourseTaskPointKind;
+  module: string;
+  title: string;
+  chapterId: number;
+  chapterLabel: string;
+  chapterName: string;
+  cardIndex: number;
+  iframeIndex: number;
+  isTaskPoint: boolean;
+  completed?: boolean;
 }
 
 export interface Chapter {
@@ -156,6 +184,9 @@ export interface CourseDetails {
   studyStats?: StudyStats;
   blockedChapterCount?: number;
   blockedPointCount?: number;
+  taskPointCount?: number;
+  taskPoints?: CourseTaskPoint[];
+  taskPointsIncomplete?: boolean;
 }
 
 export interface CourseListResponseData {

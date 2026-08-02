@@ -1,10 +1,15 @@
-import type { Chapter, CourseDocument } from './api';
+import type { Chapter, CourseDocument, CourseTaskPoint } from './api';
 
 export interface ChapterTaskMeta {
   total: number;
   finished: number;
   isLocked: boolean;
   hasTaskPoints: boolean;
+}
+
+export interface CourseTaskPointGroup {
+  chapter: Chapter;
+  taskPoints: CourseTaskPoint[];
 }
 
 type RawRecord = Record<string, unknown>;
@@ -162,6 +167,30 @@ export function getChapterTaskMetas(chapters: Chapter[]) {
     chapter,
     taskMeta: getChapterTaskMeta(chapter),
   }));
+}
+
+export function getCourseTaskPointGroups(taskPoints: CourseTaskPoint[] = []) {
+  const groups = new Map<string, CourseTaskPointGroup>();
+
+  for (const taskPoint of taskPoints) {
+    const key = `${taskPoint.chapterId}:${taskPoint.chapterLabel}:${taskPoint.chapterName}`;
+    const group = groups.get(key);
+    if (group) {
+      group.taskPoints.push(taskPoint);
+      continue;
+    }
+
+    groups.set(key, {
+      chapter: {
+        id: taskPoint.chapterId,
+        label: taskPoint.chapterLabel,
+        name: taskPoint.chapterName,
+      },
+      taskPoints: [taskPoint],
+    });
+  }
+
+  return [...groups.values()];
 }
 
 function normalizeMatchValue(value: unknown) {
