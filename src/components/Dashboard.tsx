@@ -1097,7 +1097,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                         return (
                           <div key={course.key} className="border-b border-border last:border-0">
                             {/* Course Row */}
-                            <div className={`grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-2 px-3 py-2.5 transition-colors sm:grid-cols-[auto_minmax(0,1fr)_13rem] sm:gap-x-4 sm:p-5 ${
+                            <div className={`grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-2 px-3 py-3.5 transition-colors sm:grid-cols-[auto_minmax(0,1fr)_13rem] sm:gap-x-4 sm:p-5 ${
                               isSelected
                                 ? 'bg-primary-container/20 hover:bg-primary-container/30'
                                 : 'hover:bg-muted/40'

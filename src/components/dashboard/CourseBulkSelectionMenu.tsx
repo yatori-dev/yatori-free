@@ -44,7 +44,7 @@ export function CourseBulkSelectionMenu({
     };
   }, [open]);
 
-  const menuItemClassName = 'flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 text-left text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-50';
+  const menuItemClassName = 'flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-left text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-50';
 
   return (
     <div ref={rootRef} className="relative">
@@ -75,7 +75,7 @@ export function CourseBulkSelectionMenu({
         <div
           role="menu"
           aria-label="课程批量选择"
-          className="absolute left-0 top-[calc(100%+0.375rem)] z-50 w-56 rounded-xl border border-border/70 bg-popover p-1.5 text-popover-foreground shadow-floating"
+          className="absolute left-0 top-[calc(100%+0.375rem)] z-50 w-44 rounded-xl border border-border/70 bg-popover p-1.5 text-popover-foreground shadow-floating"
         >
           <button
             type="button"
@@ -100,7 +100,7 @@ export function CourseBulkSelectionMenu({
             <span className="flex size-4 shrink-0 items-center justify-center text-primary">
               {incompleteSelected && <Check className="h-4 w-4" aria-hidden="true" />}
             </span>
-            <span>任务点未完成</span>
+            <span>未完成课程</span>
           </button>
         </div>
       )}
