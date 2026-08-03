@@ -20,7 +20,7 @@ import {
   stopTask,
 } from '@/lib/api';
 import { extractChapterItems, getChapterDocuments, getChapterTaskMetas, getCourseTaskPointGroups } from '@/lib/courseChapters';
-import type { AuthSession, Course, CourseDetails, CourseDocument, CourseTaskPointKind, Task, CoursesCustom, StudyIncrement } from '@/lib/api';
+import type { AuthSession, CourseDetails, CourseDocument, CourseSummary, CourseTaskPointKind, Task, CoursesCustom, StudyIncrement } from '@/lib/api';
 import { notifyAuthExit } from '@/lib/notifications';
 import { hasActiveStoredSignMonitor } from '@/lib/signMonitor';
 import { isActiveTaskStatus } from '@/lib/taskStatus';
@@ -137,17 +137,12 @@ const DEFAULT_STUDY_INCREMENT: StudyIncrement = {
   readMinutes: 0,
 };
 
-function courseHasTaskPoints(course: Course) {
-  const hasKnownTaskCount = typeof course.jobCount === 'number'
-    || typeof course.blockedPointCount === 'number'
-    || typeof course.taskPointCount === 'number';
-  if (!hasKnownTaskCount) {
+function courseHasTaskPoints(course: CourseSummary) {
+  if (typeof course.jobCount !== 'number') {
     return true;
   }
 
-  return (course.jobCount ?? 0) > 0
-    || (course.blockedPointCount ?? 0) > 0
-    || (course.taskPointCount ?? 0) > 0;
+  return course.jobCount > 0;
 }
 
 const COURSE_TASK_POINT_KIND_LABELS: Record<CourseTaskPointKind, string> = {
@@ -242,7 +237,7 @@ function readPersistedSettings(accountId: string | null | undefined): PersistedS
 
 export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const account = session.account;
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [courses, setCourses] = useState<CourseSummary[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [signMonitorActive, setSignMonitorActive] = useState(() => hasActiveStoredSignMonitor(account.id));
   const [appVersion, setAppVersion] = useState('...');
@@ -1093,7 +1088,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                           : null;
                         const canStopProcessing = isProcessing && Boolean(course.processingTaskId);
                         const isStoppingProcessing = course.processingTaskId === stoppingTaskId;
-                        const blockedPointCount = course.blockedPointCount ?? 0;
+                        const blockedPointCount = courseDetailsMap[course.key]?.blockedPointCount ?? 0;
 
                         const isExpanded = expandedCourses.has(course.key);
                         const isCourseOutlineFullyExpanded = fullyExpandedCourseOutlines.has(course.key);

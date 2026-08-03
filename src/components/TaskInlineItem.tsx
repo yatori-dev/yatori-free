@@ -19,7 +19,7 @@ import {
   Layers,
   Sparkles
 } from 'lucide-react';
-import { type Task } from '@/lib/api';
+import { getTaskCoursesCustomSnapshot, type Task } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 
 interface TaskInlineItemProps {
@@ -225,8 +225,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const canStopTask = stoppableStatuses.includes(task.status) || stoppableStatuses.includes(effectiveStatus);
   const isStoppingTask = task.status === 'stopping' || effectiveStatus === 'stopping';
 
-  const configSnapshot = task.configSnapshot;
-  const coursesCustom = configSnapshot?.coursesCustom;
+  const coursesCustom = getTaskCoursesCustomSnapshot(task.configSnapshot);
   const workAutoSubmitValue = coursesCustom?.workAutoSubmit;
   const examAutoSubmitValue = coursesCustom?.examAutoSubmit;
   const workAutoSubmitLabel = getAutoSubmitLabel(workAutoSubmitValue);

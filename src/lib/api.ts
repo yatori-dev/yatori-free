@@ -98,13 +98,11 @@ export interface Course {
   jobFinishCount?: number;
   jobCount?: number;
   jobRate?: number;
-  processing?: boolean;
+}
+
+export interface CourseSummary extends Course {
+  processing: boolean;
   processingTaskId?: string;
-  blockedChapterCount?: number;
-  blockedPointCount?: number;
-  taskPointCount?: number;
-  taskPoints?: CourseTaskPoint[];
-  taskPointsIncomplete?: boolean;
 }
 
 export type CourseTaskPointKind =
@@ -190,7 +188,7 @@ export interface CourseDetails {
 }
 
 export interface CourseListResponseData {
-  courses: Course[];
+  courses: CourseSummary[];
 }
 
 export interface TaskListResponseData {
@@ -256,17 +254,73 @@ export interface Task {
   accountId: string;
   status: TaskStatus;
   autoResume: boolean;
-  configSnapshot?: {
-    accountType: string;
-    account: string;
-    coursesCustom: CoursesCustom;
-  };
+  configSnapshot?: Record<string, unknown>;
   startedAt?: string | null;
   stoppedAt?: string | null;
   errorMessage?: string;
   progress?: TaskProgress;
   createdAt?: string;
   updatedAt?: string;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isOptionalString(value: unknown) {
+  return value === undefined || typeof value === 'string';
+}
+
+function isOptionalBoolean(value: unknown) {
+  return value === undefined || typeof value === 'boolean';
+}
+
+function isOptionalStringArray(value: unknown) {
+  return value === undefined
+    || (Array.isArray(value) && value.every((item) => typeof item === 'string'));
+}
+
+function isOptionalAutoSubmitMode(value: unknown) {
+  return value === undefined || value === 0 || value === 1 || value === 2;
+}
+
+function isStudyIncrement(value: unknown): value is StudyIncrement {
+  return isRecord(value)
+    && ['visitCount', 'videoStudyMinutes', 'readMinutes'].every((key) => (
+      value[key] === undefined || typeof value[key] === 'number'
+    ));
+}
+
+function isCourseSetting(value: unknown): value is CourseSetting {
+  return isRecord(value)
+    && isOptionalString(value.classId)
+    && isOptionalString(value.name)
+    && isOptionalStringArray(value.includeExams)
+    && isOptionalStringArray(value.excludeExams)
+    && (value.studyIncrement === undefined || isStudyIncrement(value.studyIncrement));
+}
+
+function isCoursesCustom(value: unknown): value is CoursesCustom {
+  return isRecord(value)
+    && isOptionalBoolean(value.doChapterTest)
+    && isOptionalBoolean(value.doWork)
+    && isOptionalBoolean(value.doExam)
+    && isOptionalAutoSubmitMode(value.workAutoSubmit)
+    && isOptionalAutoSubmitMode(value.examAutoSubmit)
+    && isOptionalString(value.answerMode)
+    && isOptionalStringArray(value.includeCourses)
+    && isOptionalStringArray(value.excludeCourses)
+    && (value.coursesSettings === undefined || (
+      Array.isArray(value.coursesSettings) && value.coursesSettings.every(isCourseSetting)
+    ));
+}
+
+export function getTaskCoursesCustomSnapshot(configSnapshot: Task['configSnapshot']) {
+  if (!isRecord(configSnapshot) || !isCoursesCustom(configSnapshot.coursesCustom)) {
+    return undefined;
+  }
+
+  return configSnapshot.coursesCustom;
 }
 
 export type StudyMetricStatus = 'disabled' | 'pending' | 'running' | 'success' | 'failed' | 'skipped';
