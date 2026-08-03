@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Check, Eye, EyeOff, LoaderCircle, RotateCw, SendHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   createSMSSession,
@@ -45,6 +45,7 @@ export function LoginCredentialsStep({
   const [smsError, setSMSError] = useState('');
   const [retrySeconds, setRetrySeconds] = useState(0);
   const [isSendingCode, setIsSendingCode] = useState(false);
+  const [showSendSuccess, setShowSendSuccess] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   useEffect(() => {
@@ -59,7 +60,25 @@ export function LoginCredentialsStep({
     return () => window.clearTimeout(timeoutId);
   }, [retrySeconds]);
 
+  useEffect(() => {
+    if (!showSendSuccess) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => setShowSendSuccess(false), 900);
+    return () => window.clearTimeout(timeoutId);
+  }, [showSendSuccess]);
+
   const isBusy = isSendingCode || isLoggingIn;
+  const sendCodeButtonLabel = isSendingCode
+    ? '正在发送验证码'
+    : showSendSuccess
+      ? '验证码已发送'
+      : retrySeconds > 0
+        ? `${retrySeconds} 秒后可重新发送验证码`
+        : smsSession
+          ? '重新发送验证码'
+          : '获取验证码';
 
   const handleMethodChange = (value: string) => {
     const nextMethod = value as LoginMethod;
@@ -81,6 +100,7 @@ export function LoginCredentialsStep({
       setSMSSession(response.data);
       setSMSCode('');
       setRetrySeconds(Math.max(0, response.data.retryAfterSeconds));
+      setShowSendSuccess(true);
       toast.success('验证码已发送');
     } catch (error) {
       console.error(error);
@@ -195,7 +215,7 @@ export function LoginCredentialsStep({
           </TabsContent>
 
           <TabsContent value="sms" className="mt-4 space-y-2">
-            <Label htmlFor="sms-code">短信验证码</Label>
+            <Label htmlFor="sms-code">6位数验证码</Label>
             <div className="flex gap-2">
               <Input
                 id="sms-code"
@@ -216,12 +236,25 @@ export function LoginCredentialsStep({
               />
               <Button
                 type="button"
+                size="icon"
                 variant="outline"
-                className="h-12 min-w-28 rounded-lg px-3 text-primary"
+                className={`size-12 shrink-0 rounded-lg transition-colors duration-200 ${showSendSuccess ? 'border-success/40 bg-success-container/50 text-success hover:bg-success-container/50' : 'text-primary'}`}
                 disabled={isBusy || retrySeconds > 0}
                 onClick={() => void handleSendCode()}
+                aria-label={sendCodeButtonLabel}
+                title={sendCodeButtonLabel}
               >
-                {isSendingCode ? '发送中...' : retrySeconds > 0 ? `${retrySeconds} 秒` : smsSession ? '重新发送' : '获取验证码'}
+                {isSendingCode ? (
+                  <LoaderCircle className="size-5 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+                ) : showSendSuccess ? (
+                  <Check className="size-5 animate-in zoom-in-50 duration-200 ease-out motion-reduce:animate-none" aria-hidden="true" />
+                ) : retrySeconds > 0 ? (
+                  <span className="text-xs font-semibold tabular-nums" aria-hidden="true">{retrySeconds}</span>
+                ) : smsSession ? (
+                  <RotateCw className="size-5" aria-hidden="true" />
+                ) : (
+                  <SendHorizontal className="size-5" aria-hidden="true" />
+                )}
               </Button>
             </div>
             {smsError ? (

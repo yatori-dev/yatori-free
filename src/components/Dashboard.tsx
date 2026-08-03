@@ -976,7 +976,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
               </TaskStatusDrawer>
 
               <div
-                className="flex min-w-0 max-w-[154px] items-center gap-1 rounded-md border border-border bg-muted/40 py-0.5 pl-1 pr-1 sm:max-w-none sm:gap-3 sm:py-1 sm:pl-2 sm:pr-3"
+                className="flex min-w-0 max-w-[154px] items-center gap-1 rounded-md border border-border bg-muted/40 py-0.5 pl-1 pr-1 min-[400px]:w-[clamp(132px,31vw,154px)] min-[400px]:gap-2 min-[400px]:py-1 min-[400px]:pl-1.5 min-[400px]:pr-1.5 sm:w-auto sm:max-w-none sm:gap-3 sm:pl-2 sm:pr-3"
                 aria-label={`当前用户 ${session.displayName}`}
               >
             {session.avatarUrl ? (
@@ -991,15 +991,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 {session.displayName.substring(0, 1).toUpperCase()}
               </div>
             )}
-            <div className="hidden min-w-0 flex-col text-left min-[360px]:flex">
-              <span className="max-w-[68px] truncate text-[11px] font-bold sm:max-w-[100px] sm:text-xs sm:font-semibold">{session.displayName}</span>
+            <div className="hidden min-w-0 flex-col text-left min-[360px]:flex min-[400px]:flex-1">
+              <span className="max-w-[68px] truncate text-[11px] font-bold min-[400px]:max-w-none sm:max-w-[100px] sm:text-xs sm:font-semibold">{session.displayName}</span>
               <span className="hidden max-w-[100px] truncate text-xs text-muted-foreground sm:block">{session.user.username}</span>
             </div>
             <Button
               size="icon"
               variant="ghost"
               onClick={() => setLogoutConfirmOpen(true)}
-              className="h-8 w-8 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground sm:ml-1 sm:h-6 sm:w-6"
+              className="h-8 w-8 shrink-0 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground min-[400px]:ml-auto sm:ml-1 sm:h-6 sm:w-6"
               title="退出登录"
               aria-label="退出登录"
             >
