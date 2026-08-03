@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Label } from './ui/label';
@@ -56,6 +56,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
+
+const DASHBOARD_TAB_ORDER: readonly MobileDashboardTabId[] = ['courses', 'sign', 'tasks', 'settings'];
 
 interface CourseCheckboxProps {
   checked: boolean;
@@ -250,6 +252,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [courseSearchQuery, setCourseSearchQuery] = useState('');
   const isCourseSearchComposing = useRef(false);
   const dashboardMainRef = useRef<HTMLElement>(null);
+  const mobileTabAnimationRef = useRef<Animation | null>(null);
+  const mobileTabDirectionRef = useRef(1);
+  const lastAnimatedMobileTabRef = useRef<MobileDashboardTabId>('courses');
   const mobileTabScrollPositions = useRef<Record<MobileDashboardTabId, number>>({
     courses: 0,
     sign: 0,
@@ -264,21 +269,57 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
     if (window.matchMedia('(max-width: 1023px)').matches) {
       mobileTabScrollPositions.current[activeTab] = dashboardMainRef.current?.scrollTop ?? 0;
+      mobileTabDirectionRef.current = DASHBOARD_TAB_ORDER.indexOf(tabId) >= DASHBOARD_TAB_ORDER.indexOf(activeTab) ? 1 : -1;
     }
 
     setPrevTab(activeTab);
     setActiveTab(tabId);
   }, [activeTab]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!window.matchMedia('(max-width: 1023px)').matches) {
       return;
     }
 
     const main = dashboardMainRef.current;
-    if (main) {
-      main.scrollTop = mobileTabScrollPositions.current[activeTab];
+    if (!main) {
+      return;
     }
+
+    main.scrollTop = mobileTabScrollPositions.current[activeTab];
+
+    if (lastAnimatedMobileTabRef.current === activeTab) {
+      return;
+    }
+    lastAnimatedMobileTabRef.current = activeTab;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof main.animate !== 'function') {
+      return;
+    }
+
+    mobileTabAnimationRef.current?.cancel();
+    const animation = main.animate(
+      [
+        {
+          opacity: 0.82,
+          transform: `translate3d(${mobileTabDirectionRef.current * 10}px, 0, 0) scale(0.995)`,
+        },
+        { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' },
+      ],
+      {
+        duration: 210,
+        easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+        fill: 'both',
+      },
+    );
+    mobileTabAnimationRef.current = animation;
+
+    return () => {
+      animation.cancel();
+      if (mobileTabAnimationRef.current === animation) {
+        mobileTabAnimationRef.current = null;
+      }
+    };
   }, [activeTab]);
 
   const filteredTasks = useMemo(() => {
@@ -845,7 +886,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   }, []);
 
   // Tab transition calculations (fixed 10px displacement for calm navigation)
-  const tabsList = ['courses', 'sign', 'tasks', 'settings'];
+  const tabsList = DASHBOARD_TAB_ORDER;
   const prevIndex = tabsList.indexOf(prevTab);
   const currentIndex = tabsList.indexOf(activeTab);
   const tabSwitchDistance = Math.abs(currentIndex - prevIndex);
@@ -982,7 +1023,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             <div className="mx-auto w-full min-w-0 px-0 py-0 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
               <div className="min-w-0">
             {/* Courses list tab content */}
-            <TabsContent value="courses" className="outline-none m-0 lg:flex-1 lg:min-h-0">
+            <TabsContent forceMount value="courses" className="m-0 outline-none data-[state=inactive]:hidden lg:min-h-0 lg:flex-1">
               <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:flex lg:h-full lg:min-h-0 lg:flex-col">
                 <CardHeader className="flex flex-row items-center gap-2 rounded-none border-b border-border/50 px-3 py-2.5 sm:justify-between sm:px-6 sm:py-4 sm:space-y-0">
                   <div className="flex shrink-0 items-center gap-1 sm:block lg:hidden">

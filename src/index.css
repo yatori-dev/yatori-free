@@ -544,6 +544,13 @@
   animation: tabFadeIn var(--tab-transition-duration, 0.25s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+/* Avoid compositing an entire long course panel during mobile tab switches. */
+@media (max-width: 1023px) {
+  [data-slot="tabs-content"][data-state="active"] {
+    animation: none;
+  }
+}
+
 @keyframes tabFadeIn {
   from {
     opacity: 0;
