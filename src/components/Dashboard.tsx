@@ -863,7 +863,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           <header className="sticky top-0 z-40 flex min-h-14 items-center justify-between gap-1.5 border-b border-border bg-card px-2.5 py-1.5 shadow-sm sm:min-h-16 sm:gap-2 sm:px-6 sm:py-2.5 lg:px-8">
             <div className="flex min-w-0 shrink-0 items-center lg:hidden">
               <div className="inline-flex min-w-0 items-center gap-1.5 font-semibold leading-none tracking-tight" aria-label={`Yatori 学习通服务 v${appVersion}`}>
-                <span className="text-xl" aria-label="Yatori">
+                <span className="text-xl sm:text-2xl" aria-label="Yatori">
                   <span className="text-[var(--google-blue)]">Y</span>
                   <span className="text-[var(--google-red)]">a</span>
                   <span className="text-[var(--google-yellow)]">t</span>
@@ -872,8 +872,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                   <span className="text-[var(--google-red)]">i</span>
                 </span>
                 <span className="flex flex-col gap-0.5 whitespace-nowrap">
-                  <span className="text-[10px] font-semibold text-foreground/80">学习通服务</span>
-                  <span className="text-[10px] font-medium tabular-nums text-muted-foreground">v{appVersion}</span>
+                  <span className="text-[10px] font-semibold text-foreground/80 sm:text-sm">学习通服务</span>
+                  <span className="text-[10px] font-medium tabular-nums text-muted-foreground sm:text-xs">v{appVersion}</span>
                 </span>
               </div>
             </div>

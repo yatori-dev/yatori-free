@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import { Progress } from './ui/progress';
 import { TaskStudyProgress } from './TaskStudyProgress';
 import { getStudyProgressPercents } from '@/lib/studyProgress';
@@ -11,6 +12,7 @@ import {
   AlertCircle, 
   Clock, 
   ChevronDown, 
+  ChevronRight,
   ChevronUp, 
   RefreshCw, 
   BookOpen,
@@ -101,6 +103,7 @@ const VISIBLE_COURSE_COUNT = 3;
 
 export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseNameByIdentifier = {}, courseTaskPointProgressByIdentifier = {}, snapshot, onStopTask }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const [showCourseList, setShowCourseList] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const taskProgress = task.progress ?? null;
   const snapshotProgress = snapshot?.progress ?? null;
@@ -258,6 +261,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
     return /^\d+$/.test(normalizedIdentifier) ? '未匹配课程' : courseIdentifier;
   });
   const visibleCourses = displayCourses?.slice(0, VISIBLE_COURSE_COUNT);
+  const hiddenCourses = displayCourses?.slice(VISIBLE_COURSE_COUNT) ?? [];
   const hiddenCourseCount = Math.max(0, (displayCourses?.length ?? 0) - VISIBLE_COURSE_COUNT);
 
   const isTerminal = ['success', 'partial_success', 'failed', 'stopped'].includes(effectiveStatus);
@@ -332,17 +336,40 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
                 </span>
               ))}
               {hiddenCourseCount > 0 && (
-                <span
-                  className="inline-flex items-center rounded-md border border-border bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground"
-                  title={displayCourses?.slice(VISIBLE_COURSE_COUNT).join('、')}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCourseList(true)}
+                  aria-haspopup="dialog"
+                  className="h-7 gap-1 rounded-md border-border bg-muted/60 px-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
                 >
                   另 {hiddenCourseCount} 门
-                </span>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Button>
               )}
             </>
           )}
         </div>
       </div>
+
+      <Dialog open={showCourseList} onOpenChange={setShowCourseList}>
+        <DialogContent className="max-h-[calc(100dvh-2rem)] max-w-[calc(100%-2rem)] gap-0 overflow-hidden p-0 sm:max-w-lg">
+          <DialogHeader className="border-b border-border/50 px-4 py-4 pr-11 sm:px-5">
+            <DialogTitle>其余 {hiddenCourseCount} 门课程</DialogTitle>
+            <DialogDescription className="sr-only">本次任务中未在卡片展示的课程。</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[min(520px,calc(100dvh-8rem))] overflow-y-auto p-2.5 sm:p-3">
+            <ol className="space-y-1.5">
+              {hiddenCourses.map((courseName, index) => (
+                <li key={`${courseName}-${index}`} className="rounded-lg border border-border/50 bg-muted/25 px-3 py-2 text-sm text-foreground">
+                  {courseName}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Terminal result */}
       {isTerminal && (
