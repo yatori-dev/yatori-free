@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import { Activity, BookOpen, MapPin, Settings } from 'lucide-react';
 
 export type DashboardViewId = 'courses' | 'sign' | 'settings';
@@ -7,7 +6,6 @@ export type MobileDashboardTabId = DashboardViewId | 'tasks';
 interface DashboardNavigationProps {
   mode: 'desktop' | 'mobile';
   activeTab: MobileDashboardTabId;
-  previousTab?: MobileDashboardTabId;
   activeTaskCount: number;
   appVersion?: string;
   signMonitorActive: boolean;
@@ -41,7 +39,7 @@ function Brand({ appVersion }: { appVersion?: string }) {
   );
 }
 
-export function DashboardNavigation({ mode, activeTab, previousTab = activeTab, activeTaskCount, appVersion, signMonitorActive, onTabChange }: DashboardNavigationProps) {
+export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersion, signMonitorActive, onTabChange }: DashboardNavigationProps) {
   if (mode === 'desktop') {
     return (
       <aside className="hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-card lg:flex" aria-label="应用侧边栏">
@@ -83,27 +81,11 @@ export function DashboardNavigation({ mode, activeTab, previousTab = activeTab, 
     { id: 'tasks', label: '任务', icon: Activity },
     { id: 'settings', label: '设置', icon: Settings },
   ];
-  const previousIndex = mobileItems.findIndex((item) => item.id === previousTab);
-  const currentIndex = mobileItems.findIndex((item) => item.id === activeTab);
-  const distance = Math.abs(currentIndex - previousIndex);
-  const isMovingRight = currentIndex > previousIndex;
-  const duration = distance === 0 ? 0 : 220 + distance * 40;
-  const delay = distance * 22;
-  const easing = 'cubic-bezier(0.25, 1.5, 0.45, 1.08)';
-  const transition = distance === 0
-    ? 'none'
-    : isMovingRight
-      ? `left ${duration}ms ${easing} ${delay}ms, right ${duration}ms ${easing} 0ms`
-      : `left ${duration}ms ${easing} 0ms, right ${duration}ms ${easing} ${delay}ms`;
-  const capsuleStyle: CSSProperties = {
-    left: `calc(${currentIndex * 25}% + 12.5% - 24px)`,
-    right: `calc(${(3 - currentIndex) * 25}% + 12.5% - 24px)`,
-    transition,
-  };
-
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center border-t border-border bg-card px-0 pb-[calc(0.375rem+env(safe-area-inset-bottom))] pt-1.5 shadow-sm lg:hidden" aria-label="移动主导航">
-      <span className="pointer-events-none absolute top-2 z-0 h-8 rounded-full bg-primary-container/60 shadow-2xs" style={capsuleStyle} aria-hidden="true" />
+    <nav
+      className="fixed inset-x-0 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 mx-auto flex w-[calc(100%-3rem)] max-w-sm items-center rounded-full border border-border/80 bg-card/95 p-1 shadow-floating backdrop-blur-md lg:hidden"
+      aria-label="移动主导航"
+    >
       {mobileItems.map((item) => {
         const Icon = item.icon;
         const active = activeTab === item.id;
@@ -114,11 +96,11 @@ export function DashboardNavigation({ mode, activeTab, previousTab = activeTab, 
             key={item.id}
             type="button"
             onClick={() => onTabChange(item.id)}
-            className="relative z-10 flex min-h-12 flex-1 flex-col items-center justify-center gap-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className={`relative z-10 flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             aria-current={active ? 'page' : undefined}
           >
-            <span className={`relative flex h-8 w-12 items-center justify-center rounded-full transition-colors duration-200 ${active ? 'text-primary' : 'text-muted-foreground'}`}>
-              <Icon className={`h-4 w-4 transition-transform duration-200 ${active ? 'scale-110' : ''}`} />
+            <span className={`relative flex h-7 w-10 items-center justify-center rounded-full motion-safe:transition-[transform,background-color] motion-safe:duration-[800ms] motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] ${active ? 'scale-110 bg-primary-container/70' : 'scale-100'}`}>
+              <Icon className="h-[18px] w-[18px]" />
               {showTaskBadge && (
                 <span className="absolute -right-1 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-mono text-xs font-bold text-primary-foreground ring-2 ring-card animate-in zoom-in-75 duration-200">
                   {activeTaskCount}
@@ -126,7 +108,7 @@ export function DashboardNavigation({ mode, activeTab, previousTab = activeTab, 
               )}
               {showSignBadge && <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" aria-label="签到已启用" />}
             </span>
-            <span className={`text-xs leading-none transition-colors duration-200 ${active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground'}`}>{item.label}</span>
+            <span className={`text-xs leading-none ${active ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
           </button>
         );
       })}

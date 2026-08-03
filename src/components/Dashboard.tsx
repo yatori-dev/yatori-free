@@ -1747,7 +1747,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       <DashboardNavigation
         mode="mobile"
         activeTab={activeTab}
-        previousTab={prevTab}
         activeTaskCount={taskCounts.active}
         signMonitorActive={signMonitorActive}
         onTabChange={handleTabChange}
