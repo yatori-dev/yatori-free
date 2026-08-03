@@ -52,7 +52,6 @@ import {
   SlidersHorizontal,
   Search,
   X,
-  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
@@ -630,10 +629,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       }
       return next;
     });
-  };
-
-  const clearSelection = () => {
-    setSelectedCourses(new Set());
   };
 
   const openStudyIncrementSettings = (classId: string) => {
@@ -1737,50 +1732,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       </Tabs>
 
 
-      {/* 批量控制 Floating Control Capsule */}
+      {/* 提交任务悬浮按钮 */}
       {selectedCourses.size > 0 && (
-        <div className="absolute inset-x-3 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-50 flex items-center justify-between gap-2.5 rounded-2xl border border-border/80 bg-card/95 p-2 shadow-floating backdrop-blur-md animate-bottom-bar-enter sm:inset-x-auto sm:bottom-6 sm:left-1/2 sm:w-max sm:-translate-x-1/2 sm:px-4 sm:py-2">
-          <div className="flex min-w-0 flex-1 items-center gap-2.5 text-xs sm:text-sm">
-            <span className="font-semibold text-foreground whitespace-nowrap">
-              已选 <span className="tabular-nums font-bold text-primary">{selectedCourses.size}</span> 门课程
-            </span>
-            {Array.from(selectedCourses).some((key) => {
-              const inc = studyIncrements[key];
-              return (inc?.visitCount ?? 0) > 0 || (inc?.videoStudyMinutes ?? 0) > 0 || (inc?.readMinutes ?? 0) > 0;
-            }) && (
-              <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary-container/40 px-2 py-0.5 text-xs font-medium text-primary">
-                <Sparkles className="h-3 w-3" />
-                已设学习目标
-              </span>
+        <div className="absolute bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 animate-bottom-bar-enter lg:bottom-6">
+          <Button
+            type="button"
+            onClick={createTaskWithSelection}
+            disabled={creatingTask}
+            className="h-12 gap-2 rounded-full bg-primary px-5 font-semibold text-primary-foreground shadow-floating ring-4 ring-card/80 hover:bg-primary-hover"
+            title={`提交 ${selectedCourses.size} 门课程任务`}
+            aria-label={`提交 ${selectedCourses.size} 门课程任务`}
+          >
+            {creatingTask ? (
+              <RefreshCw className="h-[18px] w-[18px] animate-spin" aria-hidden="true" />
+            ) : (
+              <Play className="h-[18px] w-[18px] fill-current" aria-hidden="true" />
             )}
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={clearSelection}
-              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
-              title="取消选择"
-              aria-label="取消选择"
-            >
-              <X className="h-3.5 w-3.5 mr-1" />
-              清除
-            </Button>
-            <Button
-              type="button"
-              onClick={createTaskWithSelection}
-              disabled={creatingTask}
-              className="h-8 shrink-0 gap-1.5 px-3.5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary-hover shadow-xs rounded-lg transition-all"
-            >
-              {creatingTask ? (
-                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Play className="h-3.5 w-3.5 fill-current" />
-              )}
-              <span>提交任务</span>
-            </Button>
-          </div>
+            <span>提交任务({selectedCourses.size})</span>
+          </Button>
         </div>
       )}
 
