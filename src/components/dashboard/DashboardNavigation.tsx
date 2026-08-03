@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react';
 import { Activity, BookOpen, MapPin, Settings } from 'lucide-react';
 
 export type DashboardViewId = 'courses' | 'sign' | 'settings';
@@ -16,6 +17,13 @@ const desktopItems: Array<{ id: DashboardViewId; label: string; icon: typeof Boo
   { id: 'courses', label: '课程列表', icon: BookOpen },
   { id: 'sign', label: '自动签到', icon: MapPin },
   { id: 'settings', label: '提交设置', icon: Settings },
+];
+
+const mobileItems: Array<{ id: MobileDashboardTabId; label: string; icon: typeof BookOpen }> = [
+  { id: 'courses', label: '课程', icon: BookOpen },
+  { id: 'sign', label: '签到', icon: MapPin },
+  { id: 'tasks', label: '任务', icon: Activity },
+  { id: 'settings', label: '设置', icon: Settings },
 ];
 
 function Brand({ appVersion }: { appVersion?: string }) {
@@ -40,6 +48,52 @@ function Brand({ appVersion }: { appVersion?: string }) {
 }
 
 export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersion, signMonitorActive, onTabChange }: DashboardNavigationProps) {
+  const mobileIndicatorRef = useRef<HTMLSpanElement>(null);
+  const mobileIndicatorAnimationRef = useRef<Animation | null>(null);
+  const previousMobileTabRef = useRef(activeTab);
+  const activeMobileIndex = mobileItems.findIndex((item) => item.id === activeTab);
+
+  useLayoutEffect(() => {
+    const previousTab = previousMobileTabRef.current;
+    previousMobileTabRef.current = activeTab;
+
+    if (mode !== 'mobile') {
+      return;
+    }
+
+    const indicator = mobileIndicatorRef.current;
+    const previousIndex = mobileItems.findIndex((item) => item.id === previousTab);
+    if (!indicator || previousIndex < 0 || activeMobileIndex < 0 || previousIndex === activeMobileIndex) {
+      return;
+    }
+
+    mobileIndicatorAnimationRef.current?.cancel();
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof indicator.animate !== 'function') {
+      return;
+    }
+
+    const source = `translate3d(${previousIndex * 100}%, 0, 0)`;
+    const target = `translate3d(${activeMobileIndex * 100}%, 0, 0)`;
+    const animation = indicator.animate(
+      [
+        { offset: 0, transform: source, easing: 'cubic-bezier(0.4, 0, 1, 1)' },
+        { offset: 0.22, transform: `${source} scale3d(0.12, 0.82, 1)`, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' },
+        { offset: 0.46, transform: `${target} scale3d(0.12, 0.82, 1)`, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+        { offset: 0.78, transform: `${target} scale3d(1.12, 1.04, 1)`, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+        { offset: 1, transform: target },
+      ],
+      { duration: 420, fill: 'both' },
+    );
+    mobileIndicatorAnimationRef.current = animation;
+
+    return () => {
+      animation.cancel();
+      if (mobileIndicatorAnimationRef.current === animation) {
+        mobileIndicatorAnimationRef.current = null;
+      }
+    };
+  }, [activeMobileIndex, activeTab, mode]);
+
   if (mode === 'desktop') {
     return (
       <aside className="hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-card lg:flex" aria-label="应用侧边栏">
@@ -75,17 +129,20 @@ export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersi
     );
   }
 
-  const mobileItems: Array<{ id: MobileDashboardTabId; label: string; icon: typeof BookOpen }> = [
-    { id: 'courses', label: '课程', icon: BookOpen },
-    { id: 'sign', label: '签到', icon: MapPin },
-    { id: 'tasks', label: '任务', icon: Activity },
-    { id: 'settings', label: '设置', icon: Settings },
-  ];
   return (
     <nav
       className="absolute inset-x-0 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 mx-auto flex w-[calc(100%-3rem)] max-w-sm items-center rounded-full border border-border/80 bg-card/95 p-1 shadow-floating backdrop-blur-md lg:hidden"
       aria-label="移动主导航"
     >
+      <span className="pointer-events-none absolute inset-x-1 inset-y-1" aria-hidden="true">
+        <span
+          ref={mobileIndicatorRef}
+          className="absolute inset-y-0 left-0 w-1/4 will-change-transform"
+          style={{ transform: `translate3d(${Math.max(activeMobileIndex, 0) * 100}%, 0, 0)` }}
+        >
+          <span className="absolute left-1/2 top-px h-7 w-10 -translate-x-1/2 rounded-full bg-primary-container/70" />
+        </span>
+      </span>
       {mobileItems.map((item) => {
         const Icon = item.icon;
         const active = activeTab === item.id;
@@ -99,7 +156,7 @@ export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersi
             className={`relative z-10 flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             aria-current={active ? 'page' : undefined}
           >
-            <span className={`relative flex h-7 w-10 items-center justify-center rounded-full motion-safe:transition-[transform,background-color] motion-safe:duration-[360ms] motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] ${active ? 'scale-110 bg-primary-container/70' : 'scale-100'}`}>
+            <span className={`relative flex h-7 w-10 items-center justify-center rounded-full transition-transform duration-200 ease-out ${active ? 'scale-110' : 'scale-100'}`}>
               <Icon className="h-[18px] w-[18px]" />
               {showTaskBadge && (
                 <span className="absolute -right-1 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-mono text-xs font-bold text-primary-foreground ring-2 ring-card animate-in zoom-in-75 duration-200">
