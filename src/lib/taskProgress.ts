@@ -9,14 +9,13 @@ export type CourseTaskPointProgressMap = Record<string, CourseTaskPointProgress>
 
 export function createCourseTaskPointProgressMap(courses: CourseSummary[]): CourseTaskPointProgressMap {
   return courses.reduce<CourseTaskPointProgressMap>((map, course) => {
-    if (typeof course.jobCount !== 'number' || !Number.isFinite(course.jobCount) || course.jobCount < 0) {
-      return map;
-    }
-
-    const completed = typeof course.jobFinishCount === 'number' && Number.isFinite(course.jobFinishCount)
-      ? Math.max(0, Math.min(course.jobCount, course.jobFinishCount))
+    const total = typeof course.jobCount === 'number' && Number.isFinite(course.jobCount)
+      ? Math.max(0, course.jobCount)
       : 0;
-    const progress = { total: course.jobCount, completed };
+    const completed = typeof course.jobFinishCount === 'number' && Number.isFinite(course.jobFinishCount)
+      ? Math.max(0, Math.min(total, course.jobFinishCount))
+      : 0;
+    const progress = { total, completed };
 
     map[course.key] = progress;
     if (course.courseId) {
@@ -40,7 +39,7 @@ export function getTaskCourseTaskPointProgress(
   for (const identifier of includeCourses) {
     const progress = progressMap[identifier.trim()];
     if (!progress) {
-      return undefined;
+      continue;
     }
 
     total += progress.total;
