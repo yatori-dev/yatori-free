@@ -4,12 +4,11 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent } from './ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog';
-import { getUserFacingErrorMessage, login } from '@/lib/api';
 import type { AuthSession, LoginData } from '@/lib/api';
 import { readSavedAccount, saveSavedAccount } from '@/lib/savedAccount';
-import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { QRCodeLogin } from './QRCodeLogin';
+import { LoginCredentialsStep } from './login/LoginCredentialsStep';
 
 interface LoginProps {
   onLoginSuccess: (session: AuthSession) => void;
@@ -18,21 +17,17 @@ interface LoginProps {
 const MAINLAND_MOBILE_PATTERN = /^1[3-9]\d{9}$/;
 
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
-  const [step, setStep] = useState<'account' | 'password'>('account');
+  const [step, setStep] = useState<'account' | 'credentials'>('account');
   const [account, setAccount] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [accountError, setAccountError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [dialogContent, setDialogContent] = useState<'terms' | 'privacy' | null>(null);
   const accountPaneRef = useRef<HTMLDivElement>(null);
-  const passwordPaneRef = useRef<HTMLDivElement>(null);
+  const credentialsPaneRef = useRef<HTMLDivElement>(null);
   const [viewportHeight, setViewportHeight] = useState<number>();
 
   useLayoutEffect(() => {
-    const pane = step === 'account' ? accountPaneRef.current : passwordPaneRef.current;
+    const pane = step === 'account' ? accountPaneRef.current : credentialsPaneRef.current;
     if (!pane) return;
 
     const updateHeight = () => setViewportHeight(pane.scrollHeight);
@@ -41,7 +36,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     const observer = new ResizeObserver(updateHeight);
     observer.observe(pane);
     return () => observer.disconnect();
-  }, [accountError, agreedToTerms, isLoading, passwordError, showPassword, step]);
+  }, [accountError, step]);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,18 +61,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const handleAccountChange = (value: string) => {
     setAccount(value);
     setAccountError('');
-
-    const trimmedAccount = value.trim();
-    if (!trimmedAccount) {
-      if (password) {
-        setPassword('');
-      }
-      return;
-    }
-
-    if (password) {
-      setPassword('');
-    }
   };
 
   const handleNextStep = (e: React.FormEvent) => {
@@ -95,14 +78,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       return;
     }
     
-    // Slide to password step
-    setStep('password');
+    setStep('credentials');
   };
 
   const handleBackStep = () => {
-    if (isLoading) return;
     setStep('account');
-    setPasswordError('');
   };
 
   const completeLogin = (data: LoginData) => {
@@ -118,35 +98,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       user: data.user,
       account: data.account,
     });
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPasswordError('');
-    
-    if (!password) {
-      setPasswordError('请输入您的密码');
-      return;
-    }
-
-    setIsLoading(true);
-    
-    try {
-      const response = await login({
-        account: account.trim(),
-        password,
-      });
-
-      const data = response.data;
-      completeLogin(data);
-    } catch (error) {
-      console.error(error);
-      const errMsg = getUserFacingErrorMessage(error, '服务暂时不可用，请稍后重试');
-      setPasswordError(errMsg);
-      toast.error(errMsg);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -176,7 +127,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           {/* Step Indicator */}
           <div className="mb-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none">
             <span className={`h-1.5 rounded-full transition-all duration-300 ${step === 'account' ? 'w-6 bg-primary' : 'w-2 bg-muted'}`} />
-            <span className={`h-1.5 rounded-full transition-all duration-300 ${step === 'password' ? 'w-6 bg-primary' : 'w-2 bg-muted'}`} />
+            <span className={`h-1.5 rounded-full transition-all duration-300 ${step === 'credentials' ? 'w-6 bg-primary' : 'w-2 bg-muted'}`} />
           </div>
 
           {/* Form and transition layout */}
@@ -186,7 +137,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           >
             <div 
               className="slide-container" 
-              style={{ transform: step === 'password' ? 'translateX(-50%)' : 'translateX(0%)' }}
+              style={{ transform: step === 'credentials' ? 'translateX(-50%)' : 'translateX(0%)' }}
             >
               {/* Step 1: Account Input */}
               <div
@@ -213,7 +164,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                       value={account}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAccountChange(e.target.value)}
                       className="w-full h-12 px-4 border border-input focus:border-primary focus:ring-1 focus:ring-primary rounded-lg bg-transparent text-foreground"
-                      disabled={isLoading || step !== 'account'}
+                      disabled={step !== 'account'}
                       tabIndex={step === 'account' ? 0 : -1}
                     />
                     {accountError && (
@@ -237,8 +188,8 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                     </a>
                     <Button 
                       type="submit" 
-                      className="bg-primary hover:bg-primary-hover text-primary-foreground px-6 h-10 rounded-lg font-medium text-sm transition-all shadow-none"
-                      disabled={isLoading || step !== 'account'}
+                      className="h-11 rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground shadow-none transition-all hover:bg-primary-hover md:h-10"
+                      disabled={step !== 'account'}
                       tabIndex={step === 'account' ? 0 : -1}
                     >
                       下一步
@@ -247,129 +198,25 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 </form>
               </div>
 
-              {/* Step 2: Password Input */}
+              {/* Step 2: Login method */}
               <div
-                ref={passwordPaneRef}
+                ref={credentialsPaneRef}
                 className="slide-pane flex flex-col items-center"
-                aria-hidden={step !== 'password'}
+                aria-hidden={step !== 'credentials'}
               >
-                <h1 className="text-2xl text-foreground font-normal mb-1 font-sans">输入密码</h1>
-                <p className="text-sm text-muted-foreground mb-6 font-sans">请输入您的学习通登录密码</p>
-
-                <form onSubmit={handleLogin} autoComplete="on" className="w-full space-y-6">
-                  <input
-                    type="text"
-                    name="username"
-                    autoComplete="username"
-                    value={account}
-                    readOnly
-                    tabIndex={-1}
-                    className="sr-only"
-                  />
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-3">
-                      <Label htmlFor="password">密码</Label>
-                      <a
-                        href="https://passport2.chaoxing.com/pwd/findpwd?version=1"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-disabled={isLoading || step !== 'password'}
-                        tabIndex={step === 'password' ? 0 : -1}
-                        className={`text-xs font-medium text-primary hover:underline ${isLoading || step !== 'password' ? 'pointer-events-none opacity-50' : ''}`}
-                      >
-                        忘记密码
-                      </a>
-                    </div>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? 'text' : 'password'}
-                        autoComplete="current-password"
-                        placeholder="密码"
-                        aria-invalid={Boolean(passwordError)}
-                        aria-describedby={passwordError ? 'password-error' : undefined}
-                        value={password}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                        className="w-full h-12 pl-4 pr-12 border border-input focus:border-primary focus:ring-1 focus:ring-primary rounded-lg bg-transparent text-foreground"
-                        disabled={isLoading || step !== 'password'}
-                        tabIndex={step === 'password' ? 0 : -1}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                        disabled={isLoading || step !== 'password'}
-                        tabIndex={step === 'password' ? 0 : -1}
-                        aria-label={showPassword ? '隐藏密码' : '显示密码'}
-                      >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                    {passwordError && (
-                      <p id="password-error" role="alert" className="ml-1 text-xs text-danger">{passwordError}</p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-start gap-2 text-sm leading-5 text-muted-foreground">
-                      <input
-                        id="agree-terms"
-                        type="checkbox"
-                        checked={agreedToTerms}
-                        onChange={(e) => setAgreedToTerms(e.target.checked)}
-                        disabled={isLoading || step !== 'password'}
-                        tabIndex={step === 'password' ? 0 : -1}
-                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-input accent-primary cursor-pointer disabled:opacity-50"
-                      />
-                      <div className="min-w-0">
-                      <label
-                        htmlFor="agree-terms"
-                        className={`cursor-pointer ${isLoading || step !== 'password' ? 'cursor-not-allowed opacity-50' : ''}`}
-                      >
-                        我已阅读并同意
-                      </label>{' '}
-                        <button type="button" onClick={() => setDialogContent('terms')} tabIndex={step === 'password' ? 0 : -1} className="font-medium text-primary hover:underline">服务条款</button>{' '}
-                        <span aria-hidden="true">和</span>{' '}
-                        <button type="button" onClick={() => setDialogContent('privacy')} tabIndex={step === 'password' ? 0 : -1} className="font-medium text-primary hover:underline">隐私政策</button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center pt-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={handleBackStep}
-                      className="text-primary hover:bg-primary-container/30 h-10 px-4 rounded-lg font-medium text-sm"
-                      disabled={isLoading || step !== 'password'}
-                      tabIndex={step === 'password' ? 0 : -1}
-                    >
-                      返回
-                    </Button>
-                    <Button 
-                      type="submit" 
-                      disabled={isLoading || !agreedToTerms || step !== 'password'}
-                      tabIndex={step === 'password' ? 0 : -1}
-                      className="bg-primary hover:bg-primary-hover text-primary-foreground px-8 h-10 rounded-lg font-medium text-sm transition-all shadow-none relative min-w-[80px]"
-                    >
-                      {isLoading ? '正在登录...' : '登录'}
-                    </Button>
-                  </div>
-                </form>
+                <LoginCredentialsStep
+                  key={account.trim()}
+                  account={account.trim()}
+                  active={step === 'credentials'}
+                  agreedToTerms={agreedToTerms}
+                  onAgreedToTermsChange={setAgreedToTerms}
+                  onBack={handleBackStep}
+                  onLoginSuccess={completeLogin}
+                  onOpenLegalDocument={setDialogContent}
+                />
               </div>
             </div>
           </div>
-
-          {/* Loading Animation Overlay */}
-          {isLoading && (
-            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/70 dark:bg-[#1f2021]/80" role="status" aria-label="正在登录">
-              <svg className="google-spinner" viewBox="0 0 50 50" aria-hidden="true">
-                <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4"></circle>
-              </svg>
-              <p className="mt-4 text-sm font-medium text-[#1a73e8] animate-pulse">正在登录...</p>
-            </div>
-          )}
           </div>
         </CardContent>
       </Card>

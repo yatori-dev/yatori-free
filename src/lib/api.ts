@@ -237,6 +237,21 @@ export interface LoginData {
   account: Account;
 }
 
+export interface CreateSMSSessionRequest {
+  phone: string;
+}
+
+export interface ExchangeSMSSessionRequest {
+  code: string;
+}
+
+export interface SMSSessionData {
+  id: string;
+  status: 'pending';
+  expiresAt: string;
+  retryAfterSeconds: number;
+}
+
 export type QRSessionStatus = 'pending' | 'scanned' | 'confirmed' | 'expired' | 'failed';
 
 export interface QRSessionData {
@@ -564,6 +579,24 @@ export function login(payload: LoginRequest) {
     method: 'POST',
     body: JSON.stringify(payload),
   }, true);
+}
+
+export function createSMSSession(payload: CreateSMSSessionRequest) {
+  return apiRequest<SMSSessionData>('/auth/sms-sessions', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }, true);
+}
+
+export function exchangeSMSSession(sessionId: string, payload: ExchangeSMSSessionRequest) {
+  return apiRequest<LoginData>(
+    `/auth/sms-sessions/${encodeApiPathSegment(sessionId)}/session`,
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    },
+    true,
+  );
 }
 
 export function createQRSession() {
