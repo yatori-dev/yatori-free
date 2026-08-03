@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Label } from './ui/label';
@@ -249,10 +249,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [courseSearch, setCourseSearch] = useState('');
   const [courseSearchQuery, setCourseSearchQuery] = useState('');
   const isCourseSearchComposing = useRef(false);
+  const dashboardMainRef = useRef<HTMLElement>(null);
+  const mobileTabScrollPositions = useRef<Record<MobileDashboardTabId, number>>({
+    courses: 0,
+    sign: 0,
+    tasks: 0,
+    settings: 0,
+  });
 
   const handleTabChange = useCallback((tabId: MobileDashboardTabId) => {
+    if (tabId === activeTab) {
+      return;
+    }
+
+    if (window.matchMedia('(max-width: 1023px)').matches) {
+      mobileTabScrollPositions.current[activeTab] = dashboardMainRef.current?.scrollTop ?? 0;
+    }
+
     setPrevTab(activeTab);
     setActiveTab(tabId);
+  }, [activeTab]);
+
+  useLayoutEffect(() => {
+    if (!window.matchMedia('(max-width: 1023px)').matches) {
+      return;
+    }
+
+    const main = dashboardMainRef.current;
+    if (main) {
+      main.scrollTop = mobileTabScrollPositions.current[activeTab];
+    }
   }, [activeTab]);
 
   const filteredTasks = useMemo(() => {
@@ -841,7 +867,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   }[activeTab];
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)] lg:overflow-hidden">
+    <div className="relative flex h-screen min-h-screen h-svh min-h-svh flex-col overflow-hidden bg-background text-foreground font-sans lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)]">
       <a href="#dashboard-main" className="sr-only z-[60] rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
         跳到主内容
       </a>
@@ -859,7 +885,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           signMonitorActive={signMonitorActive}
           onTabChange={handleTabChange}
         />
-        <div className="flex min-h-0 min-w-0 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-40 flex min-h-14 items-center justify-between gap-1.5 border-b border-border bg-card px-2.5 py-1.5 shadow-sm sm:min-h-16 sm:gap-2 sm:px-6 sm:py-2.5 lg:px-8">
             <div className="flex min-w-0 shrink-0 items-center lg:hidden">
               <div className="inline-flex min-w-0 items-center gap-1.5 font-semibold leading-none tracking-tight" aria-label={`Yatori 学习通服务 v${appVersion}`}>
@@ -952,7 +978,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             <div></div>
             <div></div>
           </div>
-          <main id="dashboard-main" className="min-h-0 flex-1 overflow-x-clip pb-18 lg:overflow-y-auto lg:pb-0">
+          <main ref={dashboardMainRef} id="dashboard-main" className="min-h-0 flex-1 overflow-x-clip overflow-y-auto pb-18 lg:pb-0">
             <div className="mx-auto w-full min-w-0 px-0 py-0 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
               <div className="min-w-0">
             {/* Courses list tab content */}
@@ -1672,7 +1698,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
       {/* 批量控制 Floating Control Capsule */}
       {selectedCourses.size > 0 && (
-        <div className="fixed inset-x-3 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-50 flex items-center justify-between gap-2.5 rounded-2xl border border-border/80 bg-card/95 p-2 shadow-floating backdrop-blur-md animate-bottom-bar-enter sm:inset-x-auto sm:bottom-6 sm:left-1/2 sm:w-max sm:-translate-x-1/2 sm:px-4 sm:py-2">
+        <div className="absolute inset-x-3 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-50 flex items-center justify-between gap-2.5 rounded-2xl border border-border/80 bg-card/95 p-2 shadow-floating backdrop-blur-md animate-bottom-bar-enter sm:inset-x-auto sm:bottom-6 sm:left-1/2 sm:w-max sm:-translate-x-1/2 sm:px-4 sm:py-2">
           <div className="flex min-w-0 flex-1 items-center gap-2.5 text-xs sm:text-sm">
             <span className="font-semibold text-foreground whitespace-nowrap">
               已选 <span className="tabular-nums font-bold text-primary">{selectedCourses.size}</span> 门课程
