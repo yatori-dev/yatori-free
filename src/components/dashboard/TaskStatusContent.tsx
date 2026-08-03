@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { TaskInlineItem } from '@/components/TaskInlineItem';
 import type { Task } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
+import type { CourseTaskPointProgressMap } from '@/lib/taskProgress';
 
 type TaskFilter = 'active' | 'completed';
 
@@ -14,6 +15,7 @@ interface TaskStatusContentProps {
   tasksLoading: boolean;
   taskSnapshots: Record<string, TaskProgressSnapshot>;
   courseNameByIdentifier: Record<string, string>;
+  courseTaskPointProgressByIdentifier: CourseTaskPointProgressMap;
   onTaskFilterChange: (filter: TaskFilter) => void;
   onRefresh: () => void;
   onStopTask: (taskId: string) => void;
@@ -27,6 +29,7 @@ export function TaskStatusContent({
   tasksLoading,
   taskSnapshots,
   courseNameByIdentifier,
+  courseTaskPointProgressByIdentifier,
   onTaskFilterChange,
   onRefresh,
   onStopTask,
@@ -118,6 +121,7 @@ export function TaskStatusContent({
                 task={task}
                 snapshot={taskSnapshots[task.id]}
                 courseNameByIdentifier={courseNameByIdentifier}
+                courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
                 onStopTask={onStopTask}
               />
             ))}

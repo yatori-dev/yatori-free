@@ -25,6 +25,7 @@ import { notifyAuthExit } from '@/lib/notifications';
 import { hasActiveStoredSignMonitor } from '@/lib/signMonitor';
 import { isActiveTaskStatus } from '@/lib/taskStatus';
 import { useTaskProgressPolling } from '@/hooks/useTaskProgressPolling';
+import { createCourseTaskPointProgressMap } from '@/lib/taskProgress';
 import { DashboardNavigation, type MobileDashboardTabId } from './dashboard/DashboardNavigation';
 import { CourseBulkSelectionMenu } from './dashboard/CourseBulkSelectionMenu';
 import { TaskStatusContent } from './dashboard/TaskStatusContent';
@@ -294,6 +295,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       return map;
     }, {});
   }, [courses]);
+
+  const courseTaskPointProgressByIdentifier = useMemo(
+    () => createCourseTaskPointProgressMap(courses),
+    [courses],
+  );
 
   // Selection and Expandable Course Detail States
   const [selectedCourses, setSelectedCourses] = useState<Set<string>>(new Set());
@@ -900,6 +906,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                   tasksLoading={tasksLoading}
                   taskSnapshots={taskSnapshots}
                   courseNameByIdentifier={courseNameByIdentifier}
+                  courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
                   onTaskFilterChange={setTaskFilter}
                   onRefresh={() => void fetchTasks()}
                   onStopTask={handleStopTask}
@@ -1648,6 +1655,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                     tasksLoading={tasksLoading}
                     taskSnapshots={taskSnapshots}
                     courseNameByIdentifier={courseNameByIdentifier}
+                    courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
                     onTaskFilterChange={setTaskFilter}
                     onRefresh={() => void fetchTasks()}
                     onStopTask={handleStopTask}

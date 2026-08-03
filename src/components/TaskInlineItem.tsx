@@ -16,15 +16,16 @@ import {
   BookOpen,
   Settings2,
   Hourglass,
-  Layers,
   Sparkles
 } from 'lucide-react';
 import { getTaskCoursesCustomSnapshot, type Task } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
+import { getTaskCourseTaskPointProgress, type CourseTaskPointProgressMap } from '@/lib/taskProgress';
 
 interface TaskInlineItemProps {
   task: Task;
   courseNameByIdentifier?: Record<string, string>;
+  courseTaskPointProgressByIdentifier?: CourseTaskPointProgressMap;
   snapshot?: TaskProgressSnapshot;
   onStopTask: (taskId: string) => void;
 }
@@ -96,15 +97,9 @@ function getAutoSubmitLabel(value: 0 | 1 | 2 | undefined) {
   return '模式 0';
 }
 
-const STAGES = [
-  { id: 'queued', label: '排队' },
-  { id: 'fetching', label: '拉取课程' },
-  { id: 'processing', label: '处理任务点' },
-  { id: 'study', label: '学习目标' },
-  { id: 'finished', label: '完成' },
-];
+const VISIBLE_COURSE_COUNT = 3;
 
-export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseNameByIdentifier = {}, snapshot, onStopTask }) => {
+export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseNameByIdentifier = {}, courseTaskPointProgressByIdentifier = {}, snapshot, onStopTask }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const taskProgress = task.progress ?? null;
@@ -202,9 +197,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
     && totalUnits > 0
     ? ((completedUnits + failedUnits) / totalUnits) * 100
     : null;
-  const successPercent = typeof totalUnits === 'number' && typeof completedUnits === 'number' && totalUnits > 0
-    ? (completedUnits / totalUnits) * 100
-    : null;
   const progressFallback = getProgressFallback(effectiveStatus);
   const unitPercent = derivedPercent ?? progressFallback.percent;
   const progressParts = [
@@ -217,7 +209,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const rawPercent = effectiveStatus === 'success'
     ? 100
     : calculatedPercent;
-  const percent = Math.max(0, Math.min(100, Math.round(rawPercent)));
+  const currentPercent = Math.max(0, Math.min(100, Math.round(rawPercent)));
   const showProgress = progress && snapshotStatuses.includes(effectiveStatus);
   const progressCourseLabel = progress?.currentCourse || progressFallback.course;
   const progressChapterLabel = progress?.currentChapter || (progressFallback.chapter === '--' ? '' : progressFallback.chapter);
@@ -241,6 +233,16 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
     coursesCustom.doExam,
   ].some((value) => value !== undefined);
   const includeCourses = coursesCustom?.includeCourses;
+  const taskCourseTaskPointProgress = getTaskCourseTaskPointProgress(
+    includeCourses,
+    courseTaskPointProgressByIdentifier,
+  );
+  const aggregatedPercent = taskCourseTaskPointProgress && taskCourseTaskPointProgress.total > 0
+    ? (taskCourseTaskPointProgress.completed / taskCourseTaskPointProgress.total) * 100
+    : null;
+  const percent = aggregatedPercent === null
+    ? currentPercent
+    : Math.max(0, Math.min(100, Math.round(aggregatedPercent)));
   const studyIncrementSettings = coursesCustom?.coursesSettings?.flatMap((setting) => {
     if (!setting.classId || !setting.studyIncrement) {
       return [];
@@ -255,23 +257,8 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
     }
     return /^\d+$/.test(normalizedIdentifier) ? '未匹配课程' : courseIdentifier;
   });
-
-  // Calculate current stage index (0..4) for execution trace
-  const currentStageIndex = (() => {
-    if (['success', 'partial_success', 'failed', 'stopped'].includes(effectiveStatus)) {
-      return 4;
-    }
-    if (effectiveStatus === 'pending') {
-      return 0;
-    }
-    if (progress?.studyProgress && Object.keys(progress.studyProgress).length > 0) {
-      return 3;
-    }
-    if (hasUnitCounts || percent > 0) {
-      return 2;
-    }
-    return 1;
-  })();
+  const visibleCourses = displayCourses?.slice(0, VISIBLE_COURSE_COUNT);
+  const hiddenCourseCount = Math.max(0, (displayCourses?.length ?? 0) - VISIBLE_COURSE_COUNT);
 
   const isTerminal = ['success', 'partial_success', 'failed', 'stopped'].includes(effectiveStatus);
   const processedUnits = (completedUnits ?? 0) + (failedUnits ?? 0);
@@ -334,62 +321,31 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
               未选择课程
             </span>
           ) : (
-            displayCourses.map((courseName, i) => (
-              <span
-                key={i}
-                className="inline-flex min-w-0 max-w-full items-center rounded-md border border-primary/15 bg-primary-container/20 px-2 py-0.5 text-xs font-medium text-primary sm:max-w-[200px]"
-                title={courseName}
-              >
-                <span className="min-w-0 truncate">{courseName}</span>
-              </span>
-            ))
+            <>
+              {visibleCourses?.map((courseName, i) => (
+                <span
+                  key={i}
+                  className="inline-flex min-w-0 max-w-full items-center rounded-md border border-primary/15 bg-primary-container/20 px-2 py-0.5 text-xs font-medium text-primary sm:max-w-[200px]"
+                  title={courseName}
+                >
+                  <span className="min-w-0 truncate">{courseName}</span>
+                </span>
+              ))}
+              {hiddenCourseCount > 0 && (
+                <span
+                  className="inline-flex items-center rounded-md border border-border bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground"
+                  title={displayCourses?.slice(VISIBLE_COURSE_COUNT).join('、')}
+                >
+                  另 {hiddenCourseCount} 门
+                </span>
+              )}
+            </>
           )}
         </div>
       </div>
 
-      {/* Execution Trace Track (顶部阶段轨迹) */}
-      {!isTerminal ? (
-        <div className="w-full space-y-2 rounded-xl border border-border/80 bg-muted/20 p-3 sm:p-4">
-          <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-            <span className="flex items-center gap-1.5 text-foreground font-semibold">
-              <Layers className="h-3.5 w-3.5 text-primary" />
-              执行轨迹
-            </span>
-            <span className="tabular-nums font-mono text-xs text-primary font-bold">{percent}%</span>
-          </div>
-
-          {/* Smooth Track Bar */}
-          <div className="relative my-2 flex items-center justify-between">
-            <div className="absolute inset-x-2 top-1/2 h-1 -translate-y-1/2 rounded-full bg-muted" />
-            <div
-              className="absolute left-2 top-1/2 h-1 -translate-y-1/2 rounded-full bg-primary transition-all duration-500"
-              style={{ width: `calc(${(currentStageIndex / (STAGES.length - 1)) * 100}% - 16px)` }}
-            />
-            {STAGES.map((stg, idx) => {
-              const isPassed = idx < currentStageIndex;
-              const isCurrent = idx === currentStageIndex;
-              return (
-                <div key={stg.id} className="relative z-10 flex flex-col items-center gap-1">
-                  <div
-                    className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
-                      isCurrent
-                        ? 'bg-primary text-primary-foreground ring-4 ring-primary-container/50 scale-110'
-                        : isPassed
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-muted-foreground border border-border'
-                    }`}
-                  >
-                    {isPassed ? '✓' : idx + 1}
-                  </div>
-                  <span className={`text-xs whitespace-nowrap ${isCurrent ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
-                    {stg.label}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ) : (
+      {/* Terminal result */}
+      {isTerminal && (
         <div className={`flex min-w-0 items-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium ${
           effectiveStatus === 'success'
             ? 'border-success/30 bg-success-container/30 text-success'
@@ -448,8 +404,8 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
             <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-muted-foreground">
               <span className="shrink-0 font-medium">任务点详情</span>
               <span className="max-w-full rounded-md bg-muted/80 px-2 py-0.5 font-mono text-xs font-medium text-foreground wrap-anywhere">
-                {hasUnitCounts
-                  ? `已处理 ${(completedUnits ?? 0) + (failedUnits ?? 0)} / ${totalUnits} · 成功率 ${Math.round(successPercent ?? 0)}%`
+                {taskCourseTaskPointProgress
+                  ? `共 ${taskCourseTaskPointProgress.total} 个任务点 · 已完成 ${taskCourseTaskPointProgress.completed}`
                   : '任务点明细未提供'}
               </span>
             </div>
