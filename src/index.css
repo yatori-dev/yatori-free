@@ -531,6 +531,18 @@
 }
 
 @media (max-width: 600px) {
+  /* Sonner adds mobile left/right offsets while keeping the toaster at 100% width. */
+  [data-sonner-toaster].toaster {
+    box-sizing: border-box !important;
+    width: auto !important;
+  }
+
+  [data-sonner-toaster].toaster [data-sonner-toast] {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
   .cn-toast {
     min-width: 0 !important;
     width: 100% !important;
