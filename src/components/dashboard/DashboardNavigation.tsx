@@ -1,5 +1,3 @@
-import { useLayoutEffect, useRef } from 'react';
-
 import { BrandMark } from '@/components/BrandMark';
 import { YATORI_REPOSITORY_URL } from '@/lib/externalLinks';
 import { desktopItems, mobileItems } from './dashboardNavigationData';
@@ -37,51 +35,7 @@ function Brand({ appVersion }: { appVersion?: string }) {
 }
 
 export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersion, signMonitorActive, onTabChange }: DashboardNavigationProps) {
-  const mobileIndicatorRef = useRef<HTMLSpanElement>(null);
-  const mobileIndicatorAnimationRef = useRef<Animation | null>(null);
-  const previousMobileTabRef = useRef(activeTab);
   const activeMobileIndex = mobileItems.findIndex((item) => item.id === activeTab);
-
-  useLayoutEffect(() => {
-    const previousTab = previousMobileTabRef.current;
-    previousMobileTabRef.current = activeTab;
-
-    if (mode !== 'mobile') {
-      return;
-    }
-
-    const indicator = mobileIndicatorRef.current;
-    const previousIndex = mobileItems.findIndex((item) => item.id === previousTab);
-    if (!indicator || previousIndex < 0 || activeMobileIndex < 0 || previousIndex === activeMobileIndex) {
-      return;
-    }
-
-    mobileIndicatorAnimationRef.current?.cancel();
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof indicator.animate !== 'function') {
-      return;
-    }
-
-    const source = `translate3d(${previousIndex * 100}%, 0, 0)`;
-    const target = `translate3d(${activeMobileIndex * 100}%, 0, 0)`;
-    const animation = indicator.animate(
-      [
-        { offset: 0, transform: source, easing: 'cubic-bezier(0.4, 0, 1, 1)' },
-        { offset: 0.22, transform: `${source} scale3d(0.12, 0.82, 1)`, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' },
-        { offset: 0.46, transform: `${target} scale3d(0.12, 0.82, 1)`, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
-        { offset: 0.78, transform: `${target} scale3d(1.12, 1.04, 1)`, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
-        { offset: 1, transform: target },
-      ],
-      { duration: 420, fill: 'both' },
-    );
-    mobileIndicatorAnimationRef.current = animation;
-
-    return () => {
-      animation.cancel();
-      if (mobileIndicatorAnimationRef.current === animation) {
-        mobileIndicatorAnimationRef.current = null;
-      }
-    };
-  }, [activeMobileIndex, activeTab, mode]);
 
   if (mode === 'desktop') {
     return (
@@ -139,11 +93,13 @@ export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersi
     >
       <span className="pointer-events-none absolute inset-x-1 inset-y-1" aria-hidden="true">
         <span
-          ref={mobileIndicatorRef}
-          className="absolute inset-y-0 left-0 w-1/4 will-change-transform"
+          className="absolute inset-y-0 left-0 w-1/4"
           style={{ transform: `translate3d(${Math.max(activeMobileIndex, 0) * 100}%, 0, 0)` }}
         >
-          <span className="absolute left-1/2 top-px h-7 w-10 -translate-x-1/2 rounded-full bg-primary-container/70" />
+          <span
+            key={activeTab}
+            className="absolute left-1/2 top-px h-7 w-10 -translate-x-1/2 rounded-full bg-primary-container/70 animate-in zoom-in-75 duration-200 ease-out motion-reduce:animate-none"
+          />
         </span>
       </span>
       {mobileItems.map((item) => {

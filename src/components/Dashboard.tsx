@@ -536,6 +536,33 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const isAllIncompleteSelected = incompleteSelectableCourses.length > 0
     && incompleteSelectableCourses.every(course => selectedCourses.has(course.key));
 
+  const estimatedTaskDuration = useMemo(() => {
+    if (selectedCourses.size === 0) return null;
+
+    const selected = courses.filter((course) => selectedCourses.has(course.key));
+    if (selected.length === 0 || selected.some((course) => (
+      typeof course.jobCount !== 'number'
+      || typeof course.jobFinishCount !== 'number'
+      || course.jobCount <= 0
+      || course.jobFinishCount >= course.jobCount
+    ))) {
+      return null;
+    }
+
+    const remainingTaskPoints = selected.reduce(
+      (total, course) => total + Math.max(0, (course.jobCount ?? 0) - (course.jobFinishCount ?? 0)),
+      0,
+    );
+    if (remainingTaskPoints <= 0) return null;
+
+    const totalMinutes = Math.round((remainingTaskPoints / 100) * 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    if (hours === 0) return `${minutes}分钟`;
+    if (minutes === 0) return `${hours}小时`;
+    return `${hours}小时${minutes}分钟`;
+  }, [courses, selectedCourses]);
+
   const handleToggleSelectAll = () => {
     if (isAllSelected) {
       setSelectedCourses(prev => {
@@ -1094,21 +1121,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       {/* 提交任务悬浮按钮 */}
       {selectedCourses.size > 0 && (
         <div className="absolute bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 animate-bottom-bar-enter lg:bottom-6">
-          <Button
-            type="button"
-            onClick={createTaskWithSelection}
-            disabled={creatingTask}
-            className="h-12 gap-2 rounded-full bg-primary px-5 font-semibold text-primary-foreground shadow-floating ring-4 ring-card/80 hover:bg-primary-hover"
-            title={`提交 ${selectedCourses.size} 门课程任务`}
-            aria-label={`提交 ${selectedCourses.size} 门课程任务`}
-          >
-            {creatingTask ? (
-              <RefreshCw className="h-[18px] w-[18px] animate-spin" aria-hidden="true" />
-            ) : (
-              <Play className="h-[18px] w-[18px] fill-current" aria-hidden="true" />
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              type="button"
+              onClick={createTaskWithSelection}
+              disabled={creatingTask}
+              className="h-11 gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-floating ring-4 ring-card/80 hover:bg-primary-hover"
+              title={`提交 ${selectedCourses.size} 门课程任务`}
+              aria-label={`提交 ${selectedCourses.size} 门课程任务`}
+            >
+              {creatingTask ? (
+                <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <Play className="h-4 w-4 fill-current" aria-hidden="true" />
+              )}
+              <span>提交任务({selectedCourses.size})</span>
+            </Button>
+            {estimatedTaskDuration && (
+              <span className="whitespace-nowrap text-[11px] font-medium text-muted-foreground" role="status">
+                预计所需{estimatedTaskDuration}
+              </span>
             )}
-            <span>提交任务({selectedCourses.size})</span>
-          </Button>
+          </div>
         </div>
       )}
 
