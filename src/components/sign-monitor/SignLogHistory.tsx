@@ -24,6 +24,7 @@ import {
 } from './sign-log-presentation';
 import { SignLogViewMenu } from './SignLogViewMenu';
 import type { SignLogView } from './SignLogViewMenu';
+import { formatLocalDateTime } from '@/lib/format';
 
 interface SignLogHistoryProps {
   errors: SignHistoryError[];
@@ -34,20 +35,6 @@ interface SignLogHistoryProps {
   onPageChange: (offset: number) => void;
   onRefresh: () => void;
   total: number;
-}
-
-function formatLogDateTime(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hour = String(date.getHours()).padStart(2, '0');
-  const minute = String(date.getMinutes()).padStart(2, '0');
-  const second = String(date.getSeconds()).padStart(2, '0');
-
-  return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 }
 
 function SignLogRow({ log, showCourse = true }: { log: SignLog; showCourse?: boolean }) {
@@ -77,7 +64,7 @@ function SignLogRow({ log, showCourse = true }: { log: SignLog; showCourse?: boo
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
         <span className="truncate font-mono tabular-nums">
-          {formatLogDateTime(getSignLogTimestamp(log))}
+          {formatLocalDateTime(getSignLogTimestamp(log), { fallback: getSignLogTimestamp(log), includeYear: true })}
         </span>
         {hasAttendanceCount && (
           <span className="inline-flex items-center gap-1 font-medium tabular-nums text-foreground/75">

@@ -1,8 +1,9 @@
 import { useLayoutEffect, useRef } from 'react';
-import { Activity, BookOpen, MapPin, Settings } from 'lucide-react';
 
-export type DashboardViewId = 'courses' | 'sign' | 'settings';
-export type MobileDashboardTabId = DashboardViewId | 'tasks';
+import { BrandMark } from '@/components/BrandMark';
+import { YATORI_REPOSITORY_URL } from '@/lib/externalLinks';
+import { desktopItems, mobileItems } from './dashboardNavigationData';
+import type { MobileDashboardTabId } from './dashboardNavigationData';
 
 interface DashboardNavigationProps {
   mode: 'desktop' | 'mobile';
@@ -13,36 +14,24 @@ interface DashboardNavigationProps {
   onTabChange: (tab: MobileDashboardTabId) => void;
 }
 
-const desktopItems: Array<{ id: DashboardViewId; label: string; icon: typeof BookOpen }> = [
-  { id: 'courses', label: '课程列表', icon: BookOpen },
-  { id: 'sign', label: '自动签到', icon: MapPin },
-  { id: 'settings', label: '提交设置', icon: Settings },
-];
-
-const mobileItems: Array<{ id: MobileDashboardTabId; label: string; icon: typeof BookOpen }> = [
-  { id: 'courses', label: '课程', icon: BookOpen },
-  { id: 'sign', label: '签到', icon: MapPin },
-  { id: 'tasks', label: '任务', icon: Activity },
-  { id: 'settings', label: '设置', icon: Settings },
-];
+export type { DashboardViewId, MobileDashboardTabId } from './dashboardNavigationData';
 
 function Brand({ appVersion }: { appVersion?: string }) {
   return (
     <div className="flex h-16 items-center justify-start border-b border-border/70 px-5">
-      <div className="flex min-w-0 items-center gap-2.5" aria-label="Yatori 学习通服务">
-        <span className="text-xl font-semibold tracking-tight" aria-hidden="true">
-          <span className="text-[var(--google-blue)]">Y</span>
-          <span className="text-[var(--google-red)]">a</span>
-          <span className="text-[var(--google-yellow)]">t</span>
-          <span className="text-[var(--google-blue)]">o</span>
-          <span className="text-[var(--google-green)]">r</span>
-          <span className="text-[var(--google-red)]">i</span>
-        </span>
+      <a
+        href={YATORI_REPOSITORY_URL}
+        target="_blank"
+        rel="noreferrer"
+        className="flex min-w-0 items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        aria-label="在 GitHub 查看 Yatori 学习通服务源码"
+      >
+        <BrandMark className="text-xl" />
         <span className="min-w-0">
           <span className="block truncate text-xs font-medium text-muted-foreground">学习通服务</span>
           <span className="block text-[11px] tabular-nums text-muted-foreground">v{appVersion ?? '...'}</span>
         </span>
-      </div>
+      </a>
     </div>
   );
 }

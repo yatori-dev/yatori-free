@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { BrandMark } from './BrandMark';
 import { RefreshCw } from 'lucide-react';
 import {
   createQRSession,
@@ -188,14 +189,7 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
 
   return (
     <section className="login-qr-pane hidden min-h-[516px] flex-col items-center justify-center border-r border-border bg-transparent px-10 py-12 text-center md:flex">
-      <div className="mb-5 flex items-center justify-center font-semibold text-3xl tracking-tight select-none" aria-hidden="true">
-        <span className="text-[var(--google-blue)]">Y</span>
-        <span className="text-[var(--google-red)]">a</span>
-        <span className="text-[var(--google-yellow)]">t</span>
-        <span className="text-[var(--google-blue)]">o</span>
-        <span className="text-[var(--google-green)]">r</span>
-        <span className="text-[var(--google-red)]">i</span>
-      </div>
+      <BrandMark className="mb-5 text-3xl" />
       <h1 className="text-2xl font-normal tracking-tight text-foreground">扫码登录</h1>
       <p className="mt-2 text-sm text-muted-foreground">使用学习通 App 扫码</p>
 

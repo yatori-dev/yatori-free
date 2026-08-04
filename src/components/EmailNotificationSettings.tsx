@@ -137,10 +137,10 @@ export function EmailNotificationSettings({ onUnauthorized }: EmailNotificationS
     <div className="space-y-3 rounded-md border border-border/50 bg-muted/25 p-3 sm:space-y-4 sm:rounded-lg sm:p-5">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
-          <Label htmlFor="emailNotificationEnabled" className="block cursor-pointer text-sm font-semibold text-[#191c1d] dark:text-[#e3e3e3]">
+          <Label htmlFor="emailNotificationEnabled" className="block cursor-pointer text-sm font-semibold text-foreground">
             任务状态邮件通知
           </Label>
-          <p className="truncate text-xs leading-relaxed text-gray-500 dark:text-gray-400" title={hasPendingEmail ? settings?.pendingEmail : undefined}>
+          <p className="truncate text-xs leading-relaxed text-muted-foreground" title={hasPendingEmail ? settings?.pendingEmail : undefined}>
             {statusText}
           </p>
         </div>

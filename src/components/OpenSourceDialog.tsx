@@ -51,7 +51,7 @@ export function OpenSourceDialog() {
         <Button
           size="icon"
           variant="ghost"
-          className="h-8 w-8 rounded-md text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-[#2d2e30] sm:h-9 sm:w-9"
+          className="h-8 w-8 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground sm:h-9 sm:w-9"
           aria-label="查看开源项目"
           title="开源项目"
         >

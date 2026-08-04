@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Login } from './components/Login';
 import { Dashboard } from './components/Dashboard';
+import { BrandMark } from './components/BrandMark';
 import { getCurrentSession, getUserFacingErrorMessage, isAuthExitError, logout, type AuthSession } from './lib/api';
 import { Toaster } from '@/components/ui/sonner';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,8 +13,8 @@ const LOGOUT_SUPPRESSION_KEY = 'yatori-auth-logout-suppressed';
 
 function AuthRestoreScreen() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] px-4 py-8 dark:bg-[#121314]" aria-busy="true">
-      <Card className="w-full max-w-[450px] overflow-hidden rounded-xl border border-[#E0E0E0] bg-white shadow-[0_2px_4px_rgba(0,0,0,0.08)] dark:border-[#333537] dark:bg-[#1f2021] md:max-w-[min(65.6vw,1024px)]">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8" aria-busy="true">
+      <Card className="w-full max-w-[450px] overflow-hidden md:max-w-[min(65.6vw,1024px)]">
         <div className="google-accent-bar" aria-hidden="true">
           <div></div>
           <div></div>
@@ -22,14 +23,7 @@ function AuthRestoreScreen() {
         </div>
         <CardContent className="flex min-h-[516px] flex-col items-center justify-center p-8 md:px-12 md:py-10">
           <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center justify-center font-semibold text-3xl tracking-tight select-none" aria-hidden="true">
-              <span className="text-[#4285F4]">Y</span>
-              <span className="text-[#EA4335]">a</span>
-              <span className="text-[#FBBC05]">t</span>
-              <span className="text-[#4285F4]">o</span>
-              <span className="text-[#34A853]">r</span>
-              <span className="text-[#EA4335]">i</span>
-            </div>
+            <BrandMark className="text-3xl" />
             <div className="text-sm font-medium text-muted-foreground">学习通服务</div>
           </div>
 

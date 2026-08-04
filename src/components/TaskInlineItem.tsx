@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Progress } from './ui/progress';
 import { TaskStudyProgress } from './TaskStudyProgress';
 import { getStudyProgressPercents } from '@/lib/studyProgress';
+import { formatLocalDateTime } from '@/lib/format';
 import { 
   Square, 
   Bot, 
@@ -30,18 +31,6 @@ interface TaskInlineItemProps {
   courseTaskPointProgressByIdentifier?: CourseTaskPointProgressMap;
   snapshot?: TaskProgressSnapshot;
   onStopTask: (taskId: string) => void;
-}
-
-function formatDateTime(value?: string | null) {
-  if (!value) return '未知';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '未知';
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  const hr = String(date.getHours()).padStart(2, '0');
-  const min = String(date.getMinutes()).padStart(2, '0');
-  const sec = String(date.getSeconds()).padStart(2, '0');
-  return `${m}-${d} ${hr}:${min}:${sec}`;
 }
 
 function getCompactErrorMessage(message: string) {
@@ -305,7 +294,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
             </span>
             <span className="hidden sm:inline-block text-muted-foreground/60">•</span>
             <span className="hidden sm:inline-block truncate text-muted-foreground">
-              {task.startedAt ? formatDateTime(task.startedAt) : '未启动'}
+              {task.startedAt ? formatLocalDateTime(task.startedAt) : '未启动'}
             </span>
           </div>
 
@@ -448,12 +437,12 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
       {!isTerminal && <div className="flex flex-col gap-1 px-1 font-mono text-xs text-muted-foreground">
         <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 min-w-0">
           <span className="shrink-0">启动时间:</span>
-          <span className="text-right wrap-anywhere">{task.startedAt ? formatDateTime(task.startedAt) : '未启动'}</span>
+          <span className="text-right wrap-anywhere">{task.startedAt ? formatLocalDateTime(task.startedAt) : '未启动'}</span>
         </div>
         {task.stoppedAt && (
           <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 min-w-0">
             <span className="shrink-0">结束时间:</span>
-            <span className="text-right wrap-anywhere">{formatDateTime(task.stoppedAt)}</span>
+            <span className="text-right wrap-anywhere">{formatLocalDateTime(task.stoppedAt)}</span>
           </div>
         )}
       </div>}
@@ -478,12 +467,12 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
               <div className="flex flex-col gap-1 px-1 font-mono text-xs text-muted-foreground">
                 <div className="flex min-w-0 flex-wrap justify-between gap-x-3 gap-y-0.5">
                   <span className="shrink-0">启动时间</span>
-                  <span className="text-right wrap-anywhere">{task.startedAt ? formatDateTime(task.startedAt) : '未启动'}</span>
+                  <span className="text-right wrap-anywhere">{task.startedAt ? formatLocalDateTime(task.startedAt) : '未启动'}</span>
                 </div>
                 {task.stoppedAt && (
                   <div className="flex min-w-0 flex-wrap justify-between gap-x-3 gap-y-0.5">
                     <span className="shrink-0">结束时间</span>
-                    <span className="text-right wrap-anywhere">{formatDateTime(task.stoppedAt)}</span>
+                    <span className="text-right wrap-anywhere">{formatLocalDateTime(task.stoppedAt)}</span>
                   </div>
                 )}
               </div>
