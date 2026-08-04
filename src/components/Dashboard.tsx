@@ -845,6 +845,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
               {desktopViewTitle}
             </h1>
             <div className="ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-4">
+              <a
+                href={YATORI_REPOSITORY_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-9 sm:w-9 lg:hidden"
+                aria-label="在 GitHub 查看 Yatori 学习通服务源码"
+                title="GitHub"
+              >
+                <svg className="h-5 w-5" aria-hidden="true">
+                  <use href="/icons.svg#github-icon" />
+                </svg>
+              </a>
               <OpenSourceDialog />
               <Button
                 size="icon"

@@ -114,6 +114,20 @@ export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersi
             );
           })}
         </nav>
+        <div className="px-3 pb-4">
+          <a
+            href={YATORI_REPOSITORY_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="flex min-h-11 w-full items-center gap-3 rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="在 GitHub 查看 Yatori 学习通服务源码"
+          >
+            <svg className="h-4 w-4 shrink-0" aria-hidden="true">
+              <use href="/icons.svg#github-icon" />
+            </svg>
+            <span>GitHub</span>
+          </a>
+        </div>
       </aside>
     );
   }
