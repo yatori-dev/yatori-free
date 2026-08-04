@@ -298,7 +298,7 @@ export function CourseListSection({
                             </span>
                           )}
                           {jobRate !== null && jobProgressLabel && (
-                            <div className="mt-1.5 grid w-full max-w-lg grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:mt-2 sm:grid-cols-[minmax(0,1fr)_8rem] sm:gap-3">
+                            <div className="mt-1.5 grid w-full max-w-lg grid-cols-[minmax(0,1fr)_7rem] items-center gap-2 sm:mt-2 sm:grid-cols-[minmax(0,1fr)_8rem] sm:gap-3">
                               <Progress value={jobRate} className={`h-1.5 bg-muted ${isProcessing ? 'progress-running' : ''}`} />
                               <span className="whitespace-nowrap text-xs font-semibold tabular-nums text-muted-foreground">
                                 {jobProgressLabel}
