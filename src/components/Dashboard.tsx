@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
+import { flushSync } from 'react-dom';
 
 interface DashboardProps {
   session: AuthSession;
@@ -98,10 +99,89 @@ const DEFAULT_STUDY_INCREMENT: StudyIncrement = {
 };
 
 const TASK_SETTINGS_STORAGE_PREFIX = 'yatori-task-settings:';
-const THEME_STORAGE_KEY = 'yatori-theme';
-
 function getTaskSettingsStorageKey(accountId: string) {
   return `${TASK_SETTINGS_STORAGE_PREFIX}${accountId}`;
+}
+
+function ThemeToggleButton() {
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+  const themeAnimationRef = useRef<Animation | null>(null);
+  const themeSwitchingRef = useRef(false);
+
+  useEffect(() => () => {
+    themeAnimationRef.current?.cancel();
+    document.getElementById('root')?.style.removeProperty('opacity');
+  }, []);
+
+  const toggleDarkMode = () => {
+    if (themeSwitchingRef.current) {
+      return;
+    }
+
+    const nextTheme = isDark ? 'light' : 'dark';
+    const applyTheme = () => {
+      flushSync(() => setTheme(nextTheme));
+      localStorage.removeItem('yatori-theme');
+    };
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      applyTheme();
+      return;
+    }
+
+    if (typeof document.startViewTransition === 'function') {
+      document.activeViewTransition?.skipTransition();
+      document.startViewTransition(applyTheme);
+      return;
+    }
+
+    const appRoot = document.getElementById('root');
+    if (!appRoot || typeof appRoot.animate !== 'function') {
+      applyTheme();
+      return;
+    }
+
+    themeSwitchingRef.current = true;
+    const fadeOut = appRoot.animate(
+      [{ opacity: 1 }, { opacity: 0 }],
+      { duration: 90, easing: 'ease-out', fill: 'forwards' },
+    );
+    themeAnimationRef.current = fadeOut;
+
+    void fadeOut.finished
+      .then(() => {
+        appRoot.style.opacity = '0';
+        fadeOut.cancel();
+        applyTheme();
+
+        const fadeIn = appRoot.animate(
+          [{ opacity: 0 }, { opacity: 1 }],
+          { duration: 90, easing: 'ease-out', fill: 'forwards' },
+        );
+        themeAnimationRef.current = fadeIn;
+        return fadeIn.finished;
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        appRoot.style.removeProperty('opacity');
+        themeAnimationRef.current?.cancel();
+        themeAnimationRef.current = null;
+        themeSwitchingRef.current = false;
+      });
+  };
+
+  return (
+    <Button
+      size="icon"
+      variant="ghost"
+      onClick={toggleDarkMode}
+      className="h-8 w-8 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground sm:h-9 sm:w-9"
+      aria-label={isDark ? '切换到浅色主题' : '切换到深色主题'}
+    >
+      {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+    </Button>
+  );
 }
 
 function createDefaultPersistedSettingsFormState(): PersistedSettingsFormState {
@@ -299,14 +379,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   );
   const [studyIncrements, setStudyIncrements] = useState<Record<string, StudyIncrement>>({});
   const [studyIncrementCourseKey, setStudyIncrementCourseKey] = useState<string | null>(null);
-
-  const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
-
-  const toggleDarkMode = () => {
-    setTheme(isDark ? 'light' : 'dark');
-    localStorage.removeItem(THEME_STORAGE_KEY);
-  };
 
   const persistedSettingsForm = persistedSettingsState.accountId === currentAccountId
     ? persistedSettingsState.form
@@ -858,15 +930,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 </svg>
               </a>
               <OpenSourceDialog />
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={toggleDarkMode}
-                className="h-8 w-8 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground sm:h-9 sm:w-9"
-                aria-label={isDark ? '切换到浅色主题' : '切换到深色主题'}
-              >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </Button>
+              <ThemeToggleButton />
 
               <TaskStatusDrawer
                 open={taskDrawerOpen}
