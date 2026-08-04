@@ -50,6 +50,7 @@ export interface StudyIncrement {
 export type TaskStatus =
   | 'pending'
   | 'running'
+  | 'waiting_daily_limit'
   | 'stopping'
   | 'stopped'
   | 'success'

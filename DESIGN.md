@@ -297,6 +297,7 @@ Yatori 使用 Google 风格四色文字标识或四色 SVG 标识。登录页和
 | --- | --- | --- |
 | `pending` | `warning` | 等待原因、开始时间 |
 | `running` | `info` | 当前课程、进度、停止操作 |
+| `waiting_daily_limit` | `warning` | 今日学时已达上限、次日继续 |
 | `stopping` | `warning` | 停止请求已发送 |
 | `stopped` | `neutral` | 已停止、结束时间 |
 | `success` | `success` | 完成结果、结束时间 |

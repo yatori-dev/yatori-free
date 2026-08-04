@@ -57,6 +57,12 @@ function getProgressFallback(status: Task['status'], progressPercent = 0) {
         course: '部分完成',
         chapter: '部分任务未完成',
       };
+    case 'waiting_daily_limit':
+      return {
+        percent: progressPercent,
+        course: '等待次日继续',
+        chapter: '今日任务点学时已达 1200 分钟',
+      };
     case 'failed':
       return {
         percent: progressPercent,
@@ -137,6 +143,12 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
           colorClass: 'bg-info-container/60 text-info border-info/20',
           icon: <Bot className="w-4 h-4 text-info" />
         };
+      case 'waiting_daily_limit':
+        return {
+          label: '等待次日继续',
+          colorClass: 'bg-warning-container/60 text-warning border-warning/20',
+          icon: <Hourglass className="w-4 h-4 text-warning" />
+        };
       case 'success':
         return {
           label: '成功',
@@ -177,8 +189,8 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   };
 
   const statusInfo = getStatusDisplay(effectiveStatus);
-  const snapshotStatuses: Task['status'][] = ['running', 'stopping', 'stopped', 'success', 'partial_success', 'failed'];
-  const stoppableStatuses: Task['status'][] = ['pending', 'running', 'stopping'];
+  const snapshotStatuses: Task['status'][] = ['running', 'waiting_daily_limit', 'stopping', 'stopped', 'success', 'partial_success', 'failed'];
+  const stoppableStatuses: Task['status'][] = ['pending', 'running', 'waiting_daily_limit', 'stopping'];
   const hasUnitCounts = typeof progress?.totalUnits === 'number' && typeof progress?.completedUnits === 'number';
   const totalUnits = progress?.totalUnits;
   const completedUnits = progress?.completedUnits;
