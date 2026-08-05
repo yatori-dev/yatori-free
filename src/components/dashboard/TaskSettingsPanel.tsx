@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { EmailNotificationSettings } from '@/components/EmailNotificationSettings';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { BypassDailyStudyLimitConfirmDialog } from './BypassDailyStudyLimitConfirmDialog';
 
 type SubmitMode = 0 | 1 | 2;
 type SettingSwitchKey = 'hideEmptyTaskCourses' | 'bypassDailyStudyLimit' | 'doChapterTest' | 'doWork' | 'doExam';
@@ -125,8 +127,20 @@ export function TaskSettingsPanel({
   onWorkAutoSubmitChange,
   onExamAutoSubmitChange,
 }: TaskSettingsPanelProps) {
+  const [bypassConfirmOpen, setBypassConfirmOpen] = useState(false);
+
+  const handleBypassChange = (checked: boolean) => {
+    if (checked) {
+      setBypassConfirmOpen(true);
+      return;
+    }
+
+    onSettingSwitch('bypassDailyStudyLimit', false);
+  };
+
   return (
-    <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:py-0">
+    <>
+      <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:py-0">
       <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4 lg:hidden">
         <CardTitle className="text-sm font-semibold sm:text-base">提交设置</CardTitle>
       </CardHeader>
@@ -174,17 +188,14 @@ export function TaskSettingsPanel({
             <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
               <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
                 <Label htmlFor="bypassDailyStudyLimit" className="block cursor-pointer text-sm font-semibold text-foreground">
-                  绕过每日学时限制
+                  暴力模式
                 </Label>
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  仅当前任务 · 50 个共享 worker
-                </p>
               </div>
               <Switch
                 id="bypassDailyStudyLimit"
                 checked={bypassDailyStudyLimit}
-                onCheckedChange={(checked) => onSettingSwitch('bypassDailyStudyLimit', checked)}
-                className="shrink-0"
+                onCheckedChange={handleBypassChange}
+                className="google-mode-switch shrink-0"
               />
             </div>
 
@@ -221,6 +232,13 @@ export function TaskSettingsPanel({
           </section>
         </div>
       </CardContent>
-    </Card>
+      </Card>
+
+      <BypassDailyStudyLimitConfirmDialog
+        open={bypassConfirmOpen}
+        onOpenChange={setBypassConfirmOpen}
+        onConfirm={() => onSettingSwitch('bypassDailyStudyLimit', true)}
+      />
+    </>
   );
 }

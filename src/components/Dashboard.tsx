@@ -31,6 +31,7 @@ import { StudyIncrementSettings } from './StudyIncrementSettings';
 import { OpenSourceDialog } from './OpenSourceDialog';
 import { BrandMark } from './BrandMark';
 import { NightTaskConfirmDialog } from './dashboard/NightTaskConfirmDialog';
+import { BypassDailyStudyLimitConfirmDialog } from './dashboard/BypassDailyStudyLimitConfirmDialog';
 import { LogoutConfirmDialog } from './dashboard/LogoutConfirmDialog';
 import { TaskSettingsPanel } from './dashboard/TaskSettingsPanel';
 import { CourseListSection } from './dashboard/CourseListSection';
@@ -361,6 +362,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>({});
   const [nightConfirmOpen, setNightConfirmOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [submitBypassConfirmOpen, setSubmitBypassConfirmOpen] = useState(false);
   
   // Loading flags
   const [coursesLoading, setCoursesLoading] = useState(false);
@@ -728,6 +730,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     const hours = new Date().getHours();
     if (hours >= 23 || hours < 7) {
       setNightConfirmOpen(true);
+      return;
+    }
+
+    if (bypassDailyStudyLimit) {
+      setSubmitBypassConfirmOpen(true);
+      return;
+    }
+
+    void executeSubmitTask();
+  };
+
+  const confirmNightTask = () => {
+    if (bypassDailyStudyLimit) {
+      setSubmitBypassConfirmOpen(true);
       return;
     }
 
@@ -1156,6 +1172,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       <NightTaskConfirmDialog
         open={nightConfirmOpen}
         onOpenChange={setNightConfirmOpen}
+        onConfirm={confirmNightTask}
+      />
+      <BypassDailyStudyLimitConfirmDialog
+        open={submitBypassConfirmOpen}
+        onOpenChange={setSubmitBypassConfirmOpen}
         onConfirm={executeSubmitTask}
       />
       <LogoutConfirmDialog

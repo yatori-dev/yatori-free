@@ -325,6 +325,26 @@
 .google-accent-bar > div:nth-child(3) { background-color: var(--google-yellow); }
 .google-accent-bar > div:nth-child(4) { background-color: var(--google-green); }
 
+.google-mode-switch[data-state="checked"] {
+  background-image: linear-gradient(
+    110deg,
+    var(--google-blue) 0%,
+    #5b7cf6 18%,
+    var(--google-red) 38%,
+    var(--google-yellow) 58%,
+    #e9c34a 70%,
+    var(--google-green) 88%,
+    var(--google-blue) 100%
+  );
+  background-size: 220% 100%;
+  animation: google-mode-gradient 4s ease-in-out infinite alternate;
+}
+
+@keyframes google-mode-gradient {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
 /* Google Spinner Animation */
 .google-spinner {
   animation: google-rotate 2s linear infinite;
@@ -614,6 +634,10 @@
   }
 
   .progress-running [data-slot="progress-indicator"]::after {
+    animation: none;
+  }
+
+  .google-mode-switch[data-state="checked"] {
     animation: none;
   }
 }
