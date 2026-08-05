@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 type SubmitMode = 0 | 1 | 2;
-type SettingSwitchKey = 'hideEmptyTaskCourses' | 'doChapterTest' | 'doWork' | 'doExam';
+type SettingSwitchKey = 'hideEmptyTaskCourses' | 'bypassDailyStudyLimit' | 'doChapterTest' | 'doWork' | 'doExam';
 
 interface AutoSubmitOptionProps {
   disabled: boolean;
@@ -99,6 +99,7 @@ function TaskBehaviorCard({ id, label, enabled, value, onToggle, onModeChange }:
 interface TaskSettingsPanelProps {
   hiddenEmptyTaskCourseCount: number;
   hideEmptyTaskCourses: boolean;
+  bypassDailyStudyLimit: boolean;
   doChapterTest: boolean;
   doWork: boolean;
   workAutoSubmit: SubmitMode;
@@ -113,6 +114,7 @@ interface TaskSettingsPanelProps {
 export function TaskSettingsPanel({
   hiddenEmptyTaskCourseCount,
   hideEmptyTaskCourses,
+  bypassDailyStudyLimit,
   doChapterTest,
   doWork,
   workAutoSubmit,
@@ -165,6 +167,23 @@ export function TaskSettingsPanel({
                 id="hideEmptyTaskCourses"
                 checked={hideEmptyTaskCourses}
                 onCheckedChange={(checked) => onSettingSwitch('hideEmptyTaskCourses', checked)}
+                className="shrink-0"
+              />
+            </div>
+
+            <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
+              <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
+                <Label htmlFor="bypassDailyStudyLimit" className="block cursor-pointer text-sm font-semibold text-foreground">
+                  绕过每日学时限制
+                </Label>
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  仅当前任务 · 50 个共享 worker
+                </p>
+              </div>
+              <Switch
+                id="bypassDailyStudyLimit"
+                checked={bypassDailyStudyLimit}
+                onCheckedChange={(checked) => onSettingSwitch('bypassDailyStudyLimit', checked)}
                 className="shrink-0"
               />
             </div>

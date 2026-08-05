@@ -52,6 +52,7 @@ interface DashboardProps {
 
 interface SettingsFormState {
   hideEmptyTaskCourses: boolean;
+  bypassDailyStudyLimit: boolean;
   doChapterTest: boolean;
   doWork: boolean;
   workAutoSubmit: 0 | 1 | 2;
@@ -66,6 +67,7 @@ interface PersistedSettingsFormState {
 }
 
 interface TaskExecutionSettingsState {
+  bypassDailyStudyLimit: boolean;
   doWork: boolean;
   workAutoSubmit: 0 | 1 | 2;
   doExam: boolean;
@@ -86,6 +88,7 @@ const DEFAULT_PERSISTED_SETTINGS: PersistedSettingsFormState = {
 };
 
 const DEFAULT_TASK_EXECUTION_SETTINGS: TaskExecutionSettingsState = {
+  bypassDailyStudyLimit: false,
   doWork: false,
   workAutoSubmit: 0,
   doExam: false,
@@ -390,6 +393,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const {
     hideEmptyTaskCourses,
+    bypassDailyStudyLimit,
     doChapterTest,
     doWork,
     workAutoSubmit,
@@ -670,6 +674,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     try {
       await createTask({
         accountId: account.id,
+        bypassDailyStudyLimit,
         coursesCustom: customConfig,
       });
 
@@ -684,6 +689,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       void fetchTasks();
       void fetchCourses();
       setSelectedCourses(new Set());
+      setTaskExecutionSettings((previous) => ({ ...previous, bypassDailyStudyLimit: false }));
       setStudyIncrements((previous) => {
         const next = { ...previous };
         includeCoursesList.forEach((classId) => delete next[classId]);
@@ -729,7 +735,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   };
 
   const updateSettingSwitch = (key: keyof SettingsFormState, checked: boolean) => {
-    if (key === 'doWork' || key === 'doExam') {
+    if (key === 'bypassDailyStudyLimit' || key === 'doWork' || key === 'doExam') {
       setTaskExecutionSettings((previous) => {
         const next = { ...previous, [key]: checked };
         if (key === 'doWork' && !checked) {
@@ -1076,6 +1082,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
               <TaskSettingsPanel
                 hiddenEmptyTaskCourseCount={hiddenEmptyTaskCourseCount}
                 hideEmptyTaskCourses={hideEmptyTaskCourses}
+                bypassDailyStudyLimit={bypassDailyStudyLimit}
                 doChapterTest={doChapterTest}
                 doWork={doWork}
                 workAutoSubmit={workAutoSubmit}

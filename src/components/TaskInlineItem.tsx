@@ -21,7 +21,7 @@ import {
   Hourglass,
   Sparkles
 } from 'lucide-react';
-import { getTaskCoursesCustomSnapshot, type Task } from '@/lib/api';
+import { getTaskConfigSnapshot, getTaskCoursesCustomSnapshot, type Task } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 import { getTaskCourseTaskPointProgress, type CourseTaskPointProgressMap } from '@/lib/taskProgress';
 
@@ -101,6 +101,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const [showCourseList, setShowCourseList] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const taskProgress = task.progress ?? null;
+  const taskConfigSnapshot = getTaskConfigSnapshot(task.configSnapshot);
   const snapshotProgress = snapshot?.progress ?? null;
   const progress = (() => {
     if (!snapshotProgress) return taskProgress;
@@ -497,6 +498,14 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
             </div>
             {coursesCustom ? (
               <div className="space-y-2 font-sans">
+                {taskConfigSnapshot?.bypassDailyStudyLimit !== undefined && (
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <span className="shrink-0">每日学时限制</span>
+                    <span className="text-right font-semibold text-foreground">
+                      {taskConfigSnapshot.bypassDailyStudyLimit ? '已绕过' : '正常限制'}
+                    </span>
+                  </div>
+                )}
                 <div className="flex min-w-0 items-start justify-between gap-3">
                   <span className="shrink-0">自动答题</span>
                   <span className="text-right font-semibold text-foreground wrap-anywhere">

@@ -199,6 +199,7 @@ export interface TaskListResponseData {
 export interface CreateTaskRequest {
   accountId: string;
   autoResume?: boolean;
+  bypassDailyStudyLimit?: boolean;
   coursesCustom: CoursesCustom;
 }
 
@@ -270,13 +271,20 @@ export interface Task {
   accountId: string;
   status: TaskStatus;
   autoResume: boolean;
-  configSnapshot?: Record<string, unknown>;
+  configSnapshot?: TaskConfigSnapshot;
   startedAt?: string | null;
   stoppedAt?: string | null;
   errorMessage?: string;
   progress?: TaskProgress;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface TaskConfigSnapshot {
+  account?: string;
+  accountType?: string;
+  bypassDailyStudyLimit?: boolean;
+  coursesCustom?: CoursesCustom;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -331,12 +339,20 @@ function isCoursesCustom(value: unknown): value is CoursesCustom {
     ));
 }
 
-export function getTaskCoursesCustomSnapshot(configSnapshot: Task['configSnapshot']) {
-  if (!isRecord(configSnapshot) || !isCoursesCustom(configSnapshot.coursesCustom)) {
-    return undefined;
-  }
+function isTaskConfigSnapshot(value: unknown): value is TaskConfigSnapshot {
+  return isRecord(value)
+    && isOptionalString(value.account)
+    && isOptionalString(value.accountType)
+    && isOptionalBoolean(value.bypassDailyStudyLimit)
+    && (value.coursesCustom === undefined || isCoursesCustom(value.coursesCustom));
+}
 
-  return configSnapshot.coursesCustom;
+export function getTaskConfigSnapshot(configSnapshot: Task['configSnapshot']) {
+  return isTaskConfigSnapshot(configSnapshot) ? configSnapshot : undefined;
+}
+
+export function getTaskCoursesCustomSnapshot(configSnapshot: Task['configSnapshot']) {
+  return getTaskConfigSnapshot(configSnapshot)?.coursesCustom;
 }
 
 export type StudyMetricStatus = 'disabled' | 'pending' | 'running' | 'success' | 'failed' | 'skipped';
