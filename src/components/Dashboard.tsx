@@ -561,13 +561,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     );
     if (remainingTaskPoints <= 0) return null;
 
-    const totalMinutes = Math.round((remainingTaskPoints / 100) * 60);
+    const taskPointsPerHour = bypassDailyStudyLimit ? 180 : 100;
+    const totalMinutes = Math.round((remainingTaskPoints / taskPointsPerHour) * 60);
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     if (hours === 0) return `${minutes}分钟`;
     if (minutes === 0) return `${hours}小时`;
     return `${hours}小时${minutes}分钟`;
-  }, [courses, selectedCourses]);
+  }, [bypassDailyStudyLimit, courses, selectedCourses]);
 
   const handleToggleSelectAll = () => {
     if (isAllSelected) {

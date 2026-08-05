@@ -31,7 +31,7 @@ export const BypassDailyStudyLimitConfirmDialog: React.FC<BypassDailyStudyLimitC
           <DialogTitle className="text-base">确认开启暴力模式</DialogTitle>
         </div>
         <DialogDescription className="mt-2 text-sm leading-relaxed">
-          此模式会绕过每日 1200 分钟学时限制高并发学习，很大概率会被学习通检测并打回进度。请仅在十分紧急的情况下启用！
+          此模式会绕过学时限制开始高并发学习，很大概率会被学习通检测到并打回进度。请仅在十分紧急的情况下启用！
         </DialogDescription>
       </DialogHeader>
 
