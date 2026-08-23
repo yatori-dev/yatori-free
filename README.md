@@ -4,10 +4,10 @@
 
 > **服务地址：https://yatori.hungrym0.com**
 
-![React](https://img.shields.io/badge/React-19.2.7-61DAFB.svg?style=flat-square&logo=react&logoColor=white)
+![React](https://img.shields.io/badge/React-19.2.8-61DAFB.svg?style=flat-square&logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0.3-3178C6.svg?style=flat-square&logo=typescript&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.0-06B6D4.svg?style=flat-square&logo=tailwindcss&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-8.1.0-646CFF.svg?style=flat-square&logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.3-06B6D4.svg?style=flat-square&logo=tailwindcss&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8.2.2-646CFF.svg?style=flat-square&logo=vite&logoColor=white)
 
 [![部署状态](https://github.com/yatori-dev/yatori-free/actions/workflows/deploy.yml/badge.svg)](https://github.com/yatori-dev/yatori-free/actions/workflows/deploy.yml)
 ![Cloudflare Pages](https://img.shields.io/badge/Cloudflare-Pages-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
@@ -16,11 +16,15 @@
 
 ## 功能
 
-**该网页服务仅需提交自身所需的任务，可无人值守在后台自动完成。创建任务之后，可以关闭网页**
+> [!TIP]
+>
+> 💡 **该网页服务仅需提交自身所需的任务，可在云端无人值守自动完成。**
+>
+> 创建任务之后，可以关闭网页
 
 ### 1. 自动完成章节任务点
 
-包括：
+受支持的任务点类型包括：
 - 视频任务
 - 章节测试
 - 直播观看任务
@@ -53,7 +57,9 @@
 
 ### 5. 邮件通知
 
-当任务完成/失败时，网页服务会通过邮件通知用户。默认不启用该功能
+当任务完成/失败时，网页服务会通过邮件通知用户。
+
+> （默认不启用该功能）
 
 ## 服务端技术选型
 
