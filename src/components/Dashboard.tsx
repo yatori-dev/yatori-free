@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Tabs, TabsContent } from './ui/tabs';
+import { SidebarInset, SidebarProvider } from './ui/sidebar';
 
 import {
   createTask,
@@ -20,12 +21,9 @@ import { isActiveTaskStatus } from '@/lib/taskStatus';
 import { useTaskProgressPolling } from '@/hooks/useTaskProgressPolling';
 import { createCourseTaskPointProgressMap } from '@/lib/taskProgress';
 import { courseHasTaskPoints } from '@/lib/coursePresentation';
-import { YATORI_REPOSITORY_URL } from '@/lib/externalLinks';
-import { DashboardNavigation, type MobileDashboardTabId } from './dashboard/DashboardNavigation';
+import { DashboardAccountMenu, DashboardNavigation, type MobileDashboardTabId } from './dashboard/DashboardNavigation';
 import { mobileDashboardTabOrder } from './dashboard/dashboardNavigationData';
 import { TaskStatusContent } from './dashboard/TaskStatusContent';
-import { TaskStatusDrawer } from './dashboard/TaskStatusDrawer';
-import { TaskStatusTrigger } from './dashboard/TaskStatusTrigger';
 import { SignMonitor } from './SignMonitor';
 import { StudyIncrementSettings } from './StudyIncrementSettings';
 import { OpenSourceDialog } from './OpenSourceDialog';
@@ -35,9 +33,9 @@ import { BypassDailyStudyLimitConfirmDialog } from './dashboard/BypassDailyStudy
 import { LogoutConfirmDialog } from './dashboard/LogoutConfirmDialog';
 import { TaskSettingsPanel } from './dashboard/TaskSettingsPanel';
 import { CourseListSection } from './dashboard/CourseListSection';
-import { 
-  LogOut, 
-  Play, 
+import { DashboardSummaryCards } from './dashboard/DashboardSummaryCards';
+import {
+  Play,
   RefreshCw,
   Sun, 
   Moon,
@@ -126,7 +124,6 @@ function ThemeToggleButton() {
     const nextTheme = isDark ? 'light' : 'dark';
     const applyTheme = () => {
       flushSync(() => setTheme(nextTheme));
-      localStorage.removeItem('yatori-theme');
     };
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -232,8 +229,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [signMonitorActive, setSignMonitorActive] = useState(() => hasActiveStoredSignMonitor(account.id));
   const [appVersion, setAppVersion] = useState('...');
   const [activeTab, setActiveTab] = useState<MobileDashboardTabId>('courses');
-  const [prevTab, setPrevTab] = useState<MobileDashboardTabId>('courses');
-  const [taskDrawerOpen, setTaskDrawerOpen] = useState(false);
   const [taskFilter, setTaskFilter] = useState<'active' | 'completed'>('active');
   const [courseSearch, setCourseSearch] = useState('');
   const [courseSearchQuery, setCourseSearchQuery] = useState('');
@@ -258,7 +253,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       mobileTabDirectionRef.current = mobileDashboardTabOrder.indexOf(tabId) >= mobileDashboardTabOrder.indexOf(activeTab) ? 1 : -1;
     }
 
-    setPrevTab(activeTab);
     setActiveTab(tabId);
   }, [activeTab]);
 
@@ -362,6 +356,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>({});
   const [nightConfirmOpen, setNightConfirmOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [openSourceDialogOpen, setOpenSourceDialogOpen] = useState(false);
   const [submitBypassConfirmOpen, setSubmitBypassConfirmOpen] = useState(false);
   
   // Loading flags
@@ -682,13 +677,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       });
 
       toast.success('任务已启动');
-      if (window.matchMedia('(max-width: 1023px)').matches) {
-        setTaskFilter('active');
-        handleTabChange('tasks');
-      } else {
-        setTaskFilter('active');
-        setTaskDrawerOpen(true);
-      }
+      setTaskFilter('active');
+      handleTabChange('tasks');
       void fetchTasks();
       void fetchCourses();
       setSelectedCourses(new Set());
@@ -863,18 +853,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     );
   }, [persistedSettingsState]);
 
-  useEffect(() => {
-    const desktopMediaQuery = window.matchMedia('(min-width: 1024px)');
-    const handleDesktopTransition = (event: MediaQueryListEvent) => {
-      if (event.matches) {
-        setActiveTab((currentTab) => currentTab === 'tasks' ? 'courses' : currentTab);
-      }
-    };
-
-    desktopMediaQuery.addEventListener('change', handleDesktopTransition);
-    return () => desktopMediaQuery.removeEventListener('change', handleDesktopTransition);
-  }, []);
-
   // Keep the task list fresh only while unfinished tasks exist.
   useEffect(() => {
     if (!account || !hasActiveTasks) {
@@ -905,21 +883,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     };
   }, []);
 
-  // Tab transition calculations (fixed 10px displacement for calm navigation)
-  const tabsList = mobileDashboardTabOrder;
-  const prevIndex = tabsList.indexOf(prevTab);
-  const currentIndex = tabsList.indexOf(activeTab);
-  const tabSwitchDistance = Math.abs(currentIndex - prevIndex);
-  const isMovingRight = currentIndex >= prevIndex;
-
-  const translateVal = tabSwitchDistance === 0 ? 0 : 10;
-  const startTranslateX = tabSwitchDistance === 0 ? '0px' : (isMovingRight ? `${translateVal}px` : `-${translateVal}px`);
-  const durationMs = 260;
-
-  const tabsStyle = {
-    '--tab-transition-duration': `${durationMs}ms`,
-    '--tab-transition-start-x': startTranslateX,
-  } as React.CSSProperties;
   const desktopViewTitle = {
     courses: '课程列表',
     sign: '自动签到',
@@ -928,7 +891,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   }[activeTab];
 
   return (
-    <div className="relative flex h-screen min-h-screen h-svh min-h-svh flex-col overflow-hidden bg-background text-foreground font-sans lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)]">
+    <SidebarProvider className="relative h-svh min-h-svh overflow-hidden bg-background font-sans text-foreground" style={{ '--sidebar-width': '16rem' } as React.CSSProperties}>
       <a href="#dashboard-main" className="sr-only z-[60] rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
         跳到主内容
       </a>
@@ -936,7 +899,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         value={activeTab}
         onValueChange={(value) => handleTabChange(value as MobileDashboardTabId)}
         className="contents"
-        style={tabsStyle}
       >
         <DashboardNavigation
           mode="desktop"
@@ -944,107 +906,55 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           activeTaskCount={taskCounts.active}
           appVersion={appVersion}
           signMonitorActive={signMonitorActive}
+          session={session}
           onTabChange={handleTabChange}
+          onOpenSource={() => setOpenSourceDialogOpen(true)}
+          onLogout={() => setLogoutConfirmOpen(true)}
+          footerActions={(
+            <ThemeToggleButton />
+          )}
         />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-40 flex min-h-14 items-center justify-between gap-1.5 border-b border-border bg-card px-2.5 py-1.5 shadow-sm sm:min-h-16 sm:gap-2 sm:px-6 sm:py-2.5 lg:px-8">
-            <div className="flex min-w-0 shrink-0 items-center lg:hidden">
-              <a
-                href={YATORI_REPOSITORY_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex min-w-0 items-center gap-1.5 rounded-md font-semibold leading-none tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label={`在 GitHub 查看 Yatori 学习通服务 v${appVersion} 源码`}
-              >
-                <BrandMark className="text-xl sm:text-2xl" />
-                <span className="flex flex-col gap-0.5 whitespace-nowrap">
-                  <span className="text-[10px] font-semibold text-foreground/80 sm:text-sm">学习通服务</span>
-                  <span className="text-[10px] font-medium tabular-nums text-muted-foreground sm:text-xs">v{appVersion}</span>
-                </span>
-              </a>
+        <SidebarInset className="min-h-0 min-w-0 overflow-hidden">
+          <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur sm:px-4 lg:px-6">
+            <div className="flex min-w-0 items-center gap-2 lg:hidden">
+              <BrandMark className="text-xl" />
+              <span className="hidden text-xs text-muted-foreground min-[390px]:inline">学习通服务 · v{appVersion}</span>
             </div>
-            <h1 className="hidden min-w-0 truncate text-base font-semibold text-foreground lg:block">
-              {desktopViewTitle}
-            </h1>
-            <div className="ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-4">
-              <a
-                href={YATORI_REPOSITORY_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-9 sm:w-9 lg:hidden"
-                aria-label="在 GitHub 查看 Yatori 学习通服务源码"
-                title="GitHub"
-              >
-                <svg className="h-5 w-5" aria-hidden="true">
-                  <use href="/icons.svg#github-icon" />
-                </svg>
-              </a>
-              <OpenSourceDialog />
-              <ThemeToggleButton />
-
-              <TaskStatusDrawer
-                open={taskDrawerOpen}
-                activeTaskCount={taskCounts.active}
-                onOpenChange={setTaskDrawerOpen}
-                trigger={<TaskStatusTrigger activeTaskCount={taskCounts.active} />}
-              >
-                <TaskStatusContent
-                  tasks={tasks}
-                  filteredTasks={filteredTasks}
-                  taskCounts={taskCounts}
-                  taskFilter={taskFilter}
-                  tasksLoading={tasksLoading}
-                  taskSnapshots={taskSnapshots}
-                  courseNameByIdentifier={courseNameByIdentifier}
-                  courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
-                  onTaskFilterChange={setTaskFilter}
-                  onRefresh={() => void fetchTasks()}
-                  onStopTask={handleStopTask}
+            <h1 className="hidden min-w-0 truncate text-base font-medium lg:block">{desktopViewTitle}</h1>
+            <div className="ml-auto flex items-center gap-1">
+              {activeTab === 'courses' && selectedCourses.size > 0 && (
+                <Button
+                  type="button"
+                  onClick={createTaskWithSelection}
+                  disabled={creatingTask}
+                  className="hidden h-8 gap-2 bg-brand px-3 text-white hover:bg-brand/90 lg:inline-flex"
+                >
+                  {creatingTask ? <RefreshCw className="size-4 animate-spin" /> : <Play className="size-4 fill-current" />}
+                  提交任务 ({selectedCourses.size})
+                  {estimatedTaskDuration && <span className="text-white/70">约 {estimatedTaskDuration}</span>}
+                </Button>
+              )}
+              <div className="lg:hidden"><ThemeToggleButton /></div>
+              <div className="lg:hidden">
+                <DashboardAccountMenu
+                  session={session}
+                  compact
+                  onOpenSource={() => setOpenSourceDialogOpen(true)}
+                  onLogout={() => setLogoutConfirmOpen(true)}
                 />
-              </TaskStatusDrawer>
-
-              <div
-                className="flex min-w-0 max-w-[154px] items-center gap-1 rounded-md border border-border bg-muted/40 py-0.5 pl-1 pr-1 min-[400px]:w-[clamp(132px,31vw,154px)] min-[400px]:gap-2 min-[400px]:py-1 min-[400px]:pl-1.5 min-[400px]:pr-1.5 sm:w-auto sm:max-w-none sm:gap-3 sm:pl-2 sm:pr-3"
-                aria-label={`当前用户 ${session.displayName}`}
-              >
-            {session.avatarUrl ? (
-              <img 
-                src={session.avatarUrl} 
-                alt="头像" 
-                className="h-6 w-6 rounded-full object-cover ring-1 ring-border sm:h-7 sm:w-7"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground sm:h-7 sm:w-7 sm:text-xs">
-                {session.displayName.substring(0, 1).toUpperCase()}
               </div>
-            )}
-            <div className="hidden min-w-0 flex-col text-left min-[360px]:flex min-[400px]:flex-1">
-              <span className="max-w-[68px] truncate text-[11px] font-bold min-[400px]:max-w-none sm:max-w-[100px] sm:text-xs sm:font-semibold">{session.displayName}</span>
-              <span className="hidden max-w-[100px] truncate text-xs text-muted-foreground sm:block">{session.user.username}</span>
-            </div>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setLogoutConfirmOpen(true)}
-              className="h-8 w-8 shrink-0 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground min-[400px]:ml-auto sm:ml-1 sm:h-6 sm:w-6"
-              title="退出登录"
-              aria-label="退出登录"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-            </Button>
-          </div>
             </div>
           </header>
-          <div className="google-accent-bar lg:hidden">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
           <main ref={dashboardMainRef} id="dashboard-main" className="min-h-0 flex-1 overflow-x-clip overflow-y-auto pb-18 lg:pb-0">
-            <div className="mx-auto w-full min-w-0 px-0 py-0 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
-              <div className="min-w-0">
+            <div className="mx-auto flex w-full min-w-0 flex-col gap-4 sm:p-4 lg:gap-6 lg:p-6">
+            {activeTab === 'courses' && (
+              <DashboardSummaryCards
+                courseCount={visibleCourses.length}
+                pendingCourseCount={incompleteSelectableCourses.length}
+                activeTaskCount={taskCounts.active}
+                selectedCourseCount={selectedCourses.size}
+              />
+            )}
             <CourseListSection
               accountId={account?.id}
               courses={courses}
@@ -1077,10 +987,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
               onToggleFullCourseOutline={toggleFullCourseOutline}
             />
 
-            {/* Auto Sign-In Monitor tab content */}
             <TabsContent value="sign" className="m-0 outline-none">
-              <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:py-0">
-                <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4 lg:hidden">
+              <Card className="rounded-none border-x-0 shadow-xs sm:rounded-xl sm:border-x">
+                <CardHeader className="border-b lg:hidden">
                   <CardTitle className="text-sm font-semibold sm:text-base">自动签到</CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 text-sm sm:p-6">
@@ -1112,9 +1021,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
               />
             </TabsContent>
 
-            <TabsContent value="tasks" className="m-0 outline-none lg:hidden">
-              <Card className="min-w-0 overflow-hidden rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm sm:ring-0">
-                <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
+            <TabsContent value="tasks" className="m-0 outline-none">
+              <Card className="min-w-0 overflow-hidden rounded-none border-x-0 shadow-xs sm:rounded-xl sm:border-x">
+                <CardHeader className="border-b">
                   <CardTitle className="text-sm font-semibold sm:text-base">任务</CardTitle>
                   <CardDescription className="text-xs">查看任务运行状态与进度</CardDescription>
                 </CardHeader>
@@ -1135,22 +1044,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 </CardContent>
               </Card>
             </TabsContent>
-              </div>
             </div>
           </main>
-        </div>
+        </SidebarInset>
       </Tabs>
 
-
-      {/* 提交任务悬浮按钮 */}
-      {selectedCourses.size > 0 && (
-        <div className="absolute bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 animate-bottom-bar-enter lg:bottom-6">
+      {selectedCourses.size > 0 && activeTab === 'courses' && (
+        <div className="absolute bottom-[calc(4.75rem+env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 animate-bottom-bar-enter lg:hidden">
           <div className="flex flex-col items-center gap-1">
             <Button
               type="button"
               onClick={createTaskWithSelection}
               disabled={creatingTask}
-              className="h-11 gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-floating ring-4 ring-card/80 hover:bg-primary-hover"
+              className="h-11 gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white shadow-floating ring-4 ring-background/80 hover:bg-brand/90"
               title={`提交 ${selectedCourses.size} 门课程任务`}
               aria-label={`提交 ${selectedCourses.size} 门课程任务`}
             >
@@ -1188,6 +1094,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           onLogout();
         }}
       />
+      <OpenSourceDialog open={openSourceDialogOpen} onOpenChange={setOpenSourceDialogOpen} showTrigger={false} />
 
       <StudyIncrementSettings
         open={studyIncrementCourseKey !== null}
@@ -1209,6 +1116,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         signMonitorActive={signMonitorActive}
         onTabChange={handleTabChange}
       />
-    </div>
+    </SidebarProvider>
   );
 };

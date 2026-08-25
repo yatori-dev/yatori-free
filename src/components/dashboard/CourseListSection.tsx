@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import {
   AlertCircle,
   ChevronDown,
   ChevronUp,
   Download,
   FileText,
+  LoaderCircle,
   RefreshCw,
   Search,
   SlidersHorizontal,
@@ -21,35 +22,8 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CourseBulkSelectionMenu } from './CourseBulkSelectionMenu';
-
-interface CourseCheckboxProps {
-  checked: boolean;
-  disabled?: boolean;
-  indeterminate: boolean;
-  onChange: () => void;
-}
-
-function CourseCheckbox({ checked, disabled = false, indeterminate, onChange }: CourseCheckboxProps) {
-  const ref = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (ref.current) {
-      ref.current.indeterminate = indeterminate;
-    }
-  }, [indeterminate]);
-
-  return (
-    <input
-      type="checkbox"
-      ref={ref}
-      checked={checked}
-      disabled={disabled}
-      onChange={onChange}
-      className="h-4 w-4 shrink-0 cursor-pointer rounded border-border bg-card accent-primary disabled:cursor-not-allowed disabled:opacity-50"
-    />
-  );
-}
 
 interface CourseListSectionProps {
   accountId?: string;
@@ -201,9 +175,7 @@ export function CourseListSection({
         <CardContent className="p-0 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           {coursesLoading ? (
             <div className="flex flex-col items-center justify-center p-12 text-sm text-muted-foreground">
-              <svg className="google-spinner" viewBox="0 0 50 50">
-                <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4" />
-              </svg>
+              <LoaderCircle className="size-7 animate-spin motion-reduce:animate-none" aria-hidden="true" />
               <p className="mt-4">拉取课程列表中...</p>
             </div>
           ) : courses.length === 0 ? (
@@ -272,11 +244,11 @@ export function CourseListSection({
                       isSelected ? 'bg-primary-container/20 hover:bg-primary-container/30' : 'hover:bg-muted/40'
                     }`}>
                       <div className="contents">
-                        <CourseCheckbox
+                        <Checkbox
                           checked={isSelected}
                           disabled={isProcessing}
-                          indeterminate={false}
-                          onChange={() => onToggleCourseSelection(course.key)}
+                          onCheckedChange={() => onToggleCourseSelection(course.key)}
+                          aria-label={`选择课程 ${course.courseName}`}
                         />
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
@@ -359,9 +331,7 @@ export function CourseListSection({
                       <div className="border-t border-border/50 bg-muted/20 px-3 pb-3 pl-11 pt-3 sm:px-5 sm:pb-5 sm:pl-12 sm:pt-4">
                         {loadingDetails[course.key] ? (
                           <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
-                            <svg className="google-spinner h-4 w-4" viewBox="0 0 50 50">
-                              <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4" />
-                            </svg>
+                            <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
                             <span>正在拉取章节...</span>
                           </div>
                         ) : courseDetailsMap[course.key] ? (

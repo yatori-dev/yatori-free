@@ -8,29 +8,22 @@ import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { clearSessionCache } from '@/lib/sessionCache';
 import { clearQRLoginSession } from '@/lib/qrLoginSession';
+import { LoaderCircle } from 'lucide-react';
 
 const LOGOUT_SUPPRESSION_KEY = 'yatori-auth-logout-suppressed';
 
 function AuthRestoreScreen() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8" aria-busy="true">
-      <Card className="w-full max-w-[450px] overflow-hidden md:max-w-[min(65.6vw,1024px)]">
-        <div className="google-accent-bar" aria-hidden="true">
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
-        <CardContent className="flex min-h-[516px] flex-col items-center justify-center p-8 md:px-12 md:py-10">
+    <div className="flex min-h-svh items-center justify-center bg-muted/40 px-4 py-8" aria-busy="true">
+      <Card className="w-full max-w-sm shadow-sm">
+        <CardContent className="flex min-h-72 flex-col items-center justify-center p-8">
           <div className="flex flex-col items-center gap-2">
             <BrandMark className="text-3xl" />
             <div className="text-sm font-medium text-muted-foreground">学习通服务</div>
           </div>
 
           <div className="mt-8 flex flex-col items-center gap-3">
-            <svg className="google-spinner" viewBox="0 0 50 50" role="status" aria-label="加载中">
-              <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4" />
-            </svg>
+            <LoaderCircle className="size-7 animate-spin text-muted-foreground motion-reduce:animate-none" role="status" aria-label="加载中" />
             <div className="text-center text-xs font-medium text-muted-foreground">加载中...</div>
           </div>
         </CardContent>

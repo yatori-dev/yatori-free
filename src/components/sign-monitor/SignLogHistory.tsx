@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
+  LoaderCircle,
   RefreshCw,
   Users,
 } from 'lucide-react';
@@ -215,9 +216,7 @@ export function SignLogHistory({
         <div className="max-h-[600px] min-h-[260px] overflow-y-auto">
           {loading && logs.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center p-12 text-xs text-muted-foreground">
-              <svg className="google-spinner" viewBox="0 0 50 50">
-                <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4" />
-              </svg>
+              <LoaderCircle className="size-7 animate-spin motion-reduce:animate-none" aria-hidden="true" />
               <p className="mt-4">读取账户签到记录中...</p>
             </div>
           ) : logs.length === 0 ? (

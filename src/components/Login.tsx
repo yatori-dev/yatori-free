@@ -1,7 +1,6 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Label } from './ui/label';
 import { Card, CardContent } from './ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog';
 import type { AuthSession, LoginData } from '@/lib/api';
@@ -10,6 +9,7 @@ import { toast } from 'sonner';
 import { QRCodeLogin } from './QRCodeLogin';
 import { LoginCredentialsStep } from './login/LoginCredentialsStep';
 import { BrandMark } from './BrandMark';
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from './ui/field';
 
 interface LoginProps {
   onLoginSuccess: (session: AuthSession) => void;
@@ -23,22 +23,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [accountError, setAccountError] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [dialogContent, setDialogContent] = useState<'terms' | 'privacy' | null>(null);
-  const accountPaneRef = useRef<HTMLDivElement>(null);
-  const credentialsPaneRef = useRef<HTMLDivElement>(null);
-  const [viewportHeight, setViewportHeight] = useState<number>();
-
-  useLayoutEffect(() => {
-    const pane = step === 'account' ? accountPaneRef.current : credentialsPaneRef.current;
-    if (!pane) return;
-
-    const updateHeight = () => setViewportHeight(pane.scrollHeight);
-    updateHeight();
-
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(pane);
-    return () => observer.disconnect();
-  }, [accountError, step]);
-
   useEffect(() => {
     let cancelled = false;
 
@@ -102,49 +86,29 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="login-page flex min-h-screen flex-col items-center justify-center bg-background px-4 py-8 transition-colors duration-300">
-      <Card className="w-full max-w-[450px] overflow-hidden md:max-w-[min(65.6vw,1024px)]">
-        {/* Google Accent Bar */}
-        <div className="google-accent-bar">
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
-
-        <CardContent className="grid p-0 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+    <div className="login-page flex min-h-svh flex-col items-center justify-center bg-muted/40 px-4 py-8">
+      <Card className="w-full max-w-sm overflow-hidden p-0 shadow-sm md:max-w-4xl">
+        <CardContent className="grid p-0 md:grid-cols-2">
           <QRCodeLogin onLoginSuccess={completeLogin} />
-          <div className="login-auth-pane relative flex min-w-0 flex-col items-center p-8 md:min-h-[516px] md:justify-center md:px-12 md:py-10">
-          {/* Google Colored Logo */}
+          <div className="login-auth-pane relative flex min-w-0 flex-col items-center justify-center p-6 md:min-h-[516px] md:px-10 md:py-10">
           <BrandMark className="mb-4 text-3xl md:hidden" />
 
           {/* Step Indicator */}
           <div className="mb-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none">
-            <span className={`h-1.5 rounded-full transition-all duration-300 ${step === 'account' ? 'w-6 bg-primary' : 'w-2 bg-muted'}`} />
-            <span className={`h-1.5 rounded-full transition-all duration-300 ${step === 'credentials' ? 'w-6 bg-primary' : 'w-2 bg-muted'}`} />
+            <span className={`h-1.5 rounded-full transition-all duration-300 ${step === 'account' ? 'w-8 bg-brand' : 'w-2 bg-muted'}`} />
+            <span className={`h-1.5 rounded-full transition-all duration-300 ${step === 'credentials' ? 'w-8 bg-brand' : 'w-2 bg-muted'}`} />
           </div>
 
-          {/* Form and transition layout */}
-          <div
-            className="w-full slide-viewport mt-2 transition-[height] duration-300 ease-out"
-            style={{ height: viewportHeight ? `${viewportHeight}px` : undefined }}
-          >
-            <div 
-              className="slide-container" 
-              style={{ transform: step === 'credentials' ? 'translateX(-50%)' : 'translateX(0%)' }}
-            >
-              {/* Step 1: Account Input */}
-              <div
-                ref={accountPaneRef}
-                className="slide-pane flex flex-col items-center"
-                aria-hidden={step !== 'account'}
-              >
-                <h1 className="text-2xl text-foreground font-normal mb-1 font-sans">登录</h1>
-                <p className="text-sm text-muted-foreground mb-6 font-sans">使用您的学习通账号</p>
-                
-                <form onSubmit={handleNextStep} autoComplete="on" className="w-full space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="account">账号</Label>
+          <div className="mt-2 w-full">
+            {step === 'account' ? (
+              <div className="flex flex-col items-center">
+                <h1 className="mb-1 text-2xl font-semibold tracking-tight text-foreground">登录 Yatori</h1>
+                <FieldDescription className="mb-6">使用您的学习通账号</FieldDescription>
+
+                <form onSubmit={handleNextStep} autoComplete="on" className="w-full">
+                  <FieldGroup>
+                  <Field data-invalid={Boolean(accountError)}>
+                    <FieldLabel htmlFor="account">账号</FieldLabel>
                     <Input
                       id="account"
                       name="username"
@@ -157,47 +121,35 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                       aria-describedby={accountError ? 'account-error' : undefined}
                       value={account}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAccountChange(e.target.value)}
-                      className="w-full h-12 px-4 border border-input focus:border-primary focus:ring-1 focus:ring-primary rounded-lg bg-transparent text-foreground"
-                      disabled={step !== 'account'}
-                      tabIndex={step === 'account' ? 0 : -1}
+                      className="h-11 w-full"
                     />
-                    {accountError && (
-                      <p id="account-error" role="alert" className="ml-1 text-xs text-danger">{accountError}</p>
-                    )}
-                  </div>
-                  
-                  <div className="text-xs text-muted-foreground leading-relaxed">
-                    本服务为面向大学生的学习通课程任务提交工具，不收取任何费用，请在受信任设备上使用
-                  </div>
+                    {accountError && <FieldError id="account-error">{accountError}</FieldError>}
+                  </Field>
 
-                  <div className="flex justify-between items-center pt-4">
+                  <FieldDescription>
+                    本服务为面向大学生的学习通课程任务提交工具，不收取任何费用，请在受信任设备上使用
+                  </FieldDescription>
+
+                  <Field orientation="horizontal" className="justify-between">
                     <a
                       href="https://hungrym0.com/blog/xxt/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm font-medium text-primary hover:underline"
-                      tabIndex={step === 'account' ? 0 : -1}
+                      className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                     >
                       了解详情
                     </a>
                     <Button 
                       type="submit" 
-                      className="h-11 rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground shadow-none transition-all hover:bg-primary-hover md:h-10"
-                      disabled={step !== 'account'}
-                      tabIndex={step === 'account' ? 0 : -1}
+                      className="h-10 bg-brand px-6 text-sm font-medium text-white hover:bg-brand/90"
                     >
                       下一步
                     </Button>
-                  </div>
+                  </Field>
+                  </FieldGroup>
                 </form>
               </div>
-
-              {/* Step 2: Login method */}
-              <div
-                ref={credentialsPaneRef}
-                className="slide-pane flex flex-col items-center"
-                aria-hidden={step !== 'credentials'}
-              >
+            ) : (
                 <LoginCredentialsStep
                   key={account.trim()}
                   account={account.trim()}
@@ -208,8 +160,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                   onLoginSuccess={completeLogin}
                   onOpenLegalDocument={setDialogContent}
                 />
-              </div>
-            </div>
+            )}
           </div>
           </div>
         </CardContent>

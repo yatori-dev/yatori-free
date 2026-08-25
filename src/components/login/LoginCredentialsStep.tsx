@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 
 type LoginMethod = 'password' | 'sms';
 type LegalDocument = 'terms' | 'privacy';
@@ -162,21 +164,22 @@ export function LoginCredentialsStep({
 
   return (
     <div className="flex w-full flex-col items-center" inert={!active}>
-      <h1 className="mb-1 text-2xl font-normal text-foreground">继续登录</h1>
-      <p className="mb-5 text-sm text-muted-foreground">使用 {account} 登录学习通</p>
+      <h1 className="mb-1 text-2xl font-semibold tracking-tight text-foreground">继续登录</h1>
+      <FieldDescription className="mb-5">使用 {account} 登录学习通</FieldDescription>
 
-      <form onSubmit={handleSubmit} autoComplete="on" className="w-full space-y-5">
+      <form onSubmit={handleSubmit} autoComplete="on" className="w-full">
         <input type="text" name="username" autoComplete="username" value={account} readOnly className="sr-only" />
-
+        <FieldGroup>
         <Tabs value={method} onValueChange={handleMethodChange}>
           <TabsList className="h-11 w-full md:h-10">
             <TabsTrigger value="password" disabled={isBusy}>密码登录</TabsTrigger>
             <TabsTrigger value="sms" disabled={isBusy}>验证码登录</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="password" className="mt-4 space-y-2">
+          <TabsContent value="password" className="mt-4">
+            <Field data-invalid={Boolean(passwordError)}>
             <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="password">密码</Label>
+              <FieldLabel htmlFor="password">密码</FieldLabel>
               <a
                 href="https://passport2.chaoxing.com/pwd/findpwd?version=1"
                 target="_blank"
@@ -198,7 +201,7 @@ export function LoginCredentialsStep({
                 aria-describedby={passwordError ? 'password-error' : undefined}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="h-12 w-full rounded-lg border-input bg-transparent pl-4 pr-12 focus:border-primary focus:ring-1 focus:ring-primary"
+                className="h-11 w-full pr-12"
                 disabled={isBusy}
               />
               <button
@@ -211,11 +214,13 @@ export function LoginCredentialsStep({
                 {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
               </button>
             </div>
-            {passwordError && <p id="password-error" role="alert" className="ml-1 text-xs text-danger">{passwordError}</p>}
+            {passwordError && <FieldError id="password-error">{passwordError}</FieldError>}
+            </Field>
           </TabsContent>
 
-          <TabsContent value="sms" className="mt-4 space-y-2">
-            <Label htmlFor="sms-code">6位数验证码</Label>
+          <TabsContent value="sms" className="mt-4">
+            <Field data-invalid={Boolean(smsError)}>
+            <FieldLabel htmlFor="sms-code">6位数验证码</FieldLabel>
             <div className="flex gap-2">
               <Input
                 id="sms-code"
@@ -231,14 +236,14 @@ export function LoginCredentialsStep({
                   setSMSCode(event.target.value);
                   setSMSError('');
                 }}
-                className="h-12 min-w-0 flex-1 rounded-lg border-input bg-transparent px-4 focus:border-primary focus:ring-1 focus:ring-primary"
+                className="h-11 min-w-0 flex-1"
                 disabled={isBusy}
               />
               <Button
                 type="button"
                 size="icon"
                 variant="outline"
-                className={`size-12 shrink-0 rounded-lg transition-colors duration-200 ${showSendSuccess ? 'border-success/40 bg-success-container/50 text-success hover:bg-success-container/50' : 'text-primary'}`}
+                className={`size-11 shrink-0 transition-colors duration-200 ${showSendSuccess ? 'border-success/40 bg-success-container/50 text-success hover:bg-success-container/50' : ''}`}
                 disabled={isBusy || retrySeconds > 0}
                 onClick={() => void handleSendCode()}
                 aria-label={sendCodeButtonLabel}
@@ -262,36 +267,37 @@ export function LoginCredentialsStep({
             ) : smsSession ? (
               <p id="sms-code-status" aria-live="polite" className="ml-1 text-xs text-success">验证码已发送</p>
             ) : null}
+            </Field>
           </TabsContent>
         </Tabs>
 
-        <div className="flex items-start gap-2 text-sm leading-5 text-muted-foreground">
-          <input
+        <Field orientation="horizontal" className="items-start">
+          <Checkbox
             id="agree-terms"
-            type="checkbox"
             checked={agreedToTerms}
-            onChange={(event) => onAgreedToTermsChange(event.target.checked)}
+            onCheckedChange={(checked) => onAgreedToTermsChange(checked === true)}
             disabled={isBusy}
-            className="mt-0.5 size-4 shrink-0 cursor-pointer rounded border-input accent-primary disabled:opacity-50"
+            className="mt-0.5"
           />
-          <div className="min-w-0">
-            <label htmlFor="agree-terms" className={isBusy ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}>
+          <FieldDescription className="min-w-0 leading-5">
+            <Label htmlFor="agree-terms" className={isBusy ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}>
               我已阅读并同意
-            </label>{' '}
+            </Label>{' '}
             <button type="button" onClick={() => onOpenLegalDocument('terms')} className="font-medium text-primary hover:underline">服务条款</button>{' '}
             <span aria-hidden="true">和</span>{' '}
             <button type="button" onClick={() => onOpenLegalDocument('privacy')} className="font-medium text-primary hover:underline">隐私政策</button>
-          </div>
-        </div>
+          </FieldDescription>
+        </Field>
 
         <div className="flex items-center justify-between pt-1">
           <Button type="button" variant="ghost" onClick={onBack} className="h-11 rounded-lg px-4 text-primary hover:bg-primary-container/30 md:h-10" disabled={isBusy}>
             返回
           </Button>
-          <Button type="submit" disabled={isBusy || !agreedToTerms} className="h-11 min-w-24 rounded-lg bg-primary px-6 text-primary-foreground hover:bg-primary-hover md:h-10">
+          <Button type="submit" disabled={isBusy || !agreedToTerms} className="h-10 min-w-24 bg-brand px-6 text-white hover:bg-brand/90">
             {isLoggingIn ? '正在登录...' : '登录'}
           </Button>
         </div>
+        </FieldGroup>
       </form>
     </div>
   );

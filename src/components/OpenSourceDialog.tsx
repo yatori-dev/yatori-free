@@ -44,10 +44,16 @@ const OPEN_SOURCE_PROJECTS: OpenSourceProject[] = [
   }
 ];
 
-export function OpenSourceDialog() {
+interface OpenSourceDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
+}
+
+export function OpenSourceDialog({ open, onOpenChange, showTrigger = true }: OpenSourceDialogProps) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {showTrigger && <DialogTrigger asChild>
         <Button
           size="icon"
           variant="ghost"
@@ -57,7 +63,7 @@ export function OpenSourceDialog() {
         >
         <LibraryBig className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
-      </DialogTrigger>
+      </DialogTrigger>}
       <DialogContent className="max-h-[calc(100dvh-1rem)] max-w-[calc(100%-1rem)] gap-0 overflow-hidden p-0 sm:max-h-[calc(100dvh-2rem)] sm:max-w-2xl">
         <DialogHeader className="border-b border-border/50 px-3 py-3 pr-11 sm:px-6 sm:py-5 sm:pr-12">
           <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">

@@ -105,6 +105,15 @@
     --color-card: var(--card);
     --color-foreground: var(--foreground);
     --color-background: var(--background);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-brand: var(--brand);
 
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
@@ -116,27 +125,36 @@
 }
 
 :root {
-    --background: #fdfcff;
-    --foreground: #1a1c1e;
-    --card: #fdfcff;
-    --card-foreground: #1a1c1e;
-    --popover: #fdfcff;
-    --popover-foreground: #1a1c1e;
-    --primary: #0061a4;
+    --background: #ffffff;
+    --foreground: #18181b;
+    --card: #ffffff;
+    --card-foreground: #18181b;
+    --popover: #ffffff;
+    --popover-foreground: #18181b;
+    --primary: #18181b;
     --primary-foreground: #ffffff;
-    --primary-hover: #0058bd;
-    --primary-container: #d1e4ff;
-    --secondary: #535f70;
-    --secondary-foreground: #ffffff;
-    --muted: #e0e2ec;
-    --muted-foreground: #43474e;
-    --accent: #d1e4ff;
-    --accent-foreground: #001d36;
-    --destructive: #ba1a1a;
+    --primary-hover: #27272a;
+    --primary-container: #f4f4f5;
+    --secondary: #f4f4f5;
+    --secondary-foreground: #18181b;
+    --muted: #f4f4f5;
+    --muted-foreground: #71717a;
+    --accent: #f4f4f5;
+    --accent-foreground: #18181b;
+    --destructive: #dc2626;
     --destructive-foreground: #ffffff;
-    --border: #c3c7cf;
-    --input: #73777f;
-    --ring: #0061a4;
+    --border: #e4e4e7;
+    --input: #e4e4e7;
+    --ring: #71717a;
+    --brand: #2563eb;
+    --sidebar: #fafafa;
+    --sidebar-foreground: #18181b;
+    --sidebar-primary: #18181b;
+    --sidebar-primary-foreground: #fafafa;
+    --sidebar-accent: #f4f4f5;
+    --sidebar-accent-foreground: #18181b;
+    --sidebar-border: #e4e4e7;
+    --sidebar-ring: #71717a;
     --radius: 0.5rem;
     --success: #15803d;
     --success-container: #dcfce7;
@@ -153,12 +171,6 @@
     --sign-code: #be185d;
     --sign-code-container: #fce7f3;
 
-    /* Google Colors */
-    --google-blue: #4285F4;
-    --google-red: #EA4335;
-    --google-yellow: #FBBC05;
-    --google-green: #34A853;
-
     /* Motion Easing Tokens */
     --ease-standard: cubic-bezier(0.2, 0, 0, 1);
     --ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
@@ -171,27 +183,36 @@
 }
 
 .dark {
-    --background: #1a1c1e;
-    --foreground: #e2e2e6;
-    --card: #1e2022; /* surface container */
-    --card-foreground: #e2e2e6;
-    --popover: #1a1c1e;
-    --popover-foreground: #e2e2e6;
-    --primary: #9ecaef;
-    --primary-foreground: #003258;
-    --primary-hover: #9ecaef;
-    --primary-container: #00497d;
-    --secondary: #bbc7db;
-    --secondary-foreground: #253140;
-    --muted: #43474e;
-    --muted-foreground: #c3c7cf;
-    --accent: #00497d;
-    --accent-foreground: #d1e4ff;
-    --destructive: #ffb4ab;
-    --destructive-foreground: #690005;
-    --border: #43474e;
-    --input: #8d9199;
-    --ring: #9ecaef;
+    --background: #09090b;
+    --foreground: #fafafa;
+    --card: #09090b;
+    --card-foreground: #fafafa;
+    --popover: #18181b;
+    --popover-foreground: #fafafa;
+    --primary: #fafafa;
+    --primary-foreground: #18181b;
+    --primary-hover: #e4e4e7;
+    --primary-container: #27272a;
+    --secondary: #27272a;
+    --secondary-foreground: #fafafa;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --accent: #27272a;
+    --accent-foreground: #fafafa;
+    --destructive: #ef4444;
+    --destructive-foreground: #fafafa;
+    --border: #27272a;
+    --input: #3f3f46;
+    --ring: #a1a1aa;
+    --brand: #60a5fa;
+    --sidebar: #18181b;
+    --sidebar-foreground: #fafafa;
+    --sidebar-primary: #fafafa;
+    --sidebar-primary-foreground: #18181b;
+    --sidebar-accent: #27272a;
+    --sidebar-accent-foreground: #fafafa;
+    --sidebar-border: #27272a;
+    --sidebar-ring: #a1a1aa;
     --success: #86efac;
     --success-container: #14532d;
     --warning: #fcd34d;
@@ -313,98 +334,6 @@
   }
 }
 
-/* Google-like Accent Bar */
-.google-accent-bar {
-  height: 4px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  width: 100%;
-}
-.google-accent-bar > div:nth-child(1) { background-color: var(--google-blue); }
-.google-accent-bar > div:nth-child(2) { background-color: var(--google-red); }
-.google-accent-bar > div:nth-child(3) { background-color: var(--google-yellow); }
-.google-accent-bar > div:nth-child(4) { background-color: var(--google-green); }
-
-.google-mode-switch[data-state="checked"] {
-  background-image: linear-gradient(
-    110deg,
-    var(--google-blue) 0%,
-    #5b7cf6 18%,
-    var(--google-red) 38%,
-    var(--google-yellow) 58%,
-    #e9c34a 70%,
-    var(--google-green) 88%,
-    var(--google-blue) 100%
-  );
-  background-size: 220% 100%;
-  animation: google-mode-gradient 4s ease-in-out infinite alternate;
-}
-
-@keyframes google-mode-gradient {
-  from { background-position: 0% 50%; }
-  to { background-position: 100% 50%; }
-}
-
-/* Google Spinner Animation */
-.google-spinner {
-  animation: google-rotate 2s linear infinite;
-  width: 32px;
-  height: 32px;
-}
-
-.google-spinner .path {
-  stroke: var(--google-blue);
-  stroke-linecap: round;
-  animation: google-dash 1.5s ease-in-out infinite, google-colors 5.6s ease-in-out infinite;
-}
-
-@keyframes google-rotate {
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes google-dash {
-  0% {
-    stroke-dasharray: 1, 150;
-    stroke-dashoffset: 0;
-  }
-  50% {
-    stroke-dasharray: 90, 150;
-    stroke-dashoffset: -35;
-  }
-  100% {
-    stroke-dasharray: 90, 150;
-    stroke-dashoffset: -124;
-  }
-}
-
-@keyframes google-colors {
-  0%, 100% { stroke: var(--google-blue); }
-  25% { stroke: var(--google-red); }
-  50% { stroke: var(--google-yellow); }
-  75% { stroke: var(--google-green); }
-}
-
-/* Slide Panels */
-.slide-viewport {
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-}
-
-.slide-container {
-  display: flex;
-  width: 200%;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.slide-pane {
-  width: 50%;
-  flex-shrink: 0;
-}
-
-/* Google-style Snackbar / Chrome Infobar */
 .cn-toast {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
   font-size: 13px !important;
@@ -424,7 +353,6 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Google-like colored left strip */
 .cn-toast::before {
   content: '';
   position: absolute;
@@ -432,24 +360,24 @@
   top: 0;
   bottom: 0;
   width: 4px;
-  background-color: var(--google-blue);
+  background-color: var(--info);
   transition: background-color 0.3s !important;
 }
 
 .cn-toast[data-type="success"]::before {
-  background-color: var(--google-green) !important;
+  background-color: var(--success) !important;
 }
 
 .cn-toast[data-type="error"]::before {
-  background-color: var(--google-red) !important;
+  background-color: var(--danger) !important;
 }
 
 .cn-toast[data-type="warning"]::before {
-  background-color: var(--google-yellow) !important;
+  background-color: var(--warning) !important;
 }
 
 .cn-toast[data-type="info"]::before {
-  background-color: var(--google-blue) !important;
+  background-color: var(--info) !important;
 }
 
 /* Custom icon sizing and alignment */
@@ -464,22 +392,21 @@
 }
 
 .cn-toast[data-type="success"] [data-icon] {
-  color: var(--google-green) !important;
+  color: var(--success) !important;
 }
 
 .cn-toast[data-type="error"] [data-icon] {
-  color: var(--google-red) !important;
+  color: var(--danger) !important;
 }
 
 .cn-toast[data-type="warning"] [data-icon] {
-  color: var(--google-yellow) !important;
+  color: var(--warning) !important;
 }
 
 .cn-toast[data-type="info"] [data-icon] {
-  color: var(--google-blue) !important;
+  color: var(--info) !important;
 }
 
-/* Make sure the text matches Google's sleek typography */
 .cn-toast [data-title] {
   display: block !important;
   font-weight: 600 !important;
@@ -637,9 +564,6 @@
     animation: none;
   }
 
-  .google-mode-switch[data-state="checked"] {
-    animation: none;
-  }
 }
 
 /* Keep the desktop QR form usable on short laptop viewports. */
@@ -665,12 +589,6 @@
   .login-qr-code > svg {
     width: 144px;
     height: 144px;
-  }
-
-  /* Keep the loading indicator compact within the shorter QR container. */
-  .login-qr-code > .google-spinner {
-    width: 56px;
-    height: 56px;
   }
 
   .login-footer {

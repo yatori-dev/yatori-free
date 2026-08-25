@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { EmailNotificationSettings } from '@/components/EmailNotificationSettings';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Field, FieldContent, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { cn } from '@/lib/utils';
 import { BypassDailyStudyLimitConfirmDialog } from './BypassDailyStudyLimitConfirmDialog';
 
@@ -76,11 +76,11 @@ interface TaskBehaviorCardProps {
 
 function TaskBehaviorCard({ id, label, enabled, value, onToggle, onModeChange }: TaskBehaviorCardProps) {
   return (
-    <div className="rounded-md border border-border/50 bg-muted/25 p-3 sm:rounded-lg sm:p-5">
+    <Field className="rounded-md border border-border/50 bg-muted/25 p-3 sm:rounded-lg sm:p-5">
       <div className="flex items-center justify-between gap-3">
-        <Label htmlFor={id} className="cursor-pointer text-sm font-semibold text-foreground">
+        <FieldLabel htmlFor={id} className="cursor-pointer text-sm font-semibold text-foreground">
           {label}
-        </Label>
+        </FieldLabel>
         <Switch id={id} checked={enabled} onCheckedChange={onToggle} className="shrink-0" />
       </div>
       <div
@@ -94,7 +94,7 @@ function TaskBehaviorCard({ id, label, enabled, value, onToggle, onModeChange }:
           <AutoSubmitSettings enabled={enabled} value={value} onChange={onModeChange} />
         </div>
       </div>
-    </div>
+    </Field>
   );
 }
 
@@ -158,11 +158,12 @@ export function TaskSettingsPanel({
               任务行为
             </h2>
 
-            <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
-              <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
-                <Label htmlFor="hideEmptyTaskCourses" className="block cursor-pointer text-sm font-semibold text-foreground">
+            <FieldGroup className="gap-3 sm:gap-4">
+            <Field orientation="horizontal" className="rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
+              <FieldContent className="min-w-0 pr-3 sm:pr-4">
+                <FieldLabel htmlFor="hideEmptyTaskCourses" className="cursor-pointer text-sm font-semibold text-foreground">
                   隐藏无任务点课程
-                </Label>
+                </FieldLabel>
                 <div
                   className={cn(
                     'grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none',
@@ -171,45 +172,46 @@ export function TaskSettingsPanel({
                   aria-hidden={hiddenEmptyTaskCourseCount === 0}
                 >
                   <div className="min-h-0 overflow-hidden">
-                    <p className="text-xs leading-relaxed text-muted-foreground">
+                    <FieldDescription className="text-xs">
                       当前已隐藏 {hiddenEmptyTaskCourseCount} 门
-                    </p>
+                    </FieldDescription>
                   </div>
                 </div>
-              </div>
+              </FieldContent>
               <Switch
                 id="hideEmptyTaskCourses"
                 checked={hideEmptyTaskCourses}
                 onCheckedChange={(checked) => onSettingSwitch('hideEmptyTaskCourses', checked)}
                 className="shrink-0"
               />
-            </div>
+            </Field>
 
-            <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
-              <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
-                <Label htmlFor="bypassDailyStudyLimit" className="block cursor-pointer text-sm font-semibold text-foreground">
+            <Field orientation="horizontal" className="rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
+              <FieldContent className="min-w-0 pr-3 sm:pr-4">
+                <FieldLabel htmlFor="bypassDailyStudyLimit" className="cursor-pointer text-sm font-semibold text-foreground">
                   暴力模式
-                </Label>
-              </div>
+                </FieldLabel>
+              </FieldContent>
               <Switch
                 id="bypassDailyStudyLimit"
                 checked={bypassDailyStudyLimit}
                 onCheckedChange={handleBypassChange}
-                className="google-mode-switch shrink-0"
+                className="shrink-0"
               />
-            </div>
+            </Field>
 
-            <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
-              <Label htmlFor="doChapterTest" className="block cursor-pointer text-sm font-semibold text-foreground">
+            <Field orientation="horizontal" className="rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
+              <FieldLabel htmlFor="doChapterTest" className="cursor-pointer text-sm font-semibold text-foreground">
                 章节测试自动答题
-              </Label>
+              </FieldLabel>
               <Switch
                 id="doChapterTest"
                 checked={doChapterTest}
                 onCheckedChange={(checked) => onSettingSwitch('doChapterTest', checked)}
                 className="shrink-0"
               />
-            </div>
+            </Field>
+            </FieldGroup>
 
             <div className="grid grid-cols-1 gap-3 sm:gap-6 xl:grid-cols-2">
               <TaskBehaviorCard

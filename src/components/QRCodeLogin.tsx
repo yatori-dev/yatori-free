@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { BrandMark } from './BrandMark';
-import { RefreshCw } from 'lucide-react';
+import { LoaderCircle, RefreshCw } from 'lucide-react';
 import {
   createQRSession,
   exchangeQRSession,
@@ -188,15 +188,15 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
   const isError = Boolean(error) || session?.status === 'failed';
 
   return (
-    <section className="login-qr-pane hidden min-h-[516px] flex-col items-center justify-center border-r border-border bg-transparent px-10 py-12 text-center md:flex">
+    <section className="login-qr-pane hidden min-h-[516px] flex-col items-center justify-center border-r bg-muted/30 px-10 py-12 text-center md:flex">
       <BrandMark className="mb-5 text-3xl" />
-      <h1 className="text-2xl font-normal tracking-tight text-foreground">扫码登录</h1>
+      <h1 className="text-2xl font-semibold tracking-tight text-foreground">扫码登录</h1>
       <p className="mt-2 text-sm text-muted-foreground">使用学习通 App 扫码</p>
 
       {/* Dynamic QR / Scanned Morphing Card */}
       {isScanned || isConfirmed ? (
-        <div className="mt-7 flex h-[208px] w-[208px] flex-col items-center justify-center gap-3 rounded-2xl border border-primary/20 bg-primary-container/20 p-4 shadow-sm backdrop-blur-xs animate-in zoom-in-95 duration-300">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg shadow-sm">
+        <div className="mt-7 flex h-[208px] w-[208px] flex-col items-center justify-center gap-3 rounded-xl border bg-background p-4 shadow-xs animate-in zoom-in-95 duration-300">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-lg font-bold text-white shadow-sm">
             {session?.scannedName ? session.scannedName.substring(0, 1) : '通'}
           </div>
           <div className="flex flex-col items-center gap-0.5">
@@ -207,13 +207,13 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
               {isConfirmed ? '已确认，跳转中...' : '已扫码，请在手机端确认'}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            <span className="h-2 w-2 rounded-full bg-primary animate-ping" />
+          <div className="flex items-center gap-1.5 rounded-full bg-info-container px-3 py-1 text-xs font-medium text-info">
+            <span className="h-2 w-2 rounded-full bg-info animate-ping" />
             <span>{isConfirmed ? '验证通过' : '等待确认'}</span>
           </div>
         </div>
       ) : (
-        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-2xl border border-border bg-white p-3 shadow-xs">
+        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-xl border bg-white p-3 shadow-xs">
           {session?.qrContent ? (
             <QRCodeSVG
               value={session.qrContent}
@@ -223,14 +223,7 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
               title="学习通登录二维码"
             />
           ) : isCreating ? (
-            <svg
-              className="google-spinner"
-              viewBox="0 0 50 50"
-              role="status"
-              aria-label="正在生成二维码"
-            >
-              <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4" />
-            </svg>
+            <LoaderCircle className="size-8 animate-spin text-muted-foreground motion-reduce:animate-none" role="status" aria-label="正在生成二维码" />
           ) : error ? (
             <p className="px-4 text-sm leading-6 text-danger">二维码暂时无法生成</p>
           ) : null}
