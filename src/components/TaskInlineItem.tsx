@@ -438,7 +438,12 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
                   : '任务点明细未提供'}
               </span>
             </div>
-          </div>
+            {typeof progress.unresolvedUnits === 'number' && progress.unresolvedUnits > 0 && (
+              <div className="text-xs text-warning">
+                有 {progress.unresolvedUnits} 个任务点无法确认状态
+              </div>
+            )}
+            </div>
 
           {progress.studyProgress && (
             <TaskStudyProgress courses={progress.studyProgress} />

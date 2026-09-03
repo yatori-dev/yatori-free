@@ -416,10 +416,14 @@ function CourseOutline({ accountId, courseKey, courseDetails, isFullyExpanded, o
 
   return (
     <div className="space-y-2">
-      {courseDetails.taskPointsIncomplete && (
+      {(courseDetails.taskPointsIncomplete || courseDetails.incomplete) && (
         <div className="flex items-start gap-2 rounded-md bg-warning-container/40 px-2.5 py-2 text-xs text-warning" role="status">
           <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          <span>部分章节任务点读取失败，当前大纲可能不完整。</span>
+          <span>
+            {courseDetails.partialReasons?.length
+              ? `课程数据不完整：${courseDetails.partialReasons.join('；')}`
+              : '部分章节任务点读取失败，当前大纲可能不完整。'}
+          </span>
         </div>
       )}
       <div className={isFullyExpanded ? undefined : 'max-sm:max-h-64 max-sm:overflow-hidden'}>
@@ -503,7 +507,7 @@ function CourseOutline({ accountId, courseKey, courseDetails, isFullyExpanded, o
           })}
           {chaptersWithTasks.length === 0 && (
             <div className="col-span-2 py-4 text-center text-xs text-muted-foreground">
-              {courseDetails.taskPointsIncomplete ? '课程任务点读取不完整' : '该课程没有任务点'}
+              {courseDetails.taskPointsIncomplete || courseDetails.incomplete ? '课程数据读取不完整' : '该课程没有任务点'}
             </div>
           )}
         </div>

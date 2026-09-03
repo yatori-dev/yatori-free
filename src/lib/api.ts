@@ -186,10 +186,20 @@ export interface CourseDetails {
   taskPointCount?: number;
   taskPoints?: CourseTaskPoint[];
   taskPointsIncomplete?: boolean;
+  incomplete?: boolean;
+  partialReasons?: string[];
+}
+
+export type CourseSourceStatusValue = 'ok' | 'failed' | 'skipped';
+
+export interface CourseSourceStatus {
+  joined: CourseSourceStatusValue;
+  research: CourseSourceStatusValue;
 }
 
 export interface CourseListResponseData {
   courses: CourseSummary[];
+  sourceStatus: CourseSourceStatus;
 }
 
 export interface TaskListResponseData {
@@ -377,6 +387,7 @@ export interface TaskProgress {
   totalUnits: number;
   completedUnits: number;
   failedUnits: number;
+  unresolvedUnits: number;
   currentCourse?: string;
   currentChapter?: string;
   currentKind?: string;
@@ -581,6 +592,10 @@ export interface SignMonitorStatus {
   stoppedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
+  discoveryMode?: string;
+  discoverySource?: string;
+  nextRetryAt?: string | null;
+  pendingReason?: string;
 }
 
 export interface SignLogsResponseData {
