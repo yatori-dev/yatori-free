@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent } from './ui/card';
@@ -6,10 +6,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import type { AuthSession, LoginData } from '@/lib/api';
 import { readSavedAccount, saveSavedAccount } from '@/lib/savedAccount';
 import { toast } from 'sonner';
-import { QRCodeLogin } from './QRCodeLogin';
-import { LoginCredentialsStep } from './login/LoginCredentialsStep';
 import { BrandMark } from './BrandMark';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from './ui/field';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { LoaderCircle } from 'lucide-react';
+
+const QRCodeLogin = lazy(() => import('./QRCodeLogin').then((module) => ({ default: module.QRCodeLogin })));
+const LoginCredentialsStep = lazy(() => import('./login/LoginCredentialsStep').then((module) => ({ default: module.LoginCredentialsStep })));
 
 interface LoginProps {
   onLoginSuccess: (session: AuthSession) => void;
@@ -17,7 +20,24 @@ interface LoginProps {
 
 const MAINLAND_MOBILE_PATTERN = /^1[3-9]\d{9}$/;
 
+function QRCodeLoginFallback() {
+  return (
+    <div className="login-qr-pane hidden min-h-[516px] items-center justify-center border-r bg-muted/30 md:flex" aria-busy="true">
+      <LoaderCircle className="size-6 animate-spin text-muted-foreground motion-reduce:animate-none" aria-label="正在加载二维码登录" />
+    </div>
+  );
+}
+
+function CredentialsFallback() {
+  return (
+    <div className="flex min-h-64 items-center justify-center" aria-busy="true">
+      <LoaderCircle className="size-6 animate-spin text-muted-foreground motion-reduce:animate-none" aria-label="正在加载登录表单" />
+    </div>
+  );
+}
+
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
+  const isMobile = useIsMobile();
   const [step, setStep] = useState<'account' | 'credentials'>('account');
   const [account, setAccount] = useState('');
   const [accountError, setAccountError] = useState('');
@@ -89,7 +109,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     <div className="login-page flex min-h-svh flex-col items-center justify-center bg-muted/40 px-4 py-8">
       <Card className="w-full max-w-sm overflow-hidden p-0 shadow-sm md:max-w-4xl">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <QRCodeLogin onLoginSuccess={completeLogin} />
+          {!isMobile && (
+            <Suspense fallback={<QRCodeLoginFallback />}>
+              <QRCodeLogin onLoginSuccess={completeLogin} />
+            </Suspense>
+          )}
           <div className="login-auth-pane relative flex min-w-0 flex-col items-center justify-center p-6 md:min-h-[516px] md:px-10 md:py-10">
           <BrandMark className="mb-4 text-3xl md:hidden" />
 
@@ -150,16 +174,18 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 </form>
               </div>
             ) : (
-                <LoginCredentialsStep
-                  key={account.trim()}
-                  account={account.trim()}
-                  active={step === 'credentials'}
-                  agreedToTerms={agreedToTerms}
-                  onAgreedToTermsChange={setAgreedToTerms}
-                  onBack={handleBackStep}
-                  onLoginSuccess={completeLogin}
-                  onOpenLegalDocument={setDialogContent}
-                />
+                <Suspense fallback={<CredentialsFallback />}>
+                  <LoginCredentialsStep
+                    key={account.trim()}
+                    account={account.trim()}
+                    active={step === 'credentials'}
+                    agreedToTerms={agreedToTerms}
+                    onAgreedToTermsChange={setAgreedToTerms}
+                    onBack={handleBackStep}
+                    onLoginSuccess={completeLogin}
+                    onOpenLegalDocument={setDialogContent}
+                  />
+                </Suspense>
             )}
           </div>
           </div>

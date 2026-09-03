@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Tabs, TabsContent } from './ui/tabs';
@@ -23,15 +23,11 @@ import { createCourseTaskPointProgressMap } from '@/lib/taskProgress';
 import { courseHasTaskPoints } from '@/lib/coursePresentation';
 import { DashboardAccountMenu, DashboardNavigation, type MobileDashboardTabId } from './dashboard/DashboardNavigation';
 import { mobileDashboardTabOrder } from './dashboard/dashboardNavigationData';
-import { TaskStatusContent } from './dashboard/TaskStatusContent';
-import { SignMonitor } from './SignMonitor';
-import { StudyIncrementSettings } from './StudyIncrementSettings';
-import { OpenSourceDialog } from './OpenSourceDialog';
 import { BrandMark } from './BrandMark';
+import { OpenSourceDialog } from './OpenSourceDialog';
 import { NightTaskConfirmDialog } from './dashboard/NightTaskConfirmDialog';
 import { BypassDailyStudyLimitConfirmDialog } from './dashboard/BypassDailyStudyLimitConfirmDialog';
 import { LogoutConfirmDialog } from './dashboard/LogoutConfirmDialog';
-import { TaskSettingsPanel } from './dashboard/TaskSettingsPanel';
 import { CourseListSection } from './dashboard/CourseListSection';
 import { DashboardSummaryCards } from './dashboard/DashboardSummaryCards';
 import {
@@ -43,6 +39,11 @@ import {
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
 import { flushSync } from 'react-dom';
+
+const SignMonitor = lazy(() => import('./SignMonitor').then((module) => ({ default: module.SignMonitor })));
+const TaskStatusContent = lazy(() => import('./dashboard/TaskStatusContent').then((module) => ({ default: module.TaskStatusContent })));
+const TaskSettingsPanel = lazy(() => import('./dashboard/TaskSettingsPanel').then((module) => ({ default: module.TaskSettingsPanel })));
+const StudyIncrementSettings = lazy(() => import('./StudyIncrementSettings').then((module) => ({ default: module.StudyIncrementSettings })));
 
 interface DashboardProps {
   session: AuthSession;
@@ -103,6 +104,14 @@ const DEFAULT_STUDY_INCREMENT: StudyIncrement = {
 const TASK_SETTINGS_STORAGE_PREFIX = 'yatori-task-settings:';
 function getTaskSettingsStorageKey(accountId: string) {
   return `${TASK_SETTINGS_STORAGE_PREFIX}${accountId}`;
+}
+
+function DashboardViewFallback() {
+  return (
+    <div className="flex min-h-48 items-center justify-center" aria-busy="true">
+      <RefreshCw className="size-6 animate-spin text-muted-foreground motion-reduce:animate-none" aria-label="正在加载页面" />
+    </div>
+  );
 }
 
 function ThemeToggleButton() {
@@ -993,32 +1002,38 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                   <CardTitle className="text-sm font-semibold sm:text-base">自动签到</CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 text-sm sm:p-6">
-                  {account?.id && (
-                    <SignMonitor
-                      accountId={account.id}
-                      onUnauthorized={onLogout}
-                      onStatusChange={setSignMonitorActive}
-                    />
+                  {activeTab === 'sign' && account?.id && (
+                    <Suspense fallback={<DashboardViewFallback />}>
+                      <SignMonitor
+                        accountId={account.id}
+                        onUnauthorized={onLogout}
+                        onStatusChange={setSignMonitorActive}
+                      />
+                    </Suspense>
                   )}
                 </CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="settings" className="outline-none m-0">
-              <TaskSettingsPanel
-                hiddenEmptyTaskCourseCount={hiddenEmptyTaskCourseCount}
-                hideEmptyTaskCourses={hideEmptyTaskCourses}
-                bypassDailyStudyLimit={bypassDailyStudyLimit}
-                doChapterTest={doChapterTest}
-                doWork={doWork}
-                workAutoSubmit={workAutoSubmit}
-                doExam={doExam}
-                examAutoSubmit={examAutoSubmit}
-                onUnauthorized={onLogout}
-                onSettingSwitch={updateSettingSwitch}
-                onWorkAutoSubmitChange={updateWorkAutoSubmit}
-                onExamAutoSubmitChange={updateExamAutoSubmit}
-              />
+              {activeTab === 'settings' && (
+                <Suspense fallback={<DashboardViewFallback />}>
+                  <TaskSettingsPanel
+                    hiddenEmptyTaskCourseCount={hiddenEmptyTaskCourseCount}
+                    hideEmptyTaskCourses={hideEmptyTaskCourses}
+                    bypassDailyStudyLimit={bypassDailyStudyLimit}
+                    doChapterTest={doChapterTest}
+                    doWork={doWork}
+                    workAutoSubmit={workAutoSubmit}
+                    doExam={doExam}
+                    examAutoSubmit={examAutoSubmit}
+                    onUnauthorized={onLogout}
+                    onSettingSwitch={updateSettingSwitch}
+                    onWorkAutoSubmitChange={updateWorkAutoSubmit}
+                    onExamAutoSubmitChange={updateExamAutoSubmit}
+                  />
+                </Suspense>
+              )}
             </TabsContent>
 
             <TabsContent value="tasks" className="m-0 outline-none">
@@ -1028,19 +1043,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                   <CardDescription className="text-xs">查看任务运行状态与进度</CardDescription>
                 </CardHeader>
                 <CardContent className="flex min-h-0 min-w-0 flex-col p-0">
-                  <TaskStatusContent
-                    tasks={tasks}
-                    filteredTasks={filteredTasks}
-                    taskCounts={taskCounts}
-                    taskFilter={taskFilter}
-                    tasksLoading={tasksLoading}
-                    taskSnapshots={taskSnapshots}
-                    courseNameByIdentifier={courseNameByIdentifier}
-                    courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
-                    onTaskFilterChange={setTaskFilter}
-                    onRefresh={() => void fetchTasks()}
-                    onStopTask={handleStopTask}
-                  />
+                  {activeTab === 'tasks' && (
+                    <Suspense fallback={<DashboardViewFallback />}>
+                      <TaskStatusContent
+                        tasks={tasks}
+                        filteredTasks={filteredTasks}
+                        taskCounts={taskCounts}
+                        taskFilter={taskFilter}
+                        tasksLoading={tasksLoading}
+                        taskSnapshots={taskSnapshots}
+                        courseNameByIdentifier={courseNameByIdentifier}
+                        courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
+                        onTaskFilterChange={setTaskFilter}
+                        onRefresh={() => void fetchTasks()}
+                        onStopTask={handleStopTask}
+                      />
+                    </Suspense>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -1096,19 +1115,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       />
       <OpenSourceDialog open={openSourceDialogOpen} onOpenChange={setOpenSourceDialogOpen} showTrigger={false} />
 
-      <StudyIncrementSettings
-        open={studyIncrementCourseKey !== null}
-        onOpenChange={(open) => {
-          if (!open) setStudyIncrementCourseKey(null);
-        }}
-        course={studyIncrementCourse}
-        hasReadTaskPoints={studyIncrementCourseDetails?.hasReadTaskPoints === true}
-        studyStats={studyIncrementCourseDetails?.studyStats}
-        statsLoaded={studyIncrementCourseDetails !== undefined}
-        loadingStats={studyIncrementCourseKey !== null && loadingDetails[studyIncrementCourseKey] === true}
-        values={studyIncrements}
-        onSave={saveStudyIncrement}
-      />
+      <Suspense fallback={null}>
+        {studyIncrementCourseKey !== null && (
+          <StudyIncrementSettings
+            open
+            onOpenChange={(open) => {
+              if (!open) setStudyIncrementCourseKey(null);
+            }}
+            course={studyIncrementCourse}
+            hasReadTaskPoints={studyIncrementCourseDetails?.hasReadTaskPoints === true}
+            studyStats={studyIncrementCourseDetails?.studyStats}
+            statsLoaded={studyIncrementCourseDetails !== undefined}
+            loadingStats={loadingDetails[studyIncrementCourseKey] === true}
+            values={studyIncrements}
+            onSave={saveStudyIncrement}
+          />
+        )}
+      </Suspense>
       <DashboardNavigation
         mode="mobile"
         activeTab={activeTab}

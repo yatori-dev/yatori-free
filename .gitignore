@@ -10,6 +10,11 @@ dist-ssr/
 .playwright-cli/
 .tmp/
 *.local
+coverage/
+.vite/
+.turbo/
+*.tsbuildinfo
+.eslintcache
 
 # Logs
 logs/
@@ -34,3 +39,5 @@ AGENTS.md
 # OS files
 .DS_Store
 .env
+.env.*
+!.env.example

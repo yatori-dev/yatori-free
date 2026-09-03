@@ -1,6 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Login } from './components/Login';
-import { Dashboard } from './components/Dashboard';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { BrandMark } from './components/BrandMark';
 import { getCurrentSession, getUserFacingErrorMessage, isAuthExitError, logout, type AuthSession } from './lib/api';
 import { Toaster } from '@/components/ui/sonner';
@@ -11,6 +9,9 @@ import { clearQRLoginSession } from '@/lib/qrLoginSession';
 import { LoaderCircle } from 'lucide-react';
 
 const LOGOUT_SUPPRESSION_KEY = 'yatori-auth-logout-suppressed';
+
+const Login = lazy(() => import('./components/Login').then((module) => ({ default: module.Login })));
+const Dashboard = lazy(() => import('./components/Dashboard').then((module) => ({ default: module.Dashboard })));
 
 function AuthRestoreScreen() {
   return (
@@ -99,13 +100,15 @@ function App() {
 
   return (
     <>
-      {isRestoringSession ? (
-        <AuthRestoreScreen />
-      ) : session ? (
-        <Dashboard session={session} onLogout={handleLogout} />
-      ) : (
-        <Login onLoginSuccess={handleLoginSuccess} />
-      )}
+      <Suspense fallback={<AuthRestoreScreen />}>
+        {isRestoringSession ? (
+          <AuthRestoreScreen />
+        ) : session ? (
+          <Dashboard session={session} onLogout={handleLogout} />
+        ) : (
+          <Login onLoginSuccess={handleLoginSuccess} />
+        )}
+      </Suspense>
       <Toaster
         position="top-center"
         richColors

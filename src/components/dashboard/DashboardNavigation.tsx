@@ -135,7 +135,7 @@ export function DashboardNavigation({
 
   if (mode === 'desktop') {
     return (
-      <Sidebar collapsible="none" className="hidden border-r border-sidebar-border lg:flex" aria-label="应用侧边栏">
+      <Sidebar className="hidden border-r border-sidebar-border lg:flex" aria-label="应用侧边栏">
         <SidebarHeader className="h-14 justify-center border-b border-sidebar-border px-4">
           <div className="flex items-center gap-2">
             <BrandMark className="text-xl" />
