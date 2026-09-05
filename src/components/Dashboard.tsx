@@ -39,6 +39,7 @@ import {
   LogOut, 
   Play, 
   RefreshCw,
+  ChevronDown,
   Sun, 
   Moon,
 } from 'lucide-react';
@@ -362,6 +363,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>({});
   const [nightConfirmOpen, setNightConfirmOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [submitBypassConfirmOpen, setSubmitBypassConfirmOpen] = useState(false);
   
   // Loading flags
@@ -1003,10 +1005,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 />
               </TaskStatusDrawer>
 
-              <div
-                className="flex min-w-0 max-w-[154px] items-center gap-1 rounded-md border border-border bg-muted/40 py-0.5 pl-1 pr-1 min-[400px]:w-[clamp(132px,31vw,154px)] min-[400px]:gap-2 min-[400px]:py-1 min-[400px]:pl-1.5 min-[400px]:pr-1.5 sm:w-auto sm:max-w-none sm:gap-3 sm:pl-2 sm:pr-3"
-                aria-label={`当前用户 ${session.displayName}`}
-              >
+              <div className="relative">
+                <button type="button" onClick={() => setAccountMenuOpen((open) => !open)} className="flex min-w-0 items-center gap-2 rounded-xl border border-border bg-card px-2 py-1.5 text-left shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-3 sm:px-3" aria-expanded={accountMenuOpen} aria-label={`当前用户 ${session.displayName}`}>
             {session.avatarUrl ? (
               <img 
                 src={session.avatarUrl} 
@@ -1019,21 +1019,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 {session.displayName.substring(0, 1).toUpperCase()}
               </div>
             )}
-            <div className="hidden min-w-0 flex-col text-left min-[360px]:flex min-[400px]:flex-1">
+            <div className="hidden min-w-0 flex-col text-left min-[360px]:flex">
               <span className="max-w-[68px] truncate text-[11px] font-bold min-[400px]:max-w-none sm:max-w-[100px] sm:text-xs sm:font-semibold">{session.displayName}</span>
               <span className="hidden max-w-[100px] truncate text-xs text-muted-foreground sm:block">{session.user.username}</span>
             </div>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setLogoutConfirmOpen(true)}
-              className="h-8 w-8 shrink-0 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground min-[400px]:ml-auto sm:ml-1 sm:h-6 sm:w-6"
-              title="退出登录"
-              aria-label="退出登录"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-            </Button>
-          </div>
+                  <ChevronDown className={`size-4 text-muted-foreground transition-transform ${accountMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {accountMenuOpen && (
+                  <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-52 rounded-xl border border-border bg-popover p-2 text-popover-foreground shadow-floating animate-in fade-in-0 zoom-in-95">
+                    <div className="border-b border-border/70 px-3 pb-2 pt-1"><p className="truncate text-sm font-semibold">{session.displayName}</p><p className="truncate text-xs text-muted-foreground">{session.user.username}</p></div>
+                    <button type="button" onClick={() => { setAccountMenuOpen(false); setLogoutConfirmOpen(true); }} className="mt-1 flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"><LogOut className="size-4" />退出登录</button>
+                  </div>
+                )}
+              </div>
             </div>
           </header>
           <div className="google-accent-bar lg:hidden">
@@ -1045,6 +1043,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           <main ref={dashboardMainRef} id="dashboard-main" className="min-h-0 flex-1 overflow-x-clip overflow-y-auto pb-18 lg:pb-0">
             <div className="mx-auto w-full min-w-0 px-0 py-0 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
               <div className="min-w-0">
+            {activeTab === 'courses' && (
+              <Card className="mb-4 rounded-none border-x-0 bg-card/80 shadow-none sm:rounded-xl sm:border-x sm:shadow-rest">
+                <CardContent className="flex items-center gap-4 px-4 py-3 sm:px-5">
+                  <div className="min-w-0 flex-1"><div className="mb-1.5 flex items-center justify-between gap-3"><p className="text-sm font-semibold">学习进度</p><span className="shrink-0 text-xs tabular-nums text-muted-foreground">{Math.max(visibleCourses.length - incompleteSelectableCourses.length, 0)} / {visibleCourses.length} 门已完成</span></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${visibleCourses.length ? Math.round((Math.max(visibleCourses.length - incompleteSelectableCourses.length, 0) / visibleCourses.length) * 100) : 0}%` }} /></div></div>
+                  <div className="hidden shrink-0 items-center gap-3 text-xs sm:flex"><span className="text-warning">{incompleteSelectableCourses.length} 待处理</span><span className="text-info">{taskCounts.active} 运行中</span></div>
+                </CardContent>
+              </Card>
+            )}
             <CourseListSection
               accountId={account?.id}
               courses={courses}
