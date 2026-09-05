@@ -25,7 +25,6 @@ import { DashboardNavigation, type MobileDashboardTabId } from './dashboard/Dash
 import { mobileDashboardTabOrder } from './dashboard/dashboardNavigationData';
 import { TaskStatusContent } from './dashboard/TaskStatusContent';
 import { TaskStatusDrawer } from './dashboard/TaskStatusDrawer';
-import { TaskStatusTrigger } from './dashboard/TaskStatusTrigger';
 import { SignMonitor } from './SignMonitor';
 import { StudyIncrementSettings } from './StudyIncrementSettings';
 import { BrandMark } from './BrandMark';
@@ -946,6 +945,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           appVersion={appVersion}
           signMonitorActive={signMonitorActive}
           onTabChange={handleTabChange}
+          onOpenTasks={() => setTaskDrawerOpen(true)}
         />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-40 flex min-h-14 items-center justify-between gap-1.5 border-b border-border bg-card px-2.5 py-1.5 shadow-sm sm:min-h-16 sm:gap-2 sm:px-6 sm:py-2.5 lg:px-8">
@@ -974,7 +974,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 open={taskDrawerOpen}
                 activeTaskCount={taskCounts.active}
                 onOpenChange={setTaskDrawerOpen}
-                trigger={<TaskStatusTrigger activeTaskCount={taskCounts.active} />}
+                trigger={undefined}
               >
                 <TaskStatusContent
                   tasks={tasks}
@@ -1014,8 +1014,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 {accountMenuOpen && (
                   <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-52 rounded-xl border border-border bg-popover p-2 text-popover-foreground shadow-floating animate-in fade-in-0 zoom-in-95">
                     <div className="border-b border-border/70 px-3 pb-2 pt-1"><p className="truncate text-sm font-semibold">{session.displayName}</p><p className="truncate text-xs text-muted-foreground">{session.user.username}</p></div>
-                    <a href={YATORI_REPOSITORY_URL} target="_blank" rel="noreferrer" onClick={() => setAccountMenuOpen(false)} className="mt-1 flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><svg className="size-4" aria-hidden="true"><use href="/icons.svg#github-icon" /></svg>查看开源项目</a>
-                    <button type="button" onClick={() => { setAccountMenuOpen(false); setLogoutConfirmOpen(true); }} className="flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"><LogOut className="size-4" />退出登录</button>
+                    <a href={YATORI_REPOSITORY_URL} target="_blank" rel="noreferrer" onClick={() => setAccountMenuOpen(false)} className="mt-1 flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"><svg className="size-4" aria-hidden="true"><use href="/icons.svg#github-icon" /></svg>GitHub 仓库</a>
+                    <button type="button" onClick={() => { setAccountMenuOpen(false); setLogoutConfirmOpen(true); }} className="flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-sm text-destructive transition-colors hover:bg-destructive/10"><LogOut className="size-4" />退出登录</button>
                   </div>
                 )}
               </div>

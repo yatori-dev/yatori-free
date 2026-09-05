@@ -1,3 +1,4 @@
+import { Activity } from 'lucide-react';
 import { BrandMark } from '@/components/BrandMark';
 import { YATORI_REPOSITORY_URL } from '@/lib/externalLinks';
 import { desktopItems, mobileItems } from './dashboardNavigationData';
@@ -10,6 +11,7 @@ interface DashboardNavigationProps {
   appVersion?: string;
   signMonitorActive: boolean;
   onTabChange: (tab: MobileDashboardTabId) => void;
+  onOpenTasks?: () => void;
 }
 
 export type { DashboardViewId, MobileDashboardTabId } from './dashboardNavigationData';
@@ -34,7 +36,7 @@ function Brand({ appVersion }: { appVersion?: string }) {
   );
 }
 
-export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersion, signMonitorActive, onTabChange }: DashboardNavigationProps) {
+export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersion, signMonitorActive, onTabChange, onOpenTasks }: DashboardNavigationProps) {
   const activeMobileIndex = mobileItems.findIndex((item) => item.id === activeTab);
 
   if (mode === 'desktop') {
@@ -67,6 +69,10 @@ export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersi
               </button>
             );
           })}
+          <button type="button" onClick={onOpenTasks} className="relative flex min-h-11 w-full items-center justify-start gap-3 rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="打开任务抽屉">
+            <Activity className="h-4 w-4 shrink-0" /><span>任务</span>
+            {activeTaskCount > 0 && <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 font-mono text-xs font-bold text-primary-foreground">{activeTaskCount}</span>}
+          </button>
         </nav>
         <div className="px-3 pb-4">
           <a
