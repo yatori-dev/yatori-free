@@ -13,10 +13,8 @@ import {
   AlertCircle, 
   Clock, 
   ChevronDown, 
-  ChevronRight,
   ChevronUp, 
   RefreshCw, 
-  BookOpen,
   Settings2,
   Hourglass,
   Sparkles
@@ -24,6 +22,9 @@ import {
 import { getTaskConfigSnapshot, getTaskCoursesCustomSnapshot, type Task } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 import { getTaskCourseTaskPointProgress, type CourseTaskPointProgressMap } from '@/lib/taskProgress';
+import { DetailRow } from './common/DetailRow';
+import { InlineError } from './common/InlineError';
+import { TaskCourseBadges } from './task/TaskCourseBadges';
 
 interface TaskInlineItemProps {
   task: Task;
@@ -262,7 +263,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
     }
     return /^\d+$/.test(normalizedIdentifier) ? '未匹配课程' : courseIdentifier;
   });
-  const visibleCourses = displayCourses?.slice(0, VISIBLE_COURSE_COUNT);
   const hiddenCourses = displayCourses?.slice(VISIBLE_COURSE_COUNT) ?? [];
   const hiddenCourseCount = Math.max(0, (displayCourses?.length ?? 0) - VISIBLE_COURSE_COUNT);
 
@@ -318,41 +318,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
         </div>
 
         {/* Targeted Courses Pills */}
-        <div className="flex min-w-0 w-full flex-wrap items-center gap-1.5">
-          <BookOpen className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-          {displayCourses === undefined ? (
-            <span className="text-xs font-medium text-muted-foreground">课程范围未记录</span>
-          ) : displayCourses.length === 0 ? (
-            <span className="rounded-md border border-primary/20 bg-primary-container/30 px-2 py-0.5 text-xs font-medium text-primary">
-              未选择课程
-            </span>
-          ) : (
-            <>
-              {visibleCourses?.map((courseName, i) => (
-                <span
-                  key={i}
-                  className="inline-flex min-w-0 max-w-full items-center rounded-md border border-primary/15 bg-primary-container/20 px-2 py-0.5 text-xs font-medium text-primary sm:max-w-[200px]"
-                  title={courseName}
-                >
-                  <span className="min-w-0 truncate">{courseName}</span>
-                </span>
-              ))}
-              {hiddenCourseCount > 0 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowCourseList(true)}
-                  aria-haspopup="dialog"
-                  className="h-7 gap-1 rounded-md border-border bg-muted/60 px-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-                >
-                  另 {hiddenCourseCount} 门
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </Button>
-              )}
-            </>
-          )}
-        </div>
+        <TaskCourseBadges courses={displayCourses} onShowMore={() => setShowCourseList(true)} />
       </div>
 
       <Dialog open={showCourseList} onOpenChange={setShowCourseList}>
@@ -394,13 +360,9 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
 
       {/* Error Message Box */}
       {taskErrorMessage && !isTerminal && (
-        <div className="flex w-full min-w-0 gap-2.5 rounded-lg border border-danger/30 bg-danger-container/40 p-3 text-xs leading-relaxed text-danger">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-          <div className="wrap-anywhere font-sans min-w-0">
-            <span className="font-semibold block mb-0.5">任务执行异常</span>
-            {taskErrorMessage}
-          </div>
-        </div>
+        <InlineError title="任务执行异常" className="bg-danger-container/40 font-sans">
+          {taskErrorMessage}
+        </InlineError>
       )}
 
       {/* Progress Box & Course Switch Cross-fade */}
@@ -474,13 +436,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
           {isTerminal && (
             <div className="mb-3 space-y-3">
               {taskErrorMessage && (
-                <div className="flex w-full min-w-0 gap-2.5 rounded-lg border border-danger/30 bg-danger-container/30 p-3 text-xs leading-relaxed text-danger">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <div className="min-w-0 wrap-anywhere">
-                    <span className="mb-0.5 block font-semibold">异常详情</span>
-                    {taskErrorMessage}
-                  </div>
-                </div>
+                <InlineError title="异常详情">{taskErrorMessage}</InlineError>
               )}
               <div className="flex flex-col gap-1 px-1 font-mono text-xs text-muted-foreground">
                 <div className="flex min-w-0 flex-wrap justify-between gap-x-3 gap-y-0.5">
@@ -504,40 +460,25 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
             {coursesCustom ? (
               <div className="space-y-2 font-sans">
                 {taskConfigSnapshot?.bypassDailyStudyLimit !== undefined && (
-                  <div className="flex min-w-0 items-start justify-between gap-3">
-                    <span className="shrink-0">每日学时限制</span>
-                    <span className="text-right font-semibold text-foreground">
-                      {taskConfigSnapshot.bypassDailyStudyLimit ? '已绕过' : '正常限制'}
-                    </span>
-                  </div>
+                  <DetailRow label="每日学时限制">
+                    {taskConfigSnapshot.bypassDailyStudyLimit ? '已绕过' : '正常限制'}
+                  </DetailRow>
                 )}
-                <div className="flex min-w-0 items-start justify-between gap-3">
-                  <span className="shrink-0">自动答题</span>
-                  <span className="text-right font-semibold text-foreground wrap-anywhere">
+                <DetailRow label="自动答题">
                     {enabledAutomationLabels.length > 0
                       ? enabledAutomationLabels.join('、')
                       : hasRecordedAutomation
                         ? '未开启'
                         : '未记录'}
-                  </span>
-                </div>
+                </DetailRow>
                 {coursesCustom.doWork && (
-                  <div className="flex min-w-0 items-start justify-between gap-3">
-                    <span className="shrink-0">作业提交</span>
-                    <span className="text-right font-semibold text-foreground">{workAutoSubmitLabel}</span>
-                  </div>
+                  <DetailRow label="作业提交">{workAutoSubmitLabel}</DetailRow>
                 )}
                 {coursesCustom.doExam && (
-                  <div className="flex min-w-0 items-start justify-between gap-3">
-                    <span className="shrink-0">考试提交</span>
-                    <span className="text-right font-semibold text-foreground">{examAutoSubmitLabel}</span>
-                  </div>
+                  <DetailRow label="考试提交">{examAutoSubmitLabel}</DetailRow>
                 )}
                 {coursesCustom.answerMode && (
-                  <div className="flex min-w-0 items-start justify-between gap-3">
-                    <span className="shrink-0">答题模式</span>
-                    <span className="text-right font-semibold text-foreground wrap-anywhere">{coursesCustom.answerMode}</span>
-                  </div>
+                  <DetailRow label="答题模式">{coursesCustom.answerMode}</DetailRow>
                 )}
                 {studyIncrementSettings.length > 0 && (
                   <div className="space-y-1.5 border-t border-border/50 pt-2.5">

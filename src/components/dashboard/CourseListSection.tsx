@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import {
   AlertCircle,
   ChevronDown,
@@ -22,34 +22,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
 import { CourseBulkSelectionMenu } from './CourseBulkSelectionMenu';
-
-interface CourseCheckboxProps {
-  checked: boolean;
-  disabled?: boolean;
-  indeterminate: boolean;
-  onChange: () => void;
-}
-
-function CourseCheckbox({ checked, disabled = false, indeterminate, onChange }: CourseCheckboxProps) {
-  const ref = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (ref.current) {
-      ref.current.indeterminate = indeterminate;
-    }
-  }, [indeterminate]);
-
-  return (
-    <input
-      type="checkbox"
-      ref={ref}
-      checked={checked}
-      disabled={disabled}
-      onChange={onChange}
-      className="h-4 w-4 shrink-0 cursor-pointer rounded border-border bg-card accent-primary disabled:cursor-not-allowed disabled:opacity-50"
-    />
-  );
-}
+import { CourseCheckbox } from './CourseCheckbox';
 
 interface CourseListSectionProps {
   accountId?: string;

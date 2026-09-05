@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSignMonitorCountdown } from '@/hooks/useSignMonitorCountdown';
 import { Button } from './ui/button';
 import { Card, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
@@ -74,14 +75,12 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
     accountId,
     expiresAt: readStoredMonitorExpiresAt(accountId),
   }));
-  const [now, setNow] = useState(() => Date.now());
   const [logsPage, setLogsPage] = useState(() => ({ accountId, offset: 0 }));
   const logsOffset = logsPage.accountId === accountId ? logsPage.offset : 0;
   const monitorExpiresAt = monitorState.accountId === accountId
     ? monitorState.expiresAt
     : readStoredMonitorExpiresAt(accountId);
-  const monitorRemainingMs = monitorExpiresAt ? Math.max(0, monitorExpiresAt - now) : 0;
-  const monitorStarted = monitorRemainingMs > 0;
+  const { remainingMs: monitorRemainingMs, started: monitorStarted } = useSignMonitorCountdown(monitorExpiresAt);
 
   useEffect(() => {
     onStatusChange?.(monitorStarted);
@@ -130,22 +129,6 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
     return () => window.clearTimeout(timer);
   }, [fetchLogs]);
 
-  useEffect(() => {
-    if (!monitorExpiresAt) return;
-
-    const timer = window.setInterval(() => {
-      const nextNow = Date.now();
-      setNow(nextNow);
-
-      if (nextNow >= monitorExpiresAt) {
-        localStorage.removeItem(getSignMonitorExpiresStorageKey(accountId));
-        setMonitorState({ accountId, expiresAt: null });
-      }
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [accountId, monitorExpiresAt]);
-
   const handleMonitorAction = async (action: 'start' | 'stop') => {
     setToggleAction(action);
     try {
@@ -157,7 +140,6 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
         } else {
           localStorage.removeItem(getSignMonitorExpiresStorageKey(accountId));
         }
-        setNow(Date.now());
         setMonitorState({ accountId, expiresAt });
         toast.success('签到监测已启动');
       } else {

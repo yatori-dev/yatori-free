@@ -33,6 +33,7 @@ import { BypassDailyStudyLimitConfirmDialog } from './dashboard/BypassDailyStudy
 import { LogoutConfirmDialog } from './dashboard/LogoutConfirmDialog';
 import { TaskSettingsPanel } from './dashboard/TaskSettingsPanel';
 import { CourseListSection } from './dashboard/CourseListSection';
+import { CourseProgressSummary } from './dashboard/CourseProgressSummary';
 import { 
   LogOut, 
   Play, 
@@ -1031,12 +1032,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             <div className="mx-auto w-full min-w-0 px-0 py-0 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
               <div className="min-w-0">
             {activeTab === 'courses' && (
-              <Card className="mb-4 rounded-none border-x-0 bg-card/80 shadow-none sm:rounded-xl sm:border-x sm:shadow-rest">
-                <CardContent className="flex items-center gap-4 px-4 py-3 sm:px-5">
-                  <div className="min-w-0 flex-1"><div className="mb-1.5 flex items-center justify-between gap-3"><p className="text-sm font-semibold">学习进度</p><span className="shrink-0 text-xs tabular-nums text-muted-foreground">{Math.max(visibleCourses.length - incompleteSelectableCourses.length, 0)} / {visibleCourses.length} 门已完成</span></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${visibleCourses.length ? Math.round((Math.max(visibleCourses.length - incompleteSelectableCourses.length, 0) / visibleCourses.length) * 100) : 0}%` }} /></div></div>
-                  <div className="hidden shrink-0 items-center gap-3 text-xs sm:flex"><span className="text-warning">{incompleteSelectableCourses.length} 待处理</span><span className="text-info">{taskCounts.active} 运行中</span></div>
-                </CardContent>
-              </Card>
+              <CourseProgressSummary
+                visibleCount={visibleCourses.length}
+                incompleteCount={incompleteSelectableCourses.length}
+                activeTaskCount={taskCounts.active}
+              />
             )}
             <CourseListSection
               accountId={account?.id}
