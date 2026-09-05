@@ -74,3 +74,10 @@
 > [!NOTE]
 >
 > **本网页服务的QQ群组仅限群成员邀请加入。** 
+
+## 参考项目
+
+| 项目 | 用途 |
+| --- | --- |
+| [yatori-go-core](https://github.com/yatori-dev/yatori-go-core) | 学习通任务与签到核心能力参考 |
+| [yatori-free](https://github.com/yatori-dev/yatori-free) | 本项目的开源仓库 |

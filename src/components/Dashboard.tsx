@@ -28,7 +28,6 @@ import { TaskStatusDrawer } from './dashboard/TaskStatusDrawer';
 import { TaskStatusTrigger } from './dashboard/TaskStatusTrigger';
 import { SignMonitor } from './SignMonitor';
 import { StudyIncrementSettings } from './StudyIncrementSettings';
-import { OpenSourceDialog } from './OpenSourceDialog';
 import { BrandMark } from './BrandMark';
 import { NightTaskConfirmDialog } from './dashboard/NightTaskConfirmDialog';
 import { BypassDailyStudyLimitConfirmDialog } from './dashboard/BypassDailyStudyLimitConfirmDialog';
@@ -969,19 +968,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
               {desktopViewTitle}
             </h1>
             <div className="ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-4">
-              <a
-                href={YATORI_REPOSITORY_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-9 sm:w-9 lg:hidden"
-                aria-label="在 GitHub 查看 Yatori 学习通服务源码"
-                title="GitHub"
-              >
-                <svg className="h-5 w-5" aria-hidden="true">
-                  <use href="/icons.svg#github-icon" />
-                </svg>
-              </a>
-              <OpenSourceDialog />
               <ThemeToggleButton />
 
               <TaskStatusDrawer
@@ -1028,7 +1014,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
                 {accountMenuOpen && (
                   <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-52 rounded-xl border border-border bg-popover p-2 text-popover-foreground shadow-floating animate-in fade-in-0 zoom-in-95">
                     <div className="border-b border-border/70 px-3 pb-2 pt-1"><p className="truncate text-sm font-semibold">{session.displayName}</p><p className="truncate text-xs text-muted-foreground">{session.user.username}</p></div>
-                    <button type="button" onClick={() => { setAccountMenuOpen(false); setLogoutConfirmOpen(true); }} className="mt-1 flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"><LogOut className="size-4" />退出登录</button>
+                    <a href={YATORI_REPOSITORY_URL} target="_blank" rel="noreferrer" onClick={() => setAccountMenuOpen(false)} className="mt-1 flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><svg className="size-4" aria-hidden="true"><use href="/icons.svg#github-icon" /></svg>查看开源项目</a>
+                    <button type="button" onClick={() => { setAccountMenuOpen(false); setLogoutConfirmOpen(true); }} className="flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"><LogOut className="size-4" />退出登录</button>
                   </div>
                 )}
               </div>
