@@ -77,7 +77,9 @@
 
 ## 参考项目
 
-| 项目 | 用途 |
-| --- | --- |
-| [yatori-go-core](https://github.com/yatori-dev/yatori-go-core) | 学习通任务与签到核心能力参考 |
-| [yatori-free](https://github.com/yatori-dev/yatori-free) | 本项目的开源仓库 |
+| 项目 | 用途 | 许可证 |
+| --- | --- | --- |
+| [yatori-go-core](https://github.com/yatori-dev/yatori-go-core) | 学习通任务处理核心 | MIT |
+| [chaoxing_tool](https://github.com/liuyunfz/chaoxing_tool) | 学习通课程文档资源下载、学习次数/时长参考实现 | GPL-3.0 |
+| [PassChaoxing](https://github.com/qintaiyang/PassChaoxing) | 学习通签到协议参考 | MIT |
+| [CxKitty](https://github.com/MMitsuha/CxKitty) | 学习通扫码登录协议参考 | GPL-3.0 |
