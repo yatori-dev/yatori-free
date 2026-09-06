@@ -69,12 +69,6 @@
 - ![systemd](https://img.shields.io/badge/systemd-257-red.svg?style=flat-square&logo=systemd&logoColor=white)
 - ![Cloudflare Tunnel](https://img.shields.io/badge/Cloudflare%20Tunnel-2026.8.3-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
 
-## 社区群组
-
-> [!NOTE]
->
-> **本网页服务的QQ群组仅限群成员邀请加入。** 
-
 ## 参考项目
 
 | 项目 | 用途 | 许可证 |
