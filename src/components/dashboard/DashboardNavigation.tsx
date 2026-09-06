@@ -1,6 +1,6 @@
 import { Activity } from 'lucide-react';
 import { BrandMark } from '@/components/BrandMark';
-import { YATORI_REPOSITORY_URL } from '@/lib/externalLinks';
+import { QQ_LOGO_URL, YATORI_QQ_GROUP_URL, YATORI_REPOSITORY_URL } from '@/lib/externalLinks';
 import { desktopItems, mobileItems } from './dashboardNavigationData';
 import type { MobileDashboardTabId } from './dashboardNavigationData';
 
@@ -79,7 +79,17 @@ export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersi
             return <button key={item.id} type="button" onClick={() => onTabChange(item.id)} className={`relative flex min-h-11 w-full items-center justify-start gap-3 rounded-md px-3 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'}`} aria-current={active ? 'page' : undefined} aria-label={item.label}><span className={`absolute inset-y-2 left-0 w-0.5 rounded-full bg-primary transition-opacity duration-200 ${active ? 'opacity-100' : 'opacity-0'}`} /><Icon className="h-4 w-4 shrink-0" /><span>{item.label}</span></button>;
           })}
         </nav>
-        <div className="px-3 pb-4">
+        <div className="flex flex-col gap-1 px-3 pb-4">
+          <a
+            href={YATORI_QQ_GROUP_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="flex min-h-11 w-full items-center gap-3 rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="加入QQ群组"
+          >
+            <img src={QQ_LOGO_URL} alt="" className="h-4 w-4 shrink-0 object-contain" />
+            <span>QQ群组</span>
+          </a>
           <a
             href={YATORI_REPOSITORY_URL}
             target="_blank"
