@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Tabs, TabsContent } from './ui/tabs';
+import { Tabs } from './ui/tabs';
 
 import {
   createTask,
@@ -20,31 +18,13 @@ import { isActiveTaskStatus } from '@/lib/taskStatus';
 import { useTaskProgressPolling } from '@/hooks/useTaskProgressPolling';
 import { createCourseTaskPointProgressMap } from '@/lib/taskProgress';
 import { courseHasTaskPoints } from '@/lib/coursePresentation';
-import { YATORI_REPOSITORY_URL } from '@/lib/externalLinks';
+import { getCourseNameMap, getTaskCounts, getVisibleCourses } from '@/lib/dashboardDerived';
 import { DashboardNavigation, type MobileDashboardTabId } from './dashboard/DashboardNavigation';
 import { mobileDashboardTabOrder } from './dashboard/dashboardNavigationData';
-import { TaskStatusContent } from './dashboard/TaskStatusContent';
-import { TaskStatusDrawer } from './dashboard/TaskStatusDrawer';
-import { SignMonitor } from './SignMonitor';
-import { StudyIncrementSettings } from './StudyIncrementSettings';
-import { BrandMark } from './BrandMark';
-import { NightTaskConfirmDialog } from './dashboard/NightTaskConfirmDialog';
-import { BypassDailyStudyLimitConfirmDialog } from './dashboard/BypassDailyStudyLimitConfirmDialog';
-import { LogoutConfirmDialog } from './dashboard/LogoutConfirmDialog';
-import { TaskSettingsPanel } from './dashboard/TaskSettingsPanel';
-import { CourseListSection } from './dashboard/CourseListSection';
-import { CourseProgressSummary } from './dashboard/CourseProgressSummary';
-import { 
-  LogOut, 
-  Play, 
-  RefreshCw,
-  ChevronDown,
-  Sun, 
-  Moon,
-} from 'lucide-react';
+import { DashboardMainContent } from './dashboard/DashboardMainContent';
+import { DashboardHeader } from './dashboard/DashboardHeader';
+import { DashboardOverlays } from './dashboard/DashboardOverlays';
 import { toast } from 'sonner';
-import { useTheme } from 'next-themes';
-import { flushSync } from 'react-dom';
 
 interface DashboardProps {
   session: AuthSession;
@@ -105,87 +85,6 @@ const DEFAULT_STUDY_INCREMENT: StudyIncrement = {
 const TASK_SETTINGS_STORAGE_PREFIX = 'yatori-task-settings:';
 function getTaskSettingsStorageKey(accountId: string) {
   return `${TASK_SETTINGS_STORAGE_PREFIX}${accountId}`;
-}
-
-function ThemeToggleButton() {
-  const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
-  const themeAnimationRef = useRef<Animation | null>(null);
-  const themeSwitchingRef = useRef(false);
-
-  useEffect(() => () => {
-    themeAnimationRef.current?.cancel();
-    document.getElementById('root')?.style.removeProperty('opacity');
-  }, []);
-
-  const toggleDarkMode = () => {
-    if (themeSwitchingRef.current) {
-      return;
-    }
-
-    const nextTheme = isDark ? 'light' : 'dark';
-    const applyTheme = () => {
-      flushSync(() => setTheme(nextTheme));
-      localStorage.removeItem('yatori-theme');
-    };
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      applyTheme();
-      return;
-    }
-
-    if (typeof document.startViewTransition === 'function') {
-      document.activeViewTransition?.skipTransition();
-      document.startViewTransition(applyTheme);
-      return;
-    }
-
-    const appRoot = document.getElementById('root');
-    if (!appRoot || typeof appRoot.animate !== 'function') {
-      applyTheme();
-      return;
-    }
-
-    themeSwitchingRef.current = true;
-    const fadeOut = appRoot.animate(
-      [{ opacity: 1 }, { opacity: 0 }],
-      { duration: 90, easing: 'ease-out', fill: 'forwards' },
-    );
-    themeAnimationRef.current = fadeOut;
-
-    void fadeOut.finished
-      .then(() => {
-        appRoot.style.opacity = '0';
-        fadeOut.cancel();
-        applyTheme();
-
-        const fadeIn = appRoot.animate(
-          [{ opacity: 0 }, { opacity: 1 }],
-          { duration: 90, easing: 'ease-out', fill: 'forwards' },
-        );
-        themeAnimationRef.current = fadeIn;
-        return fadeIn.finished;
-      })
-      .catch(() => undefined)
-      .finally(() => {
-        appRoot.style.removeProperty('opacity');
-        themeAnimationRef.current?.cancel();
-        themeAnimationRef.current = null;
-        themeSwitchingRef.current = false;
-      });
-  };
-
-  return (
-    <Button
-      size="icon"
-      variant="ghost"
-      onClick={toggleDarkMode}
-      className="h-8 w-8 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground sm:h-9 sm:w-9"
-      aria-label={isDark ? '切换到浅色主题' : '切换到深色主题'}
-    >
-      {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-    </Button>
-  );
 }
 
 function createDefaultPersistedSettingsFormState(): PersistedSettingsFormState {
@@ -316,38 +215,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     });
   }, [tasks, taskFilter]);
 
-  const taskCounts = useMemo(() => {
-    return tasks.reduce(
-      (counts, task) => {
-        if (isActiveTaskStatus(task.status)) {
-          counts.active += 1;
-        } else {
-          counts.completed += 1;
-        }
-
-        return counts;
-      },
-      { active: 0, completed: 0 },
-    );
-  }, [tasks]);
+  const taskCounts = useMemo(() => getTaskCounts(tasks), [tasks]);
 
   const hasActiveTasks = useMemo(() => {
     return tasks.some(task => isActiveTaskStatus(task.status));
   }, [tasks]);
 
-  const courseNameByIdentifier = useMemo(() => {
-    return courses.reduce<Record<string, string>>((map, course) => {
-      const courseName = course.courseName?.trim();
-      if (!courseName) return map;
-
-      map[course.key] = courseName;
-      if (course.courseId) {
-        map[course.courseId] = courseName;
-      }
-
-      return map;
-    }, {});
-  }, [courses]);
+  const courseNameByIdentifier = useMemo(() => getCourseNameMap(courses), [courses]);
 
   const courseTaskPointProgressByIdentifier = useMemo(
     () => createCourseTaskPointProgressMap(courses),
@@ -516,13 +390,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     });
   };
 
-  const visibleCourses = useMemo(() => {
-    if (!hideEmptyTaskCourses) {
-      return courses;
-    }
-
-    return courses.filter(courseHasTaskPoints);
-  }, [courses, hideEmptyTaskCourses]);
+  const visibleCourses = useMemo(() => getVisibleCourses(courses, hideEmptyTaskCourses), [courses, hideEmptyTaskCourses]);
 
   const filteredCourses = useMemo(() => {
     const query = courseSearchQuery.trim().toLocaleLowerCase();
@@ -949,251 +817,114 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           onOpenTasks={() => setTaskDrawerOpen(true)}
         />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-40 flex min-h-14 items-center justify-between gap-1.5 border-b border-border bg-card px-2.5 py-1.5 shadow-sm sm:min-h-16 sm:gap-2 sm:px-6 sm:py-2.5 lg:px-8">
-            <div className="flex min-w-0 shrink-0 items-center lg:hidden">
-              <a
-                href={YATORI_REPOSITORY_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex min-w-0 items-center gap-1.5 rounded-md font-semibold leading-none tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label={`在 GitHub 查看 Yatori 学习通服务 v${appVersion} 源码`}
-              >
-                <BrandMark className="text-xl sm:text-2xl" />
-                <span className="flex flex-col gap-0.5 whitespace-nowrap">
-                  <span className="text-[10px] font-semibold text-foreground/80 sm:text-sm">学习通服务</span>
-                  <span className="text-[10px] font-medium tabular-nums text-muted-foreground sm:text-xs">v{appVersion}</span>
-                </span>
-              </a>
-            </div>
-            <h1 className="hidden min-w-0 truncate text-base font-semibold text-foreground lg:block">
-              {desktopViewTitle}
-            </h1>
-            <div className="ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-4">
-              <ThemeToggleButton />
-
-              <TaskStatusDrawer
-                open={taskDrawerOpen}
-                activeTaskCount={taskCounts.active}
-                onOpenChange={setTaskDrawerOpen}
-                trigger={undefined}
-              >
-                <TaskStatusContent
-                  tasks={tasks}
-                  filteredTasks={filteredTasks}
-                  taskCounts={taskCounts}
-                  taskFilter={taskFilter}
-                  tasksLoading={tasksLoading}
-                  taskSnapshots={taskSnapshots}
-                  courseNameByIdentifier={courseNameByIdentifier}
-                  courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
-                  onTaskFilterChange={setTaskFilter}
-                  onRefresh={() => void fetchTasks()}
-                  onStopTask={handleStopTask}
-                />
-              </TaskStatusDrawer>
-
-              <div className="relative">
-                <button type="button" onClick={() => setAccountMenuOpen((open) => !open)} className="flex min-w-0 items-center gap-2 rounded-xl border border-border bg-card px-2 py-1.5 text-left shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-3 sm:px-3" aria-expanded={accountMenuOpen} aria-label={`当前用户 ${session.displayName}`}>
-            {session.avatarUrl ? (
-              <img 
-                src={session.avatarUrl} 
-                alt="头像" 
-                className="h-6 w-6 rounded-full object-cover ring-1 ring-border sm:h-7 sm:w-7"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground sm:h-7 sm:w-7 sm:text-xs">
-                {session.displayName.substring(0, 1).toUpperCase()}
-              </div>
-            )}
-            <div className="hidden min-w-0 flex-col text-left min-[360px]:flex">
-              <span className="max-w-[68px] truncate text-[11px] font-bold min-[400px]:max-w-none sm:max-w-[100px] sm:text-xs sm:font-semibold">{session.displayName}</span>
-              <span className="hidden max-w-[100px] truncate text-xs text-muted-foreground sm:block">{session.user.username}</span>
-            </div>
-                  <ChevronDown className={`size-4 text-muted-foreground transition-transform ${accountMenuOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {accountMenuOpen && (
-                  <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-52 rounded-xl border border-border bg-popover p-2 text-popover-foreground shadow-floating animate-in fade-in-0 zoom-in-95">
-                    <div className="border-b border-border/70 px-3 pb-2 pt-1"><p className="truncate text-sm font-semibold">{session.displayName}</p><p className="truncate text-xs text-muted-foreground">{session.user.username}</p></div>
-                    <a href={YATORI_REPOSITORY_URL} target="_blank" rel="noreferrer" onClick={() => setAccountMenuOpen(false)} className="mt-1 flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"><svg className="size-4" aria-hidden="true"><use href="/icons.svg#github-icon" /></svg>GitHub 仓库</a>
-                    <button type="button" onClick={() => { setAccountMenuOpen(false); setLogoutConfirmOpen(true); }} className="flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-sm text-destructive transition-colors hover:bg-destructive/10"><LogOut className="size-4" />退出登录</button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </header>
+          <DashboardHeader
+            title={desktopViewTitle}
+            appVersion={appVersion}
+            session={session}
+            taskDrawerOpen={taskDrawerOpen}
+            accountMenuOpen={accountMenuOpen}
+            taskCounts={taskCounts}
+            tasks={tasks}
+            filteredTasks={filteredTasks}
+            taskFilter={taskFilter}
+            tasksLoading={tasksLoading}
+            taskSnapshots={taskSnapshots}
+            courseNameByIdentifier={courseNameByIdentifier}
+            courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
+            onTaskDrawerChange={setTaskDrawerOpen}
+            onAccountMenuChange={setAccountMenuOpen}
+            onTaskFilterChange={setTaskFilter}
+            onRefreshTasks={() => void fetchTasks()}
+            onStopTask={handleStopTask}
+            onLogoutRequest={() => setLogoutConfirmOpen(true)}
+          />
           <div className="google-accent-bar lg:hidden">
             <div></div>
             <div></div>
             <div></div>
             <div></div>
           </div>
-          <main ref={dashboardMainRef} id="dashboard-main" className="min-h-0 flex-1 overflow-x-clip overflow-y-auto pb-18 lg:pb-0">
-            <div className="mx-auto w-full min-w-0 px-0 py-0 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
-              <div className="min-w-0">
-            {activeTab === 'courses' && (
-              <CourseProgressSummary
-                visibleCount={visibleCourses.length}
-                incompleteCount={incompleteSelectableCourses.length}
-                activeTaskCount={taskCounts.active}
-              />
-            )}
-            <CourseListSection
-              accountId={account?.id}
-              courses={courses}
-              filteredCourses={filteredCourses}
-              coursesLoading={coursesLoading}
-              courseSearch={courseSearch}
-              courseSearchQuery={courseSearchQuery}
-              selectableCourses={selectableCourses}
-              incompleteSelectableCourses={incompleteSelectableCourses}
-              isAllSelected={isAllSelected}
-              isSomeSelected={isSomeSelected}
-              isAllIncompleteSelected={isAllIncompleteSelected}
-              selectedCourses={selectedCourses}
-              expandedCourses={expandedCourses}
-              fullyExpandedCourseOutlines={fullyExpandedCourseOutlines}
-              courseDetailsMap={courseDetailsMap}
-              loadingDetails={loadingDetails}
-              stoppingTaskId={stoppingTaskId}
-              studyIncrements={studyIncrements}
-              defaultStudyIncrement={DEFAULT_STUDY_INCREMENT}
-              onRefresh={fetchCourses}
-              onSearchChange={setCourseSearch}
-              onSearchQueryChange={setCourseSearchQuery}
-              onToggleSelectAll={handleToggleSelectAll}
-              onToggleSelectIncomplete={handleToggleSelectIncomplete}
-              onToggleCourseSelection={toggleCourseSelection}
-              onOpenStudyIncrementSettings={openStudyIncrementSettings}
-              onStopTask={handleStopTask}
-              onToggleExpandCourse={toggleExpandCourse}
-              onToggleFullCourseOutline={toggleFullCourseOutline}
-            />
-
-            {/* Auto Sign-In Monitor tab content */}
-            <TabsContent value="sign" className="m-0 outline-none">
-              <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:py-0">
-                <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4 lg:hidden">
-                  <CardTitle className="text-sm font-semibold sm:text-base">自动签到</CardTitle>
-                </CardHeader>
-                <CardContent className="p-3 text-sm sm:p-6">
-                  {account?.id && (
-                    <SignMonitor
-                      accountId={account.id}
-                      onUnauthorized={onLogout}
-                      onStatusChange={setSignMonitorActive}
-                    />
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="settings" className="outline-none m-0">
-              <TaskSettingsPanel
-                hiddenEmptyTaskCourseCount={hiddenEmptyTaskCourseCount}
-                hideEmptyTaskCourses={hideEmptyTaskCourses}
-                bypassDailyStudyLimit={bypassDailyStudyLimit}
-                doChapterTest={doChapterTest}
-                doWork={doWork}
-                workAutoSubmit={workAutoSubmit}
-                doExam={doExam}
-                examAutoSubmit={examAutoSubmit}
-                onUnauthorized={onLogout}
-                onSettingSwitch={updateSettingSwitch}
-                onWorkAutoSubmitChange={updateWorkAutoSubmit}
-                onExamAutoSubmitChange={updateExamAutoSubmit}
-              />
-            </TabsContent>
-
-            <TabsContent value="tasks" className="m-0 outline-none lg:hidden">
-              <Card className="min-w-0 overflow-hidden rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm sm:ring-0">
-                <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
-                  <CardTitle className="text-sm font-semibold sm:text-base">任务</CardTitle>
-                  <CardDescription className="text-xs">查看任务运行状态与进度</CardDescription>
-                </CardHeader>
-                <CardContent className="flex min-h-0 min-w-0 flex-col p-0">
-                  <TaskStatusContent
-                    tasks={tasks}
-                    filteredTasks={filteredTasks}
-                    taskCounts={taskCounts}
-                    taskFilter={taskFilter}
-                    tasksLoading={tasksLoading}
-                    taskSnapshots={taskSnapshots}
-                    courseNameByIdentifier={courseNameByIdentifier}
-                    courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
-                    onTaskFilterChange={setTaskFilter}
-                    onRefresh={() => void fetchTasks()}
-                    onStopTask={handleStopTask}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-              </div>
-            </div>
-          </main>
+          <DashboardMainContent
+            mainRef={dashboardMainRef}
+            activeTab={activeTab}
+            accountId={account?.id}
+            courses={courses}
+            filteredCourses={filteredCourses}
+            coursesLoading={coursesLoading}
+            courseSearch={courseSearch}
+            courseSearchQuery={courseSearchQuery}
+            selectableCourses={selectableCourses}
+            incompleteSelectableCourses={incompleteSelectableCourses}
+            isAllSelected={isAllSelected}
+            isSomeSelected={isSomeSelected}
+            isAllIncompleteSelected={isAllIncompleteSelected}
+            selectedCourses={selectedCourses}
+            expandedCourses={expandedCourses}
+            fullyExpandedCourseOutlines={fullyExpandedCourseOutlines}
+            courseDetailsMap={courseDetailsMap}
+            loadingDetails={loadingDetails}
+            stoppingTaskId={stoppingTaskId}
+            studyIncrements={studyIncrements}
+            defaultStudyIncrement={DEFAULT_STUDY_INCREMENT}
+            taskCounts={taskCounts}
+            tasks={tasks}
+            filteredTasks={filteredTasks}
+            taskFilter={taskFilter}
+            tasksLoading={tasksLoading}
+            taskSnapshots={taskSnapshots}
+            courseNameByIdentifier={courseNameByIdentifier}
+            courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
+            hiddenEmptyTaskCourseCount={hiddenEmptyTaskCourseCount}
+            hideEmptyTaskCourses={hideEmptyTaskCourses}
+            bypassDailyStudyLimit={bypassDailyStudyLimit}
+            doChapterTest={doChapterTest}
+            doWork={doWork}
+            workAutoSubmit={workAutoSubmit}
+            doExam={doExam}
+            examAutoSubmit={examAutoSubmit}
+            onUnauthorized={onLogout}
+            onRefreshCourses={fetchCourses}
+            onSearchChange={setCourseSearch}
+            onSearchQueryChange={setCourseSearchQuery}
+            onToggleSelectAll={handleToggleSelectAll}
+            onToggleSelectIncomplete={handleToggleSelectIncomplete}
+            onToggleCourseSelection={toggleCourseSelection}
+            onOpenStudyIncrementSettings={openStudyIncrementSettings}
+            onStopTask={handleStopTask}
+            onToggleExpandCourse={toggleExpandCourse}
+            onToggleFullCourseOutline={toggleFullCourseOutline}
+            onTaskFilterChange={setTaskFilter}
+            onRefreshTasks={() => void fetchTasks()}
+            onSettingSwitch={updateSettingSwitch}
+            onWorkAutoSubmitChange={updateWorkAutoSubmit}
+            onExamAutoSubmitChange={updateExamAutoSubmit}
+            onSignStatusChange={setSignMonitorActive}
+          />
         </div>
       </Tabs>
 
 
-      {/* 提交任务悬浮按钮 */}
-      {selectedCourses.size > 0 && (
-        <div className="absolute bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 animate-bottom-bar-enter lg:bottom-6">
-          <div className="flex flex-col items-center gap-1">
-            <Button
-              type="button"
-              onClick={createTaskWithSelection}
-              disabled={creatingTask}
-              className="h-11 gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-floating ring-4 ring-card/80 hover:bg-primary-hover"
-              title={`提交 ${selectedCourses.size} 门课程任务`}
-              aria-label={`提交 ${selectedCourses.size} 门课程任务`}
-            >
-              {creatingTask ? (
-                <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
-              ) : (
-                <Play className="h-4 w-4 fill-current" aria-hidden="true" />
-              )}
-              <span>提交任务({selectedCourses.size})</span>
-            </Button>
-            {estimatedTaskDuration && (
-              <span className="whitespace-nowrap text-[11px] font-medium text-muted-foreground" role="status">
-                预计所需{estimatedTaskDuration}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-
-      <NightTaskConfirmDialog
-        open={nightConfirmOpen}
-        onOpenChange={setNightConfirmOpen}
-        onConfirm={confirmNightTask}
-      />
-      <BypassDailyStudyLimitConfirmDialog
-        open={submitBypassConfirmOpen}
-        onOpenChange={setSubmitBypassConfirmOpen}
-        onConfirm={executeSubmitTask}
-      />
-      <LogoutConfirmDialog
-        open={logoutConfirmOpen}
-        onOpenChange={setLogoutConfirmOpen}
-        onConfirm={() => {
-          setLogoutConfirmOpen(false);
-          onLogout();
-        }}
-      />
-
-      <StudyIncrementSettings
-        open={studyIncrementCourseKey !== null}
-        onOpenChange={(open) => {
-          if (!open) setStudyIncrementCourseKey(null);
-        }}
-        course={studyIncrementCourse}
-        hasReadTaskPoints={studyIncrementCourseDetails?.hasReadTaskPoints === true}
-        studyStats={studyIncrementCourseDetails?.studyStats}
-        statsLoaded={studyIncrementCourseDetails !== undefined}
-        loadingStats={studyIncrementCourseKey !== null && loadingDetails[studyIncrementCourseKey] === true}
-        values={studyIncrements}
-        onSave={saveStudyIncrement}
+      <DashboardOverlays
+        selectedCount={selectedCourses.size}
+        creatingTask={creatingTask}
+        estimatedTaskDuration={estimatedTaskDuration}
+        nightConfirmOpen={nightConfirmOpen}
+        submitBypassConfirmOpen={submitBypassConfirmOpen}
+        logoutConfirmOpen={logoutConfirmOpen}
+        studyIncrementCourseKey={studyIncrementCourseKey}
+        studyIncrementCourse={studyIncrementCourse}
+        studyIncrementCourseDetails={studyIncrementCourseDetails}
+        loadingDetails={loadingDetails}
+        studyIncrements={studyIncrements}
+        onCreateTask={createTaskWithSelection}
+        onNightConfirmChange={setNightConfirmOpen}
+        onSubmitBypassConfirmChange={setSubmitBypassConfirmOpen}
+        onLogoutConfirmChange={setLogoutConfirmOpen}
+        onConfirmNightTask={confirmNightTask}
+        onExecuteSubmitTask={executeSubmitTask}
+        onStudyIncrementOpenChange={(open) => { if (!open) setStudyIncrementCourseKey(null); }}
+        onSaveStudyIncrement={saveStudyIncrement}
+        onLogout={() => { setLogoutConfirmOpen(false); onLogout(); }}
       />
       <DashboardNavigation
         mode="mobile"

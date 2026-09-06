@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
-import { Progress } from './ui/progress';
-import { TaskStudyProgress } from './TaskStudyProgress';
 import { getStudyProgressPercents } from '@/lib/studyProgress';
 import { formatLocalDateTime } from '@/lib/format';
 import { 
@@ -15,16 +12,16 @@ import {
   ChevronDown, 
   ChevronUp, 
   RefreshCw, 
-  Settings2,
   Hourglass,
-  Sparkles
 } from 'lucide-react';
 import { getTaskConfigSnapshot, getTaskCoursesCustomSnapshot, type Task } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 import { getTaskCourseTaskPointProgress, type CourseTaskPointProgressMap } from '@/lib/taskProgress';
-import { DetailRow } from './common/DetailRow';
 import { InlineError } from './common/InlineError';
 import { TaskCourseBadges } from './task/TaskCourseBadges';
+import { TaskCourseListDialog } from './task/TaskCourseListDialog';
+import { TaskProgressPanel } from './task/TaskProgressPanel';
+import { TaskSettingsSnapshot } from './task/TaskSettingsSnapshot';
 
 interface TaskInlineItemProps {
   task: Task;
@@ -217,8 +214,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
     : calculatedPercent;
   const currentPercent = Math.max(0, Math.min(100, Math.round(rawPercent)));
   const showProgress = progress && snapshotStatuses.includes(effectiveStatus);
-  const progressCourseLabel = progress?.currentCourse || progressFallback.course;
-  const progressChapterLabel = progress?.currentChapter || (progressFallback.chapter === '--' ? '' : progressFallback.chapter);
   const taskErrorMessage = snapshot?.errorMessage || task.errorMessage || (effectiveStatus === 'failed' ? progress?.message : '');
   const canStopTask = stoppableStatuses.includes(task.status) || stoppableStatuses.includes(effectiveStatus);
   const isStoppingTask = task.status === 'stopping' || effectiveStatus === 'stopping';
@@ -264,7 +259,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
     return /^\d+$/.test(normalizedIdentifier) ? '未匹配课程' : courseIdentifier;
   });
   const hiddenCourses = displayCourses?.slice(VISIBLE_COURSE_COUNT) ?? [];
-  const hiddenCourseCount = Math.max(0, (displayCourses?.length ?? 0) - VISIBLE_COURSE_COUNT);
 
   const isTerminal = ['success', 'partial_success', 'failed', 'stopped'].includes(effectiveStatus);
   const processedUnits = (completedUnits ?? 0) + (failedUnits ?? 0);
@@ -321,23 +315,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
         <TaskCourseBadges courses={displayCourses} onShowMore={() => setShowCourseList(true)} />
       </div>
 
-      <Dialog open={showCourseList} onOpenChange={setShowCourseList}>
-        <DialogContent className="max-h-[calc(100dvh-2rem)] max-w-[calc(100%-2rem)] gap-0 overflow-hidden p-0 sm:max-w-lg">
-          <DialogHeader className="border-b border-border/50 px-4 py-4 pr-11 sm:px-5">
-            <DialogTitle>其余 {hiddenCourseCount} 门课程</DialogTitle>
-            <DialogDescription className="sr-only">本次任务中未在卡片展示的课程。</DialogDescription>
-          </DialogHeader>
-          <div className="max-h-[min(520px,calc(100dvh-8rem))] overflow-y-auto p-2.5 sm:p-3">
-            <ol className="space-y-1.5">
-              {hiddenCourses.map((courseName, index) => (
-                <li key={`${courseName}-${index}`} className="rounded-lg border border-border/50 bg-muted/25 px-3 py-2 text-sm text-foreground">
-                  {courseName}
-                </li>
-              ))}
-            </ol>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <TaskCourseListDialog courses={hiddenCourses} open={showCourseList} onOpenChange={setShowCourseList} />
 
       {/* Terminal result */}
       {isTerminal && (
@@ -366,51 +344,8 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
       )}
 
       {/* Progress Box & Course Switch Cross-fade */}
-      {showProgress && !isTerminal && (
-        <div className="w-full min-w-0 space-y-3 rounded-xl border border-border/70 bg-muted/20 p-3.5 sm:space-y-4 sm:p-4">
-          <div className="flex items-end justify-between gap-3 text-xs">
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <div
-                key={progressCourseLabel}
-                className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-foreground transition-opacity duration-200 animate-in fade-in"
-                title={progressCourseLabel}
-              >
-                <span className="truncate">{progressCourseLabel}</span>
-              </div>
-              {progressChapterLabel && (
-                <div className="truncate text-xs text-muted-foreground" title={progressChapterLabel}>
-                  {progressChapterLabel}
-                </div>
-              )}
-            </div>
-            <span className="shrink-0 text-base font-bold tabular-nums text-primary sm:text-lg">{percent}%</span>
-          </div>
-
-          <div className="space-y-1.5">
-            <Progress
-              value={percent}
-              className={`h-2 overflow-hidden rounded-full bg-muted ${effectiveStatus === 'running' ? 'progress-running' : ''}`}
-            />
-            
-            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-muted-foreground">
-              <span className="shrink-0 font-medium">任务点详情</span>
-              <span className="max-w-full rounded-md bg-muted/80 px-2 py-0.5 font-mono text-xs font-medium text-foreground wrap-anywhere">
-                {taskCourseTaskPointProgress
-                  ? `共 ${taskCourseTaskPointProgress.total} 个任务点 · 已完成 ${taskCourseTaskPointProgress.completed}`
-                  : '任务点明细未提供'}
-              </span>
-            </div>
-            {typeof progress.unresolvedUnits === 'number' && progress.unresolvedUnits > 0 && (
-              <div className="text-xs text-warning">
-                有 {progress.unresolvedUnits} 个任务点无法确认状态
-              </div>
-            )}
-            </div>
-
-          {progress.studyProgress && (
-            <TaskStudyProgress courses={progress.studyProgress} />
-          )}
-        </div>
+      {showProgress && !isTerminal && progress && (
+        <TaskProgressPanel progress={progress} status={effectiveStatus} percent={percent} taskPointProgress={taskCourseTaskPointProgress} />
       )}
 
       {/* Date & Time details */}
@@ -452,69 +387,20 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
               </div>
             </div>
           )}
-          <div className="mt-1 min-w-0 w-full space-y-3 rounded-lg border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5 border-b border-border/50 pb-1.5 text-xs font-semibold text-foreground">
-              <Settings2 className="w-3.5 h-3.5 text-muted-foreground" />
-              <span>任务配置</span>
-            </div>
-            {coursesCustom ? (
-              <div className="space-y-2 font-sans">
-                {taskConfigSnapshot?.bypassDailyStudyLimit !== undefined && (
-                  <DetailRow label="每日学时限制">
-                    {taskConfigSnapshot.bypassDailyStudyLimit ? '已绕过' : '正常限制'}
-                  </DetailRow>
-                )}
-                <DetailRow label="自动答题">
-                    {enabledAutomationLabels.length > 0
-                      ? enabledAutomationLabels.join('、')
-                      : hasRecordedAutomation
-                        ? '未开启'
-                        : '未记录'}
-                </DetailRow>
-                {coursesCustom.doWork && (
-                  <DetailRow label="作业提交">{workAutoSubmitLabel}</DetailRow>
-                )}
-                {coursesCustom.doExam && (
-                  <DetailRow label="考试提交">{examAutoSubmitLabel}</DetailRow>
-                )}
-                {coursesCustom.answerMode && (
-                  <DetailRow label="答题模式">{coursesCustom.answerMode}</DetailRow>
-                )}
-                {studyIncrementSettings.length > 0 && (
-                  <div className="space-y-1.5 border-t border-border/50 pt-2.5">
-                    <span className="flex items-center gap-1">
-                      <Sparkles className="h-3 w-3 text-primary" />
-                      学习目标
-                    </span>
-                    {studyIncrementSettings.map((setting) => {
-                      const courseName = courseNameByIdentifier[setting.classId] ?? setting.classId;
-                      const increments = [
-                        (setting.studyIncrement.visitCount ?? 0) > 0
-                          ? `学习次数 +${setting.studyIncrement.visitCount}`
-                          : null,
-                        (setting.studyIncrement.videoStudyMinutes ?? 0) > 0
-                          ? `视频观看 +${setting.studyIncrement.videoStudyMinutes} 分钟`
-                          : null,
-                        (setting.studyIncrement.readMinutes ?? 0) > 0
-                          ? `阅读 +${setting.studyIncrement.readMinutes} 分钟`
-                          : null,
-                      ].filter(Boolean).join(' · ');
-                      return (
-                        <div key={setting.classId} className="flex justify-between gap-2 text-foreground">
-                          <span className="truncate" title={courseName}>{courseName}</span>
-                          <span className="shrink-0 font-semibold tabular-nums">
-                            {increments || '未设置'}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-xs text-muted-foreground">任务未保存配置快照</div>
-            )}
-          </div>
+          {coursesCustom ? (
+            <TaskSettingsSnapshot
+              config={taskConfigSnapshot}
+              coursesCustom={coursesCustom}
+              courseNameByIdentifier={courseNameByIdentifier}
+              studyIncrementSettings={studyIncrementSettings}
+              workAutoSubmitLabel={workAutoSubmitLabel}
+              examAutoSubmitLabel={examAutoSubmitLabel}
+              enabledAutomationLabels={enabledAutomationLabels}
+              hasRecordedAutomation={hasRecordedAutomation}
+            />
+          ) : (
+            <div className="mt-1 min-w-0 w-full rounded-lg border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground">任务未保存配置快照</div>
+          )}
         </div>
       </div>
 
