@@ -11,7 +11,6 @@ interface DashboardNavigationProps {
   appVersion?: string;
   signMonitorActive: boolean;
   onTabChange: (tab: MobileDashboardTabId) => void;
-  onOpenTasks?: () => void;
 }
 
 export type { DashboardViewId, MobileDashboardTabId } from './dashboardNavigationData';
@@ -36,7 +35,7 @@ function Brand({ appVersion }: { appVersion?: string }) {
   );
 }
 
-export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersion, signMonitorActive, onTabChange, onOpenTasks }: DashboardNavigationProps) {
+export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersion, signMonitorActive, onTabChange }: DashboardNavigationProps) {
   const activeMobileIndex = mobileItems.findIndex((item) => item.id === activeTab);
 
   if (mode === 'desktop') {
@@ -69,15 +68,11 @@ export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersi
               </button>
             );
           })}
-          <button type="button" onClick={onOpenTasks} className="relative flex min-h-11 w-full items-center justify-start gap-3 rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="打开任务抽屉">
+          <button type="button" onClick={() => onTabChange('tasks')} className={`relative flex min-h-11 w-full items-center justify-start gap-3 rounded-md px-3 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activeTab === 'tasks' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'}`} aria-current={activeTab === 'tasks' ? 'page' : undefined} aria-label="任务">
+            <span className={`absolute inset-y-2 left-0 w-0.5 rounded-full bg-primary transition-opacity duration-200 ${activeTab === 'tasks' ? 'opacity-100' : 'opacity-0'}`} />
             <Activity className="h-4 w-4 shrink-0" /><span>任务</span>
             {activeTaskCount > 0 && <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 font-mono text-xs font-bold text-primary-foreground">{activeTaskCount}</span>}
           </button>
-          {desktopItems.slice(2).map((item) => {
-            const Icon = item.icon;
-            const active = activeTab === item.id;
-            return <button key={item.id} type="button" onClick={() => onTabChange(item.id)} className={`relative flex min-h-11 w-full items-center justify-start gap-3 rounded-md px-3 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'}`} aria-current={active ? 'page' : undefined} aria-label={item.label}><span className={`absolute inset-y-2 left-0 w-0.5 rounded-full bg-primary transition-opacity duration-200 ${active ? 'opacity-100' : 'opacity-0'}`} /><Icon className="h-4 w-4 shrink-0" /><span>{item.label}</span></button>;
-          })}
         </nav>
         <div className="flex flex-col gap-1 px-3 pb-4">
           <a
@@ -102,6 +97,11 @@ export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersi
             </svg>
             <span>GitHub</span>
           </a>
+          {desktopItems.slice(2).map((item) => {
+            const Icon = item.icon;
+            const active = activeTab === item.id;
+            return <button key={item.id} type="button" onClick={() => onTabChange(item.id)} className={`relative flex min-h-11 w-full items-center justify-start gap-3 rounded-md px-3 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'}`} aria-current={active ? 'page' : undefined} aria-label={item.label}><span className={`absolute inset-y-2 left-0 w-0.5 rounded-full bg-primary transition-opacity duration-200 ${active ? 'opacity-100' : 'opacity-0'}`} /><Icon className="h-4 w-4 shrink-0" /><span>{item.label}</span></button>;
+          })}
         </div>
       </aside>
     );

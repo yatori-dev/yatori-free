@@ -132,7 +132,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [appVersion, setAppVersion] = useState('...');
   const [activeTab, setActiveTab] = useState<MobileDashboardTabId>('courses');
   const [prevTab, setPrevTab] = useState<MobileDashboardTabId>('courses');
-  const [taskDrawerOpen, setTaskDrawerOpen] = useState(false);
   const [taskFilter, setTaskFilter] = useState<'active' | 'completed'>('active');
   const [courseSearch, setCourseSearch] = useState('');
   const [courseSearchQuery, setCourseSearchQuery] = useState('');
@@ -551,13 +550,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       });
 
       toast.success('任务已启动');
-      if (window.matchMedia('(max-width: 1023px)').matches) {
-        setTaskFilter('active');
-        handleTabChange('tasks');
-      } else {
-        setTaskFilter('active');
-        setTaskDrawerOpen(true);
-      }
+      setTaskFilter('active');
+      handleTabChange('tasks');
       void fetchTasks();
       void fetchCourses();
       setSelectedCourses(new Set());
@@ -732,18 +726,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     );
   }, [persistedSettingsState]);
 
-  useEffect(() => {
-    const desktopMediaQuery = window.matchMedia('(min-width: 1024px)');
-    const handleDesktopTransition = (event: MediaQueryListEvent) => {
-      if (event.matches) {
-        setActiveTab((currentTab) => currentTab === 'tasks' ? 'courses' : currentTab);
-      }
-    };
-
-    desktopMediaQuery.addEventListener('change', handleDesktopTransition);
-    return () => desktopMediaQuery.removeEventListener('change', handleDesktopTransition);
-  }, []);
-
   // Keep the task list fresh only while unfinished tasks exist.
   useEffect(() => {
     if (!account || !hasActiveTasks) {
@@ -814,14 +796,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           appVersion={appVersion}
           signMonitorActive={signMonitorActive}
           onTabChange={handleTabChange}
-          onOpenTasks={() => setTaskDrawerOpen(true)}
         />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <DashboardHeader
             title={desktopViewTitle}
             appVersion={appVersion}
             session={session}
-            taskDrawerOpen={taskDrawerOpen}
             accountMenuOpen={accountMenuOpen}
             taskCounts={taskCounts}
             tasks={tasks}
@@ -831,7 +811,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             taskSnapshots={taskSnapshots}
             courseNameByIdentifier={courseNameByIdentifier}
             courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
-            onTaskDrawerChange={setTaskDrawerOpen}
             onAccountMenuChange={setAccountMenuOpen}
             onTaskFilterChange={setTaskFilter}
             onRefreshTasks={() => void fetchTasks()}
