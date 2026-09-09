@@ -744,7 +744,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     getVersion()
       .then((response) => {
         if (!cancelled) {
-          setAppVersion(response.data.version);
+          setAppVersion(response.data.version.replace(/^v+/i, ''));
         }
       })
       .catch((error) => {
