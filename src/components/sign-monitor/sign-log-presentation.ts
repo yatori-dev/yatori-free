@@ -40,16 +40,21 @@ export function getSignDisplayName(log: SignLog) {
     : (log.signName ?? signType.label);
 }
 
-export function isSignResultSuccess(result: string) {
-  return result.includes('成功') || result.includes('完成') || result.includes('已签到');
+export function getSignResult(log: SignLog) {
+  if (log.submittedAt) return '已签到';
+  if (log.personalStatus !== undefined && log.personalStatus !== null) {
+    return `状态 ${log.personalStatus}`;
+  }
+  return '未签到';
 }
 
-export function getSignResultClassName(result: string) {
-  if (isSignResultSuccess(result)) {
+export function isSignResultSuccess(log: SignLog) {
+  return Boolean(log.submittedAt);
+}
+
+export function getSignResultClassName(log: SignLog) {
+  if (isSignResultSuccess(log)) {
     return 'border-success/25 bg-success-container/60 text-success';
-  }
-  if (result.includes('失败') || result.includes('异常')) {
-    return 'border-danger/25 bg-danger-container/60 text-danger';
   }
   return 'border-border bg-muted text-muted-foreground';
 }

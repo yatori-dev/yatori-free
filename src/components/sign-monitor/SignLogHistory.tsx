@@ -18,6 +18,7 @@ import {
   getSignLogTimestamp,
   getSignLogTimeValue,
   getSignDisplayName,
+  getSignResult,
   getSignResultClassName,
   getSignTypeBadge,
   isSignResultSuccess,
@@ -39,6 +40,7 @@ interface SignLogHistoryProps {
 
 function SignLogRow({ log, showCourse = true }: { log: SignLog; showCourse?: boolean }) {
   const signType = getSignTypeBadge(log);
+  const signResult = getSignResult(log);
   const hasAttendanceCount = typeof log.signedCount === 'number'
     && typeof log.totalCount === 'number';
 
@@ -56,9 +58,9 @@ function SignLogRow({ log, showCourse = true }: { log: SignLog; showCourse?: boo
         )}
         <Badge
           variant="outline"
-          className={`shrink-0 font-semibold ${getSignResultClassName(log.result)}`}
+          className={`shrink-0 font-semibold ${getSignResultClassName(log)}`}
         >
-          {log.result}
+          {signResult}
         </Badge>
       </div>
 
@@ -124,7 +126,7 @@ export function SignLogHistory({
   const currentPage = Math.floor(offset / limit) + 1;
   const pageCount = Math.max(1, Math.ceil(total / limit));
   const signedCount = useMemo(
-    () => logs.filter((log) => isSignResultSuccess(log.result)).length,
+    () => logs.filter(isSignResultSuccess).length,
     [logs],
   );
   const [pageDraft, setPageDraft] = useState(() => ({

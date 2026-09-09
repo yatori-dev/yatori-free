@@ -8,7 +8,7 @@ import { SIGN_TYPE_BADGES } from './sign-monitor/sign-log-presentation';
 import {
   startSignMonitor,
   stopSignMonitor,
-  getAllSignLogs,
+  getSignLogs,
   getUserFacingErrorMessage,
   isAuthExitError,
 } from '@/lib/api';
@@ -65,7 +65,6 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
     getSignLogsCacheKey(accountId),
   );
   const [logs, setLogs] = useState<SignLog[]>(() => initialLogs?.logs ?? []);
-  const [logsTotal, setLogsTotal] = useState(() => initialLogs?.total ?? 0);
   const [historyErrors, setHistoryErrors] = useState<SignHistoryError[]>(
     () => initialLogs?.errors ?? [],
   );
@@ -91,7 +90,7 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
     try {
       const cacheKey = getSignLogsCacheKey(accountId);
       const loadLogs = async () => {
-        const response = await getAllSignLogs(accountId);
+        const response = await getSignLogs(accountId);
         return response.data;
       };
       const data = useCache
@@ -99,13 +98,12 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
         : await loadLogs();
       writeSessionCache(cacheKey, data);
       setLogs(data.logs);
-      setLogsTotal(data.total);
       setHistoryErrors(Array.isArray(data.errors) ? data.errors : []);
       setLogsPage((previous) => {
         const previousOffset = previous.accountId === accountId ? previous.offset : 0;
         const maxOffset = Math.max(
           0,
-          Math.floor((Math.max(0, data.total - 1)) / SIGN_LOGS_PAGE_SIZE) * SIGN_LOGS_PAGE_SIZE,
+          Math.floor((Math.max(0, data.logs.length - 1)) / SIGN_LOGS_PAGE_SIZE) * SIGN_LOGS_PAGE_SIZE,
         );
         return { accountId, offset: Math.min(previousOffset, maxOffset) };
       });
@@ -261,7 +259,7 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
           offset,
         })}
         onRefresh={() => void fetchLogs(true, false)}
-        total={logsTotal}
+        total={logs.length}
       />
     </div>
   );
