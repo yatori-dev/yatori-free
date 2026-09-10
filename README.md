@@ -67,7 +67,7 @@
 - ![net/http](https://img.shields.io/badge/net/http-1.27.1-blue.svg?style=flat-square&logo=go&logoColor=white)
 - ![SQLite](https://img.shields.io/badge/SQLite-3-yellow.svg?style=flat-square&logo=sqlite&logoColor=white)
 - ![systemd](https://img.shields.io/badge/systemd-257-red.svg?style=flat-square&logo=systemd&logoColor=white)
-- ![Cloudflare Tunnel](https://img.shields.io/badge/Cloudflare%20Tunnel-2026.8.3-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
+- ![Cloudflare Tunnel](https://img.shields.io/badge/Cloudflare%20Tunnel-2026.9.0-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
 
 ## 参考项目
 
