@@ -115,6 +115,7 @@ export type CourseTaskPointKind =
   | 'hyperlink'
   | 'live'
   | 'discussion'
+  | 'microcourse'
   | 'other';
 
 export interface CourseTaskPoint {
@@ -128,6 +129,7 @@ export interface CourseTaskPoint {
   cardIndex: number;
   iframeIndex: number;
   isTaskPoint: boolean;
+  runnable: boolean;
   completed?: boolean;
 }
 
@@ -172,12 +174,36 @@ export interface StudyStats {
   readMinutes?: number;
 }
 
+export interface CourseWorkItem {
+  id: string;
+  runnable: boolean;
+  title?: string;
+  name?: string;
+  status?: string | number;
+  startDate?: string;
+  endDate?: string;
+  score?: string | number;
+  [key: string]: unknown;
+}
+
+export interface CourseExamItem {
+  id: string;
+  runnable: boolean;
+  title?: string;
+  name?: string;
+  status?: string | number;
+  startDate?: string;
+  endDate?: string;
+  score?: string | number;
+  [key: string]: unknown;
+}
+
 export interface CourseDetails {
   course: Course;
   chapters?: unknown;
   documents?: CourseDocument[];
-  works?: unknown[];
-  exams?: unknown[];
+  works?: CourseWorkItem[];
+  exams?: CourseExamItem[];
   hasReadTaskPoints?: boolean;
   readTaskPointCount?: number;
   studyStats?: StudyStats;
@@ -206,11 +232,20 @@ export interface TaskListResponseData {
   tasks: Task[];
 }
 
+export type TaskKind = 'task_points' | 'works' | 'exams';
+
+export interface TaskTarget {
+  classId: string;
+  itemIds: string[];
+}
+
 export interface CreateTaskRequest {
   accountId: string;
   autoResume?: boolean;
   bypassDailyStudyLimit?: boolean;
-  coursesCustom: CoursesCustom;
+  coursesCustom?: CoursesCustom;
+  kind?: TaskKind;
+  targets?: TaskTarget[];
 }
 
 export interface EmailNotificationSettings {
@@ -295,6 +330,8 @@ export interface TaskConfigSnapshot {
   accountType?: string;
   bypassDailyStudyLimit?: boolean;
   coursesCustom?: CoursesCustom;
+  kind?: TaskKind;
+  targets?: TaskTarget[];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -307,6 +344,21 @@ function isOptionalString(value: unknown) {
 
 function isOptionalBoolean(value: unknown) {
   return value === undefined || typeof value === 'boolean';
+}
+
+function isOptionalTaskKind(value: unknown): value is TaskKind | undefined {
+  return value === undefined || value === 'task_points' || value === 'works' || value === 'exams';
+}
+
+function isTaskTarget(value: unknown): value is TaskTarget {
+  return isRecord(value)
+    && typeof value.classId === 'string'
+    && Array.isArray(value.itemIds)
+    && value.itemIds.every((id) => typeof id === 'string');
+}
+
+function isOptionalTaskTargetArray(value: unknown): value is TaskTarget[] | undefined {
+  return value === undefined || (Array.isArray(value) && value.every(isTaskTarget));
 }
 
 function isOptionalStringArray(value: unknown) {
@@ -354,6 +406,8 @@ function isTaskConfigSnapshot(value: unknown): value is TaskConfigSnapshot {
     && isOptionalString(value.account)
     && isOptionalString(value.accountType)
     && isOptionalBoolean(value.bypassDailyStudyLimit)
+    && isOptionalTaskKind(value.kind)
+    && isOptionalTaskTargetArray(value.targets)
     && (value.coursesCustom === undefined || isCoursesCustom(value.coursesCustom));
 }
 
@@ -363,6 +417,14 @@ export function getTaskConfigSnapshot(configSnapshot: Task['configSnapshot']) {
 
 export function getTaskCoursesCustomSnapshot(configSnapshot: Task['configSnapshot']) {
   return getTaskConfigSnapshot(configSnapshot)?.coursesCustom;
+}
+
+export function getWorkItemTitle(item: CourseWorkItem) {
+  return (item.title || item.name || `作业 #${item.id}`).trim();
+}
+
+export function getExamItemTitle(item: CourseExamItem) {
+  return (item.title || item.name || `考试 #${item.id}`).trim();
 }
 
 export type StudyMetricStatus = 'disabled' | 'pending' | 'running' | 'success' | 'failed' | 'skipped';

@@ -11,7 +11,7 @@ import {
   isAuthExitError,
   stopTask,
 } from '@/lib/api';
-import type { AuthSession, CourseDetails, CourseSummary, Task, CoursesCustom, StudyIncrement } from '@/lib/api';
+import type { AuthSession, CourseDetails, CourseSummary, Task, CoursesCustom, StudyIncrement, TaskTarget } from '@/lib/api';
 import { notifyAuthExit } from '@/lib/notifications';
 import { hasActiveStoredSignMonitor } from '@/lib/signMonitor';
 import { isActiveTaskStatus } from '@/lib/taskStatus';
@@ -141,6 +141,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const lastAnimatedMobileTabRef = useRef<MobileDashboardTabId>('courses');
   const mobileTabScrollPositions = useRef<Record<MobileDashboardTabId, number>>({
     courses: 0,
+    works: 0,
+    exams: 0,
     sign: 0,
     tasks: 0,
     settings: 0,
@@ -229,6 +231,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   // Selection and Expandable Course Detail States
   const [selectedCourses, setSelectedCourses] = useState<Set<string>>(new Set());
+  const [selectedWorks, setSelectedWorks] = useState<Record<string, Set<string>>>({});
+  const [selectedExams, setSelectedExams] = useState<Record<string, Set<string>>>({});
   const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
   const [fullyExpandedCourseOutlines, setFullyExpandedCourseOutlines] = useState<Set<string>>(new Set());
   const [courseDetailsMap, setCourseDetailsMap] = useState<Record<string, CourseDetails>>({});
@@ -375,10 +379,108 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     }
   }, [account, onLogout]);
 
+  const loadAllCourseDetails = useCallback(async () => {
+    if (!account) return;
+    const unloadCourses = courses.filter((c) => !courseDetailsMap[c.key] && !loadingDetails[c.key]);
+    if (unloadCourses.length === 0) return;
 
+    for (const course of unloadCourses) {
+      await loadCourseDetail(course.key);
+    }
+  }, [account, courses, courseDetailsMap, loadingDetails, loadCourseDetail]);
 
-   const toggleCourseSelection = (courseKey: string) => {
-    setSelectedCourses(prev => {
+  const handleToggleSelectWork = useCallback((classId: string, workId: string) => {
+    setSelectedWorks((prev) => {
+      const currentCourseSet = new Set(prev[classId] ?? []);
+      if (currentCourseSet.has(workId)) {
+        currentCourseSet.delete(workId);
+      } else {
+        currentCourseSet.add(workId);
+      }
+      return { ...prev, [classId]: currentCourseSet };
+    });
+  }, []);
+
+  const handleToggleSelectCourseWorks = useCallback((classId: string) => {
+    const details = courseDetailsMap[classId];
+    const runnableWorks = details?.works?.filter((w) => w.runnable) ?? [];
+    if (runnableWorks.length === 0) return;
+
+    setSelectedWorks((prev) => {
+      const currentCourseSet = prev[classId] ?? new Set<string>();
+      const allSelected = runnableWorks.every((w) => currentCourseSet.has(w.id));
+      const nextCourseSet = allSelected ? new Set<string>() : new Set(runnableWorks.map((w) => w.id));
+      return { ...prev, [classId]: nextCourseSet };
+    });
+  }, [courseDetailsMap]);
+
+  const handleSelectAllRunnableWorks = useCallback(() => {
+    const next: Record<string, Set<string>> = {};
+    courses.forEach((course) => {
+      const details = courseDetailsMap[course.key];
+      const runnableWorks = details?.works?.filter((w) => w.runnable) ?? [];
+      if (runnableWorks.length > 0) {
+        next[course.key] = new Set(runnableWorks.map((w) => w.id));
+      }
+    });
+    setSelectedWorks(next);
+  }, [courses, courseDetailsMap]);
+
+  const handleClearSelectedWorks = useCallback(() => {
+    setSelectedWorks({});
+  }, []);
+
+  const handleToggleSelectExam = useCallback((classId: string, examId: string) => {
+    setSelectedExams((prev) => {
+      const currentCourseSet = new Set(prev[classId] ?? []);
+      if (currentCourseSet.has(examId)) {
+        currentCourseSet.delete(examId);
+      } else {
+        currentCourseSet.add(examId);
+      }
+      return { ...prev, [classId]: currentCourseSet };
+    });
+  }, []);
+
+  const handleToggleSelectCourseExams = useCallback((classId: string) => {
+    const details = courseDetailsMap[classId];
+    const runnableExams = details?.exams?.filter((e) => e.runnable) ?? [];
+    if (runnableExams.length === 0) return;
+
+    setSelectedExams((prev) => {
+      const currentCourseSet = prev[classId] ?? new Set<string>();
+      const allSelected = runnableExams.every((e) => currentCourseSet.has(e.id));
+      const nextCourseSet = allSelected ? new Set<string>() : new Set(runnableExams.map((e) => e.id));
+      return { ...prev, [classId]: nextCourseSet };
+    });
+  }, [courseDetailsMap]);
+
+  const handleSelectAllRunnableExams = useCallback(() => {
+    const next: Record<string, Set<string>> = {};
+    courses.forEach((course) => {
+      const details = courseDetailsMap[course.key];
+      const runnableExams = details?.exams?.filter((e) => e.runnable) ?? [];
+      if (runnableExams.length > 0) {
+        next[course.key] = new Set(runnableExams.map((e) => e.id));
+      }
+    });
+    setSelectedExams(next);
+  }, [courses, courseDetailsMap]);
+
+  const handleClearSelectedExams = useCallback(() => {
+    setSelectedExams({});
+  }, []);
+
+  const selectedWorksCount = useMemo(() => {
+    return Object.values(selectedWorks).reduce((total, set) => total + set.size, 0);
+  }, [selectedWorks]);
+
+  const selectedExamsCount = useMemo(() => {
+    return Object.values(selectedExams).reduce((total, set) => total + set.size, 0);
+  }, [selectedExams]);
+
+  const toggleCourseSelection = (courseKey: string) => {
+    setSelectedCourses((prev) => {
       const next = new Set(prev);
       if (next.has(courseKey)) {
         next.delete(courseKey);
@@ -523,28 +625,89 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const executeSubmitTask = async () => {
     if (!account) return;
     setCreatingTask(true);
-    
-    const includeCoursesList = Array.from(selectedCourses);
-    const customConfig: CoursesCustom = buildCoursesCustom({
-      includeCourses: includeCoursesList,
-      excludeCourses: [],
-      coursesSettings: includeCoursesList.flatMap((classId) => {
-        const studyIncrement = studyIncrements[classId] ?? DEFAULT_STUDY_INCREMENT;
-        const visitCount = studyIncrement.visitCount ?? 0;
-        const videoStudyMinutes = studyIncrement.videoStudyMinutes ?? 0;
-        const hasReadTaskPoints = courseDetailsMap[classId]?.hasReadTaskPoints === true;
-        const readMinutes = hasReadTaskPoints ? (studyIncrement.readMinutes ?? 0) : 0;
-        if (visitCount === 0 && videoStudyMinutes === 0 && readMinutes === 0) {
-          return [];
-        }
-
-        return [{ classId, studyIncrement: { visitCount, videoStudyMinutes, readMinutes } }];
-      }),
-    });
 
     try {
+      if (activeTab === 'works') {
+        const targets: TaskTarget[] = Object.entries(selectedWorks)
+          .filter(([, ids]) => ids.size > 0)
+          .map(([classId, ids]) => ({ classId, itemIds: Array.from(ids) }));
+
+        if (targets.length === 0) {
+          toast.error('请先选择要执行的作业');
+          return;
+        }
+
+        await createTask({
+          accountId: account.id,
+          kind: 'works',
+          targets,
+          coursesCustom: buildCoursesCustom({
+            doWork: true,
+            workAutoSubmit,
+            includeCourses: targets.map((t) => t.classId),
+          }),
+        });
+
+        toast.success('作业任务已启动');
+        setSelectedWorks({});
+        setTaskFilter('active');
+        handleTabChange('tasks');
+        void fetchTasks();
+        void fetchCourses();
+        return;
+      }
+
+      if (activeTab === 'exams') {
+        const targets: TaskTarget[] = Object.entries(selectedExams)
+          .filter(([, ids]) => ids.size > 0)
+          .map(([classId, ids]) => ({ classId, itemIds: Array.from(ids) }));
+
+        if (targets.length === 0) {
+          toast.error('请先选择要执行的考试');
+          return;
+        }
+
+        await createTask({
+          accountId: account.id,
+          kind: 'exams',
+          targets,
+          coursesCustom: buildCoursesCustom({
+            doExam: true,
+            examAutoSubmit,
+            includeCourses: targets.map((t) => t.classId),
+          }),
+        });
+
+        toast.success('考试任务已启动');
+        setSelectedExams({});
+        setTaskFilter('active');
+        handleTabChange('tasks');
+        void fetchTasks();
+        void fetchCourses();
+        return;
+      }
+
+      const includeCoursesList = Array.from(selectedCourses);
+      const customConfig: CoursesCustom = buildCoursesCustom({
+        includeCourses: includeCoursesList,
+        excludeCourses: [],
+        coursesSettings: includeCoursesList.flatMap((classId) => {
+          const studyIncrement = studyIncrements[classId] ?? DEFAULT_STUDY_INCREMENT;
+          const visitCount = studyIncrement.visitCount ?? 0;
+          const videoStudyMinutes = studyIncrement.videoStudyMinutes ?? 0;
+          const hasReadTaskPoints = courseDetailsMap[classId]?.hasReadTaskPoints === true;
+          const readMinutes = hasReadTaskPoints ? (studyIncrement.readMinutes ?? 0) : 0;
+          if (visitCount === 0 && videoStudyMinutes === 0 && readMinutes === 0) {
+            return [];
+          }
+
+          return [{ classId, studyIncrement: { visitCount, videoStudyMinutes, readMinutes } }];
+        }),
+      });
+
       await createTask({
         accountId: account.id,
+        kind: 'task_points',
         bypassDailyStudyLimit,
         coursesCustom: customConfig,
       });
@@ -577,18 +740,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const createTaskWithSelection = async () => {
     if (!account) return;
 
-    const includeCoursesList = Array.from(selectedCourses);
+    if (activeTab === 'works') {
+      if (selectedWorksCount === 0) {
+        toast.error('请先选择要执行的作业');
+        return;
+      }
+    } else if (activeTab === 'exams') {
+      if (selectedExamsCount === 0) {
+        toast.error('请先选择要执行的考试');
+        return;
+      }
+    } else {
+      const includeCoursesList = Array.from(selectedCourses);
 
-    if (includeCoursesList.length === 0) {
-      toast.error('请先选择课程');
-      return;
-    }
+      if (includeCoursesList.length === 0) {
+        toast.error('请先选择课程');
+        return;
+      }
 
-    const processingCourses = getSelectedProcessingCourses(includeCoursesList);
-    if (processingCourses.length > 0) {
-      toast.error(`以下课程已有进行中的任务：${processingCourses.map((course) => course.courseName).join('、')}`);
-      void fetchCourses();
-      return;
+      const processingCourses = getSelectedProcessingCourses(includeCoursesList);
+      if (processingCourses.length > 0) {
+        toast.error(`以下课程已有进行中的任务：${processingCourses.map((course) => course.courseName).join('、')}`);
+        void fetchCourses();
+        return;
+      }
     }
 
     const hours = new Date().getHours();
@@ -597,7 +772,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       return;
     }
 
-    if (bypassDailyStudyLimit) {
+    if (activeTab === 'courses' && bypassDailyStudyLimit) {
       setSubmitBypassConfirmOpen(true);
       return;
     }
@@ -772,11 +947,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     '--tab-transition-start-x': startTranslateX,
   } as React.CSSProperties;
   const desktopViewTitle = {
-    courses: '课程列表',
+    courses: '章节任务点',
+    works: '课程作业',
+    exams: '课程考试',
     sign: '自动签到',
     tasks: '任务',
     settings: '提交设置',
   }[activeTab];
+
+  const overlaySelectedCount = activeTab === 'works'
+    ? selectedWorksCount
+    : activeTab === 'exams'
+      ? selectedExamsCount
+      : activeTab === 'courses'
+        ? selectedCourses.size
+        : 0;
+
+  const overlaySubmitButtonText = activeTab === 'works'
+    ? `提交作业(${selectedWorksCount})`
+    : activeTab === 'exams'
+      ? `提交考试(${selectedExamsCount})`
+      : `提交章节任务(${selectedCourses.size})`;
 
   return (
     <div className="relative flex h-screen min-h-screen h-svh min-h-svh flex-col overflow-hidden bg-background text-foreground font-sans lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)]">
@@ -838,6 +1029,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             isSomeSelected={isSomeSelected}
             isAllIncompleteSelected={isAllIncompleteSelected}
             selectedCourses={selectedCourses}
+            selectedWorks={selectedWorks}
+            selectedExams={selectedExams}
             expandedCourses={expandedCourses}
             fullyExpandedCourseOutlines={fullyExpandedCourseOutlines}
             courseDetailsMap={courseDetailsMap}
@@ -878,15 +1071,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             onWorkAutoSubmitChange={updateWorkAutoSubmit}
             onExamAutoSubmitChange={updateExamAutoSubmit}
             onSignStatusChange={setSignMonitorActive}
+            onTabChange={handleTabChange}
+            onLoadAllCourseDetails={loadAllCourseDetails}
+            onToggleSelectWork={handleToggleSelectWork}
+            onToggleSelectCourseWorks={handleToggleSelectCourseWorks}
+            onSelectAllRunnableWorks={handleSelectAllRunnableWorks}
+            onClearSelectedWorks={handleClearSelectedWorks}
+            onToggleSelectExam={handleToggleSelectExam}
+            onToggleSelectCourseExams={handleToggleSelectCourseExams}
+            onSelectAllRunnableExams={handleSelectAllRunnableExams}
+            onClearSelectedExams={handleClearSelectedExams}
           />
         </div>
       </Tabs>
 
 
       <DashboardOverlays
-        selectedCount={selectedCourses.size}
+        selectedCount={overlaySelectedCount}
+        submitButtonText={overlaySubmitButtonText}
         creatingTask={creatingTask}
-        estimatedTaskDuration={estimatedTaskDuration}
+        estimatedTaskDuration={activeTab === 'courses' ? estimatedTaskDuration : null}
         nightConfirmOpen={nightConfirmOpen}
         submitBypassConfirmOpen={submitBypassConfirmOpen}
         logoutConfirmOpen={logoutConfirmOpen}

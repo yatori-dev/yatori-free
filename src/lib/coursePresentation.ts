@@ -9,6 +9,7 @@ export const COURSE_TASK_POINT_KIND_LABELS: Record<CourseTaskPointKind, string> 
   hyperlink: '链接',
   live: '直播',
   discussion: '讨论',
+  microcourse: '微课',
   other: '其他',
 };
 

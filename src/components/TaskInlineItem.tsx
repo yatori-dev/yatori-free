@@ -299,6 +299,17 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
             <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 font-semibold text-foreground">
               #{task.id.substring(0, 8)}
             </span>
+            {taskConfigSnapshot?.kind && (
+              <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-sans font-medium ${
+                taskConfigSnapshot.kind === 'works'
+                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                  : taskConfigSnapshot.kind === 'exams'
+                    ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                    : 'bg-primary/10 text-primary'
+              }`}>
+                {taskConfigSnapshot.kind === 'works' ? '作业' : taskConfigSnapshot.kind === 'exams' ? '考试' : '章节任务'}
+              </span>
+            )}
             <span className="hidden sm:inline-block text-muted-foreground/60">•</span>
             <span className="hidden sm:inline-block truncate text-muted-foreground">
               {task.startedAt ? formatLocalDateTime(task.startedAt) : '未启动'}
