@@ -24,24 +24,23 @@ export const SIGN_TYPE_BADGES = [
 ] as const;
 
 export function getSignTypeBadge(log: SignLog) {
-  const value = `${log.signType ?? ''} ${log.signName ?? ''}`;
+  const value = log.signType?.toLowerCase() ?? '';
 
-  if (log.signType?.toLowerCase() === 'photo') return SIGN_TYPE_BADGES[1];
+  if (value.includes('photo') || value.includes('拍照')) return SIGN_TYPE_BADGES[1];
   if (value.includes('位置')) return SIGN_TYPE_BADGES[3];
-  if (value.includes('手势')) return SIGN_TYPE_BADGES[2];
-  if (value.includes('签到码') || value.includes('二维码')) return SIGN_TYPE_BADGES[4];
+  if (value.includes('location')) return SIGN_TYPE_BADGES[3];
+  if (value.includes('gesture') || value.includes('手势')) return SIGN_TYPE_BADGES[2];
+  if (value.includes('code') || value.includes('二维码') || value.includes('签到码')) return SIGN_TYPE_BADGES[4];
   return SIGN_TYPE_BADGES[0];
 }
 
 export function getSignDisplayName(log: SignLog) {
-  const signType = getSignTypeBadge(log);
-  return log.signType?.toLowerCase() === 'photo'
-    ? signType.label
-    : (log.signName ?? signType.label);
+  return getSignTypeBadge(log).label;
 }
 
 export function getSignResult(log: SignLog) {
   if (log.submittedAt) return '已签到';
+  if (log.personalStatus === 0) return '未签到';
   if (log.personalStatus !== undefined && log.personalStatus !== null) {
     return `状态 ${log.personalStatus}`;
   }
