@@ -17,6 +17,7 @@ import { isActiveTaskStatus } from '@/lib/taskStatus';
 import { useTaskProgressPolling } from '@/hooks/useTaskProgressPolling';
 import { createCourseTaskPointProgressMap } from '@/lib/taskProgress';
 import { courseHasTaskPoints } from '@/lib/coursePresentation';
+import { hasReadTaskPoints } from '@/lib/courseChapters';
 import { getCourseNameMap, getTaskCounts, getVisibleCourses } from '@/lib/dashboardDerived';
 import { DashboardNavigation, type MobileDashboardTabId } from './dashboard/DashboardNavigation';
 import { mobileDashboardTabOrder } from './dashboard/dashboardNavigationData';
@@ -628,8 +629,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           const studyIncrement = studyIncrements[classId] ?? DEFAULT_STUDY_INCREMENT;
           const visitCount = studyIncrement.visitCount ?? 0;
           const videoStudyMinutes = studyIncrement.videoStudyMinutes ?? 0;
-          const hasReadTaskPoints = courseDetailsMap[classId]?.hasReadTaskPoints === true;
-          const readMinutes = hasReadTaskPoints ? (studyIncrement.readMinutes ?? 0) : 0;
+          const readMinutes = hasReadTaskPoints(courseDetailsMap[classId]) ? (studyIncrement.readMinutes ?? 0) : 0;
           if (visitCount === 0 && videoStudyMinutes === 0 && readMinutes === 0) {
             return [];
           }

@@ -199,16 +199,9 @@ export interface CourseDetails {
   documents?: CourseDocument[];
   works?: CourseWorkItem[];
   exams?: CourseExamItem[];
-  hasReadTaskPoints?: boolean;
-  readTaskPointCount?: number;
   studyStats?: StudyStats;
-  blockedChapterCount?: number;
-  blockedPointCount?: number;
-  taskPointCount?: number;
   taskPoints?: CourseTaskPoint[];
-  taskPointsIncomplete?: boolean;
   incomplete?: boolean;
-  partialReasons?: string[];
 }
 
 export type CourseSourceStatusValue = 'ok' | 'failed' | 'skipped';

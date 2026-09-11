@@ -1,6 +1,7 @@
 import { Play, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { CourseDetails, CourseSummary, StudyIncrement } from '@/lib/api';
+import { hasReadTaskPoints } from '@/lib/courseChapters';
 import { NightTaskConfirmDialog } from './NightTaskConfirmDialog';
 import { BypassDailyStudyLimitConfirmDialog } from './BypassDailyStudyLimitConfirmDialog';
 import { LogoutConfirmDialog } from './LogoutConfirmDialog';
@@ -36,6 +37,6 @@ export function DashboardOverlays({ selectedCount, creatingTask, estimatedTaskDu
     <NightTaskConfirmDialog open={nightConfirmOpen} onOpenChange={onNightConfirmChange} onConfirm={onConfirmNightTask} />
     <BypassDailyStudyLimitConfirmDialog open={submitBypassConfirmOpen} onOpenChange={onSubmitBypassConfirmChange} onConfirm={onExecuteSubmitTask} />
     <LogoutConfirmDialog open={logoutConfirmOpen} onOpenChange={onLogoutConfirmChange} onConfirm={onLogout} />
-    <StudyIncrementSettings open={studyIncrementCourseKey !== null} onOpenChange={onStudyIncrementOpenChange} course={studyIncrementCourse} hasReadTaskPoints={studyIncrementCourseDetails?.hasReadTaskPoints === true} studyStats={studyIncrementCourseDetails?.studyStats} statsLoaded={studyIncrementCourseDetails !== undefined} loadingStats={studyIncrementCourseKey !== null && loadingDetails[studyIncrementCourseKey] === true} values={studyIncrements} onSave={onSaveStudyIncrement} />
+    <StudyIncrementSettings open={studyIncrementCourseKey !== null} onOpenChange={onStudyIncrementOpenChange} course={studyIncrementCourse} hasReadTaskPoints={hasReadTaskPoints(studyIncrementCourseDetails)} studyStats={studyIncrementCourseDetails?.studyStats} statsLoaded={studyIncrementCourseDetails !== undefined} loadingStats={studyIncrementCourseKey !== null && loadingDetails[studyIncrementCourseKey] === true} values={studyIncrements} onSave={onSaveStudyIncrement} />
   </>;
 }

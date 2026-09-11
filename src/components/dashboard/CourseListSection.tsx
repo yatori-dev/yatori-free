@@ -10,6 +10,7 @@ import {
   X,
 } from 'lucide-react';
 import type { CourseDetails, CourseSummary, StudyIncrement } from '@/lib/api';
+import { hasReadTaskPoints } from '@/lib/courseChapters';
 import { CourseOutline } from './CourseOutline';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -200,15 +201,13 @@ export function CourseListSection({
                 const processingTaskLabel = course.processingTaskId ? course.processingTaskId.substring(0, 8) : null;
                 const canStopProcessing = isProcessing && Boolean(course.processingTaskId);
                 const isStoppingProcessing = course.processingTaskId === stoppingTaskId;
-                const blockedPointCount = courseDetailsMap[course.key]?.blockedPointCount ?? 0;
                 const isExpanded = expandedCourses.has(course.key);
                 const isCourseOutlineFullyExpanded = fullyExpandedCourseOutlines.has(course.key);
                 const isSelected = selectedCourses.has(course.key);
                 const studyIncrement = studyIncrements[course.key] ?? defaultStudyIncrement;
                 const studyVisitCount = studyIncrement.visitCount ?? 0;
                 const videoStudyMinutes = studyIncrement.videoStudyMinutes ?? 0;
-                const hasReadTaskPoints = courseDetailsMap[course.key]?.hasReadTaskPoints === true;
-                const readMinutes = hasReadTaskPoints ? (studyIncrement.readMinutes ?? 0) : 0;
+                const readMinutes = hasReadTaskPoints(courseDetailsMap[course.key]) ? (studyIncrement.readMinutes ?? 0) : 0;
                 const hasStudyIncrement = studyVisitCount > 0 || videoStudyMinutes > 0 || readMinutes > 0;
                 const studyIncrementSummary = [
                   studyVisitCount > 0 ? `+${studyVisitCount}次` : null,
@@ -231,11 +230,6 @@ export function CourseListSection({
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <h3 className="truncate text-xs font-semibold text-foreground sm:text-sm">{course.courseName}</h3>
-                            {blockedPointCount > 0 && (
-                              <Badge variant="outline" className="border-border bg-muted text-muted-foreground">
-                                含未开放任务点 {blockedPointCount}
-                              </Badge>
-                            )}
                             {isProcessing && (
                               <Badge variant="outline" className="border-warning/20 bg-warning-container text-warning">
                                 处理中

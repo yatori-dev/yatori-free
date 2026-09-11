@@ -1,4 +1,4 @@
-import type { Chapter, CourseDocument, CourseTaskPoint } from './api';
+import type { Chapter, CourseDetails, CourseDocument, CourseTaskPoint } from './api';
 
 export interface ChapterTaskMeta {
   total: number;
@@ -187,6 +187,10 @@ export function getCourseTaskPointGroups(taskPoints: CourseTaskPoint[] = []) {
   }
 
   return [...groups.values()];
+}
+
+export function hasReadTaskPoints(courseDetails?: CourseDetails) {
+  return courseDetails?.taskPoints?.some((taskPoint) => taskPoint.kind === 'reading') === true;
 }
 
 function normalizeMatchValue(value: unknown) {
