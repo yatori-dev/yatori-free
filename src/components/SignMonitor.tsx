@@ -167,28 +167,28 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
   return (
     <div className="flex flex-col gap-3 sm:gap-4 lg:min-h-0 lg:flex-1">
       {/* 自动签到控制卡片 */}
-      <Card className="shrink-0 rounded-none border-x-0 border-t-0 bg-card p-4 sm:rounded-xl sm:border sm:border-border sm:p-5 shadow-xs">
+      <Card className="shrink-0 rounded-none border-x-0 border-t-0 border-border/60 bg-card p-4 shadow-rest transition-all duration-200 ease-standard sm:rounded-xl sm:border sm:border-border/70 sm:p-5 hover:shadow-raised">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 space-y-1">
             <div className="flex items-center gap-2.5">
-              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-xs transition-colors ${
                 monitorStarted
                   ? 'bg-success-container/40 text-success'
                   : 'bg-muted/60 text-muted-foreground'
               }`}>
-                <Radio className={`h-4 w-4 ${monitorStarted ? 'animate-pulse' : ''}`} />
+                <Radio className={`h-4 w-4 ${monitorStarted ? 'animate-calm-pulse' : ''}`} />
               </div>
 
               <div className="flex flex-wrap items-center gap-2 min-w-0">
                 <span className="text-sm font-semibold text-foreground sm:text-base">自动签到监测</span>
                 {!monitorStarted ? (
-                  <Badge variant="outline" className="gap-1.5 border-border bg-muted/40 px-2 py-0.5 text-xs font-normal text-muted-foreground">
+                  <Badge variant="outline" className="gap-1.5 border-border/60 bg-muted/40 px-2 py-0.5 text-xs font-normal text-muted-foreground">
                     <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
                     未运行
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="gap-1.5 border-success/30 bg-success-container/30 px-2 py-0.5 text-xs font-medium text-success">
-                    <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                  <Badge variant="outline" className="gap-1.5 border-success/30 bg-success-container/30 px-2.5 py-0.5 text-xs font-medium text-success shadow-xs">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success animate-calm-pulse" />
                     运行中
                     <span className="text-muted-foreground/30">|</span>
                     <span className="text-muted-foreground font-normal">剩余</span>

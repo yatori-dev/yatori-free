@@ -63,7 +63,11 @@ export function TaskStatusContent({
                 aria-pressed={taskFilter === filter.id}
               >
                 {filter.label}
-                <span className="text-xs font-normal tabular-nums text-muted-foreground">
+                <span className={`rounded-full px-1.5 py-0.5 font-mono text-[11px] tabular-nums transition-colors ${
+                  taskFilter === filter.id
+                    ? 'bg-primary/10 text-primary font-semibold'
+                    : 'bg-muted/70 text-muted-foreground'
+                }`}>
                   {filter.count}
                 </span>
               </button>

@@ -75,7 +75,7 @@ export function CourseBulkSelectionMenu({
         <div
           role="menu"
           aria-label="课程批量选择"
-          className="absolute left-0 top-[calc(100%+0.375rem)] z-50 w-44 rounded-xl border border-border/70 bg-popover p-1.5 text-popover-foreground shadow-floating"
+          className="absolute left-0 top-[calc(100%+0.375rem)] z-50 w-44 rounded-xl border border-border/70 bg-popover/95 p-1.5 text-popover-foreground shadow-floating backdrop-blur-sm animate-in fade-in-0 zoom-in-95 duration-150"
         >
           <button
             type="button"

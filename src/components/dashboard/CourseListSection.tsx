@@ -2,7 +2,6 @@ import { useRef } from 'react';
 import {
   AlertCircle,
   ChevronDown,
-  ChevronUp,
   RefreshCw,
   Search,
   SlidersHorizontal,
@@ -216,10 +215,15 @@ export function CourseListSection({
                 ].filter(Boolean).join(' ');
 
                 return (
-                  <div key={course.key} className="border-b border-border last:border-0">
-                    <div className={`grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-2 px-3 py-3.5 transition-colors sm:grid-cols-[auto_minmax(0,1fr)_13rem] sm:gap-x-4 sm:p-5 ${
-                      isSelected ? 'bg-primary-container/20 hover:bg-primary-container/30' : 'hover:bg-muted/40'
+                  <div key={course.key} className="border-b border-border/40 last:border-0">
+                    <div className={`relative grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-2 px-3 py-3.5 transition-colors duration-150 ease-standard sm:grid-cols-[auto_minmax(0,1fr)_13rem] sm:gap-x-4 sm:p-5 ${
+                      isSelected
+                        ? 'bg-primary/5 hover:bg-primary/10 dark:bg-primary/10 dark:hover:bg-primary/15'
+                        : 'hover:bg-muted/40'
                     }`}>
+                      {isSelected && (
+                        <span aria-hidden="true" className="absolute inset-y-2 left-0 w-1 rounded-r bg-primary" />
+                      )}
                       <div className="contents">
                         <CourseCheckbox
                           checked={isSelected}
@@ -287,20 +291,21 @@ export function CourseListSection({
                           variant="ghost"
                           size="sm"
                           onClick={() => onToggleExpandCourse(course.key)}
-                          className="h-8 w-8 gap-1 rounded border border-primary/30 px-0 text-xs text-primary hover:bg-primary-container/20 sm:w-auto sm:px-2"
+                          className={`h-8 w-8 gap-1 rounded border px-0 text-xs transition-all duration-150 sm:w-auto sm:px-2 ${
+                            isExpanded
+                              ? 'border-primary/40 bg-primary/10 text-primary'
+                              : 'border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary'
+                          }`}
                           aria-label={isExpanded ? '收起章节' : '查看章节'}
                         >
-                          {isExpanded ? (
-                            <><span className="sr-only sm:not-sr-only">收起章节</span><ChevronUp className="h-3.5 w-3.5" /></>
-                          ) : (
-                            <><span className="sr-only sm:not-sr-only">查看章节</span><ChevronDown className="h-3.5 w-3.5" /></>
-                          )}
+                          <span className="sr-only sm:not-sr-only">{isExpanded ? '收起章节' : '查看章节'}</span>
+                          <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ease-standard ${isExpanded ? 'rotate-180' : ''}`} />
                         </Button>
                       </div>
                     </div>
 
                     {isExpanded && (
-                      <div className="border-t border-border/50 bg-muted/20 px-3 pb-3 pl-11 pt-3 sm:px-5 sm:pb-5 sm:pl-12 sm:pt-4">
+                      <div className="border-t border-border/40 bg-muted/20 px-3 pb-3 pl-11 pt-3 sm:px-5 sm:pb-5 sm:pl-12 sm:pt-4 animate-in fade-in-0 duration-150">
                         {loadingDetails[course.key] ? (
                           <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
                             <svg className="google-spinner h-4 w-4" viewBox="0 0 50 50">

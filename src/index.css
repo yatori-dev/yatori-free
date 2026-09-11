@@ -163,11 +163,12 @@
     --ease-standard: cubic-bezier(0.2, 0, 0, 1);
     --ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
 
-    /* 4-Tier Shadow Tokens */
-    --shadow-rest: 0 1px 2px rgb(15 23 42 / 0.05);
-    --shadow-raised: 0 4px 12px rgb(15 23 42 / 0.08), 0 1px 3px rgb(15 23 42 / 0.05);
-    --shadow-floating: 0 12px 32px rgb(15 23 42 / 0.14), 0 2px 8px rgb(15 23 42 / 0.08);
-    --shadow-overlay: 0 24px 64px rgb(15 23 42 / 0.20);
+    /* 4-Tier Shadow Tokens (Refined depth and ambient lighting) */
+    --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+    --shadow-rest: 0 1px 3px 0 rgb(15 23 42 / 0.05), 0 1px 2px -1px rgb(15 23 42 / 0.04);
+    --shadow-raised: 0 6px 18px -3px rgb(15 23 42 / 0.08), 0 2px 6px -1px rgb(15 23 42 / 0.04);
+    --shadow-floating: 0 14px 34px -4px rgb(15 23 42 / 0.12), 0 4px 10px -2px rgb(15 23 42 / 0.05);
+    --shadow-overlay: 0 24px 56px -8px rgb(15 23 42 / 0.22), 0 8px 16px -4px rgb(15 23 42 / 0.08);
 }
 
 .dark {
@@ -207,11 +208,16 @@
     --sign-code: #f9a8d4;
     --sign-code-container: #831843;
 
-    /* 4-Tier Dark Mode Shadows (cleaner surface elevation) */
-    --shadow-rest: 0 1px 2px rgb(0 0 0 / 0.25);
-    --shadow-raised: 0 4px 14px rgb(0 0 0 / 0.35), 0 1px 3px rgb(0 0 0 / 0.20);
-    --shadow-floating: 0 12px 32px rgb(0 0 0 / 0.50), 0 2px 8px rgb(0 0 0 / 0.30);
-    --shadow-overlay: 0 24px 64px rgb(0 0 0 / 0.65);
+    /* 4-Tier Dark Mode Shadows (cleaner surface elevation with subtle rim light) */
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.35), inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+    --shadow-rest: 0 1px 3px 0 rgb(0 0 0 / 0.4), inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+    --shadow-raised: 0 8px 24px -4px rgb(0 0 0 / 0.55), 0 2px 6px -1px rgb(0 0 0 / 0.35), inset 0 1px 0 0 rgb(255 255 255 / 0.07);
+    --shadow-floating: 0 16px 36px -6px rgb(0 0 0 / 0.65), 0 4px 12px -2px rgb(0 0 0 / 0.4), inset 0 1px 0 0 rgb(255 255 255 / 0.08);
+    --shadow-overlay: 0 28px 64px -12px rgb(0 0 0 / 0.8), inset 0 1px 0 0 rgb(255 255 255 / 0.1);
+}
+
+@utility shadow-xs {
+  box-shadow: var(--shadow-xs);
 }
 
 @utility shadow-rest {
@@ -244,6 +250,21 @@
 
 @utility animate-task-success-flash {
   animation: taskSuccessFlash 1200ms var(--ease-emphasized) forwards;
+}
+
+@utility animate-calm-pulse {
+  animation: calmPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes calmPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
 }
 
 @keyframes bottomBarEnter {
@@ -556,13 +577,16 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.35) 50%, transparent 80%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.12) 30%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.12) 70%, transparent 100%);
   transform: translateX(-100%);
-  animation: progressShimmer 2.8s ease-in-out infinite;
+  animation: progressShimmer 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes progressShimmer {
-  to {
+  0% {
+    transform: translateX(-100%);
+  }
+  60%, 100% {
     transform: translateX(100%);
   }
 }

@@ -43,10 +43,10 @@ function SignLogRow({ log, showCourse = true }: { log: SignLog; showCourse?: boo
     && typeof log.totalCount === 'number';
 
   return (
-    <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6 transition-colors duration-150 hover:bg-muted/30">
+    <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6 transition-colors duration-150 ease-standard hover:bg-muted/40">
       <div className="flex min-w-0 flex-1 items-start gap-2.5 sm:gap-3">
         {/* Status indicator icon */}
-        <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
+        <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg shadow-xs transition-colors ${
           isSuccess
             ? 'bg-success-container/40 text-success'
             : 'bg-muted/60 text-muted-foreground'
@@ -124,7 +124,7 @@ export function SignLogHistory({
   };
 
   return (
-    <Card className="min-w-0 flex-1 flex flex-col overflow-hidden rounded-none border-x-0 border-t-0 bg-card p-0 sm:rounded-xl sm:border sm:border-border sm:shadow-xs">
+    <Card className="min-w-0 flex-1 flex flex-col overflow-hidden rounded-none border-x-0 border-t-0 border-border/60 bg-card p-0 shadow-none sm:rounded-xl sm:border sm:border-border/70 sm:shadow-rest">
       <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 px-4 py-3 sm:px-6 sm:py-3.5">
         <div className="flex min-w-0 items-center gap-2">
           <ClipboardCheck className="h-4 w-4 shrink-0 text-primary" />

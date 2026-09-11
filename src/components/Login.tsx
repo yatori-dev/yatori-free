@@ -103,7 +103,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
   return (
     <div className="login-page flex min-h-screen flex-col items-center justify-center bg-background px-4 py-8 transition-colors duration-300">
-      <Card className="w-full max-w-[450px] overflow-hidden md:max-w-[min(65.6vw,1024px)]">
+      <Card className="w-full max-w-[450px] overflow-hidden border-border/70 shadow-floating md:max-w-[min(65.6vw,1024px)]">
         {/* Google Accent Bar */}
         <div className="google-accent-bar">
           <div></div>

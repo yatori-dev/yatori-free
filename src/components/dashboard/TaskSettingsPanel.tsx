@@ -23,10 +23,10 @@ function AutoSubmitOption({ disabled, selected, label, onClick }: AutoSubmitOpti
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'flex min-h-11 items-center justify-between rounded-md border px-3 py-2 text-left shadow-sm transition-all duration-200 disabled:cursor-not-allowed sm:rounded-lg sm:px-4 sm:py-3',
+        'flex min-h-11 items-center justify-between rounded-lg border px-3 py-2 text-left transition-all duration-150 ease-standard active:scale-[0.985] disabled:cursor-not-allowed sm:px-4 sm:py-3',
         selected
-          ? 'border-primary bg-primary-container/30 text-primary'
-          : 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted/40',
+          ? 'border-primary/60 bg-primary-container/25 text-primary ring-1 ring-primary/25 shadow-xs'
+          : 'border-border/70 bg-card text-foreground shadow-xs hover:border-primary/40 hover:bg-muted/40',
       )}
     >
       <span className="text-sm font-medium transition-colors">{label}</span>
@@ -76,7 +76,7 @@ interface TaskBehaviorCardProps {
 
 function TaskBehaviorCard({ id, label, enabled, value, onToggle, onModeChange }: TaskBehaviorCardProps) {
   return (
-    <div className="rounded-md border border-border/50 bg-muted/25 p-3 sm:rounded-lg sm:p-5">
+    <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-all duration-200 hover:border-border sm:p-5">
       <div className="flex items-center justify-between gap-3">
         <Label htmlFor={id} className="cursor-pointer text-sm font-semibold text-foreground">
           {label}
@@ -158,7 +158,7 @@ export function TaskSettingsPanel({
               显示
             </h2>
             <div className="grid gap-3">
-              <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
+              <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-all duration-200 hover:border-border sm:p-5">
                 <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
                   <Label htmlFor="hideEmptyTaskCourses" className="block cursor-pointer text-sm font-semibold text-foreground">
                     隐藏无任务点课程
@@ -185,7 +185,7 @@ export function TaskSettingsPanel({
               任务行为
             </h2>
 
-            <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
+            <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-all duration-200 hover:border-border sm:p-5">
               <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
                 <Label htmlFor="bypassDailyStudyLimit" className="block cursor-pointer text-sm font-semibold text-foreground">
                   暴力模式
@@ -199,7 +199,7 @@ export function TaskSettingsPanel({
               />
             </div>
 
-            <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
+            <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-all duration-200 hover:border-border sm:p-5">
               <Label htmlFor="doChapterTest" className="block cursor-pointer text-sm font-semibold text-foreground">
                 章节测试自动答题
               </Label>

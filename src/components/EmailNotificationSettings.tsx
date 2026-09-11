@@ -134,7 +134,7 @@ export function EmailNotificationSettings({ onUnauthorized }: EmailNotificationS
       : '任务成功/失败时发送邮件';
 
   return (
-    <div className="space-y-3 rounded-md border border-border/50 bg-muted/25 p-3 sm:space-y-4 sm:rounded-lg sm:p-5">
+    <div className="space-y-3 rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-all duration-200 hover:border-border sm:space-y-4 sm:p-5">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
           <Label htmlFor="emailNotificationEnabled" className="block cursor-pointer text-sm font-semibold text-foreground">

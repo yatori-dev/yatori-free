@@ -10,7 +10,6 @@ import {
   AlertCircle, 
   Clock, 
   ChevronDown, 
-  ChevronUp, 
   RefreshCw, 
   Hourglass,
 } from 'lucide-react';
@@ -139,50 +138,55 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
       case 'running':
         return {
           label: '运行中',
-          colorClass: 'bg-info-container/60 text-info border-info/20',
-          icon: <Bot className="w-4 h-4 text-info" />
+          colorClass: 'bg-info-container/50 text-info border-info/25 shadow-xs',
+          icon: (
+            <span className="relative flex h-3.5 w-3.5 items-center justify-center">
+              <span className="absolute inline-flex h-2 w-2 rounded-full bg-info/40 animate-calm-pulse" />
+              <Bot className="relative w-3.5 h-3.5 text-info" />
+            </span>
+          )
         };
       case 'waiting_daily_limit':
         return {
           label: '等待次日继续',
-          colorClass: 'bg-warning-container/60 text-warning border-warning/20',
-          icon: <Hourglass className="w-4 h-4 text-warning" />
+          colorClass: 'bg-warning-container/50 text-warning border-warning/25 shadow-xs',
+          icon: <Hourglass className="w-3.5 h-3.5 text-warning" />
         };
       case 'success':
         return {
           label: '成功',
-          colorClass: 'bg-success-container/60 text-success border-success/20',
-          icon: <CheckCircle2 className="w-4 h-4 text-success" />
+          colorClass: 'bg-success-container/50 text-success border-success/25 shadow-xs',
+          icon: <CheckCircle2 className="w-3.5 h-3.5 text-success" />
         };
       case 'partial_success':
         return {
           label: '部分成功',
-          colorClass: 'bg-warning-container/60 text-warning border-warning/20',
-          icon: <AlertCircle className="w-4 h-4 text-warning" />
+          colorClass: 'bg-warning-container/50 text-warning border-warning/25 shadow-xs',
+          icon: <AlertCircle className="w-3.5 h-3.5 text-warning" />
         };
       case 'failed':
         return {
           label: '失败',
-          colorClass: 'bg-danger-container/60 text-danger border-danger/20',
-          icon: <XCircle className="w-4 h-4 text-danger" />
+          colorClass: 'bg-danger-container/50 text-danger border-danger/25 shadow-xs',
+          icon: <XCircle className="w-3.5 h-3.5 text-danger" />
         };
       case 'stopping':
         return {
           label: '停止中',
-          colorClass: 'bg-warning-container/60 text-warning border-warning/20',
-          icon: <Hourglass className="w-4 h-4 text-warning animate-spin" />
+          colorClass: 'bg-warning-container/50 text-warning border-warning/25 shadow-xs',
+          icon: <Hourglass className="w-3.5 h-3.5 text-warning animate-spin" />
         };
       case 'stopped':
         return {
           label: '已停止',
-          colorClass: 'bg-muted text-muted-foreground border-border',
-          icon: <Square className="w-4 h-4 text-muted-foreground" />
+          colorClass: 'bg-muted/70 text-muted-foreground border-border/70 shadow-xs',
+          icon: <Square className="w-3.5 h-3.5 text-muted-foreground" />
         };
       default:
         return {
           label: '待执行',
-          colorClass: 'bg-muted/50 text-muted-foreground border-border/50',
-          icon: <Clock className="w-4 h-4 text-muted-foreground" />
+          colorClass: 'bg-muted/50 text-muted-foreground border-border/50 shadow-xs',
+          icon: <Clock className="w-3.5 h-3.5 text-muted-foreground" />
         };
     }
   };
@@ -288,7 +292,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   })();
 
   return (
-    <article className={`group flex w-full min-w-0 flex-col gap-3 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-rest transition-all duration-200 ease-standard hover:shadow-raised dark:hover:bg-accent/10 sm:gap-4 sm:p-5 ${
+    <article className={`group flex w-full min-w-0 flex-col gap-3 overflow-hidden rounded-xl border border-border/70 bg-card p-4 shadow-rest transition-all duration-200 ease-standard hover:border-border hover:shadow-raised sm:gap-4 sm:p-5 ${
       effectiveStatus === 'success' ? 'animate-task-success-flash' : ''
     }`}>
       
@@ -296,7 +300,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
       <div className="flex w-full min-w-0 flex-col gap-2.5 sm:gap-3">
         <div className="flex min-w-0 items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2 font-mono text-xs text-muted-foreground">
-            <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 font-semibold text-foreground">
+            <span className="shrink-0 rounded-md border border-border/60 bg-muted/70 px-2 py-0.5 font-semibold text-foreground">
               #{task.id.substring(0, 8)}
             </span>
             {taskConfigSnapshot?.kind && (
@@ -330,14 +334,14 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
 
       {/* Terminal result */}
       {isTerminal && (
-        <div className={`flex min-w-0 items-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium ${
+        <div className={`flex min-w-0 items-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${
           effectiveStatus === 'success'
             ? 'border-success/30 bg-success-container/30 text-success'
             : effectiveStatus === 'failed'
               ? 'border-danger/30 bg-danger-container/30 text-danger'
               : effectiveStatus === 'partial_success'
                 ? 'border-warning/30 bg-warning-container/30 text-warning'
-                : 'border-border bg-muted/30 text-muted-foreground'
+                : 'border-border/70 bg-muted/30 text-muted-foreground'
         }`}>
           {effectiveStatus === 'success' && <CheckCircle2 className="h-4 w-4 shrink-0" />}
           {effectiveStatus === 'failed' && <XCircle className="h-4 w-4 shrink-0" />}
@@ -422,10 +426,10 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
           variant="ghost"
           onClick={() => setShowDetails(!showDetails)}
           aria-expanded={showDetails}
-          className="h-8 text-xs text-muted-foreground hover:text-foreground hover:bg-muted px-3 flex items-center gap-1.5 transition-colors shrink-0"
+          className="h-8 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/70 px-3 flex items-center gap-1.5 transition-colors shrink-0"
         >
-          {showDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-          {isTerminal ? (showDetails ? '收起详情' : '查看详情') : '配置参数'}
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ease-standard ${showDetails ? 'rotate-180' : ''}`} />
+          <span>{isTerminal ? (showDetails ? '收起详情' : '查看详情') : (showDetails ? '收起参数' : '配置参数')}</span>
         </Button>
         
         {canStopTask && (

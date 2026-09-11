@@ -207,13 +207,13 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
               {isConfirmed ? '已确认，跳转中...' : '已扫码，请在手机端确认'}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            <span className="h-2 w-2 rounded-full bg-primary animate-ping" />
+          <div className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary shadow-xs">
+            <span className="h-2 w-2 rounded-full bg-primary animate-calm-pulse" />
             <span>{isConfirmed ? '验证通过' : '等待确认'}</span>
           </div>
         </div>
       ) : (
-        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-2xl border border-border bg-white p-3 shadow-xs">
+        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-2xl border border-border/70 bg-white p-3 shadow-rest transition-all duration-200 ease-standard hover:shadow-raised">
           {session?.qrContent ? (
             <QRCodeSVG
               value={session.qrContent}
