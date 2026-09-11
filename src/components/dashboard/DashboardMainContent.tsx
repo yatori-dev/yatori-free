@@ -178,6 +178,7 @@ export function DashboardMainContent({
             </div>
           )}
 
+          <div data-dashboard-tab-content>
           {activeTab === 'courses' && (
             <CourseProgressSummary
               visibleCount={courses.length - hiddenEmptyTaskCourseCount}
@@ -302,6 +303,7 @@ export function DashboardMainContent({
             </Card>
           </TabsContent>
         </div>
+          </div>
       </div>
     </main>
   );

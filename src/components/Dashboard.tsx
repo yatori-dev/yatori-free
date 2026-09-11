@@ -167,7 +167,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     }
 
     const main = dashboardMainRef.current;
-    if (!main) {
+    const content = main?.querySelector<HTMLElement>('[data-dashboard-tab-content]');
+    if (!main || !content) {
       return;
     }
 
@@ -178,12 +179,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     }
     lastAnimatedMobileTabRef.current = activeTab;
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof main.animate !== 'function') {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof content.animate !== 'function') {
       return;
     }
 
     mobileTabAnimationRef.current?.cancel();
-    const animation = main.animate(
+    const animation = content.animate(
       [
         {
           opacity: 0.82,
