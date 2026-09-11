@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { BypassDailyStudyLimitConfirmDialog } from './BypassDailyStudyLimitConfirmDialog';
 
 type SubmitMode = 0 | 1 | 2;
-type SettingSwitchKey = 'hideEmptyTaskCourses' | 'bypassDailyStudyLimit' | 'doChapterTest' | 'doWork' | 'doExam';
+type SettingSwitchKey = 'hideEmptyTaskCourses' | 'hideUnavailableWorks' | 'hideUnavailableExams' | 'bypassDailyStudyLimit' | 'doChapterTest' | 'doWork' | 'doExam';
 
 interface AutoSubmitOptionProps {
   disabled: boolean;
@@ -101,6 +101,8 @@ function TaskBehaviorCard({ id, label, enabled, value, onToggle, onModeChange }:
 interface TaskSettingsPanelProps {
   hiddenEmptyTaskCourseCount: number;
   hideEmptyTaskCourses: boolean;
+  hideUnavailableWorks: boolean;
+  hideUnavailableExams: boolean;
   bypassDailyStudyLimit: boolean;
   doChapterTest: boolean;
   doWork: boolean;
@@ -116,6 +118,8 @@ interface TaskSettingsPanelProps {
 export function TaskSettingsPanel({
   hiddenEmptyTaskCourseCount,
   hideEmptyTaskCourses,
+  hideUnavailableWorks,
+  hideUnavailableExams,
   bypassDailyStudyLimit,
   doChapterTest,
   doWork,
@@ -145,7 +149,7 @@ export function TaskSettingsPanel({
         <CardTitle className="text-sm font-semibold sm:text-base">提交设置</CardTitle>
       </CardHeader>
       <CardContent className="p-3 text-sm sm:p-6">
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-5 sm:space-y-6">
           <section className="space-y-2" aria-labelledby="notification-settings-heading">
             <h2 id="notification-settings-heading" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               通知
@@ -153,37 +157,45 @@ export function TaskSettingsPanel({
             <EmailNotificationSettings onUnauthorized={onUnauthorized} />
           </section>
 
+          <section className="space-y-3 sm:space-y-4" aria-labelledby="display-settings-heading">
+            <h2 id="display-settings-heading" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              显示
+            </h2>
+            <div className="grid gap-3">
+              <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
+                <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
+                  <Label htmlFor="hideEmptyTaskCourses" className="block cursor-pointer text-sm font-semibold text-foreground">
+                    隐藏无任务点课程
+                  </Label>
+                  <div
+                    className={cn(
+                      'grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none',
+                      hiddenEmptyTaskCourseCount > 0 ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
+                    )}
+                    aria-hidden={hiddenEmptyTaskCourseCount === 0}
+                  >
+                    <div className="min-h-0 overflow-hidden">
+                      <p className="text-xs leading-relaxed text-muted-foreground">当前已隐藏 {hiddenEmptyTaskCourseCount} 门</p>
+                    </div>
+                  </div>
+                </div>
+                <Switch id="hideEmptyTaskCourses" checked={hideEmptyTaskCourses} onCheckedChange={(checked) => onSettingSwitch('hideEmptyTaskCourses', checked)} className="shrink-0" />
+              </div>
+              <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 sm:rounded-lg sm:p-4">
+                <Label htmlFor="hideUnavailableWorks" className="cursor-pointer text-sm font-semibold text-foreground">隐藏未开放作业</Label>
+                <Switch id="hideUnavailableWorks" checked={hideUnavailableWorks} onCheckedChange={(checked) => onSettingSwitch('hideUnavailableWorks', checked)} />
+              </div>
+              <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 sm:rounded-lg sm:p-4">
+                <Label htmlFor="hideUnavailableExams" className="cursor-pointer text-sm font-semibold text-foreground">隐藏未开放考试</Label>
+                <Switch id="hideUnavailableExams" checked={hideUnavailableExams} onCheckedChange={(checked) => onSettingSwitch('hideUnavailableExams', checked)} />
+              </div>
+            </div>
+          </section>
+
           <section className="space-y-3 sm:space-y-4" aria-labelledby="task-behavior-settings-heading">
             <h2 id="task-behavior-settings-heading" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               任务行为
             </h2>
-
-            <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
-              <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
-                <Label htmlFor="hideEmptyTaskCourses" className="block cursor-pointer text-sm font-semibold text-foreground">
-                  隐藏无任务点课程
-                </Label>
-                <div
-                  className={cn(
-                    'grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none',
-                    hiddenEmptyTaskCourseCount > 0 ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
-                  )}
-                  aria-hidden={hiddenEmptyTaskCourseCount === 0}
-                >
-                  <div className="min-h-0 overflow-hidden">
-                    <p className="text-xs leading-relaxed text-muted-foreground">
-                      当前已隐藏 {hiddenEmptyTaskCourseCount} 门
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <Switch
-                id="hideEmptyTaskCourses"
-                checked={hideEmptyTaskCourses}
-                onCheckedChange={(checked) => onSettingSwitch('hideEmptyTaskCourses', checked)}
-                className="shrink-0"
-              />
-            </div>
 
             <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 transition-all sm:rounded-lg sm:p-5">
               <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">

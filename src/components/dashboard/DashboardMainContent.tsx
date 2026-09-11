@@ -47,6 +47,8 @@ interface DashboardMainContentProps {
   courseTaskPointProgressByIdentifier: CourseTaskPointProgressMap;
   hiddenEmptyTaskCourseCount: number;
   hideEmptyTaskCourses: boolean;
+  hideUnavailableWorks: boolean;
+  hideUnavailableExams: boolean;
   bypassDailyStudyLimit: boolean;
   doChapterTest: boolean;
   doWork: boolean;
@@ -66,7 +68,7 @@ interface DashboardMainContentProps {
   onToggleFullCourseOutline: (courseKey: string) => void;
   onTaskFilterChange: (filter: 'active' | 'completed') => void;
   onRefreshTasks: () => void;
-  onSettingSwitch: (key: 'hideEmptyTaskCourses' | 'bypassDailyStudyLimit' | 'doChapterTest' | 'doWork' | 'doExam', checked: boolean) => void;
+  onSettingSwitch: (key: 'hideEmptyTaskCourses' | 'hideUnavailableWorks' | 'hideUnavailableExams' | 'bypassDailyStudyLimit' | 'doChapterTest' | 'doWork' | 'doExam', checked: boolean) => void;
   onWorkAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onExamAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onSignStatusChange: (active: boolean) => void;
@@ -115,6 +117,8 @@ export function DashboardMainContent({
   courseTaskPointProgressByIdentifier,
   hiddenEmptyTaskCourseCount,
   hideEmptyTaskCourses,
+  hideUnavailableWorks,
+  hideUnavailableExams,
   bypassDailyStudyLimit,
   doChapterTest,
   doWork,
@@ -230,6 +234,7 @@ export function DashboardMainContent({
             selectedWorks={selectedWorks}
             expandedCourses={expandedCourses}
             workAutoSubmit={workAutoSubmit}
+            hideUnavailable={hideUnavailableWorks}
             onWorkAutoSubmitChange={onWorkAutoSubmitChange}
             onToggleExpandCourse={onToggleExpandCourse}
             onToggleSelectWork={onToggleSelectWork}
@@ -247,6 +252,7 @@ export function DashboardMainContent({
             selectedExams={selectedExams}
             expandedCourses={expandedCourses}
             examAutoSubmit={examAutoSubmit}
+            hideUnavailable={hideUnavailableExams}
             onExamAutoSubmitChange={onExamAutoSubmitChange}
             onToggleExpandCourse={onToggleExpandCourse}
             onToggleSelectExam={onToggleSelectExam}
@@ -271,6 +277,8 @@ export function DashboardMainContent({
             <TaskSettingsPanel
               hiddenEmptyTaskCourseCount={hiddenEmptyTaskCourseCount}
               hideEmptyTaskCourses={hideEmptyTaskCourses}
+              hideUnavailableWorks={hideUnavailableWorks}
+              hideUnavailableExams={hideUnavailableExams}
               bypassDailyStudyLimit={bypassDailyStudyLimit}
               doChapterTest={doChapterTest}
               doWork={doWork}

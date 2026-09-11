@@ -28,6 +28,7 @@ interface WorksListSectionProps {
   selectedWorks: Record<string, Set<string>>;
   expandedCourses: Set<string>;
   workAutoSubmit: 0 | 1 | 2;
+  hideUnavailable: boolean;
   onWorkAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onToggleExpandCourse: (courseKey: string) => void;
   onToggleSelectWork: (classId: string, workId: string) => void;
@@ -51,6 +52,7 @@ export function WorksListSection({
   selectedWorks,
   expandedCourses,
   workAutoSubmit,
+  hideUnavailable,
   onWorkAutoSubmitChange,
   onToggleExpandCourse,
   onToggleSelectWork,
@@ -68,7 +70,7 @@ export function WorksListSection({
 
     courses.forEach((course) => {
       const details = courseDetailsMap[course.key];
-      const works = details?.works ?? [];
+      const works = (details?.works ?? []).filter((work) => !hideUnavailable || work.runnable);
       totalWorksCount += works.length;
       runnableWorksCount += works.filter((w) => w.runnable).length;
 
@@ -79,7 +81,7 @@ export function WorksListSection({
     });
 
     return { totalWorksCount, runnableWorksCount, selectedCount };
-  }, [courses, courseDetailsMap, selectedWorks]);
+  }, [courses, courseDetailsMap, selectedWorks, hideUnavailable]);
 
   const filteredCourses = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -89,13 +91,13 @@ export function WorksListSection({
       const nameMatch = course.courseName.toLowerCase().includes(query);
       const teacherMatch = course.courseTeacher?.toLowerCase().includes(query) ?? false;
       const details = courseDetailsMap[course.key];
-      const workMatch = details?.works?.some((w) =>
+      const workMatch = details?.works?.filter((w) => !hideUnavailable || w.runnable).some((w) =>
         getWorkItemTitle(w).toLowerCase().includes(query)
       ) ?? false;
 
       return nameMatch || teacherMatch || workMatch;
     });
-  }, [courses, searchQuery, courseDetailsMap]);
+  }, [courses, searchQuery, courseDetailsMap, hideUnavailable]);
 
   const hasAnyLoadedWorks = stats.totalWorksCount > 0;
   const isAllRunnableSelected = stats.runnableWorksCount > 0 && stats.selectedCount === stats.runnableWorksCount;
@@ -220,7 +222,7 @@ export function WorksListSection({
                 const details = courseDetailsMap[course.key];
                 const isLoading = loadingDetails[course.key] === true;
                 const isExpanded = expandedCourses.has(course.key);
-                const works: CourseWorkItem[] = details?.works ?? [];
+                const works: CourseWorkItem[] = (details?.works ?? []).filter((work) => !hideUnavailable || work.runnable);
                 const runnableWorks = works.filter((w) => w.runnable);
                 const courseSelected = selectedWorks[course.key] ?? new Set<string>();
 

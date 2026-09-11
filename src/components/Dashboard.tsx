@@ -32,6 +32,8 @@ interface DashboardProps {
 
 interface SettingsFormState {
   hideEmptyTaskCourses: boolean;
+  hideUnavailableWorks: boolean;
+  hideUnavailableExams: boolean;
   bypassDailyStudyLimit: boolean;
   doChapterTest: boolean;
   doWork: boolean;
@@ -44,6 +46,8 @@ interface PersistedSettingsFormState {
   settingsVersion: number;
   hideEmptyTaskCourses: boolean;
   doChapterTest: boolean;
+  hideUnavailableWorks: boolean;
+  hideUnavailableExams: boolean;
 }
 
 interface TaskExecutionSettingsState {
@@ -59,12 +63,14 @@ interface PersistedSettingsState {
   form: PersistedSettingsFormState;
 }
 
-const TASK_SETTINGS_VERSION = 1;
+const TASK_SETTINGS_VERSION = 2;
 
 const DEFAULT_PERSISTED_SETTINGS: PersistedSettingsFormState = {
   settingsVersion: TASK_SETTINGS_VERSION,
   hideEmptyTaskCourses: true,
   doChapterTest: true,
+  hideUnavailableWorks: true,
+  hideUnavailableExams: true,
 };
 
 const DEFAULT_TASK_EXECUTION_SETTINGS: TaskExecutionSettingsState = {
@@ -115,6 +121,8 @@ function readPersistedSettings(accountId: string | null | undefined): PersistedS
       settingsVersion: TASK_SETTINGS_VERSION,
       hideEmptyTaskCourses: isCurrentSettingsVersion ? settings.hideEmptyTaskCourses !== false : true,
       doChapterTest: settings.doChapterTest !== false,
+      hideUnavailableWorks: isCurrentSettingsVersion ? settings.hideUnavailableWorks !== false : true,
+      hideUnavailableExams: isCurrentSettingsVersion ? settings.hideUnavailableExams !== false : true,
     };
   } catch (error) {
     console.error('Failed to parse task settings', error);
@@ -272,6 +280,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const {
     hideEmptyTaskCourses,
+    hideUnavailableWorks,
+    hideUnavailableExams,
     bypassDailyStudyLimit,
     doChapterTest,
     doWork,
@@ -783,6 +793,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       });
     }
 
+    if (key === 'hideUnavailableWorks' && checked) {
+      setSelectedWorks((previous) => Object.fromEntries(
+        Object.entries(previous).map(([classId, ids]) => [
+          classId,
+          new Set([...ids].filter((id) => courseDetailsMap[classId]?.works?.find((work) => work.id === id)?.runnable)),
+        ]),
+      ));
+    }
+
+    if (key === 'hideUnavailableExams' && checked) {
+      setSelectedExams((previous) => Object.fromEntries(
+        Object.entries(previous).map(([classId, ids]) => [
+          classId,
+          new Set([...ids].filter((id) => courseDetailsMap[classId]?.exams?.find((exam) => exam.id === id)?.runnable)),
+        ]),
+      ));
+    }
+
     setPersistedSettingsState({
       accountId: currentAccountId,
       form: nextForm,
@@ -1012,6 +1040,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
             hiddenEmptyTaskCourseCount={hiddenEmptyTaskCourseCount}
             hideEmptyTaskCourses={hideEmptyTaskCourses}
+            hideUnavailableWorks={hideUnavailableWorks}
+            hideUnavailableExams={hideUnavailableExams}
             bypassDailyStudyLimit={bypassDailyStudyLimit}
             doChapterTest={doChapterTest}
             doWork={doWork}

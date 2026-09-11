@@ -28,6 +28,7 @@ interface ExamsListSectionProps {
   selectedExams: Record<string, Set<string>>;
   expandedCourses: Set<string>;
   examAutoSubmit: 0 | 1 | 2;
+  hideUnavailable: boolean;
   onExamAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onToggleExpandCourse: (courseKey: string) => void;
   onToggleSelectExam: (classId: string, examId: string) => void;
@@ -51,6 +52,7 @@ export function ExamsListSection({
   selectedExams,
   expandedCourses,
   examAutoSubmit,
+  hideUnavailable,
   onExamAutoSubmitChange,
   onToggleExpandCourse,
   onToggleSelectExam,
@@ -68,7 +70,7 @@ export function ExamsListSection({
 
     courses.forEach((course) => {
       const details = courseDetailsMap[course.key];
-      const exams = details?.exams ?? [];
+      const exams = (details?.exams ?? []).filter((exam) => !hideUnavailable || exam.runnable);
       totalExamsCount += exams.length;
       runnableExamsCount += exams.filter((e) => e.runnable).length;
 
@@ -79,7 +81,7 @@ export function ExamsListSection({
     });
 
     return { totalExamsCount, runnableExamsCount, selectedCount };
-  }, [courses, courseDetailsMap, selectedExams]);
+  }, [courses, courseDetailsMap, selectedExams, hideUnavailable]);
 
   const filteredCourses = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -89,13 +91,13 @@ export function ExamsListSection({
       const nameMatch = course.courseName.toLowerCase().includes(query);
       const teacherMatch = course.courseTeacher?.toLowerCase().includes(query) ?? false;
       const details = courseDetailsMap[course.key];
-      const examMatch = details?.exams?.some((e) =>
+      const examMatch = details?.exams?.filter((e) => !hideUnavailable || e.runnable).some((e) =>
         getExamItemTitle(e).toLowerCase().includes(query)
       ) ?? false;
 
       return nameMatch || teacherMatch || examMatch;
     });
-  }, [courses, searchQuery, courseDetailsMap]);
+  }, [courses, searchQuery, courseDetailsMap, hideUnavailable]);
 
   const hasAnyLoadedExams = stats.totalExamsCount > 0;
   const isAllRunnableSelected = stats.runnableExamsCount > 0 && stats.selectedCount === stats.runnableExamsCount;
@@ -220,7 +222,7 @@ export function ExamsListSection({
                 const details = courseDetailsMap[course.key];
                 const isLoading = loadingDetails[course.key] === true;
                 const isExpanded = expandedCourses.has(course.key);
-                const exams: CourseExamItem[] = details?.exams ?? [];
+                const exams: CourseExamItem[] = (details?.exams ?? []).filter((exam) => !hideUnavailable || exam.runnable);
                 const runnableExams = exams.filter((e) => e.runnable);
                 const courseSelected = selectedExams[course.key] ?? new Set<string>();
 
