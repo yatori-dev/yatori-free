@@ -245,15 +245,14 @@ export function DashboardMainContent({
             onRefreshCourses={onRefreshCourses}
           />
 
-          <TabsContent value="sign" className="m-0 outline-none">
-            <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:py-0">
-              <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4 lg:hidden">
-                <CardTitle className="text-sm font-semibold sm:text-base">自动签到</CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 text-sm sm:p-6">
-                {accountId && <SignMonitor accountId={accountId} onUnauthorized={onUnauthorized} onStatusChange={onSignStatusChange} />}
-              </CardContent>
-            </Card>
+          <TabsContent value="sign" className="m-0 outline-none lg:min-h-0 lg:flex-1">
+            {accountId && (
+              <SignMonitor
+                accountId={accountId}
+                onUnauthorized={onUnauthorized}
+                onStatusChange={onSignStatusChange}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="settings" className="m-0 outline-none">

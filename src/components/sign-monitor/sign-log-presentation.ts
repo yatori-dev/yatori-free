@@ -3,23 +3,23 @@ import type { SignLog } from '@/lib/api';
 export const SIGN_TYPE_BADGES = [
   {
     label: '普通签到',
-    className: 'border-info/25 bg-info-container/60 text-info',
+    className: 'border-info/20 bg-info-container/30 text-info',
   },
   {
     label: '拍照签到',
-    className: 'border-sign-photo/25 bg-sign-photo-container/60 text-sign-photo',
+    className: 'border-sign-photo/20 bg-sign-photo-container/30 text-sign-photo',
   },
   {
     label: '手势签到',
-    className: 'border-warning/25 bg-warning-container/60 text-warning',
+    className: 'border-warning/20 bg-warning-container/30 text-warning',
   },
   {
     label: '位置签到',
-    className: 'border-sign-location/25 bg-sign-location-container/60 text-sign-location',
+    className: 'border-sign-location/20 bg-sign-location-container/30 text-sign-location',
   },
   {
     label: '签到码签到',
-    className: 'border-sign-code/25 bg-sign-code-container/60 text-sign-code',
+    className: 'border-sign-code/20 bg-sign-code-container/30 text-sign-code',
   },
 ] as const;
 
@@ -53,9 +53,9 @@ export function isSignResultSuccess(log: SignLog) {
 
 export function getSignResultClassName(log: SignLog) {
   if (isSignResultSuccess(log)) {
-    return 'border-success/25 bg-success-container/60 text-success';
+    return 'border-success/30 bg-success-container/40 text-success';
   }
-  return 'border-border bg-muted text-muted-foreground';
+  return 'border-border bg-muted/40 text-muted-foreground';
 }
 
 export function getSignLogTimestamp(log: SignLog) {

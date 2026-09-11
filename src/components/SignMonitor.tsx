@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSignMonitorCountdown } from '@/hooks/useSignMonitorCountdown';
 import { Button } from './ui/button';
-import { Card, CardHeader, CardTitle } from './ui/card';
+import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { SignLogHistory } from './sign-monitor/SignLogHistory';
-import { SIGN_TYPE_BADGES } from './sign-monitor/sign-log-presentation';
 import {
   startSignMonitor,
   stopSignMonitor,
@@ -24,6 +23,7 @@ import {
   Play,
   Square,
   RefreshCw,
+  Radio,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -165,89 +165,82 @@ export const SignMonitor: React.FC<SignMonitorProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6">
-      {/* 自动签到：常驻状态装置 */}
-      {!monitorStarted ? (
-        /* Stopped State: Quiet Launcher Card */
-        <Card className="rounded-xl border border-border bg-card p-4 sm:p-6 shadow-xs">
-          <CardHeader className="flex flex-col gap-4 p-0 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0 flex-1 space-y-2">
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-base font-semibold text-foreground">自动签到监测</CardTitle>
-                <Badge variant="outline" className="text-xs text-muted-foreground">未运行</Badge>
+    <div className="flex flex-col gap-3 sm:gap-4 lg:min-h-0 lg:flex-1">
+      {/* 自动签到控制卡片 */}
+      <Card className="shrink-0 rounded-none border-x-0 border-t-0 bg-card p-4 sm:rounded-xl sm:border sm:border-border sm:p-5 shadow-xs">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 space-y-1">
+            <div className="flex items-center gap-2.5">
+              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                monitorStarted
+                  ? 'bg-success-container/40 text-success'
+                  : 'bg-muted/60 text-muted-foreground'
+              }`}>
+                <Radio className={`h-4 w-4 ${monitorStarted ? 'animate-pulse' : ''}`} />
               </div>
-              <div className="no-scrollbar flex min-w-0 items-center gap-1.5 overflow-x-auto pt-1 pb-1 sm:flex-wrap sm:overflow-visible">
-                {SIGN_TYPE_BADGES.map((item) => (
-                  <Badge
-                    key={item.label}
-                    variant="outline"
-                    className={`shrink-0 px-1.5 py-0.5 text-[11px] leading-4 ${item.className}`}
-                  >
-                    {item.label}
+
+              <div className="flex flex-wrap items-center gap-2 min-w-0">
+                <span className="text-sm font-semibold text-foreground sm:text-base">自动签到监测</span>
+                {!monitorStarted ? (
+                  <Badge variant="outline" className="gap-1.5 border-border bg-muted/40 px-2 py-0.5 text-xs font-normal text-muted-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                    未运行
                   </Badge>
-                ))}
+                ) : (
+                  <Badge variant="outline" className="gap-1.5 border-success/30 bg-success-container/30 px-2 py-0.5 text-xs font-medium text-success">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                    运行中
+                    <span className="text-muted-foreground/30">|</span>
+                    <span className="text-muted-foreground font-normal">剩余</span>
+                    <span className="font-mono font-semibold tabular-nums">{formatCountdown(monitorRemainingMs)}</span>
+                  </Badge>
+                )}
               </div>
             </div>
 
-            <div className="flex items-center shrink-0 pt-2 sm:pt-0">
+            <p className="text-xs text-muted-foreground leading-relaxed pl-[42px] sm:pl-0">
+              {monitorStarted
+                ? '后台监听中，倒计时结束或手动停止后退出。'
+                : '后台自动提交开放的课程签到（不支持拍照与二维码签到）'}
+            </p>
+          </div>
+
+          <div className="flex shrink-0 items-center pt-1 sm:pt-0">
+            {!monitorStarted ? (
               <Button
                 type="button"
                 disabled={toggleAction !== null}
                 onClick={() => void handleMonitorAction('start')}
-                className="h-10 w-full sm:w-auto items-center gap-2 rounded-lg bg-primary hover:bg-primary-hover text-primary-foreground px-5 text-sm font-semibold shadow-xs transition-all"
+                className="h-11 w-auto self-end items-center gap-1.5 rounded-lg bg-primary hover:bg-primary-hover text-primary-foreground px-4 text-xs font-medium shadow-xs transition-colors sm:h-9"
               >
                 {toggleAction !== null ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
                 ) : (
-                  <Play className="w-4 h-4 fill-current" />
+                  <Play className="h-3.5 w-3.5 fill-current" />
                 )}
                 <span>启动监测</span>
               </Button>
-            </div>
-          </CardHeader>
-        </Card>
-      ) : (
-        /* Active State: Status Instrument Dashboard Widget */
-        <Card className="rounded-xl border border-primary/30 bg-primary-container/20 p-4 sm:p-6 shadow-sm animate-in fade-in-0 duration-300">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-center gap-4">
-              {/* Circular border timer */}
-              <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-card text-primary shadow-xs">
-                <span className="h-2 w-2 rounded-full bg-primary animate-ping absolute -top-0.5 -right-0.5" />
-                <Play className="h-5 w-5 fill-current ml-0.5 text-primary" />
-              </div>
-
-              <div className="min-w-0 flex-1 space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-primary uppercase tracking-wider">监测中</span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                </div>
-                <div className="tabular-nums font-mono text-xl sm:text-2xl font-bold text-foreground">
-                  {formatCountdown(monitorRemainingMs)}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center shrink-0">
+            ) : (
               <Button
                 type="button"
                 variant="outline"
                 disabled={toggleAction !== null}
                 onClick={() => void handleMonitorAction('stop')}
-                className="h-10 w-full sm:w-auto items-center gap-2 rounded-lg border-danger/30 text-danger hover:bg-danger-container/40 hover:border-danger px-4 text-xs font-semibold shadow-xs transition-colors"
+                className="h-11 w-auto self-end items-center gap-1.5 rounded-lg border-danger/30 text-danger hover:bg-danger-container/30 hover:border-danger px-4 text-xs font-medium shadow-xs transition-colors sm:h-9"
               >
                 {toggleAction !== null ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
                 ) : (
-                  <Square className="w-4 h-4 fill-current" />
+                  <Square className="h-3.5 w-3.5 fill-current" />
                 )}
                 <span>停止监测</span>
               </Button>
-            </div>
+            )}
           </div>
-        </Card>
-      )}
+        </div>
+      </Card>
 
+      {/* 签到历史记录列表 */}
       <SignLogHistory
         errors={historyErrors}
         limit={SIGN_LOGS_PAGE_SIZE}
