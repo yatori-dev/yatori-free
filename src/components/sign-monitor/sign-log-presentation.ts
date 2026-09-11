@@ -67,3 +67,7 @@ export function getSignLogTimeValue(log: SignLog) {
   const value = Date.parse(getSignLogTimestamp(log));
   return Number.isFinite(value) ? value : 0;
 }
+
+export function compareSignLogsNewestFirst(left: SignLog, right: SignLog) {
+  return getSignLogTimeValue(right) - getSignLogTimeValue(left);
+}

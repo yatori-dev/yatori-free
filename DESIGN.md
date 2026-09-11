@@ -192,10 +192,8 @@ Category tokens designate the *mode* of sign-in, while status tokens communicate
   - Authorization expiry: HTTP 401 responses immediately trigger `onUnauthorized` for clean session ejection and redirection.
 - **Sign-in Monitoring Architecture**:
   - Unified operational surface combining real-time monitor controls and sign-in audit history.
-  - Data ingestion: The full history dataset is fetched in a single query; filtering, view switching, and pagination are executed entirely in-memory on the client.
-  - Dual View Modes:
-    - **By-Time View**: Paginated timeline showing signed vs. total counts, jump-to-first/last, previous/next, and direct page navigation with lightweight directional transitions. Sorted latest-first.
-    - **By-Course View**: Non-paginated accordion listing all courses with sign-in records. Supports individual expand/collapse. Sorted latest-first.
+  - Data ingestion: The full history dataset is fetched in a single query; sorting and pagination are executed entirely in-memory on the client.
+  - **By-Time View**: Paginated timeline showing signed vs. total counts, jump-to-first/last, previous/next, and direct page navigation with lightweight directional transitions. Sorted latest-first.
   - Semantic vs. Category Colors: Category tokens (`sign-photo`, `sign-location`, `sign-code`) differentiate sign-in mechanisms; execution results exclusively use semantic status tokens (`success`, `warning`, `danger`).
 
 ---

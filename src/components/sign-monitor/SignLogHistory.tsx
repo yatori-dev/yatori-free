@@ -1,7 +1,6 @@
-import { useId, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   AlertCircle,
-  ChevronDown,
   ChevronsLeft,
   ChevronsRight,
   ChevronLeft,
@@ -15,16 +14,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+  compareSignLogsNewestFirst,
   getSignLogTimestamp,
-  getSignLogTimeValue,
   getSignDisplayName,
   getSignResult,
   getSignResultClassName,
   getSignTypeBadge,
   isSignResultSuccess,
 } from './sign-log-presentation';
-import { SignLogViewMenu } from './SignLogViewMenu';
-import type { SignLogView } from './SignLogViewMenu';
 import { formatLocalDateTime } from '@/lib/format';
 
 interface SignLogHistoryProps {
@@ -93,36 +90,14 @@ export function SignLogHistory({
   onRefresh,
   total,
 }: SignLogHistoryProps) {
-  const [view, setView] = useState<SignLogView>('time');
-  const [collapsedCourses, setCollapsedCourses] = useState<Set<string>>(() => new Set());
   const [pageDirection, setPageDirection] = useState<'forward' | 'backward'>('forward');
-  const coursePanelId = useId();
   const sortedLogs = useMemo(() => (
-    [...logs].sort((left, right) => {
-      const timeDifference = getSignLogTimeValue(right) - getSignLogTimeValue(left);
-      if (view === 'time') return timeDifference;
-
-      const courseDifference = (left.courseName ?? '课程未记录').localeCompare(
-        right.courseName ?? '课程未记录',
-        'zh-CN',
-      );
-      return courseDifference || timeDifference;
-    })
-  ), [logs, view]);
+    [...logs].sort(compareSignLogsNewestFirst)
+  ), [logs]);
   const visibleLogs = useMemo(
     () => sortedLogs.slice(offset, offset + limit),
     [limit, offset, sortedLogs],
   );
-  const courseGroups = useMemo(() => {
-    const groups = new Map<string, SignLog[]>();
-    sortedLogs.forEach((log) => {
-      const courseName = log.courseName ?? '课程未记录';
-      const group = groups.get(courseName) ?? [];
-      group.push(log);
-      groups.set(courseName, group);
-    });
-    return [...groups.entries()];
-  }, [sortedLogs]);
   const currentPage = Math.floor(offset / limit) + 1;
   const pageCount = Math.max(1, Math.ceil(total / limit));
   const signedCount = useMemo(
@@ -142,18 +117,6 @@ export function SignLogHistory({
     onPageChange((page - 1) * limit);
   };
 
-  const toggleCourse = (courseName: string) => {
-    setCollapsedCourses((current) => {
-      const next = new Set(current);
-      if (next.has(courseName)) {
-        next.delete(courseName);
-      } else {
-        next.add(courseName);
-      }
-      return next;
-    });
-  };
-
   const submitPageInput = () => {
     const requestedPage = Number.parseInt(pageInput, 10);
     goToPage(Number.isFinite(requestedPage) ? requestedPage : currentPage);
@@ -171,15 +134,6 @@ export function SignLogHistory({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <SignLogViewMenu
-            value={view}
-            onChange={(value) => {
-              setPageDirection('backward');
-              setView(value);
-              onPageChange(0);
-            }}
-          />
-
           <Button
             size="icon"
             variant="ghost"
@@ -229,59 +183,14 @@ export function SignLogHistory({
             </div>
           ) : (
             <div
-              key={`${view}-${offset}`}
+              key={offset}
               className={pageDirection === 'forward'
                 ? 'animate-sign-log-page-forward'
                 : 'animate-sign-log-page-backward'}
             >
-              {view === 'course' ? (
-                <div className="divide-y divide-border/60">
-                  {courseGroups.map(([courseName, courseLogs], index) => {
-                    const isCollapsed = collapsedCourses.has(courseName);
-                    const panelId = `${coursePanelId}-course-${index}`;
-
-                    return (
-                      <section key={courseName}>
-                        <button
-                          type="button"
-                          className="sticky top-0 z-10 flex min-h-11 w-full items-center gap-3 border-b border-border/40 bg-muted/80 px-4 py-2 text-left backdrop-blur-sm transition-colors duration-200 ease-standard hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset sm:px-6"
-                          aria-expanded={!isCollapsed}
-                          aria-controls={panelId}
-                          aria-label={`${courseName}，${courseLogs.length} 条`}
-                          onClick={() => toggleCourse(courseName)}
-                        >
-                          <ChevronDown
-                            className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-standard ${isCollapsed ? '-rotate-90' : ''}`}
-                            aria-hidden="true"
-                          />
-                          <h3 className="min-w-0 flex-1 truncate text-xs font-semibold text-foreground sm:text-sm">
-                            {courseName}
-                          </h3>
-                          <Badge variant="outline" className="shrink-0 bg-card/80 text-muted-foreground">
-                            {courseLogs.length} 条
-                          </Badge>
-                        </button>
-                        <div
-                          id={panelId}
-                          className={`grid transition-[grid-template-rows,opacity] duration-200 ease-standard ${isCollapsed ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'}`}
-                        >
-                          <div className="min-h-0 overflow-hidden">
-                            <div className="divide-y divide-border/40">
-                              {courseLogs.map((log) => (
-                                <SignLogRow key={log.id} log={log} showCourse={false} />
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </section>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="divide-y divide-border/40">
-                  {visibleLogs.map((log) => <SignLogRow key={log.id} log={log} />)}
-                </div>
-              )}
+              <div className="divide-y divide-border/40">
+                {visibleLogs.map((log) => <SignLogRow key={log.id} log={log} />)}
+              </div>
             </div>
           )}
         </div>
@@ -293,15 +202,14 @@ export function SignLogHistory({
             <span className="tabular-nums text-foreground">{total}</span> 条
           </p>
 
-          {view === 'time' && (
-            <form
-              className="flex items-center justify-between gap-1 sm:justify-end"
-              aria-label="签到记录分页"
-              onSubmit={(event) => {
-                event.preventDefault();
-                submitPageInput();
-              }}
-            >
+          <form
+            className="flex items-center justify-between gap-1 sm:justify-end"
+            aria-label="签到记录分页"
+            onSubmit={(event) => {
+              event.preventDefault();
+              submitPageInput();
+            }}
+          >
               <div className="flex items-center gap-1">
                 <Button
                   type="button"
@@ -379,8 +287,7 @@ export function SignLogHistory({
                   <ChevronsRight className="h-4 w-4" />
                 </Button>
               </div>
-            </form>
-          )}
+          </form>
         </div>
       </CardContent>
     </Card>
