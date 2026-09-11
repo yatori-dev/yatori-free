@@ -44,7 +44,7 @@ export function TaskStartConfirmDialog({ open, summary, warnings, onOpenChange, 
           </div>
         )}
 
-        <DialogFooter className="gap-2 pt-2">
+        <DialogFooter className="flex-row justify-end gap-2 pt-2">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="h-9 px-4 text-xs font-medium">
             取消
           </Button>
