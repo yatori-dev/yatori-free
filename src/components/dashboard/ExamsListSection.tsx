@@ -30,7 +30,6 @@ interface ExamsListSectionProps {
   examAutoSubmit: 0 | 1 | 2;
   onExamAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onToggleExpandCourse: (courseKey: string) => void;
-  onLoadAllCourseDetails: () => void;
   onToggleSelectExam: (classId: string, examId: string) => void;
   onToggleSelectCourseExams: (classId: string) => void;
   onSelectAllRunnableExams: () => void;
@@ -54,7 +53,6 @@ export function ExamsListSection({
   examAutoSubmit,
   onExamAutoSubmitChange,
   onToggleExpandCourse,
-  onLoadAllCourseDetails,
   onToggleSelectExam,
   onToggleSelectCourseExams,
   onSelectAllRunnableExams,
@@ -153,9 +151,6 @@ export function ExamsListSection({
             </div>
 
             <div className="flex flex-wrap items-center justify-start gap-2 text-xs sm:justify-end">
-              <Button variant="outline" size="sm" onClick={onLoadAllCourseDetails} disabled={coursesLoading} className="h-8 gap-1 text-xs" title="批量读取所有课程的考试明细">
-                <FolderSync className="h-3.5 w-3.5" /><span>扫描全部考试</span>
-              </Button>
               {stats.runnableExamsCount > 0 && (
                 <Button
                   variant="outline"

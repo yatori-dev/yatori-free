@@ -3,7 +3,6 @@ import { Tabs } from './ui/tabs';
 
 import {
   createTask,
-  getCourseDetails,
   getCourses,
   getVersion,
   getTasks,
@@ -311,6 +310,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       const response = await getCourses(account.id);
       const nextCourses = response.data.courses;
       setCourses(nextCourses);
+      setCourseDetailsMap(response.data.courseDetails);
+      setLoadingDetails({});
       const processingCourseKeys = new Set(
         nextCourses.filter((course) => course.processing).map((course) => course.key),
       );
@@ -359,35 +360,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       }
     }
   }, [onLogout]);
-
-  const loadCourseDetail = useCallback(async (classId: string) => {
-    if (!account) return;
-    setLoadingDetails(prev => ({ ...prev, [classId]: true }));
-    try {
-      const response = await getCourseDetails(account.id, classId);
-      setCourseDetailsMap(prev => ({ ...prev, [classId]: response.data }));
-    } catch (error) {
-      if (isAuthExitError(error)) {
-        notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
-        onLogout();
-        return;
-      }
-      console.error(error);
-      toast.error(getUserFacingErrorMessage(error, '加载课程详情失败，请稍后重试'));
-    } finally {
-      setLoadingDetails(prev => ({ ...prev, [classId]: false }));
-    }
-  }, [account, onLogout]);
-
-  const loadAllCourseDetails = useCallback(async () => {
-    if (!account) return;
-    const unloadCourses = courses.filter((c) => !courseDetailsMap[c.key] && !loadingDetails[c.key]);
-    if (unloadCourses.length === 0) return;
-
-    for (const course of unloadCourses) {
-      await loadCourseDetail(course.key);
-    }
-  }, [account, courses, courseDetailsMap, loadingDetails, loadCourseDetail]);
 
   const handleToggleSelectWork = useCallback((classId: string, workId: string) => {
     setSelectedWorks((prev) => {
@@ -588,11 +560,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         next.delete(courseKey);
       } else {
         next.add(courseKey);
-        // Load details if not loaded
-        const existingDetails = courseDetailsMap[courseKey];
-        if (!existingDetails && !loadingDetails[courseKey]) {
-          void loadCourseDetail(courseKey);
-        }
       }
       return next;
     });
@@ -612,9 +579,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const openStudyIncrementSettings = (classId: string) => {
     setStudyIncrementCourseKey(classId);
-    if (!courseDetailsMap[classId] && !loadingDetails[classId]) {
-      void loadCourseDetail(classId);
-    }
   };
 
   const getSelectedProcessingCourses = (courseKeys: string[]) => {
@@ -1072,7 +1036,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             onExamAutoSubmitChange={updateExamAutoSubmit}
             onSignStatusChange={setSignMonitorActive}
             onTabChange={handleTabChange}
-            onLoadAllCourseDetails={loadAllCourseDetails}
             onToggleSelectWork={handleToggleSelectWork}
             onToggleSelectCourseWorks={handleToggleSelectCourseWorks}
             onSelectAllRunnableWorks={handleSelectAllRunnableWorks}

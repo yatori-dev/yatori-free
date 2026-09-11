@@ -30,7 +30,6 @@ interface WorksListSectionProps {
   workAutoSubmit: 0 | 1 | 2;
   onWorkAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onToggleExpandCourse: (courseKey: string) => void;
-  onLoadAllCourseDetails: () => void;
   onToggleSelectWork: (classId: string, workId: string) => void;
   onToggleSelectCourseWorks: (classId: string) => void;
   onSelectAllRunnableWorks: () => void;
@@ -54,7 +53,6 @@ export function WorksListSection({
   workAutoSubmit,
   onWorkAutoSubmitChange,
   onToggleExpandCourse,
-  onLoadAllCourseDetails,
   onToggleSelectWork,
   onToggleSelectCourseWorks,
   onSelectAllRunnableWorks,
@@ -153,9 +151,6 @@ export function WorksListSection({
             </div>
 
             <div className="flex flex-wrap items-center justify-start gap-2 text-xs sm:justify-end">
-              <Button variant="outline" size="sm" onClick={onLoadAllCourseDetails} disabled={coursesLoading} className="h-8 gap-1 text-xs" title="批量读取所有课程的作业明细">
-                <FolderSync className="h-3.5 w-3.5" /><span>扫描全部作业</span>
-              </Button>
               {stats.runnableWorksCount > 0 && (
                 <Button
                   variant="outline"

@@ -81,7 +81,7 @@ export interface AuthSession {
 export interface CurrentSessionData {
   expiresAt: string;
   user: User;
-  accounts: Account[];
+  account: Account | null;
 }
 
 export interface VersionData {
@@ -137,19 +137,12 @@ export interface Chapter {
   name: string;
   id: number | string;
   label: string;
-  PointTotal?: number;
-  PointFinished?: number;
   pointTotal?: number;
   pointFinished?: number;
   status?: string;
-  jobcount?: number;
   jobCount?: number;
   jobFinishCount?: number;
-  openlock?: number;
   openLock?: number;
-  totalCount?: number;
-  finishCount?: number;
-  unfinishCount?: number;
   isOpen?: boolean;
 }
 
@@ -200,6 +193,8 @@ export interface CourseExamItem {
 
 export interface CourseDetails {
   course: Course;
+  processing?: boolean;
+  processingTaskId?: string;
   chapters?: unknown;
   documents?: CourseDocument[];
   works?: CourseWorkItem[];
@@ -225,7 +220,15 @@ export interface CourseSourceStatus {
 
 export interface CourseListResponseData {
   courses: CourseSummary[];
+  courseDetails: Record<string, CourseDetails>;
   sourceStatus: CourseSourceStatus;
+  errors: Record<string, unknown>[];
+}
+
+interface CourseListApiResponseData {
+  courses: Array<CourseDetails | null>;
+  sourceStatus: CourseSourceStatus;
+  errors: Record<string, unknown>[];
 }
 
 export interface TaskListResponseData {
@@ -602,7 +605,7 @@ export async function getCurrentSession() {
   const response = await apiRequest<CurrentSessionData>('/auth/me', undefined, true);
   const data = response.data;
 
-  const account = data.accounts[0];
+  const account = data.account;
   if (!account) {
     throw new Error('当前会话未关联账号，请重新登录');
   }
@@ -722,15 +725,29 @@ export function getVersion() {
 }
 
 export function getCourses(accountId: string) {
-  return apiRequest<CourseListResponseData>(`/accounts/${encodeApiPathSegment(accountId)}/courses`, undefined, true);
-}
+  return apiRequest<CourseListApiResponseData>(`/accounts/${encodeApiPathSegment(accountId)}/courses`, undefined, true)
+    .then((response) => {
+      const validCourses = response.data.courses.filter(
+        (details): details is CourseDetails => details !== null && typeof details.course?.key === 'string',
+      );
+      const courseDetails = Object.fromEntries(
+        validCourses.map((details) => [details.course.key, details]),
+      );
 
-export function getCourseDetails(accountId: string, classId: string) {
-  return apiRequest<CourseDetails>(
-    `/accounts/${encodeApiPathSegment(accountId)}/courses/${encodeApiPathSegment(classId)}`,
-    undefined,
-    true,
-  );
+      return {
+        ...response,
+        data: {
+          courses: validCourses.map(({ course, processing = false, processingTaskId }) => ({
+            ...course,
+            processing,
+            processingTaskId,
+          })),
+          courseDetails,
+          sourceStatus: response.data.sourceStatus,
+          errors: response.data.errors,
+        },
+      } satisfies ApiDataResponse<CourseListResponseData>;
+    });
 }
 
 export function getCourseDocumentDownloadUrl(accountId: string, classId: string, documentId: string) {

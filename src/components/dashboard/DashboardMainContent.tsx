@@ -71,7 +71,6 @@ interface DashboardMainContentProps {
   onExamAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onSignStatusChange: (active: boolean) => void;
   onTabChange: (tab: MobileDashboardTabId) => void;
-  onLoadAllCourseDetails: () => void;
   onToggleSelectWork: (classId: string, workId: string) => void;
   onToggleSelectCourseWorks: (classId: string) => void;
   onSelectAllRunnableWorks: () => void;
@@ -140,7 +139,6 @@ export function DashboardMainContent({
   onExamAutoSubmitChange,
   onSignStatusChange,
   onTabChange,
-  onLoadAllCourseDetails,
   onToggleSelectWork,
   onToggleSelectCourseWorks,
   onSelectAllRunnableWorks,
@@ -234,7 +232,6 @@ export function DashboardMainContent({
             workAutoSubmit={workAutoSubmit}
             onWorkAutoSubmitChange={onWorkAutoSubmitChange}
             onToggleExpandCourse={onToggleExpandCourse}
-            onLoadAllCourseDetails={onLoadAllCourseDetails}
             onToggleSelectWork={onToggleSelectWork}
             onToggleSelectCourseWorks={onToggleSelectCourseWorks}
             onSelectAllRunnableWorks={onSelectAllRunnableWorks}
@@ -252,7 +249,6 @@ export function DashboardMainContent({
             examAutoSubmit={examAutoSubmit}
             onExamAutoSubmitChange={onExamAutoSubmitChange}
             onToggleExpandCourse={onToggleExpandCourse}
-            onLoadAllCourseDetails={onLoadAllCourseDetails}
             onToggleSelectExam={onToggleSelectExam}
             onToggleSelectCourseExams={onToggleSelectCourseExams}
             onSelectAllRunnableExams={onSelectAllRunnableExams}

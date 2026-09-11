@@ -40,12 +40,8 @@ function hasChapterMetric(record: RawRecord) {
   return [
     'pointTotal',
     'pointFinished',
-    'PointTotal',
-    'PointFinished',
-    'jobcount',
     'jobCount',
     'jobFinishCount',
-    'openlock',
     'openLock',
     'isOpen',
   ].some((key) => record[key] !== undefined && record[key] !== null);
@@ -119,7 +115,7 @@ function getChapterLockState(chapter: Chapter) {
     return !chapter.isOpen;
   }
 
-  const openLock = toSafeNumber(chapter.openlock) || toSafeNumber(chapter.openLock);
+  const openLock = toSafeNumber(chapter.openLock);
   if (openLock > 0) {
     return true;
   }
@@ -137,9 +133,9 @@ function getNumber(chapter: Chapter, keys: Array<keyof Chapter>) {
 }
 
 export function getChapterTaskMeta(chapter: Chapter): ChapterTaskMeta {
-  const pointTotal = getNumber(chapter, ['pointTotal', 'PointTotal']);
-  const pointFinished = getNumber(chapter, ['pointFinished', 'PointFinished']);
-  const jobCount = getNumber(chapter, ['jobcount', 'jobCount']);
+  const pointTotal = getNumber(chapter, ['pointTotal']);
+  const pointFinished = getNumber(chapter, ['pointFinished']);
+  const jobCount = getNumber(chapter, ['jobCount']);
   const jobFinishCount = toSafeNumber(chapter.jobFinishCount);
   const isLocked = getChapterLockState(chapter);
   const total = pointTotal || jobCount;
