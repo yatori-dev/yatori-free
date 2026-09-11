@@ -29,6 +29,7 @@ interface ExamsListSectionProps {
   onToggleExpandCourse: (courseKey: string) => void;
   onToggleSelectExam: (classId: string, examId: string) => void;
   onToggleSelectCourseExams: (classId: string) => void;
+  onToggleSelectAllExams?: () => void;
   onRefreshCourses: () => void;
   onOpenSettings: () => void;
 }
@@ -44,22 +45,33 @@ export function ExamsListSection({
   onToggleExpandCourse,
   onToggleSelectExam,
   onToggleSelectCourseExams,
+  onToggleSelectAllExams,
   onRefreshCourses,
   onOpenSettings,
 }: ExamsListSectionProps) {
   const stats = useMemo(() => {
     let totalExamsCount = 0;
     let runnableExamsCount = 0;
+    let selectedCount = 0;
 
     courses.forEach((course) => {
       const details = courseDetailsMap[course.key];
-      const exams = (details?.exams ?? []).filter((exam) => !hideUnavailable || exam.runnable);
+      const allExams = details?.exams ?? [];
+      const exams = allExams.filter((exam) => !hideUnavailable || exam.runnable);
       totalExamsCount += exams.length;
-      runnableExamsCount += exams.filter((e) => e.runnable).length;
-
+      const runnable = exams.filter((e) => e.runnable);
+      runnableExamsCount += runnable.length;
+      const courseSelected = selectedExams[course.key];
+      if (courseSelected) {
+        runnable.forEach((e) => {
+          if (courseSelected.has(e.id)) {
+            selectedCount++;
+          }
+        });
+      }
     });
 
-    return { totalExamsCount, runnableExamsCount };
+    return { totalExamsCount, runnableExamsCount, selectedCount };
   }, [courses, courseDetailsMap, selectedExams, hideUnavailable]);
 
   const filteredCourses = useMemo(() => {
@@ -69,40 +81,65 @@ export function ExamsListSection({
     });
   }, [courses, courseDetailsMap, hideUnavailable]);
 
-  const hasAnyLoadedExams = stats.totalExamsCount > 0;
+  const hasLoadedDetails = useMemo(() => {
+    return courses.some((course) => Boolean(courseDetailsMap[course.key]));
+  }, [courses, courseDetailsMap]);
+
+  const isAllSelected = stats.runnableExamsCount > 0 && stats.selectedCount === stats.runnableExamsCount;
 
   return (
     <TabsContent forceMount value="exams" className="m-0 outline-none data-[state=inactive]:hidden lg:min-h-0 lg:flex-1">
       <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:flex lg:h-full lg:min-h-0 lg:flex-col">
-        <CardHeader className="flex flex-col gap-3 border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-primary" />
-              <CardTitle className="text-sm font-semibold sm:text-base">考试</CardTitle>
-              {false && stats.totalExamsCount > 0 && (
-                <Badge variant="outline" className="text-xs font-normal">
-                  已发现 {stats.totalExamsCount} 个考试（{stats.runnableExamsCount} 个可执行）
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onRefreshCourses}
-                disabled={coursesLoading}
-                className="h-8 w-8 shrink-0 rounded-full hover:bg-muted"
-                title="刷新课程"
-              >
-                <RefreshCw className={`h-4 w-4 ${coursesLoading ? 'animate-spin' : ''}`} />
-              </Button>
-            </div>
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
+          <div className="flex min-w-0 items-center gap-2">
+            <GraduationCap className="h-5 w-5 shrink-0 text-primary" />
+            <CardTitle className="whitespace-nowrap text-sm font-semibold sm:text-base">考试</CardTitle>
+            {stats.totalExamsCount > 0 && (
+              <Badge variant="outline" className="hidden text-xs font-normal sm:inline-flex">
+                已发现 {stats.totalExamsCount} 个考试{stats.runnableExamsCount > 0 ? `（${stats.runnableExamsCount} 可执行）` : ''}
+              </Badge>
+            )}
           </div>
 
-          <div className="flex justify-end">
-            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={onOpenSettings}>
-              <Settings className="h-3.5 w-3.5" /> 设置
+          <div className="flex shrink-0 items-center gap-2">
+            {onToggleSelectAllExams && stats.runnableExamsCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 text-xs font-normal"
+                onClick={onToggleSelectAllExams}
+                title={isAllSelected ? '取消全选考试' : '全选所有可执行考试'}
+                aria-label={isAllSelected ? '取消全选考试' : '全选所有可执行考试'}
+              >
+                {isAllSelected ? (
+                  <CheckSquare className="h-3.5 w-3.5 text-primary" />
+                ) : (
+                  <Square className="h-3.5 w-3.5 text-muted-foreground" />
+                )}
+                <span>{isAllSelected ? '取消全选' : '全选可执行'}</span>
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1.5 text-xs"
+              onClick={onOpenSettings}
+              title="考试设置"
+              aria-label="考试设置"
+            >
+              <Settings className="h-3.5 w-3.5" />
+              <span>设置</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onRefreshCourses}
+              disabled={coursesLoading}
+              className="h-8 w-8 shrink-0 rounded-full hover:bg-muted"
+              title="刷新课程"
+              aria-label="刷新课程"
+            >
+              <RefreshCw className={`h-4 w-4 ${coursesLoading ? 'animate-spin' : ''}`} />
             </Button>
           </div>
         </CardHeader>
@@ -120,13 +157,25 @@ export function ExamsListSection({
             </div>
           ) : (
             <div className="space-y-3">
-              {!hasAnyLoadedExams && (
+              {!hasLoadedDetails && (
                 <div className="flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-foreground sm:p-4">
                   <FolderSync className="mt-0.5 h-4 w-4 text-primary shrink-0" />
                   <div className="flex-1">
                     <p className="font-semibold text-primary">尚未读取考试明细</p>
                     <p className="text-muted-foreground mt-0.5">
-                      点击下方课程卡片展开加载考试，或点击上方「扫描全部考试」按钮一次性读取全部课程的考试。
+                      展开下方课程卡片即可查看考试明细，或点击右上角刷新课程以同步最新数据。
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {hasLoadedDetails && stats.totalExamsCount === 0 && (
+                <div className="flex items-start gap-2.5 rounded-xl border border-border/80 bg-muted/25 p-3 text-xs text-muted-foreground sm:p-4">
+                  <AlertCircle className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-foreground">当前暂无可执行考试</p>
+                    <p className="mt-0.5 text-muted-foreground">
+                      各课程已完成明细检查，暂无需要提交的考试。可点击右上角刷新重试。
                     </p>
                   </div>
                 </div>
@@ -136,8 +185,9 @@ export function ExamsListSection({
                 const details = courseDetailsMap[course.key];
                 const isLoading = loadingDetails[course.key] === true;
                 const isExpanded = expandedCourses.has(course.key);
-                const exams: CourseExamItem[] = (details?.exams ?? []).filter((exam) => !hideUnavailable || exam.runnable);
-                const runnableExams = exams.filter((e) => e.runnable);
+                const allExams = details?.exams ?? [];
+                const exams: CourseExamItem[] = allExams.filter((exam) => !hideUnavailable || exam.runnable);
+                const runnableExams = allExams.filter((e) => e.runnable);
                 const courseSelected = selectedExams[course.key] ?? new Set<string>();
 
                 const isAllCourseExamsSelected =
@@ -159,7 +209,7 @@ export function ExamsListSection({
                         )}
 
                         <div
-                          className="min-w-0 flex-1 cursor-pointer"
+                          className="min-w-0 flex-1 cursor-pointer select-none"
                           onClick={() => onToggleExpandCourse(course.key)}
                         >
                           <div className="flex flex-wrap items-center gap-2">
@@ -190,9 +240,11 @@ export function ExamsListSection({
                                 : 'text-muted-foreground'
                             }`}
                           >
-                            {exams.length === 0
+                            {allExams.length === 0
                               ? '无考试'
-                              : `${runnableExams.length} 可执行 / 共 ${exams.length} 个`}
+                              : runnableExams.length === 0
+                                ? `暂无可执行 (${allExams.length})`
+                                : `${runnableExams.length} 可执行 / 共 ${allExams.length} 个`}
                           </Badge>
                         ) : (
                           <Button
@@ -228,9 +280,13 @@ export function ExamsListSection({
                           <div className="py-4 text-center text-xs text-muted-foreground">
                             <span>点击上方按钮加载考试明细</span>
                           </div>
-                        ) : exams.length === 0 ? (
+                        ) : allExams.length === 0 ? (
                           <div className="py-4 text-center text-xs text-muted-foreground">
                             <span>该课程暂无考试</span>
+                          </div>
+                        ) : exams.length === 0 ? (
+                          <div className="py-4 text-center text-xs text-muted-foreground">
+                            <span>该课程考试均不可执行或已截止 (共 {allExams.length} 项)</span>
                           </div>
                         ) : (
                           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">

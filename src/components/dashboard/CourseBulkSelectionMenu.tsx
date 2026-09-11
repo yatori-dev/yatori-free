@@ -61,12 +61,12 @@ export function CourseBulkSelectionMenu({
           event.preventDefault();
           setOpen(true);
         }}
-        className="h-9 gap-1.5 rounded-lg px-2.5 text-xs font-semibold shadow-none"
+        className="h-8 gap-1.5 rounded-lg px-2 text-xs font-semibold shadow-none sm:h-9 sm:px-2.5"
       >
-        <ListChecks className="h-4 w-4" aria-hidden="true" />
-        批量选择
+        <ListChecks className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+        <span>批量选择</span>
         <ChevronDown
-          className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
           aria-hidden="true"
         />
       </Button>

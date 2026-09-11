@@ -18,6 +18,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
 import { CourseCheckbox } from './CourseCheckbox';
+import { CourseBulkSelectionMenu } from './CourseBulkSelectionMenu';
 
 interface CourseListSectionProps {
   accountId?: string;
@@ -58,6 +59,11 @@ export function CourseListSection({
   coursesLoading,
   courseSearch,
   courseSearchQuery,
+  selectableCourses,
+  incompleteSelectableCourses,
+  isAllSelected,
+  isSomeSelected,
+  isAllIncompleteSelected,
   selectedCourses,
   expandedCourses,
   fullyExpandedCourseOutlines,
@@ -69,6 +75,8 @@ export function CourseListSection({
   onRefresh,
   onSearchChange,
   onSearchQueryChange,
+  onToggleSelectAll,
+  onToggleSelectIncomplete,
   onToggleCourseSelection,
   onOpenStudyIncrementSettings,
   onStopTask,
@@ -80,22 +88,21 @@ export function CourseListSection({
   return (
     <TabsContent forceMount value="courses" className="m-0 outline-none data-[state=inactive]:hidden lg:min-h-0 lg:flex-1">
       <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:flex lg:h-full lg:min-h-0 lg:flex-col">
-        <CardHeader className="flex flex-row items-center gap-2 rounded-none border-b border-border/50 px-3 py-2.5 sm:justify-between sm:px-6 sm:py-4 sm:space-y-0">
-          <div className="flex shrink-0 items-center gap-1 sm:block lg:hidden">
-            <CardTitle className="whitespace-nowrap text-sm font-semibold sm:text-base">课程列表</CardTitle>
-            <Button
-              size="icon"
-              variant="ghost"
-              disabled={coursesLoading}
-              onClick={onRefresh}
-              className="h-8 w-8 shrink-0 rounded-full hover:bg-muted sm:hidden"
-              title="刷新课程"
-              aria-label="刷新课程"
-            >
-              <RefreshCw className={`h-4 w-4 ${coursesLoading ? 'animate-spin' : ''}`} />
-            </Button>
+        <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-border/50 px-3 py-2 sm:px-6 sm:py-3.5">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <CardTitle className="hidden whitespace-nowrap text-sm font-semibold sm:block lg:hidden">课程列表</CardTitle>
+            {selectableCourses.length > 0 && (
+              <CourseBulkSelectionMenu
+                allSelected={isAllSelected}
+                allSelectionIndeterminate={isSomeSelected && !isAllSelected}
+                incompleteAvailable={incompleteSelectableCourses.length > 0}
+                incompleteSelected={isAllIncompleteSelected}
+                onToggleAll={onToggleSelectAll}
+                onToggleIncomplete={onToggleSelectIncomplete}
+              />
+            )}
           </div>
-          <div className="flex min-w-0 flex-1 items-center gap-2 sm:justify-end lg:justify-start">
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5 sm:gap-2">
             <div className="group relative min-w-0 flex-1 sm:max-w-xs">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-primary" />
               <Input
@@ -144,7 +151,7 @@ export function CourseListSection({
               variant="ghost"
               disabled={coursesLoading}
               onClick={onRefresh}
-              className="hidden h-8 w-8 shrink-0 rounded-full hover:bg-muted sm:flex"
+              className="h-8 w-8 shrink-0 rounded-full hover:bg-muted"
               title="刷新课程"
               aria-label="刷新课程"
             >

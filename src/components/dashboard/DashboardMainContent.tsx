@@ -73,8 +73,10 @@ interface DashboardMainContentProps {
   onTabChange: (tab: MobileDashboardTabId) => void;
   onToggleSelectWork: (classId: string, workId: string) => void;
   onToggleSelectCourseWorks: (classId: string) => void;
+  onToggleSelectAllWorks?: () => void;
   onToggleSelectExam: (classId: string, examId: string) => void;
   onToggleSelectCourseExams: (classId: string) => void;
+  onToggleSelectAllExams?: () => void;
 }
 
 export function DashboardMainContent({
@@ -137,13 +139,15 @@ export function DashboardMainContent({
   onTabChange,
   onToggleSelectWork,
   onToggleSelectCourseWorks,
+  onToggleSelectAllWorks,
   onToggleSelectExam,
   onToggleSelectCourseExams,
+  onToggleSelectAllExams,
 }: DashboardMainContentProps) {
   const isLearningTab = activeTab === 'courses' || activeTab === 'works' || activeTab === 'exams';
 
   return (
-    <main ref={mainRef} id="dashboard-main" className="min-h-0 flex-1 overflow-x-clip overflow-y-auto pb-18 lg:pb-0">
+    <main ref={mainRef} id="dashboard-main" className="min-h-0 flex-1 overflow-x-clip overflow-y-auto pb-[calc(8.5rem+env(safe-area-inset-bottom))] lg:pb-0">
       <div className="mx-auto w-full min-w-0 px-0 py-0 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
         <div className="min-w-0">
           {/* Mobile Top Segmented Control for Learning sub-tabs */}
@@ -226,6 +230,7 @@ export function DashboardMainContent({
             onToggleExpandCourse={onToggleExpandCourse}
             onToggleSelectWork={onToggleSelectWork}
             onToggleSelectCourseWorks={onToggleSelectCourseWorks}
+            onToggleSelectAllWorks={onToggleSelectAllWorks}
             onRefreshCourses={onRefreshCourses}
           />
 
@@ -241,6 +246,7 @@ export function DashboardMainContent({
             onToggleExpandCourse={onToggleExpandCourse}
             onToggleSelectExam={onToggleSelectExam}
             onToggleSelectCourseExams={onToggleSelectCourseExams}
+            onToggleSelectAllExams={onToggleSelectAllExams}
             onRefreshCourses={onRefreshCourses}
           />
 
