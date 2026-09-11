@@ -17,7 +17,6 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
-import { CourseBulkSelectionMenu } from './CourseBulkSelectionMenu';
 import { CourseCheckbox } from './CourseCheckbox';
 
 interface CourseListSectionProps {
@@ -59,11 +58,6 @@ export function CourseListSection({
   coursesLoading,
   courseSearch,
   courseSearchQuery,
-  selectableCourses,
-  incompleteSelectableCourses,
-  isAllSelected,
-  isSomeSelected,
-  isAllIncompleteSelected,
   selectedCourses,
   expandedCourses,
   fullyExpandedCourseOutlines,
@@ -75,8 +69,6 @@ export function CourseListSection({
   onRefresh,
   onSearchChange,
   onSearchQueryChange,
-  onToggleSelectAll,
-  onToggleSelectIncomplete,
   onToggleCourseSelection,
   onOpenStudyIncrementSettings,
   onStopTask,
@@ -187,24 +179,6 @@ export function CourseListSection({
             </div>
           ) : (
             <div className="divide-y divide-border">
-              {selectableCourses.length > 0 && (
-                <div className="flex items-center justify-between gap-2 border-b border-border bg-muted/30 px-3 py-2.5 select-none sm:gap-4 sm:px-5 sm:py-3.5">
-                  <div className="flex min-w-0 items-center gap-2.5 sm:gap-4">
-                    <CourseBulkSelectionMenu
-                      allSelected={isAllSelected}
-                      allSelectionIndeterminate={isSomeSelected && !isAllSelected}
-                      incompleteAvailable={incompleteSelectableCourses.length > 0}
-                      incompleteSelected={isAllIncompleteSelected}
-                      onToggleAll={onToggleSelectAll}
-                      onToggleIncomplete={onToggleSelectIncomplete}
-                    />
-                  </div>
-                  <div className="whitespace-nowrap text-[11px] text-muted-foreground sm:text-xs">
-                    已选择 {selectedCourses.size} / {selectableCourses.length} 门课程
-                  </div>
-                </div>
-              )}
-
               {filteredCourses.map((course) => {
                 const jobFinishCount = course.jobFinishCount;
                 const jobCount = course.jobCount;

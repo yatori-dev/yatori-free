@@ -222,8 +222,7 @@ export function DashboardMainContent({
             loadingDetails={loadingDetails}
             selectedWorks={selectedWorks}
             expandedCourses={expandedCourses}
-            workAutoSubmit={workAutoSubmit}
-            onWorkAutoSubmitChange={onWorkAutoSubmitChange}
+            onOpenSettings={() => onTabChange('settings')}
             onToggleExpandCourse={onToggleExpandCourse}
             onToggleSelectWork={onToggleSelectWork}
             onToggleSelectCourseWorks={onToggleSelectCourseWorks}
@@ -238,8 +237,7 @@ export function DashboardMainContent({
             loadingDetails={loadingDetails}
             selectedExams={selectedExams}
             expandedCourses={expandedCourses}
-            examAutoSubmit={examAutoSubmit}
-            onExamAutoSubmitChange={onExamAutoSubmitChange}
+            onOpenSettings={() => onTabChange('settings')}
             onToggleExpandCourse={onToggleExpandCourse}
             onToggleSelectExam={onToggleSelectExam}
             onToggleSelectCourseExams={onToggleSelectCourseExams}

@@ -7,8 +7,8 @@ import {
   ClipboardList,
   FolderSync,
   RefreshCw,
-  SlidersHorizontal,
   Square,
+  Settings,
 } from 'lucide-react';
 import type { CourseDetails, CourseSummary, CourseWorkItem } from '@/lib/api';
 import { getWorkItemTitle } from '@/lib/api';
@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
+import { CourseCheckbox } from './CourseCheckbox';
 
 interface WorksListSectionProps {
   courses: CourseSummary[];
@@ -24,20 +25,13 @@ interface WorksListSectionProps {
   loadingDetails: Record<string, boolean>;
   selectedWorks: Record<string, Set<string>>;
   expandedCourses: Set<string>;
-  workAutoSubmit: 0 | 1 | 2;
   hideUnavailable: boolean;
-  onWorkAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onToggleExpandCourse: (courseKey: string) => void;
   onToggleSelectWork: (classId: string, workId: string) => void;
   onToggleSelectCourseWorks: (classId: string) => void;
   onRefreshCourses: () => void;
+  onOpenSettings: () => void;
 }
-
-const AUTO_SUBMIT_LABELS: Record<0 | 1 | 2, string> = {
-  0: '只保存答案',
-  1: '答完后提交',
-  2: '有空答案时只保存',
-};
 
 export function WorksListSection({
   courses,
@@ -46,13 +40,12 @@ export function WorksListSection({
   loadingDetails,
   selectedWorks,
   expandedCourses,
-  workAutoSubmit,
   hideUnavailable,
-  onWorkAutoSubmitChange,
   onToggleExpandCourse,
   onToggleSelectWork,
   onToggleSelectCourseWorks,
   onRefreshCourses,
+  onOpenSettings,
 }: WorksListSectionProps) {
   const stats = useMemo(() => {
     let totalWorksCount = 0;
@@ -108,20 +101,9 @@ export function WorksListSection({
           </div>
 
           <div className="flex justify-end">
-              <div className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2 py-1 text-xs text-muted-foreground">
-                <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                <span className="hidden min-[480px]:inline">提交策略:</span>
-                <select
-                  value={workAutoSubmit}
-                  onChange={(e) => onWorkAutoSubmitChange(Number(e.target.value) as 0 | 1 | 2)}
-                  className="bg-transparent font-medium text-foreground focus:outline-none cursor-pointer"
-                  aria-label="作业提交策略"
-                >
-                  <option value={0}>{AUTO_SUBMIT_LABELS[0]}</option>
-                  <option value={1}>{AUTO_SUBMIT_LABELS[1]}</option>
-                  <option value={2}>{AUTO_SUBMIT_LABELS[2]}</option>
-                </select>
-              </div>
+            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={onOpenSettings}>
+              <Settings className="h-3.5 w-3.5" /> 设置
+            </Button>
           </div>
         </CardHeader>
 
@@ -135,7 +117,6 @@ export function WorksListSection({
             <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
               <AlertCircle className="h-8 w-8 text-muted-foreground/60 mb-2" />
               <p className="text-sm font-medium">未找到匹配的课程或作业</p>
-              <p className="text-xs mt-1">请尝试清除搜索关键字或扫描全部课程</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -172,20 +153,11 @@ export function WorksListSection({
                     <div className="flex items-center justify-between gap-3 p-3 sm:p-4 bg-muted/20">
                       <div className="flex min-w-0 items-center gap-2.5 flex-1">
                         {details && runnableWorks.length > 0 ? (
-                          <button
-                            type="button"
-                            onClick={() => onToggleSelectCourseWorks(course.key)}
-                            className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-input text-primary hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            aria-label={`全选课程 ${course.courseName} 的可执行作业`}
-                          >
-                            {isAllCourseWorksSelected ? (
-                              <CheckSquare className="h-4 w-4 text-primary fill-primary/10" />
-                            ) : isSomeCourseWorksSelected ? (
-                              <div className="h-2 w-2 rounded-xs bg-primary" />
-                            ) : (
-                              <Square className="h-4 w-4 text-muted-foreground" />
-                            )}
-                          </button>
+                          <CourseCheckbox
+                            checked={isAllCourseWorksSelected}
+                            indeterminate={isSomeCourseWorksSelected}
+                            onChange={() => onToggleSelectCourseWorks(course.key)}
+                          />
                         ) : (
                           <div className="w-5 shrink-0" />
                         )}
