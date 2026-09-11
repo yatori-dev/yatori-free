@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { BypassDailyStudyLimitConfirmDialog } from './BypassDailyStudyLimitConfirmDialog';
 
 type SubmitMode = 0 | 1 | 2;
-type SettingSwitchKey = 'hideEmptyTaskCourses' | 'hideUnavailableWorks' | 'hideUnavailableExams' | 'bypassDailyStudyLimit' | 'doChapterTest' | 'doWork' | 'doExam';
+type SettingSwitchKey = 'hideEmptyTaskCourses' | 'bypassDailyStudyLimit' | 'doChapterTest' | 'doWork' | 'doExam';
 
 interface AutoSubmitOptionProps {
   disabled: boolean;
@@ -101,8 +101,6 @@ function TaskBehaviorCard({ id, label, enabled, value, onToggle, onModeChange }:
 interface TaskSettingsPanelProps {
   hiddenEmptyTaskCourseCount: number;
   hideEmptyTaskCourses: boolean;
-  hideUnavailableWorks: boolean;
-  hideUnavailableExams: boolean;
   bypassDailyStudyLimit: boolean;
   doChapterTest: boolean;
   doWork: boolean;
@@ -118,8 +116,6 @@ interface TaskSettingsPanelProps {
 export function TaskSettingsPanel({
   hiddenEmptyTaskCourseCount,
   hideEmptyTaskCourses,
-  hideUnavailableWorks,
-  hideUnavailableExams,
   bypassDailyStudyLimit,
   doChapterTest,
   doWork,
@@ -180,14 +176,6 @@ export function TaskSettingsPanel({
                   </div>
                 </div>
                 <Switch id="hideEmptyTaskCourses" checked={hideEmptyTaskCourses} onCheckedChange={(checked) => onSettingSwitch('hideEmptyTaskCourses', checked)} className="shrink-0" />
-              </div>
-              <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 sm:rounded-lg sm:p-4">
-                <Label htmlFor="hideUnavailableWorks" className="cursor-pointer text-sm font-semibold text-foreground">隐藏未开放作业</Label>
-                <Switch id="hideUnavailableWorks" checked={hideUnavailableWorks} onCheckedChange={(checked) => onSettingSwitch('hideUnavailableWorks', checked)} />
-              </div>
-              <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/25 p-3 sm:rounded-lg sm:p-4">
-                <Label htmlFor="hideUnavailableExams" className="cursor-pointer text-sm font-semibold text-foreground">隐藏未开放考试</Label>
-                <Switch id="hideUnavailableExams" checked={hideUnavailableExams} onCheckedChange={(checked) => onSettingSwitch('hideUnavailableExams', checked)} />
               </div>
             </div>
           </section>
@@ -254,3 +242,5 @@ export function TaskSettingsPanel({
     </>
   );
 }
+
+

@@ -32,8 +32,6 @@ interface DashboardProps {
 
 interface SettingsFormState {
   hideEmptyTaskCourses: boolean;
-  hideUnavailableWorks: boolean;
-  hideUnavailableExams: boolean;
   bypassDailyStudyLimit: boolean;
   doChapterTest: boolean;
   doWork: boolean;
@@ -46,8 +44,6 @@ interface PersistedSettingsFormState {
   settingsVersion: number;
   hideEmptyTaskCourses: boolean;
   doChapterTest: boolean;
-  hideUnavailableWorks: boolean;
-  hideUnavailableExams: boolean;
 }
 
 interface TaskExecutionSettingsState {
@@ -69,8 +65,6 @@ const DEFAULT_PERSISTED_SETTINGS: PersistedSettingsFormState = {
   settingsVersion: TASK_SETTINGS_VERSION,
   hideEmptyTaskCourses: true,
   doChapterTest: true,
-  hideUnavailableWorks: true,
-  hideUnavailableExams: true,
 };
 
 const DEFAULT_TASK_EXECUTION_SETTINGS: TaskExecutionSettingsState = {
@@ -121,8 +115,6 @@ function readPersistedSettings(accountId: string | null | undefined): PersistedS
       settingsVersion: TASK_SETTINGS_VERSION,
       hideEmptyTaskCourses: isCurrentSettingsVersion ? settings.hideEmptyTaskCourses !== false : true,
       doChapterTest: settings.doChapterTest !== false,
-      hideUnavailableWorks: isCurrentSettingsVersion ? settings.hideUnavailableWorks !== false : true,
-      hideUnavailableExams: isCurrentSettingsVersion ? settings.hideUnavailableExams !== false : true,
     };
   } catch (error) {
     console.error('Failed to parse task settings', error);
@@ -280,8 +272,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const {
     hideEmptyTaskCourses,
-    hideUnavailableWorks,
-    hideUnavailableExams,
     bypassDailyStudyLimit,
     doChapterTest,
     doWork,
@@ -396,22 +386,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     });
   }, [courseDetailsMap]);
 
-  const handleSelectAllRunnableWorks = useCallback(() => {
-    const next: Record<string, Set<string>> = {};
-    courses.forEach((course) => {
-      const details = courseDetailsMap[course.key];
-      const runnableWorks = details?.works?.filter((w) => w.runnable) ?? [];
-      if (runnableWorks.length > 0) {
-        next[course.key] = new Set(runnableWorks.map((w) => w.id));
-      }
-    });
-    setSelectedWorks(next);
-  }, [courses, courseDetailsMap]);
-
-  const handleClearSelectedWorks = useCallback(() => {
-    setSelectedWorks({});
-  }, []);
-
   const handleToggleSelectExam = useCallback((classId: string, examId: string) => {
     setSelectedExams((prev) => {
       const currentCourseSet = new Set(prev[classId] ?? []);
@@ -436,22 +410,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       return { ...prev, [classId]: nextCourseSet };
     });
   }, [courseDetailsMap]);
-
-  const handleSelectAllRunnableExams = useCallback(() => {
-    const next: Record<string, Set<string>> = {};
-    courses.forEach((course) => {
-      const details = courseDetailsMap[course.key];
-      const runnableExams = details?.exams?.filter((e) => e.runnable) ?? [];
-      if (runnableExams.length > 0) {
-        next[course.key] = new Set(runnableExams.map((e) => e.id));
-      }
-    });
-    setSelectedExams(next);
-  }, [courses, courseDetailsMap]);
-
-  const handleClearSelectedExams = useCallback(() => {
-    setSelectedExams({});
-  }, []);
 
   const selectedWorksCount = useMemo(() => {
     return Object.values(selectedWorks).reduce((total, set) => total + set.size, 0);
@@ -793,23 +751,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       });
     }
 
-    if (key === 'hideUnavailableWorks' && checked) {
-      setSelectedWorks((previous) => Object.fromEntries(
-        Object.entries(previous).map(([classId, ids]) => [
-          classId,
-          new Set([...ids].filter((id) => courseDetailsMap[classId]?.works?.find((work) => work.id === id)?.runnable)),
-        ]),
-      ));
-    }
-
-    if (key === 'hideUnavailableExams' && checked) {
-      setSelectedExams((previous) => Object.fromEntries(
-        Object.entries(previous).map(([classId, ids]) => [
-          classId,
-          new Set([...ids].filter((id) => courseDetailsMap[classId]?.exams?.find((exam) => exam.id === id)?.runnable)),
-        ]),
-      ));
-    }
 
     setPersistedSettingsState({
       accountId: currentAccountId,
@@ -1040,8 +981,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
             hiddenEmptyTaskCourseCount={hiddenEmptyTaskCourseCount}
             hideEmptyTaskCourses={hideEmptyTaskCourses}
-            hideUnavailableWorks={hideUnavailableWorks}
-            hideUnavailableExams={hideUnavailableExams}
             bypassDailyStudyLimit={bypassDailyStudyLimit}
             doChapterTest={doChapterTest}
             doWork={doWork}
@@ -1068,12 +1007,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             onTabChange={handleTabChange}
             onToggleSelectWork={handleToggleSelectWork}
             onToggleSelectCourseWorks={handleToggleSelectCourseWorks}
-            onSelectAllRunnableWorks={handleSelectAllRunnableWorks}
-            onClearSelectedWorks={handleClearSelectedWorks}
             onToggleSelectExam={handleToggleSelectExam}
             onToggleSelectCourseExams={handleToggleSelectCourseExams}
-            onSelectAllRunnableExams={handleSelectAllRunnableExams}
-            onClearSelectedExams={handleClearSelectedExams}
           />
         </div>
       </Tabs>

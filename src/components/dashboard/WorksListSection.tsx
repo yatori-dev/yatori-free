@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   AlertCircle,
   CheckSquare,
@@ -7,16 +7,13 @@ import {
   ClipboardList,
   FolderSync,
   RefreshCw,
-  Search,
   SlidersHorizontal,
   Square,
-  X,
 } from 'lucide-react';
 import type { CourseDetails, CourseSummary, CourseWorkItem } from '@/lib/api';
 import { getWorkItemTitle } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
 
@@ -33,8 +30,6 @@ interface WorksListSectionProps {
   onToggleExpandCourse: (courseKey: string) => void;
   onToggleSelectWork: (classId: string, workId: string) => void;
   onToggleSelectCourseWorks: (classId: string) => void;
-  onSelectAllRunnableWorks: () => void;
-  onClearSelectedWorks: () => void;
   onRefreshCourses: () => void;
 }
 
@@ -57,16 +52,11 @@ export function WorksListSection({
   onToggleExpandCourse,
   onToggleSelectWork,
   onToggleSelectCourseWorks,
-  onSelectAllRunnableWorks,
-  onClearSelectedWorks,
   onRefreshCourses,
 }: WorksListSectionProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-
   const stats = useMemo(() => {
     let totalWorksCount = 0;
     let runnableWorksCount = 0;
-    let selectedCount = 0;
 
     courses.forEach((course) => {
       const details = courseDetailsMap[course.key];
@@ -74,33 +64,19 @@ export function WorksListSection({
       totalWorksCount += works.length;
       runnableWorksCount += works.filter((w) => w.runnable).length;
 
-      const courseSelected = selectedWorks[course.key];
-      if (courseSelected) {
-        selectedCount += courseSelected.size;
-      }
     });
 
-    return { totalWorksCount, runnableWorksCount, selectedCount };
+    return { totalWorksCount, runnableWorksCount };
   }, [courses, courseDetailsMap, selectedWorks, hideUnavailable]);
 
   const filteredCourses = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return courses;
-
     return courses.filter((course) => {
-      const nameMatch = course.courseName.toLowerCase().includes(query);
-      const teacherMatch = course.courseTeacher?.toLowerCase().includes(query) ?? false;
       const details = courseDetailsMap[course.key];
-      const workMatch = details?.works?.filter((w) => !hideUnavailable || w.runnable).some((w) =>
-        getWorkItemTitle(w).toLowerCase().includes(query)
-      ) ?? false;
-
-      return nameMatch || teacherMatch || workMatch;
+      return !details || (details.works ?? []).some((work) => !hideUnavailable || work.runnable);
     });
-  }, [courses, searchQuery, courseDetailsMap, hideUnavailable]);
+  }, [courses, courseDetailsMap, hideUnavailable]);
 
   const hasAnyLoadedWorks = stats.totalWorksCount > 0;
-  const isAllRunnableSelected = stats.runnableWorksCount > 0 && stats.selectedCount === stats.runnableWorksCount;
 
   return (
     <TabsContent forceMount value="works" className="m-0 outline-none data-[state=inactive]:hidden lg:min-h-0 lg:flex-1">
@@ -110,7 +86,7 @@ export function WorksListSection({
             <div className="flex items-center gap-2">
               <ClipboardList className="h-5 w-5 text-primary" />
               <CardTitle className="text-sm font-semibold sm:text-base">作业</CardTitle>
-              {stats.totalWorksCount > 0 && (
+              {false && stats.totalWorksCount > 0 && (
                 <Badge variant="outline" className="text-xs font-normal">
                   已发现 {stats.totalWorksCount} 个作业（{stats.runnableWorksCount} 个可执行）
                 </Badge>
@@ -131,49 +107,7 @@ export function WorksListSection({
             </div>
           </div>
 
-          <div className="grid gap-2 sm:grid-cols-[minmax(220px,1fr)_auto] sm:items-center">
-            <div className="relative min-w-0">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索课程名、教师或作业标题..."
-                className="h-8 pl-8 pr-8 text-xs"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center justify-start gap-2 text-xs sm:justify-end">
-              {stats.runnableWorksCount > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={isAllRunnableSelected ? onClearSelectedWorks : onSelectAllRunnableWorks}
-                  className="h-8 gap-1.5 text-xs"
-                >
-                  {isAllRunnableSelected ? (
-                    <>
-                      <Square className="h-3.5 w-3.5" />
-                      <span>取消全选</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckSquare className="h-3.5 w-3.5" />
-                      <span>全选可执行 ({stats.runnableWorksCount})</span>
-                    </>
-                  )}
-                </Button>
-              )}
-
+          <div className="flex justify-end">
               <div className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2 py-1 text-xs text-muted-foreground">
                 <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                 <span className="hidden min-[480px]:inline">提交策略:</span>
@@ -188,7 +122,6 @@ export function WorksListSection({
                   <option value={2}>{AUTO_SUBMIT_LABELS[2]}</option>
                 </select>
               </div>
-            </div>
           </div>
         </CardHeader>
 

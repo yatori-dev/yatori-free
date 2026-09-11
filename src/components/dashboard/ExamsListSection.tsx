@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   AlertCircle,
   CheckSquare,
@@ -7,16 +7,13 @@ import {
   FolderSync,
   GraduationCap,
   RefreshCw,
-  Search,
   SlidersHorizontal,
   Square,
-  X,
 } from 'lucide-react';
 import type { CourseDetails, CourseExamItem, CourseSummary } from '@/lib/api';
 import { getExamItemTitle } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
 
@@ -33,8 +30,6 @@ interface ExamsListSectionProps {
   onToggleExpandCourse: (courseKey: string) => void;
   onToggleSelectExam: (classId: string, examId: string) => void;
   onToggleSelectCourseExams: (classId: string) => void;
-  onSelectAllRunnableExams: () => void;
-  onClearSelectedExams: () => void;
   onRefreshCourses: () => void;
 }
 
@@ -57,16 +52,11 @@ export function ExamsListSection({
   onToggleExpandCourse,
   onToggleSelectExam,
   onToggleSelectCourseExams,
-  onSelectAllRunnableExams,
-  onClearSelectedExams,
   onRefreshCourses,
 }: ExamsListSectionProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-
   const stats = useMemo(() => {
     let totalExamsCount = 0;
     let runnableExamsCount = 0;
-    let selectedCount = 0;
 
     courses.forEach((course) => {
       const details = courseDetailsMap[course.key];
@@ -74,33 +64,19 @@ export function ExamsListSection({
       totalExamsCount += exams.length;
       runnableExamsCount += exams.filter((e) => e.runnable).length;
 
-      const courseSelected = selectedExams[course.key];
-      if (courseSelected) {
-        selectedCount += courseSelected.size;
-      }
     });
 
-    return { totalExamsCount, runnableExamsCount, selectedCount };
+    return { totalExamsCount, runnableExamsCount };
   }, [courses, courseDetailsMap, selectedExams, hideUnavailable]);
 
   const filteredCourses = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return courses;
-
     return courses.filter((course) => {
-      const nameMatch = course.courseName.toLowerCase().includes(query);
-      const teacherMatch = course.courseTeacher?.toLowerCase().includes(query) ?? false;
       const details = courseDetailsMap[course.key];
-      const examMatch = details?.exams?.filter((e) => !hideUnavailable || e.runnable).some((e) =>
-        getExamItemTitle(e).toLowerCase().includes(query)
-      ) ?? false;
-
-      return nameMatch || teacherMatch || examMatch;
+      return !details || (details.exams ?? []).some((exam) => !hideUnavailable || exam.runnable);
     });
-  }, [courses, searchQuery, courseDetailsMap, hideUnavailable]);
+  }, [courses, courseDetailsMap, hideUnavailable]);
 
   const hasAnyLoadedExams = stats.totalExamsCount > 0;
-  const isAllRunnableSelected = stats.runnableExamsCount > 0 && stats.selectedCount === stats.runnableExamsCount;
 
   return (
     <TabsContent forceMount value="exams" className="m-0 outline-none data-[state=inactive]:hidden lg:min-h-0 lg:flex-1">
@@ -110,7 +86,7 @@ export function ExamsListSection({
             <div className="flex items-center gap-2">
               <GraduationCap className="h-5 w-5 text-primary" />
               <CardTitle className="text-sm font-semibold sm:text-base">考试</CardTitle>
-              {stats.totalExamsCount > 0 && (
+              {false && stats.totalExamsCount > 0 && (
                 <Badge variant="outline" className="text-xs font-normal">
                   已发现 {stats.totalExamsCount} 个考试（{stats.runnableExamsCount} 个可执行）
                 </Badge>
@@ -131,49 +107,7 @@ export function ExamsListSection({
             </div>
           </div>
 
-          <div className="grid gap-2 sm:grid-cols-[minmax(220px,1fr)_auto] sm:items-center">
-            <div className="relative min-w-0">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索课程名、教师或考试标题..."
-                className="h-8 pl-8 pr-8 text-xs"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center justify-start gap-2 text-xs sm:justify-end">
-              {stats.runnableExamsCount > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={isAllRunnableSelected ? onClearSelectedExams : onSelectAllRunnableExams}
-                  className="h-8 gap-1.5 text-xs"
-                >
-                  {isAllRunnableSelected ? (
-                    <>
-                      <Square className="h-3.5 w-3.5" />
-                      <span>取消全选</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckSquare className="h-3.5 w-3.5" />
-                      <span>全选可执行 ({stats.runnableExamsCount})</span>
-                    </>
-                  )}
-                </Button>
-              )}
-
+          <div className="flex justify-end">
               <div className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2 py-1 text-xs text-muted-foreground">
                 <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                 <span className="hidden min-[480px]:inline">提交策略:</span>
@@ -188,7 +122,6 @@ export function ExamsListSection({
                   <option value={2}>{AUTO_SUBMIT_LABELS[2]}</option>
                 </select>
               </div>
-            </div>
           </div>
         </CardHeader>
 
