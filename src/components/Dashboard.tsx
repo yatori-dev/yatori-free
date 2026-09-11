@@ -412,68 +412,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     });
   }, [courseDetailsMap]);
 
-  const handleToggleSelectAllWorks = useCallback(() => {
-    let allRunnableCount = 0;
-    let currentSelectedCount = 0;
-    courses.forEach((c) => {
-      const runnable = courseDetailsMap[c.key]?.works?.filter((w) => w.runnable) ?? [];
-      allRunnableCount += runnable.length;
-      const set = selectedWorks[c.key];
-      if (set) {
-        runnable.forEach((w) => {
-          if (set.has(w.id)) currentSelectedCount++;
-        });
-      }
-    });
-
-    if (allRunnableCount === 0) return;
-
-    if (currentSelectedCount === allRunnableCount) {
-      setSelectedWorks({});
-      return;
-    }
-
-    const next: Record<string, Set<string>> = {};
-    courses.forEach((c) => {
-      const runnable = courseDetailsMap[c.key]?.works?.filter((w) => w.runnable) ?? [];
-      if (runnable.length > 0) {
-        next[c.key] = new Set(runnable.map((w) => w.id));
-      }
-    });
-    setSelectedWorks(next);
-  }, [courses, courseDetailsMap, selectedWorks]);
-
-  const handleToggleSelectAllExams = useCallback(() => {
-    let allRunnableCount = 0;
-    let currentSelectedCount = 0;
-    courses.forEach((c) => {
-      const runnable = courseDetailsMap[c.key]?.exams?.filter((e) => e.runnable) ?? [];
-      allRunnableCount += runnable.length;
-      const set = selectedExams[c.key];
-      if (set) {
-        runnable.forEach((e) => {
-          if (set.has(e.id)) currentSelectedCount++;
-        });
-      }
-    });
-
-    if (allRunnableCount === 0) return;
-
-    if (currentSelectedCount === allRunnableCount) {
-      setSelectedExams({});
-      return;
-    }
-
-    const next: Record<string, Set<string>> = {};
-    courses.forEach((c) => {
-      const runnable = courseDetailsMap[c.key]?.exams?.filter((e) => e.runnable) ?? [];
-      if (runnable.length > 0) {
-        next[c.key] = new Set(runnable.map((e) => e.id));
-      }
-    });
-    setSelectedExams(next);
-  }, [courses, courseDetailsMap, selectedExams]);
-
   const selectedWorksCount = useMemo(() => {
     return Object.values(selectedWorks).reduce((total, set) => total + set.size, 0);
   }, [selectedWorks]);
@@ -1070,10 +1008,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             onTabChange={handleTabChange}
             onToggleSelectWork={handleToggleSelectWork}
             onToggleSelectCourseWorks={handleToggleSelectCourseWorks}
-            onToggleSelectAllWorks={handleToggleSelectAllWorks}
             onToggleSelectExam={handleToggleSelectExam}
             onToggleSelectCourseExams={handleToggleSelectCourseExams}
-            onToggleSelectAllExams={handleToggleSelectAllExams}
           />
         </div>
       </Tabs>

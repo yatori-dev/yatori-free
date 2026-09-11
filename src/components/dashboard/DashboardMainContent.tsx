@@ -73,10 +73,8 @@ interface DashboardMainContentProps {
   onTabChange: (tab: MobileDashboardTabId) => void;
   onToggleSelectWork: (classId: string, workId: string) => void;
   onToggleSelectCourseWorks: (classId: string) => void;
-  onToggleSelectAllWorks?: () => void;
   onToggleSelectExam: (classId: string, examId: string) => void;
   onToggleSelectCourseExams: (classId: string) => void;
-  onToggleSelectAllExams?: () => void;
 }
 
 export function DashboardMainContent({
@@ -139,10 +137,8 @@ export function DashboardMainContent({
   onTabChange,
   onToggleSelectWork,
   onToggleSelectCourseWorks,
-  onToggleSelectAllWorks,
   onToggleSelectExam,
   onToggleSelectCourseExams,
-  onToggleSelectAllExams,
 }: DashboardMainContentProps) {
   const isLearningTab = activeTab === 'courses' || activeTab === 'works' || activeTab === 'exams';
 
@@ -231,7 +227,6 @@ export function DashboardMainContent({
             onToggleExpandCourse={onToggleExpandCourse}
             onToggleSelectWork={onToggleSelectWork}
             onToggleSelectCourseWorks={onToggleSelectCourseWorks}
-            onToggleSelectAllWorks={onToggleSelectAllWorks}
             onRefreshCourses={onRefreshCourses}
           />
 
@@ -247,7 +242,6 @@ export function DashboardMainContent({
             onToggleExpandCourse={onToggleExpandCourse}
             onToggleSelectExam={onToggleSelectExam}
             onToggleSelectCourseExams={onToggleSelectCourseExams}
-            onToggleSelectAllExams={onToggleSelectAllExams}
             onRefreshCourses={onRefreshCourses}
           />
 

@@ -29,7 +29,6 @@ interface ExamsListSectionProps {
   onToggleExpandCourse: (courseKey: string) => void;
   onToggleSelectExam: (classId: string, examId: string) => void;
   onToggleSelectCourseExams: (classId: string) => void;
-  onToggleSelectAllExams?: () => void;
   onRefreshCourses: () => void;
   onOpenSettings: () => void;
 }
@@ -45,34 +44,21 @@ export function ExamsListSection({
   onToggleExpandCourse,
   onToggleSelectExam,
   onToggleSelectCourseExams,
-  onToggleSelectAllExams,
   onRefreshCourses,
   onOpenSettings,
 }: ExamsListSectionProps) {
-  const stats = useMemo(() => {
+  const totalExamsCount = useMemo(() => {
     let totalExamsCount = 0;
-    let runnableExamsCount = 0;
-    let selectedCount = 0;
 
     courses.forEach((course) => {
       const details = courseDetailsMap[course.key];
       const allExams = details?.exams ?? [];
       const exams = allExams.filter((exam) => !hideUnavailable || exam.runnable);
       totalExamsCount += exams.length;
-      const runnable = exams.filter((e) => e.runnable);
-      runnableExamsCount += runnable.length;
-      const courseSelected = selectedExams[course.key];
-      if (courseSelected) {
-        runnable.forEach((e) => {
-          if (courseSelected.has(e.id)) {
-            selectedCount++;
-          }
-        });
-      }
     });
 
-    return { totalExamsCount, runnableExamsCount, selectedCount };
-  }, [courses, courseDetailsMap, selectedExams, hideUnavailable]);
+    return totalExamsCount;
+  }, [courses, courseDetailsMap, hideUnavailable]);
 
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
@@ -85,8 +71,6 @@ export function ExamsListSection({
     return courses.some((course) => Boolean(courseDetailsMap[course.key]));
   }, [courses, courseDetailsMap]);
 
-  const isAllSelected = stats.runnableExamsCount > 0 && stats.selectedCount === stats.runnableExamsCount;
-
   return (
     <TabsContent forceMount value="exams" className="m-0 outline-none data-[state=inactive]:hidden lg:min-h-0 lg:flex-1">
       <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:flex lg:h-full lg:min-h-0 lg:flex-col">
@@ -94,31 +78,9 @@ export function ExamsListSection({
           <div className="flex min-w-0 items-center gap-2">
             <GraduationCap className="h-5 w-5 shrink-0 text-primary" />
             <CardTitle className="whitespace-nowrap text-sm font-semibold sm:text-base">考试</CardTitle>
-            {stats.totalExamsCount > 0 && (
-              <Badge variant="outline" className="hidden text-xs font-normal sm:inline-flex">
-                已发现 {stats.totalExamsCount} 个考试{stats.runnableExamsCount > 0 ? `（${stats.runnableExamsCount} 可执行）` : ''}
-              </Badge>
-            )}
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            {onToggleSelectAllExams && stats.runnableExamsCount > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1.5 text-xs font-normal"
-                onClick={onToggleSelectAllExams}
-                title={isAllSelected ? '取消全选考试' : '全选所有可执行考试'}
-                aria-label={isAllSelected ? '取消全选考试' : '全选所有可执行考试'}
-              >
-                {isAllSelected ? (
-                  <CheckSquare className="h-3.5 w-3.5 text-primary" />
-                ) : (
-                  <Square className="h-3.5 w-3.5 text-muted-foreground" />
-                )}
-                <span>{isAllSelected ? '取消全选' : '全选可执行'}</span>
-              </Button>
-            )}
             <Button
               variant="outline"
               size="sm"
@@ -169,7 +131,7 @@ export function ExamsListSection({
                 </div>
               )}
 
-              {hasLoadedDetails && stats.totalExamsCount === 0 && (
+              {hasLoadedDetails && totalExamsCount === 0 && (
                 <div className="flex items-start gap-2.5 rounded-xl border border-border/80 bg-muted/25 p-3 text-xs text-muted-foreground sm:p-4">
                   <AlertCircle className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="flex-1">
