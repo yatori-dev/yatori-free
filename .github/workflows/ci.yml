@@ -29,5 +29,8 @@ jobs:
       - name: Code check
         run: pnpm run lint
 
+      - name: Test
+        run: pnpm run test
+
       - name: Build
         run: pnpm run build
