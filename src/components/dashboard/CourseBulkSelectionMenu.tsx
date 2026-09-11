@@ -1,6 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown, Minus, ListChecks } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useEffect, useRef } from 'react';
 
 interface CourseBulkSelectionMenuProps {
   allSelected: boolean;
@@ -14,96 +12,25 @@ interface CourseBulkSelectionMenuProps {
 export function CourseBulkSelectionMenu({
   allSelected,
   allSelectionIndeterminate,
-  incompleteAvailable,
-  incompleteSelected,
   onToggleAll,
-  onToggleIncomplete,
 }: CourseBulkSelectionMenuProps) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const checkboxRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!open) return;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      setOpen(false);
-      triggerRef.current?.focus();
-    };
-
-    document.addEventListener('pointerdown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [open]);
-
-  const menuItemClassName = 'flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-left text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-50';
+    if (checkboxRef.current) checkboxRef.current.indeterminate = allSelectionIndeterminate;
+  }, [allSelectionIndeterminate]);
 
   return (
-    <div ref={rootRef} className="relative">
-      <Button
-        ref={triggerRef}
-        type="button"
-        variant="outline"
-        size="sm"
-        aria-expanded={open}
-        aria-haspopup="menu"
-        onClick={() => setOpen((current) => !current)}
-        onKeyDown={(event) => {
-          if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
-          event.preventDefault();
-          setOpen(true);
-        }}
-        className="h-8 gap-1.5 rounded-lg px-2 text-xs font-semibold shadow-none sm:h-9 sm:px-2.5"
-      >
-        <ListChecks className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-        <span>批量选择</span>
-        <ChevronDown
-          className={`h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-          aria-hidden="true"
-        />
-      </Button>
-
-      {open && (
-        <div
-          role="menu"
-          aria-label="课程批量选择"
-          className="absolute left-0 top-[calc(100%+0.375rem)] z-50 w-44 rounded-xl border border-border/70 bg-popover/95 p-1.5 text-popover-foreground shadow-floating backdrop-blur-sm animate-in fade-in-0 zoom-in-95 duration-150"
-        >
-          <button
-            type="button"
-            role="menuitemcheckbox"
-            aria-checked={allSelectionIndeterminate ? 'mixed' : allSelected}
-            onClick={onToggleAll}
-            className={menuItemClassName}
-          >
-            <span className="flex size-4 shrink-0 items-center justify-center text-primary">
-              {allSelected ? <Check className="h-4 w-4" aria-hidden="true" /> : allSelectionIndeterminate ? <Minus className="h-4 w-4" aria-hidden="true" /> : null}
-            </span>
-            <span>所有课程</span>
-          </button>
-          <button
-            type="button"
-            role="menuitemcheckbox"
-            aria-checked={incompleteSelected}
-            disabled={!incompleteAvailable}
-            onClick={onToggleIncomplete}
-            className={menuItemClassName}
-          >
-            <span className="flex size-4 shrink-0 items-center justify-center text-primary">
-              {incompleteSelected && <Check className="h-4 w-4" aria-hidden="true" />}
-            </span>
-            <span>未完成课程</span>
-          </button>
-        </div>
-      )}
-    </div>
+    <label className="inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-lg border border-border/70 px-2.5 text-xs font-semibold transition-colors hover:bg-accent hover:text-accent-foreground focus-within:ring-2 focus-within:ring-ring">
+      <input
+        ref={checkboxRef}
+        type="checkbox"
+        checked={allSelected}
+        onChange={onToggleAll}
+        aria-label="全选课程"
+        className="size-4 accent-primary"
+      />
+      <span>全选</span>
+    </label>
   );
 }
