@@ -109,7 +109,7 @@ export function ExamsListSection({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-5 w-5 text-primary" />
-              <CardTitle className="text-sm font-semibold sm:text-base">课程考试</CardTitle>
+              <CardTitle className="text-sm font-semibold sm:text-base">考试</CardTitle>
               {stats.totalExamsCount > 0 && (
                 <Badge variant="outline" className="text-xs font-normal">
                   已发现 {stats.totalExamsCount} 个考试（{stats.runnableExamsCount} 个可执行）
@@ -117,20 +117,7 @@ export function ExamsListSection({
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onLoadAllCourseDetails}
-                disabled={coursesLoading}
-                className="h-8 gap-1 text-xs"
-                title="批量读取所有课程的考试明细"
-              >
-                <FolderSync className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">扫描全部课程考试</span>
-                <span className="sm:hidden">扫描全部</span>
-              </Button>
-
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="icon"
@@ -144,8 +131,8 @@ export function ExamsListSection({
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative flex-1 max-w-sm">
+          <div className="grid gap-2 sm:grid-cols-[minmax(220px,1fr)_auto] sm:items-center">
+            <div className="relative min-w-0">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
@@ -165,7 +152,10 @@ export function ExamsListSection({
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-xs">
+            <div className="flex flex-wrap items-center justify-start gap-2 text-xs sm:justify-end">
+              <Button variant="outline" size="sm" onClick={onLoadAllCourseDetails} disabled={coursesLoading} className="h-8 gap-1 text-xs" title="批量读取所有课程的考试明细">
+                <FolderSync className="h-3.5 w-3.5" /><span>扫描全部考试</span>
+              </Button>
               {stats.runnableExamsCount > 0 && (
                 <Button
                   variant="outline"
@@ -225,7 +215,7 @@ export function ExamsListSection({
                   <div className="flex-1">
                     <p className="font-semibold text-primary">尚未读取考试明细</p>
                     <p className="text-muted-foreground mt-0.5">
-                      点击下方课程卡片展开加载考试，或点击上方「扫描全部课程考试」按钮一次性读取全部课程的考试。
+                      点击下方课程卡片展开加载考试，或点击上方「扫描全部考试」按钮一次性读取全部课程的考试。
                     </p>
                   </div>
                 </div>

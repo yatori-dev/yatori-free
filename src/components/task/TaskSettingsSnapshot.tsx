@@ -20,7 +20,7 @@ export function TaskSettingsSnapshot({ config, coursesCustom, courseNameByIdenti
       <div className="space-y-2 font-sans">
         {config?.kind && (
           <DetailRow label="任务类型">
-            {config.kind === 'works' ? '课程作业' : config.kind === 'exams' ? '课程考试' : '章节任务'}
+            {config.kind === 'works' ? '作业' : config.kind === 'exams' ? '考试' : '章节任务'}
           </DetailRow>
         )}
         {config?.bypassDailyStudyLimit !== undefined && <DetailRow label="每日学时限制">{config.bypassDailyStudyLimit ? '已绕过' : '正常限制'}</DetailRow>}

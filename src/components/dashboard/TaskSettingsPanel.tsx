@@ -214,7 +214,7 @@ export function TaskSettingsPanel({
             <div className="grid grid-cols-1 gap-3 sm:gap-6 xl:grid-cols-2">
               <TaskBehaviorCard
                 id="doWork"
-                label="课程作业自动答题"
+                label="作业自动答题"
                 enabled={doWork}
                 value={workAutoSubmit}
                 onToggle={(checked) => onSettingSwitch('doWork', checked)}

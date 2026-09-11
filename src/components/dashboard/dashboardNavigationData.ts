@@ -5,8 +5,8 @@ export type MobileDashboardTabId = DashboardViewId | 'tasks';
 
 export const desktopItems: Array<{ id: DashboardViewId; label: string; icon: typeof BookOpen }> = [
   { id: 'courses', label: '章节任务', icon: BookOpen },
-  { id: 'works', label: '课程作业', icon: ClipboardList },
-  { id: 'exams', label: '课程考试', icon: GraduationCap },
+  { id: 'works', label: '作业', icon: ClipboardList },
+  { id: 'exams', label: '考试', icon: GraduationCap },
   { id: 'sign', label: '自动签到', icon: MapPin },
   { id: 'settings', label: '设置', icon: Settings },
 ];

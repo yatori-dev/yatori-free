@@ -225,8 +225,8 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const examAutoSubmitLabel = getAutoSubmitLabel(examAutoSubmitValue);
   const enabledAutomationLabels = [
     coursesCustom?.doChapterTest ? '章节测试' : null,
-    coursesCustom?.doWork ? '课程作业' : null,
-    coursesCustom?.doExam ? '课程考试' : null,
+    coursesCustom?.doWork ? '作业' : null,
+    coursesCustom?.doExam ? '考试' : null,
   ].filter(Boolean) as string[];
   const hasRecordedAutomation = coursesCustom !== undefined && [
     coursesCustom.doChapterTest,

@@ -948,8 +948,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   } as React.CSSProperties;
   const desktopViewTitle = {
     courses: '章节任务点',
-    works: '课程作业',
-    exams: '课程考试',
+    works: '作业',
+    exams: '考试',
     sign: '自动签到',
     tasks: '任务',
     settings: '提交设置',
