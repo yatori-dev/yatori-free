@@ -7,7 +7,6 @@ import {
   FolderSync,
   RefreshCw,
   Square,
-  Settings,
 } from 'lucide-react';
 import type { CourseDetails, CourseSummary, CourseWorkItem } from '@/lib/api';
 import { getWorkItemTitle } from '@/lib/api';
@@ -16,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
 import { CourseCheckbox } from './CourseCheckbox';
+import { SubmitModeControl, type SubmitMode } from './SubmitModeControl';
 
 interface WorksListSectionProps {
   courses: CourseSummary[];
@@ -25,11 +25,12 @@ interface WorksListSectionProps {
   selectedWorks: Record<string, Set<string>>;
   expandedCourses: Set<string>;
   hideUnavailable: boolean;
+  submitMode: SubmitMode;
   onToggleExpandCourse: (courseKey: string) => void;
   onToggleSelectWork: (classId: string, workId: string) => void;
   onToggleSelectCourseWorks: (classId: string) => void;
   onRefreshCourses: () => void;
-  onOpenSettings: () => void;
+  onSubmitModeChange: (value: SubmitMode) => void;
 }
 
 export function WorksListSection({
@@ -40,11 +41,12 @@ export function WorksListSection({
   selectedWorks,
   expandedCourses,
   hideUnavailable,
+  submitMode,
   onToggleExpandCourse,
   onToggleSelectWork,
   onToggleSelectCourseWorks,
   onRefreshCourses,
-  onOpenSettings,
+  onSubmitModeChange,
 }: WorksListSectionProps) {
   const totalWorksCount = useMemo(() => {
     let totalWorksCount = 0;
@@ -80,17 +82,7 @@ export function WorksListSection({
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1.5 text-xs"
-              onClick={onOpenSettings}
-              title="作业设置"
-              aria-label="作业设置"
-            >
-              <Settings className="h-3.5 w-3.5" />
-              <span>设置</span>
-            </Button>
+            <SubmitModeControl value={submitMode} onChange={onSubmitModeChange} />
             <Button
               variant="ghost"
               size="icon"

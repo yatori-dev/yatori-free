@@ -7,7 +7,6 @@ import {
   GraduationCap,
   RefreshCw,
   Square,
-  Settings,
 } from 'lucide-react';
 import type { CourseDetails, CourseExamItem, CourseSummary } from '@/lib/api';
 import { getExamItemTitle } from '@/lib/api';
@@ -16,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
 import { CourseCheckbox } from './CourseCheckbox';
+import { SubmitModeControl, type SubmitMode } from './SubmitModeControl';
 
 interface ExamsListSectionProps {
   courses: CourseSummary[];
@@ -25,11 +25,12 @@ interface ExamsListSectionProps {
   selectedExams: Record<string, Set<string>>;
   expandedCourses: Set<string>;
   hideUnavailable: boolean;
+  submitMode: SubmitMode;
   onToggleExpandCourse: (courseKey: string) => void;
   onToggleSelectExam: (classId: string, examId: string) => void;
   onToggleSelectCourseExams: (classId: string) => void;
   onRefreshCourses: () => void;
-  onOpenSettings: () => void;
+  onSubmitModeChange: (value: SubmitMode) => void;
 }
 
 export function ExamsListSection({
@@ -40,11 +41,12 @@ export function ExamsListSection({
   selectedExams,
   expandedCourses,
   hideUnavailable,
+  submitMode,
   onToggleExpandCourse,
   onToggleSelectExam,
   onToggleSelectCourseExams,
   onRefreshCourses,
-  onOpenSettings,
+  onSubmitModeChange,
 }: ExamsListSectionProps) {
   const totalExamsCount = useMemo(() => {
     let totalExamsCount = 0;
@@ -80,17 +82,7 @@ export function ExamsListSection({
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1.5 text-xs"
-              onClick={onOpenSettings}
-              title="考试设置"
-              aria-label="考试设置"
-            >
-              <Settings className="h-3.5 w-3.5" />
-              <span>设置</span>
-            </Button>
+            <SubmitModeControl value={submitMode} onChange={onSubmitModeChange} />
             <Button
               variant="ghost"
               size="icon"

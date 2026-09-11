@@ -6,111 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { BypassDailyStudyLimitConfirmDialog } from './BypassDailyStudyLimitConfirmDialog';
 
-type SubmitMode = 0 | 1 | 2;
-type SettingSwitchKey = 'hideEmptyTaskCourses' | 'bypassDailyStudyLimit' | 'doChapterTest' | 'doWork' | 'doExam';
-
-interface AutoSubmitOptionProps {
-  disabled: boolean;
-  selected: boolean;
-  label: string;
-  onClick: () => void;
-}
-
-function AutoSubmitOption({ disabled, selected, label, onClick }: AutoSubmitOptionProps) {
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      className={cn(
-        'flex min-h-11 items-center justify-between rounded-lg border px-3 py-2 text-left transition-all duration-150 ease-standard active:scale-[0.985] disabled:cursor-not-allowed sm:px-4 sm:py-3',
-        selected
-          ? 'border-primary/60 bg-primary-container/25 text-primary ring-1 ring-primary/25 shadow-xs'
-          : 'border-border/70 bg-card text-foreground shadow-xs hover:border-primary/40 hover:bg-muted/40',
-      )}
-    >
-      <span className="text-sm font-medium transition-colors">{label}</span>
-      <span className={cn(
-        'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors',
-        selected ? 'border-primary bg-primary' : 'border-border bg-muted',
-      )}>
-        {selected && <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />}
-      </span>
-    </button>
-  );
-}
-
-interface AutoSubmitSettingsProps {
-  enabled: boolean;
-  value: SubmitMode;
-  onChange: (value: SubmitMode) => void;
-}
-
-function AutoSubmitSettings({ enabled, value, onChange }: AutoSubmitSettingsProps) {
-  return (
-    <div className="grid grid-cols-2 gap-2 pt-3 sm:gap-4 sm:pt-4">
-      <AutoSubmitOption
-        disabled={!enabled}
-        selected={enabled && value === 1}
-        label="自动提交"
-        onClick={() => onChange(1)}
-      />
-      <AutoSubmitOption
-        disabled={!enabled}
-        selected={enabled && value === 0}
-        label="仅保存不提交"
-        onClick={() => onChange(0)}
-      />
-    </div>
-  );
-}
-
-interface TaskBehaviorCardProps {
-  id: 'doWork' | 'doExam';
-  label: string;
-  enabled: boolean;
-  value: SubmitMode;
-  onToggle: (checked: boolean) => void;
-  onModeChange: (value: SubmitMode) => void;
-}
-
-function TaskBehaviorCard({ id, label, enabled, value, onToggle, onModeChange }: TaskBehaviorCardProps) {
-  return (
-    <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-all duration-200 hover:border-border sm:p-5">
-      <div className="flex items-center justify-between gap-3">
-        <Label htmlFor={id} className="cursor-pointer text-sm font-semibold text-foreground">
-          {label}
-        </Label>
-        <Switch id={id} checked={enabled} onCheckedChange={onToggle} className="shrink-0" />
-      </div>
-      <div
-        className={cn(
-          'grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none',
-          enabled ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
-        )}
-        aria-hidden={!enabled}
-      >
-        <div className="min-h-0 overflow-hidden">
-          <AutoSubmitSettings enabled={enabled} value={value} onChange={onModeChange} />
-        </div>
-      </div>
-    </div>
-  );
-}
+type SettingSwitchKey = 'hideEmptyTaskCourses' | 'bypassDailyStudyLimit' | 'doChapterTest';
 
 interface TaskSettingsPanelProps {
   hiddenEmptyTaskCourseCount: number;
   hideEmptyTaskCourses: boolean;
   bypassDailyStudyLimit: boolean;
   doChapterTest: boolean;
-  doWork: boolean;
-  workAutoSubmit: SubmitMode;
-  doExam: boolean;
-  examAutoSubmit: SubmitMode;
   onUnauthorized: () => void;
   onSettingSwitch: (key: SettingSwitchKey, checked: boolean) => void;
-  onWorkAutoSubmitChange: (value: SubmitMode) => void;
-  onExamAutoSubmitChange: (value: SubmitMode) => void;
 }
 
 export function TaskSettingsPanel({
@@ -118,14 +22,8 @@ export function TaskSettingsPanel({
   hideEmptyTaskCourses,
   bypassDailyStudyLimit,
   doChapterTest,
-  doWork,
-  workAutoSubmit,
-  doExam,
-  examAutoSubmit,
   onUnauthorized,
   onSettingSwitch,
-  onWorkAutoSubmitChange,
-  onExamAutoSubmitChange,
 }: TaskSettingsPanelProps) {
   const [bypassConfirmOpen, setBypassConfirmOpen] = useState(false);
 
@@ -142,7 +40,7 @@ export function TaskSettingsPanel({
     <>
       <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:py-0">
       <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4 lg:hidden">
-        <CardTitle className="text-sm font-semibold sm:text-base">提交设置</CardTitle>
+        <CardTitle className="text-sm font-semibold sm:text-base">设置</CardTitle>
       </CardHeader>
       <CardContent className="p-3 text-sm sm:p-6">
         <div className="space-y-5 sm:space-y-6">
@@ -208,25 +106,6 @@ export function TaskSettingsPanel({
                 checked={doChapterTest}
                 onCheckedChange={(checked) => onSettingSwitch('doChapterTest', checked)}
                 className="shrink-0"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:gap-6 xl:grid-cols-2">
-              <TaskBehaviorCard
-                id="doWork"
-                label="作业自动答题"
-                enabled={doWork}
-                value={workAutoSubmit}
-                onToggle={(checked) => onSettingSwitch('doWork', checked)}
-                onModeChange={onWorkAutoSubmitChange}
-              />
-              <TaskBehaviorCard
-                id="doExam"
-                label="考试自动答题"
-                enabled={doExam}
-                value={examAutoSubmit}
-                onToggle={(checked) => onSettingSwitch('doExam', checked)}
-                onModeChange={onExamAutoSubmitChange}
               />
             </div>
           </section>

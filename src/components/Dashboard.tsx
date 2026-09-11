@@ -35,9 +35,7 @@ interface SettingsFormState {
   hideEmptyTaskCourses: boolean;
   bypassDailyStudyLimit: boolean;
   doChapterTest: boolean;
-  doWork: boolean;
   workAutoSubmit: 0 | 1 | 2;
-  doExam: boolean;
   examAutoSubmit: 0 | 1 | 2;
 }
 
@@ -49,9 +47,7 @@ interface PersistedSettingsFormState {
 
 interface TaskExecutionSettingsState {
   bypassDailyStudyLimit: boolean;
-  doWork: boolean;
   workAutoSubmit: 0 | 1 | 2;
-  doExam: boolean;
   examAutoSubmit: 0 | 1 | 2;
 }
 
@@ -70,9 +66,7 @@ const DEFAULT_PERSISTED_SETTINGS: PersistedSettingsFormState = {
 
 const DEFAULT_TASK_EXECUTION_SETTINGS: TaskExecutionSettingsState = {
   bypassDailyStudyLimit: false,
-  doWork: false,
   workAutoSubmit: 0,
-  doExam: false,
   examAutoSubmit: 0,
 };
 
@@ -238,10 +232,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [fullyExpandedCourseOutlines, setFullyExpandedCourseOutlines] = useState<Set<string>>(new Set());
   const [courseDetailsMap, setCourseDetailsMap] = useState<Record<string, CourseDetails>>({});
   const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>({});
-  const [nightConfirmOpen, setNightConfirmOpen] = useState(false);
+  const [taskStartConfirmOpen, setTaskStartConfirmOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-  const [submitBypassConfirmOpen, setSubmitBypassConfirmOpen] = useState(false);
   
   // Loading flags
   const [coursesLoading, setCoursesLoading] = useState(false);
@@ -276,25 +269,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     hideEmptyTaskCourses,
     bypassDailyStudyLimit,
     doChapterTest,
-    doWork,
     workAutoSubmit,
-    doExam,
     examAutoSubmit,
   } = settingsForm;
 
-  const buildCoursesCustom = useCallback((overrides: Partial<CoursesCustom> = {}) => {
+  const buildCoursesCustom = useCallback((overrides: Partial<CoursesCustom> = {}): CoursesCustom => {
     return {
       doChapterTest,
-      doWork,
-      workAutoSubmit: doWork ? workAutoSubmit : 0,
-      doExam,
-      examAutoSubmit: doExam ? examAutoSubmit : 0,
+      doWork: false,
+      workAutoSubmit: 0,
+      doExam: false,
+      examAutoSubmit: 0,
       includeCourses: [],
       excludeCourses: [],
       coursesSettings: [],
       ...overrides,
     };
-  }, [doChapterTest, doExam, doWork, examAutoSubmit, workAutoSubmit]);
+  }, [doChapterTest]);
 
   const studyIncrementCourse = useMemo(
     () => courses.find((course) => course.key === studyIncrementCourseKey) ?? null,
@@ -699,41 +690,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       }
     }
 
-    const hours = new Date().getHours();
-    if (hours >= 23 || hours < 7) {
-      setNightConfirmOpen(true);
-      return;
-    }
-
-    if (activeTab === 'courses' && bypassDailyStudyLimit) {
-      setSubmitBypassConfirmOpen(true);
-      return;
-    }
-
-    void executeSubmitTask();
-  };
-
-  const confirmNightTask = () => {
-    if (bypassDailyStudyLimit) {
-      setSubmitBypassConfirmOpen(true);
-      return;
-    }
-
-    void executeSubmitTask();
+    setTaskStartConfirmOpen(true);
   };
 
   const updateSettingSwitch = (key: keyof SettingsFormState, checked: boolean) => {
-    if (key === 'bypassDailyStudyLimit' || key === 'doWork' || key === 'doExam') {
-      setTaskExecutionSettings((previous) => {
-        const next = { ...previous, [key]: checked };
-        if (key === 'doWork' && !checked) {
-          next.workAutoSubmit = 0;
-        }
-        if (key === 'doExam' && !checked) {
-          next.examAutoSubmit = 0;
-        }
-        return next;
-      });
+    if (key === 'bypassDailyStudyLimit') {
+      setTaskExecutionSettings((previous) => ({ ...previous, bypassDailyStudyLimit: checked }));
       return;
     }
 
@@ -886,7 +848,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     exams: '考试',
     sign: '自动签到',
     tasks: '任务',
-    settings: '提交设置',
+    settings: '设置',
   }[activeTab];
 
   const overlaySelectedCount = activeTab === 'works'
@@ -898,10 +860,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         : 0;
 
   const overlaySubmitButtonText = activeTab === 'works'
-    ? `提交作业(${selectedWorksCount})`
+    ? `开始作答(${selectedWorksCount})`
     : activeTab === 'exams'
-      ? `提交考试(${selectedExamsCount})`
-      : `提交章节任务(${selectedCourses.size})`;
+      ? `开始作答(${selectedExamsCount})`
+      : `开始章节任务(${selectedCourses.size})`;
+
+  const taskStartSummary = activeTab === 'works'
+    ? `将开始处理 ${selectedWorksCount} 份作业，完成后${workAutoSubmit === 1 ? '自动提交' : '仅保存答案'}。`
+    : activeTab === 'exams'
+      ? `将开始处理 ${selectedExamsCount} 场考试，完成后${examAutoSubmit === 1 ? '自动提交' : '仅保存答案'}。`
+      : `将开始处理 ${selectedCourses.size} 门课程的章节任务。`;
+
+  const currentHour = new Date().getHours();
+  const taskStartWarnings = [
+    currentHour >= 23 || currentHour < 7 ? '当前为夜间时段，任务进度可能被学习通打回。' : null,
+    activeTab === 'courses' && bypassDailyStudyLimit ? '已启用暴力模式，存在进度被检测并打回的风险。' : null,
+    activeTab === 'exams' && examAutoSubmit === 1 ? '考试答完后将直接提交，提交后通常无法修改。' : null,
+  ].filter((warning): warning is string => warning !== null);
 
   return (
     <div className="relative flex h-screen min-h-screen h-svh min-h-svh flex-col overflow-hidden bg-background text-foreground font-sans lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)]">
@@ -984,9 +959,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             hideEmptyTaskCourses={hideEmptyTaskCourses}
             bypassDailyStudyLimit={bypassDailyStudyLimit}
             doChapterTest={doChapterTest}
-            doWork={doWork}
             workAutoSubmit={workAutoSubmit}
-            doExam={doExam}
             examAutoSubmit={examAutoSubmit}
             onUnauthorized={onLogout}
             onRefreshCourses={fetchCourses}
@@ -1020,8 +993,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         submitButtonText={overlaySubmitButtonText}
         creatingTask={creatingTask}
         estimatedTaskDuration={activeTab === 'courses' ? estimatedTaskDuration : null}
-        nightConfirmOpen={nightConfirmOpen}
-        submitBypassConfirmOpen={submitBypassConfirmOpen}
+        taskStartConfirmOpen={taskStartConfirmOpen}
+        taskStartSummary={taskStartSummary}
+        taskStartWarnings={taskStartWarnings}
         logoutConfirmOpen={logoutConfirmOpen}
         studyIncrementCourseKey={studyIncrementCourseKey}
         studyIncrementCourse={studyIncrementCourse}
@@ -1029,10 +1003,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         loadingDetails={loadingDetails}
         studyIncrements={studyIncrements}
         onCreateTask={createTaskWithSelection}
-        onNightConfirmChange={setNightConfirmOpen}
-        onSubmitBypassConfirmChange={setSubmitBypassConfirmOpen}
+        onTaskStartConfirmChange={setTaskStartConfirmOpen}
         onLogoutConfirmChange={setLogoutConfirmOpen}
-        onConfirmNightTask={confirmNightTask}
         onExecuteSubmitTask={executeSubmitTask}
         onStudyIncrementOpenChange={(open) => { if (!open) setStudyIncrementCourseKey(null); }}
         onSaveStudyIncrement={saveStudyIncrement}

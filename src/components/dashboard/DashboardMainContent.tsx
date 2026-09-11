@@ -49,9 +49,7 @@ interface DashboardMainContentProps {
   hideEmptyTaskCourses: boolean;
   bypassDailyStudyLimit: boolean;
   doChapterTest: boolean;
-  doWork: boolean;
   workAutoSubmit: 0 | 1 | 2;
-  doExam: boolean;
   examAutoSubmit: 0 | 1 | 2;
   onUnauthorized: () => void;
   onRefreshCourses: () => void;
@@ -66,7 +64,7 @@ interface DashboardMainContentProps {
   onToggleFullCourseOutline: (courseKey: string) => void;
   onTaskFilterChange: (filter: 'active' | 'completed') => void;
   onRefreshTasks: () => void;
-  onSettingSwitch: (key: 'hideEmptyTaskCourses' | 'bypassDailyStudyLimit' | 'doChapterTest' | 'doWork' | 'doExam', checked: boolean) => void;
+  onSettingSwitch: (key: 'hideEmptyTaskCourses' | 'bypassDailyStudyLimit' | 'doChapterTest', checked: boolean) => void;
   onWorkAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onExamAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onSignStatusChange: (active: boolean) => void;
@@ -113,9 +111,7 @@ export function DashboardMainContent({
   hideEmptyTaskCourses,
   bypassDailyStudyLimit,
   doChapterTest,
-  doWork,
   workAutoSubmit,
-  doExam,
   examAutoSubmit,
   onUnauthorized,
   onRefreshCourses,
@@ -223,7 +219,8 @@ export function DashboardMainContent({
             loadingDetails={loadingDetails}
             selectedWorks={selectedWorks}
             expandedCourses={expandedCourses}
-            onOpenSettings={() => onTabChange('settings')}
+            submitMode={workAutoSubmit}
+            onSubmitModeChange={onWorkAutoSubmitChange}
             onToggleExpandCourse={onToggleExpandCourse}
             onToggleSelectWork={onToggleSelectWork}
             onToggleSelectCourseWorks={onToggleSelectCourseWorks}
@@ -238,7 +235,8 @@ export function DashboardMainContent({
             loadingDetails={loadingDetails}
             selectedExams={selectedExams}
             expandedCourses={expandedCourses}
-            onOpenSettings={() => onTabChange('settings')}
+            submitMode={examAutoSubmit}
+            onSubmitModeChange={onExamAutoSubmitChange}
             onToggleExpandCourse={onToggleExpandCourse}
             onToggleSelectExam={onToggleSelectExam}
             onToggleSelectCourseExams={onToggleSelectCourseExams}
@@ -261,14 +259,8 @@ export function DashboardMainContent({
               hideEmptyTaskCourses={hideEmptyTaskCourses}
               bypassDailyStudyLimit={bypassDailyStudyLimit}
               doChapterTest={doChapterTest}
-              doWork={doWork}
-              workAutoSubmit={workAutoSubmit}
-              doExam={doExam}
-              examAutoSubmit={examAutoSubmit}
               onUnauthorized={onUnauthorized}
               onSettingSwitch={onSettingSwitch}
-              onWorkAutoSubmitChange={onWorkAutoSubmitChange}
-              onExamAutoSubmitChange={onExamAutoSubmitChange}
             />
           </TabsContent>
 
