@@ -4,10 +4,10 @@
 
 > **服务地址：https://yatori.hungrym0.com**
 
-![React](https://img.shields.io/badge/React-19.2.8-61DAFB.svg?style=flat-square&logo=react&logoColor=white)
+![React](https://img.shields.io/badge/React-19.3.0-61DAFB.svg?style=flat-square&logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0.3-3178C6.svg?style=flat-square&logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.3-06B6D4.svg?style=flat-square&logo=tailwindcss&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-8.2.2-646CFF.svg?style=flat-square&logo=vite&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8.3.0-646CFF.svg?style=flat-square&logo=vite&logoColor=white)
 
 [![部署状态](https://github.com/yatori-dev/yatori-free/actions/workflows/deploy.yml/badge.svg)](https://github.com/yatori-dev/yatori-free/actions/workflows/deploy.yml)
 ![Cloudflare Pages](https://img.shields.io/badge/Cloudflare-Pages-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
