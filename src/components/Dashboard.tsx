@@ -613,6 +613,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       }
 
       const includeCoursesList = Array.from(selectedCourses);
+      const targets: TaskTarget[] = includeCoursesList.flatMap((classId) => {
+        const itemIds = (courseDetailsMap[classId]?.taskPoints ?? [])
+          .filter((taskPoint) => taskPoint.runnable)
+          .map((taskPoint) => taskPoint.id);
+        return itemIds.length > 0 ? [{ classId, itemIds }] : [];
+      });
+
+      if (targets.length === 0) {
+        toast.error('所选课程没有可执行的任务点，请刷新课程后重试');
+        return;
+      }
+
       const customConfig: CoursesCustom = buildCoursesCustom({
         includeCourses: includeCoursesList,
         excludeCourses: [],
@@ -632,6 +644,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       await createTask({
         accountId: account.id,
         kind: 'task_points',
+        targets,
         bypassDailyStudyLimit,
         coursesCustom: customConfig,
       });
