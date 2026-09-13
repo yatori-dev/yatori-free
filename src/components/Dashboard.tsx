@@ -60,7 +60,7 @@ const TASK_SETTINGS_VERSION = 2;
 
 const DEFAULT_PERSISTED_SETTINGS: PersistedSettingsFormState = {
   settingsVersion: TASK_SETTINGS_VERSION,
-  hideEmptyTaskCourses: true,
+  hideEmptyTaskCourses: false,
   doChapterTest: true,
 };
 
@@ -108,7 +108,7 @@ function readPersistedSettings(accountId: string | null | undefined): PersistedS
 
     return {
       settingsVersion: TASK_SETTINGS_VERSION,
-      hideEmptyTaskCourses: isCurrentSettingsVersion ? settings.hideEmptyTaskCourses !== false : true,
+      hideEmptyTaskCourses: isCurrentSettingsVersion ? settings.hideEmptyTaskCourses !== false : false,
       doChapterTest: settings.doChapterTest !== false,
     };
   } catch (error) {
