@@ -1,9 +1,14 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "yatori-free",
+  "main": "./worker.ts",
   "compatibility_date": "2026-06-06",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "MAINTENANCE_MODE": "0"
   }
 }
