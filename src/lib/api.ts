@@ -93,6 +93,8 @@ export interface Course {
   key: string;
   courseId?: string;
   courseTeacher?: string;
+  beginDate?: string;
+  endDate?: string;
   courseName: string;
   isstart?: boolean;
   state?: number;
@@ -226,6 +228,12 @@ interface CourseListApiResponseData {
 
 export interface TaskListResponseData {
   tasks: Task[];
+}
+
+export interface TaskCreationLimit {
+  limit: number;
+  remaining: number;
+  resetAt: string | null;
 }
 
 export type TaskKind = 'task_points' | 'works' | 'exams';
@@ -749,6 +757,10 @@ export function getCourseDocumentDownloadUrl(accountId: string, classId: string,
 
 export function getTasks() {
   return apiRequest<TaskListResponseData>('/tasks', undefined, true);
+}
+
+export function getTaskCreationLimit() {
+  return apiRequest<TaskCreationLimit>('/tasks/limit', undefined, true);
 }
 
 export function createTask(payload: CreateTaskRequest) {

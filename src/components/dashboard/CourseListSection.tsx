@@ -52,6 +52,14 @@ interface CourseListSectionProps {
   onToggleFullCourseOutline: (courseKey: string) => void;
 }
 
+function formatCourseDate(value?: string) {
+  if (!value) return null;
+  const isoDate = value.match(/^\d{4}-\d{2}-\d{2}/)?.[0];
+  if (isoDate) return isoDate;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('zh-CN', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).replaceAll('/', '-');
+}
+
 export function CourseListSection({
   accountId,
   courses,
@@ -240,6 +248,11 @@ export function CourseListSection({
                               </Badge>
                             )}
                           </div>
+                          {(course.beginDate || course.endDate) && (
+                            <p className="mt-1 text-[11px] text-muted-foreground">
+                              开课时间：{formatCourseDate(course.beginDate) ?? '未设置'}~{formatCourseDate(course.endDate) ?? '未设置'}
+                            </p>
+                          )}
                           {processingTaskLabel && (
                             <span className="mt-1 inline-flex w-fit items-center rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
                               #{processingTaskLabel}

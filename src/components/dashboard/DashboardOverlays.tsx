@@ -1,6 +1,6 @@
 import { Play, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { CourseDetails, CourseSummary, StudyIncrement } from '@/lib/api';
+import type { CourseDetails, CourseSummary, StudyIncrement, TaskCreationLimit } from '@/lib/api';
 import { hasReadTaskPoints } from '@/lib/courseChapters';
 import { LogoutConfirmDialog } from './LogoutConfirmDialog';
 import { StudyIncrementSettings } from '@/components/StudyIncrementSettings';
@@ -14,6 +14,8 @@ interface DashboardOverlaysProps {
   taskStartConfirmOpen: boolean;
   taskStartSummary: string;
   taskStartWarnings: string[];
+  taskCreationLimit: TaskCreationLimit | null;
+  taskCreationLimitLoading: boolean;
   logoutConfirmOpen: boolean;
   studyIncrementCourseKey: string | null;
   studyIncrementCourse: CourseSummary | null;
@@ -29,9 +31,18 @@ interface DashboardOverlaysProps {
   onLogout: () => void;
 }
 
-export function DashboardOverlays({ selectedCount, creatingTask, estimatedTaskDuration, submitButtonText, taskStartConfirmOpen, taskStartSummary, taskStartWarnings, logoutConfirmOpen, studyIncrementCourseKey, studyIncrementCourse, studyIncrementCourseDetails, loadingDetails, studyIncrements, onCreateTask, onTaskStartConfirmChange, onLogoutConfirmChange, onExecuteSubmitTask, onStudyIncrementOpenChange, onSaveStudyIncrement, onLogout }: DashboardOverlaysProps) {
+export function DashboardOverlays({ selectedCount, creatingTask, estimatedTaskDuration, submitButtonText, taskStartConfirmOpen, taskStartSummary, taskStartWarnings, taskCreationLimit, taskCreationLimitLoading, logoutConfirmOpen, studyIncrementCourseKey, studyIncrementCourse, studyIncrementCourseDetails, loadingDetails, studyIncrements, onCreateTask, onTaskStartConfirmChange, onLogoutConfirmChange, onExecuteSubmitTask, onStudyIncrementOpenChange, onSaveStudyIncrement, onLogout }: DashboardOverlaysProps) {
+  const limitLabel = taskCreationLimitLoading
+    ? '获取配额中…'
+    : taskCreationLimit
+      ? `剩余 ${taskCreationLimit.remaining}/${taskCreationLimit.limit}`
+      : null;
+  const resetLabel = taskCreationLimit?.resetAt
+    ? new Date(taskCreationLimit.resetAt).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', hour: '2-digit', minute: '2-digit' })
+    : null;
+
   return <>
-    {selectedCount > 0 && <div className="absolute bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 animate-bottom-bar-enter lg:bottom-6"><div className="flex flex-col items-center gap-1"><Button type="button" onClick={onCreateTask} disabled={creatingTask} className="h-11 shrink-0 gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-floating ring-4 ring-card/80 hover:bg-primary-hover" title={submitButtonText ?? `提交 ${selectedCount} 项任务`} aria-label={submitButtonText ?? `提交 ${selectedCount} 项任务`}>{creatingTask ? <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Play className="h-4 w-4 fill-current" aria-hidden="true" />}<span>{submitButtonText ?? `提交任务(${selectedCount})`}</span></Button>{estimatedTaskDuration && <span className="whitespace-nowrap text-[11px] font-medium text-muted-foreground" role="status">预计所需{estimatedTaskDuration}</span>}</div></div>}
+    {selectedCount > 0 && <div className="absolute bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 animate-bottom-bar-enter lg:bottom-6"><div className="flex flex-col items-center gap-1"><Button type="button" onClick={onCreateTask} disabled={creatingTask} className="h-auto min-h-11 shrink-0 gap-0.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-floating ring-4 ring-card/80 hover:bg-primary-hover" title={submitButtonText ?? `提交 ${selectedCount} 项任务`} aria-label={submitButtonText ?? `提交 ${selectedCount} 项任务`}><span className="flex items-center gap-2">{creatingTask ? <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Play className="h-4 w-4 fill-current" aria-hidden="true" />}<span>{submitButtonText ?? `提交任务(${selectedCount})`}</span></span>{limitLabel && <span className="block text-[10px] font-medium leading-none opacity-85">{limitLabel}{resetLabel ? ` · ${resetLabel} 重置` : ''}</span>}</Button>{estimatedTaskDuration && <span className="whitespace-nowrap text-[11px] font-medium text-muted-foreground" role="status">预计所需{estimatedTaskDuration}</span>}</div></div>}
     <TaskStartConfirmDialog open={taskStartConfirmOpen} summary={taskStartSummary} warnings={taskStartWarnings} onOpenChange={onTaskStartConfirmChange} onConfirm={onExecuteSubmitTask} />
     <LogoutConfirmDialog open={logoutConfirmOpen} onOpenChange={onLogoutConfirmChange} onConfirm={onLogout} />
     <StudyIncrementSettings open={studyIncrementCourseKey !== null} onOpenChange={onStudyIncrementOpenChange} course={studyIncrementCourse} hasReadTaskPoints={hasReadTaskPoints(studyIncrementCourseDetails)} studyStats={studyIncrementCourseDetails?.studyStats} statsLoaded={studyIncrementCourseDetails !== undefined} loadingStats={studyIncrementCourseKey !== null && loadingDetails[studyIncrementCourseKey] === true} values={studyIncrements} onSave={onSaveStudyIncrement} />
