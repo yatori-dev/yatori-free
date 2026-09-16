@@ -262,25 +262,20 @@ export function ExamsListSection({
                                       <Badge
                                         className={`shrink-0 border text-[10px] font-normal ${
                                           isRunnable
-                                            ? 'border-success/20 bg-success-container text-success'
+                                          ? 'border-warning/30 bg-warning-container text-warning'
                                             : 'border-border bg-muted text-muted-foreground'
                                         }`}
                                       >
-                                        {isRunnable ? '可执行' : '不可执行'}
+                                        {isRunnable ? '未交' : '不可执行'}
                                       </Badge>
                                     </div>
 
-                                    {(exam.status !== undefined || exam.endDate) && (
-                                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
-                                        {exam.status !== undefined && (
-                                          <span>状态: {String(exam.status)}</span>
-                                        )}
+                                    <div className="min-h-4 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
                                         {exam.endDate && <span>截止: {String(exam.endDate)}</span>}
                                         {exam.score !== undefined && (
                                           <span>成绩: {String(exam.score)}</span>
                                         )}
-                                      </div>
-                                    )}
+                                    </div>
                                   </div>
                                 </div>
                               );

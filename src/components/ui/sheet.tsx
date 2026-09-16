@@ -28,7 +28,7 @@ function SheetOverlay({ className, ...props }: React.ComponentProps<typeof Dialo
     <DialogPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-foreground/10 duration-200 ease-out data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 z-50 bg-foreground/10 duration-400 ease-out data-open:duration-400 data-open:animate-in data-open:fade-in-0 data-closed:duration-350 data-closed:animate-out data-closed:fade-out-0",
         className,
       )}
       {...props}
@@ -47,7 +47,7 @@ function SheetContent({
       <DialogPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[min(400px,calc(100vw-0.5rem))] max-w-full flex-col border-l border-border bg-popover text-popover-foreground shadow-overlay outline-none duration-260 ease-emphasized data-open:animate-in data-open:slide-in-from-right data-closed:animate-out data-closed:slide-out-to-right sm:w-[min(400px,calc(100vw-1rem))]",
+          "fixed inset-y-0 right-0 z-50 flex w-[min(400px,calc(100vw-0.5rem))] max-w-full flex-col border-l border-border bg-popover text-popover-foreground shadow-overlay outline-none duration-400 ease-emphasized data-open:duration-400 data-open:animate-in data-open:slide-in-from-right data-closed:duration-350 data-closed:animate-out data-closed:slide-out-to-right sm:w-[min(400px,calc(100vw-1rem))]",
           className,
         )}
         {...props}

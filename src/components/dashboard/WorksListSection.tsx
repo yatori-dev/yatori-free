@@ -252,25 +252,20 @@ export function WorksListSection({
                                       <Badge
                                         className={`shrink-0 border text-[10px] font-normal ${
                                           isRunnable
-                                            ? 'border-success/20 bg-success-container text-success'
+                                          ? 'border-warning/30 bg-warning-container text-warning'
                                             : 'border-border bg-muted text-muted-foreground'
                                         }`}
                                       >
-                                        {isRunnable ? '可执行' : '不可执行'}
+                                        {isRunnable ? '未交' : '不可执行'}
                                       </Badge>
                                     </div>
 
-                                    {(work.status !== undefined || work.endDate) && (
-                                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
-                                        {work.status !== undefined && (
-                                          <span>状态: {String(work.status)}</span>
-                                        )}
+                                    <div className="min-h-4 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
                                         {work.endDate && <span>截止: {String(work.endDate)}</span>}
                                         {work.score !== undefined && (
                                           <span>成绩: {String(work.score)}</span>
                                         )}
-                                      </div>
-                                    )}
+                                    </div>
                                   </div>
                                 </div>
                               );
