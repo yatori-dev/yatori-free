@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import {
   AlertCircle,
   CheckSquare,
-  ChevronDown,
   ClipboardList,
   FolderSync,
   RefreshCw,
@@ -22,13 +21,13 @@ interface WorksListSectionProps {
   coursesLoading: boolean;
   courseDetailsMap: Record<string, CourseDetails>;
   loadingDetails: Record<string, boolean>;
-  selectedWorks: Record<string, Set<string>>;
   expandedCourses: Set<string>;
+  selectedWorks: Record<string, Set<string>>;
   hideUnavailable: boolean;
   submitMode: SubmitMode;
-  onToggleExpandCourse: (courseKey: string) => void;
   onToggleSelectWork: (classId: string, workId: string) => void;
   onToggleSelectCourseWorks: (classId: string) => void;
+  onToggleExpandCourse: (courseKey: string) => void;
   onRefreshCourses: () => void;
   onSubmitModeChange: (value: SubmitMode) => void;
 }
@@ -38,16 +37,18 @@ export function WorksListSection({
   coursesLoading,
   courseDetailsMap,
   loadingDetails,
-  selectedWorks,
   expandedCourses,
+  selectedWorks,
   hideUnavailable,
   submitMode,
-  onToggleExpandCourse,
   onToggleSelectWork,
   onToggleSelectCourseWorks,
+  onToggleExpandCourse,
   onRefreshCourses,
   onSubmitModeChange,
 }: WorksListSectionProps) {
+  void expandedCourses;
+  void onToggleExpandCourse;
   const totalWorksCount = useMemo(() => {
     let totalWorksCount = 0;
 
@@ -137,7 +138,6 @@ export function WorksListSection({
               {filteredCourses.map((course) => {
                 const details = courseDetailsMap[course.key];
                 const isLoading = loadingDetails[course.key] === true;
-                const isExpanded = expandedCourses.has(course.key);
                 const allWorks = details?.works ?? [];
                 const works: CourseWorkItem[] = allWorks.filter((work) => !hideUnavailable || work.runnable);
                 const runnableWorks = allWorks.filter((w) => w.runnable);
@@ -165,10 +165,7 @@ export function WorksListSection({
                           <div className="w-5 shrink-0" />
                         )}
 
-                        <div
-                          className="min-w-0 flex-1 cursor-pointer select-none"
-                          onClick={() => onToggleExpandCourse(course.key)}
-                        >
+                      <div className="min-w-0 flex-1 select-none">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="font-semibold text-foreground text-sm truncate">
                               {course.courseName}
@@ -188,45 +185,11 @@ export function WorksListSection({
                             <RefreshCw className="h-3 w-3 animate-spin" />
                             <span>加载中</span>
                           </Badge>
-                        ) : details ? (
-                          <Badge
-                            variant="outline"
-                            className={`text-xs ${
-                              runnableWorks.length > 0
-                                ? 'border-primary/30 bg-primary/10 text-primary'
-                                : 'text-muted-foreground'
-                            }`}
-                          >
-                            {allWorks.length === 0
-                              ? '无作业'
-                              : runnableWorks.length === 0
-                                ? `暂无可执行 (${allWorks.length})`
-                                : `${runnableWorks.length} 可执行 / 共 ${allWorks.length} 个`}
-                          </Badge>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onToggleExpandCourse(course.key)}
-                            className="h-7 text-xs text-primary"
-                          >
-                            加载作业
-                          </Button>
-                        )}
-
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onToggleExpandCourse(course.key)}
-                          className="h-8 w-8 text-muted-foreground hover:text-foreground transition-colors"
-                          aria-label={isExpanded ? '收起作业明细' : '展开作业明细'}
-                        >
-                          <ChevronDown className={`h-4 w-4 transition-transform duration-200 ease-standard ${isExpanded ? 'rotate-180' : ''}`} />
-                        </Button>
+                        ) : null}
                       </div>
                     </div>
 
-                    {isExpanded && (
+                    {
                       <div className="border-t border-border/50 p-3 sm:p-4 bg-card animate-in fade-in-0 duration-150">
                         {isLoading ? (
                           <div className="flex items-center justify-center py-6 text-xs text-muted-foreground gap-2">
@@ -235,7 +198,7 @@ export function WorksListSection({
                           </div>
                         ) : !details ? (
                           <div className="py-4 text-center text-xs text-muted-foreground">
-                            <span>点击上方按钮加载作业明细</span>
+                            <span>作业明细暂未加载</span>
                           </div>
                         ) : allWorks.length === 0 ? (
                           <div className="py-4 text-center text-xs text-muted-foreground">
@@ -315,7 +278,7 @@ export function WorksListSection({
                           </div>
                         )}
                       </div>
-                    )}
+                    }
                   </div>
                 );
               })}

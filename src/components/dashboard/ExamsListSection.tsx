@@ -48,6 +48,7 @@ export function ExamsListSection({
   onRefreshCourses,
   onSubmitModeChange,
 }: ExamsListSectionProps) {
+  void expandedCourses;
   const totalExamsCount = useMemo(() => {
     let totalExamsCount = 0;
 
@@ -137,7 +138,7 @@ export function ExamsListSection({
               {filteredCourses.map((course) => {
                 const details = courseDetailsMap[course.key];
                 const isLoading = loadingDetails[course.key] === true;
-                const isExpanded = expandedCourses.has(course.key);
+                const isExpanded = true;
                 const allExams = details?.exams ?? [];
                 const exams: CourseExamItem[] = allExams.filter((exam) => !hideUnavailable || exam.runnable);
                 const runnableExams = allExams.filter((e) => e.runnable);
@@ -163,7 +164,7 @@ export function ExamsListSection({
 
                         <div
                           className="min-w-0 flex-1 cursor-pointer select-none"
-                          onClick={() => onToggleExpandCourse(course.key)}
+                          onClick={undefined}
                         >
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="font-semibold text-foreground text-sm truncate">
@@ -184,37 +185,13 @@ export function ExamsListSection({
                             <RefreshCw className="h-3 w-3 animate-spin" />
                             <span>加载中</span>
                           </Badge>
-                        ) : details ? (
-                          <Badge
-                            variant="outline"
-                            className={`text-xs ${
-                              runnableExams.length > 0
-                                ? 'border-primary/30 bg-primary/10 text-primary'
-                                : 'text-muted-foreground'
-                            }`}
-                          >
-                            {allExams.length === 0
-                              ? '无考试'
-                              : runnableExams.length === 0
-                                ? `暂无可执行 (${allExams.length})`
-                                : `${runnableExams.length} 可执行 / 共 ${allExams.length} 个`}
-                          </Badge>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onToggleExpandCourse(course.key)}
-                            className="h-7 text-xs text-primary"
-                          >
-                            加载考试
-                          </Button>
-                        )}
+                        ) : null}
 
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => onToggleExpandCourse(course.key)}
-                          className="h-8 w-8 text-muted-foreground hover:text-foreground transition-colors"
+                          className="hidden"
                           aria-label={isExpanded ? '收起考试明细' : '展开考试明细'}
                         >
                           <ChevronDown className={`h-4 w-4 transition-transform duration-200 ease-standard ${isExpanded ? 'rotate-180' : ''}`} />
