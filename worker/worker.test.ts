@@ -14,4 +14,14 @@ describe("maintenance mode", () => {
     expect(response.headers.get("Cache-Control")).toBe("no-store")
     expect(fetch).not.toHaveBeenCalled()
   })
+
+  it("serves assets when the variable is absent", async () => {
+    const response = new Response("ok")
+    const fetch = vi.fn().mockResolvedValue(response)
+
+    await expect(worker.fetch(new Request("https://example.com"), {
+      ASSETS: { fetch },
+    })).resolves.toBe(response)
+    expect(fetch).toHaveBeenCalledOnce()
+  })
 })
