@@ -311,14 +311,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       setCourses(nextCourses);
       setCourseDetailsMap({});
       setLoadingDetails({});
-      const [worksResponse, examsResponse] = await Promise.all([getWorks(account.id), getExams(account.id)]);
+      const [worksResult, examsResult] = await Promise.allSettled([getWorks(account.id), getExams(account.id)]);
       const nextDetails: Record<string, CourseDetails> = {};
-      worksResponse.data.courses.forEach(({ course, items }) => {
-        nextDetails[course.key] = { course, works: items ?? [] };
-      });
-      examsResponse.data.courses.forEach(({ course, items }) => {
-        nextDetails[course.key] = { ...(nextDetails[course.key] ?? { course }), exams: items ?? [] };
-      });
+      if (worksResult.status === 'fulfilled') {
+        worksResult.value.data.courses.forEach(({ course, items }) => {
+          nextDetails[course.key] = { course, works: items ?? [] };
+        });
+      }
+      if (examsResult.status === 'fulfilled') {
+        examsResult.value.data.courses.forEach(({ course, items }) => {
+          nextDetails[course.key] = { ...(nextDetails[course.key] ?? { course }), exams: items ?? [] };
+        });
+      }
       setCourseDetailsMap(nextDetails);
       const processingCourseKeys = new Set(
         nextCourses.filter((course) => course.processing).map((course) => course.key),
