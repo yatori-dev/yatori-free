@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import type { CourseDetails, CourseSummary, CourseWorkItem } from '@/lib/api';
 import { getWorkItemTitle } from '@/lib/api';
+import { formatLocalDateTime } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -261,10 +262,12 @@ export function WorksListSection({
                                     </div>
 
                                     <div className="min-h-4 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
-                                        {work.endDate && <span>截止: {String(work.endDate)}</span>}
-                                        {work.score !== undefined && (
-                                          <span>成绩: {String(work.score)}</span>
-                                        )}
+                                      {work.openAt !== undefined && (
+                                        <span>开始: {formatLocalDateTime(work.openAt, { includeYear: true })}</span>
+                                      )}
+                                      {work.endAt !== undefined && (
+                                        <span>截止: {formatLocalDateTime(work.endAt, { includeYear: true })}</span>
+                                      )}
                                     </div>
                                   </div>
                                 </div>

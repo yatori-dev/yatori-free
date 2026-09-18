@@ -196,25 +196,25 @@ export interface StudyStats {
 export interface CourseWorkItem {
   id: string;
   runnable: boolean;
-  title?: string;
-  name?: string;
-  status?: string | number;
-  startDate?: string;
-  endDate?: string;
-  score?: string | number;
-  [key: string]: unknown;
+  name: string;
+  status: string;
+  createdAt?: number;
+  openAt?: number;
+  endAt?: number;
+  finishStandard?: string;
+  remain_time?: string;
 }
 
 export interface CourseExamItem {
   id: string;
   runnable: boolean;
-  title?: string;
-  name?: string;
-  status?: string | number;
-  startDate?: string;
-  endDate?: string;
-  score?: string | number;
-  [key: string]: unknown;
+  name: string;
+  status: string;
+  createdAt?: number;
+  openAt?: number;
+  endAt?: number;
+  finishStandard?: string;
+  remain_time?: string;
 }
 
 export interface CourseDetails {
@@ -466,11 +466,11 @@ export function getTaskCoursesCustomSnapshot(configSnapshot: Task['configSnapsho
 }
 
 export function getWorkItemTitle(item: CourseWorkItem) {
-  return (item.title || item.name || `作业 #${item.id}`).trim();
+  return (item.name || `作业 #${item.id}`).trim();
 }
 
 export function getExamItemTitle(item: CourseExamItem) {
-  return (item.title || item.name || `考试 #${item.id}`).trim();
+  return (item.name || `考试 #${item.id}`).trim();
 }
 
 export type StudyMetricStatus = 'disabled' | 'pending' | 'running' | 'success' | 'failed' | 'skipped';

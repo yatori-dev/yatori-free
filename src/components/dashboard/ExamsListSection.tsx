@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import type { CourseDetails, CourseExamItem, CourseSummary } from '@/lib/api';
 import { getExamItemTitle } from '@/lib/api';
+import { formatLocalDateTime } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -266,15 +267,17 @@ export function ExamsListSection({
                                             : 'border-border bg-muted text-muted-foreground'
                                         }`}
                                       >
-                                        {isRunnable ? '未交' : '不可执行'}
+                                        {isRunnable ? '未完成' : '不可执行'}
                                       </Badge>
                                     </div>
 
                                     <div className="min-h-4 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
-                                        {exam.endDate && <span>截止: {String(exam.endDate)}</span>}
-                                        {exam.score !== undefined && (
-                                          <span>成绩: {String(exam.score)}</span>
-                                        )}
+                                      {exam.openAt !== undefined && (
+                                        <span>开始: {formatLocalDateTime(exam.openAt, { includeYear: true })}</span>
+                                      )}
+                                      {exam.endAt !== undefined && (
+                                        <span>截止: {formatLocalDateTime(exam.endAt, { includeYear: true })}</span>
+                                      )}
                                     </div>
                                   </div>
                                 </div>

@@ -4,10 +4,10 @@ interface LocalDateTimeFormatOptions {
 }
 
 export function formatLocalDateTime(
-  value: string | null | undefined,
+  value: string | number | null | undefined,
   { fallback = '未知', includeYear = false }: LocalDateTimeFormatOptions = {},
 ) {
-  if (!value) return fallback;
+  if (value === null || value === undefined || value === '') return fallback;
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return fallback;

@@ -317,6 +317,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         worksResult.value.data.courses.forEach(({ course, items }) => {
           nextDetails[course.key] = { course, works: items ?? [] };
         });
+      } else {
+        const detailResults = await Promise.allSettled(nextCourses.map((course) => getCourseDetails(account.id, course.key)));
+        detailResults.forEach((result, index) => {
+          if (result.status === 'fulfilled') {
+            const course = nextCourses[index];
+            nextDetails[course.key] = { ...nextDetails[course.key], ...result.value.data };
+          }
+        });
       }
       if (examsResult.status === 'fulfilled') {
         examsResult.value.data.courses.forEach(({ course, items }) => {
