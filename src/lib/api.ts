@@ -108,6 +108,30 @@ export interface CourseSummary extends Course {
   processingTaskId?: string;
 }
 
+export interface ChapterNode {
+  id: number;
+  parentnodeid: number;
+  name: string;
+  label: string;
+  indexorder: number;
+  layer: number;
+  status: string;
+  jobcount: number;
+  isreview: number;
+  attachment: unknown[] | null;
+  begintime?: string;
+  openlock?: number;
+  pointFinished?: number;
+  pointTotal?: number;
+}
+
+export interface CourseChapters {
+  chatid: string;
+  isstart: boolean;
+  bbsid: string;
+  knowledge: ChapterNode[] | null;
+}
+
 export type CourseTaskPointKind =
   | 'video'
   | 'audio'
@@ -197,13 +221,20 @@ export interface CourseDetails {
   course: Course;
   processing?: boolean;
   processingTaskId?: string;
-  chapters?: unknown;
+  chapters?: CourseChapters;
   documents?: CourseDocument[];
   works?: CourseWorkItem[];
   exams?: CourseExamItem[];
   studyStats?: StudyStats;
   taskPoints?: CourseTaskPoint[];
   incomplete?: boolean;
+  blockedChapterCount?: number;
+  blockedPointCount?: number;
+  hasReadTaskPoints?: boolean;
+  partialReasons?: string[];
+  readTaskPointCount?: number;
+  taskPointCount?: number;
+  taskPointsIncomplete?: boolean;
 }
 
 export type CourseSourceStatusValue = 'ok' | 'failed' | 'skipped';
@@ -215,15 +246,26 @@ export interface CourseSourceStatus {
 
 export interface CourseListResponseData {
   courses: CourseSummary[];
-  courseDetails: Record<string, CourseDetails>;
+  courseDetails?: Record<string, CourseDetails>;
   sourceStatus: CourseSourceStatus;
   errors: Record<string, unknown>[];
 }
 
 interface CourseListApiResponseData {
-  courses: Array<CourseDetails | null>;
+  courses: Array<{ course?: Course; processing: boolean; processingTaskId?: string; works?: CourseWorkItem[]; exams?: CourseExamItem[] } | null>;
   sourceStatus: CourseSourceStatus;
   errors: Record<string, unknown>[];
+}
+
+export interface CourseTaskListItem<T> {
+  course: Course;
+  items: T[] | null;
+  error?: string;
+}
+
+export interface CourseTaskListResponseData<T> {
+  courses: CourseTaskListItem<T>[];
+  sourceStatus: CourseSourceStatus;
 }
 
 export interface TaskListResponseData {
@@ -728,12 +770,8 @@ export function getVersion() {
 export function getCourses(accountId: string) {
   return apiRequest<CourseListApiResponseData>(`/accounts/${encodeApiPathSegment(accountId)}/courses`, undefined, true)
     .then((response) => {
-      const validCourses = response.data.courses.filter(
-        (details): details is CourseDetails => details !== null && typeof details.course?.key === 'string',
-      );
-      const courseDetails = Object.fromEntries(
-        validCourses.map((details) => [details.course.key, details]),
-      );
+      const validCourses = response.data.courses.filter((item) => typeof item?.course?.key === 'string') as Array<{ course: Course; processing: boolean; processingTaskId?: string; works?: CourseWorkItem[]; exams?: CourseExamItem[] }>;
+      const courseDetails = Object.fromEntries(validCourses.filter((item) => item.works || item.exams).map((item) => [item.course.key, { course: item.course, processing: item.processing, processingTaskId: item.processingTaskId, works: item.works, exams: item.exams }]));
 
       return {
         ...response,
@@ -749,6 +787,30 @@ export function getCourses(accountId: string) {
         },
       } satisfies ApiDataResponse<CourseListResponseData>;
     });
+}
+
+export function getCourseDetails(accountId: string, classId: string) {
+  return apiRequest<CourseDetails>(
+    `/accounts/${encodeApiPathSegment(accountId)}/courses/${encodeApiPathSegment(classId)}`,
+    undefined,
+    true,
+  );
+}
+
+function getCourseTaskList<T>(accountId: string, kind: 'works' | 'exams') {
+  return apiRequest<CourseTaskListResponseData<T>>(
+    `/accounts/${encodeApiPathSegment(accountId)}/${kind}`,
+    undefined,
+    true,
+  );
+}
+
+export function getWorks(accountId: string) {
+  return getCourseTaskList<CourseWorkItem>(accountId, 'works');
+}
+
+export function getExams(accountId: string) {
+  return getCourseTaskList<CourseExamItem>(accountId, 'exams');
 }
 
 export function getCourseDocumentDownloadUrl(accountId: string, classId: string, documentId: string) {

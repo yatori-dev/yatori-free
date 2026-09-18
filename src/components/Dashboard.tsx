@@ -4,6 +4,9 @@ import { Tabs } from './ui/tabs';
 import {
   createTask,
   getCourses,
+  getCourseDetails,
+  getWorks,
+  getExams,
   getVersion,
   getTasks,
   getTaskCreationLimit,
@@ -306,8 +309,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       const response = await getCourses(account.id);
       const nextCourses = response.data.courses;
       setCourses(nextCourses);
-      setCourseDetailsMap(response.data.courseDetails);
+      setCourseDetailsMap({});
       setLoadingDetails({});
+      const [worksResponse, examsResponse] = await Promise.all([getWorks(account.id), getExams(account.id)]);
+      const nextDetails: Record<string, CourseDetails> = {};
+      worksResponse.data.courses.forEach(({ course, items }) => {
+        nextDetails[course.key] = { course, works: items ?? [] };
+      });
+      examsResponse.data.courses.forEach(({ course, items }) => {
+        nextDetails[course.key] = { ...(nextDetails[course.key] ?? { course }), exams: items ?? [] };
+      });
+      setCourseDetailsMap(nextDetails);
       const processingCourseKeys = new Set(
         nextCourses.filter((course) => course.processing).map((course) => course.key),
       );
@@ -527,6 +539,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       }
       return next;
     });
+    if (!courseDetailsMap[courseKey] || !courseDetailsMap[courseKey].chapters) {
+      setLoadingDetails((previous) => ({ ...previous, [courseKey]: true }));
+      void getCourseDetails(account.id, courseKey)
+        .then((response) => setCourseDetailsMap((previous) => ({ ...previous, [courseKey]: { ...previous[courseKey], ...response.data } })))
+        .catch((error) => {
+          if (isAuthExitError(error)) { notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录')); onLogout(); }
+          else toast.error(getUserFacingErrorMessage(error, '加载课程详情失败，请稍后重试'));
+        })
+        .finally(() => setLoadingDetails((previous) => ({ ...previous, [courseKey]: false })));
+    }
   };
 
   const toggleFullCourseOutline = (courseKey: string) => {
