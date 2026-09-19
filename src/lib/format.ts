@@ -4,6 +4,10 @@ interface LocalDateTimeFormatOptions {
   includeSeconds?: boolean;
 }
 
+export function hasDeadlinePassed(endAt: number | undefined, now = Date.now()) {
+  return endAt !== undefined && Number.isFinite(endAt) && endAt <= now;
+}
+
 export function formatLocalDateTime(
   value: string | number | null | undefined,
   { fallback = '未知', includeYear = false, includeSeconds = true }: LocalDateTimeFormatOptions = {},

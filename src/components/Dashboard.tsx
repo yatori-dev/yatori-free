@@ -22,6 +22,7 @@ import { useTaskProgressPolling } from '@/hooks/useTaskProgressPolling';
 import { createCourseTaskPointProgressMap } from '@/lib/taskProgress';
 import { courseHasTaskPoints } from '@/lib/coursePresentation';
 import { hasReadTaskPoints } from '@/lib/courseChapters';
+import { hasDeadlinePassed } from '@/lib/format';
 import { getCourseNameMap, getTaskCounts, getVisibleCourses } from '@/lib/dashboardDerived';
 import { DashboardNavigation, type MobileDashboardTabId } from './dashboard/DashboardNavigation';
 import { mobileDashboardTabOrder } from './dashboard/dashboardNavigationData';
@@ -395,7 +396,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const handleToggleSelectCourseWorks = useCallback((classId: string) => {
     const details = courseDetailsMap[classId];
-    const runnableWorks = details?.works?.filter((w) => w.runnable) ?? [];
+    const runnableWorks = details?.works?.filter((work) => work.runnable && !hasDeadlinePassed(work.endAt)) ?? [];
     if (runnableWorks.length === 0) return;
 
     setSelectedWorks((prev) => {

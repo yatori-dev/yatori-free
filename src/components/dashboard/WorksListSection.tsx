@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import type { CourseDetails, CourseSummary, CourseWorkItem } from '@/lib/api';
 import { getWorkItemTitle } from '@/lib/api';
-import { formatLocalDateTime } from '@/lib/format';
+import { formatLocalDateTime, hasDeadlinePassed } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +31,10 @@ interface WorksListSectionProps {
   onToggleExpandCourse: (courseKey: string) => void;
   onRefreshCourses: () => void;
   onSubmitModeChange: (value: SubmitMode) => void;
+}
+
+function getVisibleWorks(works: CourseWorkItem[], hideUnavailable: boolean) {
+  return works.filter((work) => !hasDeadlinePassed(work.endAt) && (!hideUnavailable || work.runnable));
 }
 
 export function WorksListSection({
@@ -56,7 +60,7 @@ export function WorksListSection({
     courses.forEach((course) => {
       const details = courseDetailsMap[course.key];
       const allWorks = details?.works ?? [];
-      const works = allWorks.filter((work) => !hideUnavailable || work.runnable);
+      const works = getVisibleWorks(allWorks, hideUnavailable);
       totalWorksCount += works.length;
     });
 
@@ -66,7 +70,7 @@ export function WorksListSection({
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
       const details = courseDetailsMap[course.key];
-      return !details || (details.works ?? []).some((work) => !hideUnavailable || work.runnable);
+      return !details || getVisibleWorks(details.works ?? [], hideUnavailable).length > 0;
     });
   }, [courses, courseDetailsMap, hideUnavailable]);
 
@@ -140,8 +144,8 @@ export function WorksListSection({
                 const details = courseDetailsMap[course.key];
                 const isLoading = loadingDetails[course.key] === true;
                 const allWorks = details?.works ?? [];
-                const works: CourseWorkItem[] = allWorks.filter((work) => !hideUnavailable || work.runnable);
-                const runnableWorks = allWorks.filter((w) => w.runnable);
+                const works = getVisibleWorks(allWorks, hideUnavailable);
+                const runnableWorks = works.filter((work) => work.runnable);
                 const courseSelected = selectedWorks[course.key] ?? new Set<string>();
 
                 const isAllCourseWorksSelected =

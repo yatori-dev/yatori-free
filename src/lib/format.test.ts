@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { formatLocalDateTime } from './format';
+import { formatLocalDateTime, hasDeadlinePassed } from './format';
+
+describe('hasDeadlinePassed', () => {
+  const now = new Date(2026, 8, 20, 12).getTime();
+
+  it('only treats finite deadlines at or before the current time as passed', () => {
+    expect(hasDeadlinePassed(now - 1, now)).toBe(true);
+    expect(hasDeadlinePassed(now, now)).toBe(true);
+    expect(hasDeadlinePassed(now + 1, now)).toBe(false);
+    expect(hasDeadlinePassed(undefined, now)).toBe(false);
+  });
+});
 
 describe('formatLocalDateTime', () => {
   it('formats Unix millisecond timestamps returned by course task APIs', () => {
