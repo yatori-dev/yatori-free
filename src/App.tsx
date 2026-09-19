@@ -41,6 +41,7 @@ function AuthRestoreScreen() {
 
 function App() {
   const [session, setSession] = useState<AuthSession | null>(null);
+  const [isLoginTransitioning, setIsLoginTransitioning] = useState(false);
   const [isRestoringSession, setIsRestoringSession] = useState(() => {
     return sessionStorage.getItem(LOGOUT_SUPPRESSION_KEY) !== '1';
   });
@@ -82,6 +83,7 @@ function App() {
     clearSessionCache();
     clearQRLoginSession();
     sessionStorage.removeItem(LOGOUT_SUPPRESSION_KEY);
+    setIsLoginTransitioning(!window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     setSession(newSession);
     setIsRestoringSession(false);
   }, []);
@@ -99,6 +101,7 @@ function App() {
         toast.error(getUserFacingErrorMessage(error, '退出登录失败，请稍后重试'));
       }
     } finally {
+      setIsLoginTransitioning(false);
       setSession(null);
       setIsRestoringSession(false);
     }
@@ -106,12 +109,30 @@ function App() {
 
   return (
     <>
-      {isRestoringSession ? (
-        <AuthRestoreScreen />
-      ) : session ? (
-        <Dashboard session={session} onLogout={handleLogout} />
-      ) : (
-        <Login onLoginSuccess={handleLoginSuccess} />
+      {isRestoringSession ? <AuthRestoreScreen /> : (
+        <div>
+          {(!session || isLoginTransitioning) && (
+            <div
+              className={isLoginTransitioning ? 'login-success-underlay' : undefined}
+              aria-hidden={isLoginTransitioning || undefined}
+              inert={isLoginTransitioning || undefined}
+            >
+              <Login onLoginSuccess={handleLoginSuccess} />
+            </div>
+          )}
+          {session && (
+            <div
+              className={isLoginTransitioning ? 'login-success-view' : undefined}
+              onAnimationEnd={(event) => {
+                if (event.animationName === 'loginSuccessReveal') {
+                  setIsLoginTransitioning(false);
+                }
+              }}
+            >
+              <Dashboard session={session} onLogout={handleLogout} />
+            </div>
+          )}
+        </div>
       )}
       <Toaster
         position="top-center"

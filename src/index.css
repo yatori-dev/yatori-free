@@ -636,6 +636,44 @@
   }
 }
 
+@keyframes loginSuccessReveal {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+    filter: blur(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+.login-success-underlay,
+.login-success-view {
+  position: fixed;
+  inset: 0;
+}
+
+.login-success-underlay {
+  overflow: hidden;
+}
+
+.login-success-view {
+  z-index: 50;
+  overflow: auto;
+  transform-origin: center;
+  animation: loginSuccessReveal 500ms ease-in-out both;
+  will-change: opacity, transform, filter;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-success-view {
+    animation: none;
+  }
+}
+
 /* Keep the desktop QR form usable on short laptop viewports. */
 @media (min-width: 768px) and (max-height: 700px) {
   .login-page {
