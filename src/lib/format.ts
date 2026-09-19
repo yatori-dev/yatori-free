@@ -1,11 +1,12 @@
 interface LocalDateTimeFormatOptions {
   fallback?: string;
   includeYear?: boolean;
+  includeSeconds?: boolean;
 }
 
 export function formatLocalDateTime(
   value: string | number | null | undefined,
-  { fallback = '未知', includeYear = false }: LocalDateTimeFormatOptions = {},
+  { fallback = '未知', includeYear = false, includeSeconds = true }: LocalDateTimeFormatOptions = {},
 ) {
   if (value === null || value === undefined || value === '') return fallback;
 
@@ -19,5 +20,5 @@ export function formatLocalDateTime(
   const minute = String(date.getMinutes()).padStart(2, '0');
   const second = String(date.getSeconds()).padStart(2, '0');
 
-  return `${includeYear ? `${year}-` : ''}${month}-${day} ${hour}:${minute}:${second}`;
+  return `${includeYear ? `${year}-` : ''}${month}-${day} ${hour}:${minute}${includeSeconds ? `:${second}` : ''}`;
 }

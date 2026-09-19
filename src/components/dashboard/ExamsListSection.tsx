@@ -271,12 +271,9 @@ export function ExamsListSection({
                                       </Badge>
                                     </div>
 
-                                    <div className="min-h-4 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
-                                      {exam.openAt !== undefined && (
-                                        <span>开始: {formatLocalDateTime(exam.openAt, { includeYear: true })}</span>
-                                      )}
+                                    <div className="flex min-h-4 flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] leading-4 text-muted-foreground">
                                       {exam.endAt !== undefined && (
-                                        <span>截止: {formatLocalDateTime(exam.endAt, { includeYear: true })}</span>
+                                        <span>截止时间：{formatLocalDateTime(exam.endAt, { includeYear: true, includeSeconds: false })}</span>
                                       )}
                                     </div>
                                   </div>

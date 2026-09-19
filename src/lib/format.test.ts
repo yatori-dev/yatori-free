@@ -7,4 +7,10 @@ describe('formatLocalDateTime', () => {
 
     expect(formatLocalDateTime(timestamp, { includeYear: true })).toBe('2026-09-19 12:34:56');
   });
+
+  it('can omit seconds', () => {
+    const timestamp = new Date(2026, 8, 19, 12, 34, 56).getTime();
+
+    expect(formatLocalDateTime(timestamp, { includeYear: true, includeSeconds: false })).toBe('2026-09-19 12:34');
+  });
 });

@@ -261,12 +261,9 @@ export function WorksListSection({
                                       </Badge>
                                     </div>
 
-                                    <div className="min-h-4 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
-                                      {work.openAt !== undefined && (
-                                        <span>开始: {formatLocalDateTime(work.openAt, { includeYear: true })}</span>
-                                      )}
+                                    <div className="flex min-h-4 flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] leading-4 text-muted-foreground">
                                       {work.endAt !== undefined && (
-                                        <span>截止: {formatLocalDateTime(work.endAt, { includeYear: true })}</span>
+                                        <span>截止时间：{formatLocalDateTime(work.endAt, { includeYear: true, includeSeconds: false })}</span>
                                       )}
                                     </div>
                                   </div>
