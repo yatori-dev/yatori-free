@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import type { CourseDetails, CourseExamItem, CourseSummary } from '@/lib/api';
 import { getExamItemTitle } from '@/lib/api';
-import { formatLocalDateTime } from '@/lib/format';
+import { formatLocalDateTime, getDeadlineUrgencyLabel, hasDeadlinePassed } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +32,10 @@ interface ExamsListSectionProps {
   onToggleSelectCourseExams: (classId: string) => void;
   onRefreshCourses: () => void;
   onSubmitModeChange: (value: SubmitMode) => void;
+}
+
+function getVisibleExams(exams: CourseExamItem[], hideUnavailable: boolean) {
+  return exams.filter((exam) => !hasDeadlinePassed(exam.endAt) && (!hideUnavailable || exam.runnable));
 }
 
 export function ExamsListSection({
@@ -56,7 +60,7 @@ export function ExamsListSection({
     courses.forEach((course) => {
       const details = courseDetailsMap[course.key];
       const allExams = details?.exams ?? [];
-      const exams = allExams.filter((exam) => !hideUnavailable || exam.runnable);
+      const exams = getVisibleExams(allExams, hideUnavailable);
       totalExamsCount += exams.length;
     });
 
@@ -66,7 +70,7 @@ export function ExamsListSection({
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
       const details = courseDetailsMap[course.key];
-      return !details || (details.exams ?? []).some((exam) => !hideUnavailable || exam.runnable);
+      return !details || getVisibleExams(details.exams ?? [], hideUnavailable).length > 0;
     });
   }, [courses, courseDetailsMap, hideUnavailable]);
 
@@ -141,8 +145,8 @@ export function ExamsListSection({
                 const isLoading = loadingDetails[course.key] === true;
                 const isExpanded = true;
                 const allExams = details?.exams ?? [];
-                const exams: CourseExamItem[] = allExams.filter((exam) => !hideUnavailable || exam.runnable);
-                const runnableExams = allExams.filter((e) => e.runnable);
+                const exams = getVisibleExams(allExams, hideUnavailable);
+                const runnableExams = exams.filter((exam) => exam.runnable);
                 const courseSelected = selectedExams[course.key] ?? new Set<string>();
 
                 const isAllCourseExamsSelected =
@@ -225,6 +229,7 @@ export function ExamsListSection({
                               const title = getExamItemTitle(exam);
                               const isSelected = courseSelected.has(exam.id);
                               const isRunnable = exam.runnable;
+                              const urgencyLabel = getDeadlineUrgencyLabel(exam.endAt);
 
                               return (
                                 <div
@@ -262,12 +267,14 @@ export function ExamsListSection({
                                       </span>
                                       <Badge
                                         className={`shrink-0 border text-[10px] font-normal ${
-                                          isRunnable
-                                          ? 'border-warning/30 bg-warning-container text-warning'
+                                          urgencyLabel
+                                            ? 'border-danger/30 bg-danger-container text-danger'
+                                            : isRunnable
+                                              ? 'border-warning/30 bg-warning-container text-warning'
                                             : 'border-border bg-muted text-muted-foreground'
                                         }`}
                                       >
-                                        {isRunnable ? '未完成' : '不可执行'}
+                                        {urgencyLabel ?? (isRunnable ? '未完成' : '不可执行')}
                                       </Badge>
                                     </div>
 

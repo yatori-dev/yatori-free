@@ -421,7 +421,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const handleToggleSelectCourseExams = useCallback((classId: string) => {
     const details = courseDetailsMap[classId];
-    const runnableExams = details?.exams?.filter((e) => e.runnable) ?? [];
+    const runnableExams = details?.exams?.filter((exam) => exam.runnable && !hasDeadlinePassed(exam.endAt)) ?? [];
     if (runnableExams.length === 0) return;
 
     setSelectedExams((prev) => {

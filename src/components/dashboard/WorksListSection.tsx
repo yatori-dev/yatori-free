@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import type { CourseDetails, CourseSummary, CourseWorkItem } from '@/lib/api';
 import { getWorkItemTitle } from '@/lib/api';
-import { formatLocalDateTime, hasDeadlinePassed } from '@/lib/format';
+import { formatLocalDateTime, getDeadlineUrgencyLabel, hasDeadlinePassed } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -219,6 +219,7 @@ export function WorksListSection({
                               const title = getWorkItemTitle(work);
                               const isSelected = courseSelected.has(work.id);
                               const isRunnable = work.runnable;
+                              const urgencyLabel = getDeadlineUrgencyLabel(work.endAt);
 
                               return (
                                 <div
@@ -256,12 +257,14 @@ export function WorksListSection({
                                       </span>
                                       <Badge
                                         className={`shrink-0 border text-[10px] font-normal ${
-                                          isRunnable
-                                          ? 'border-warning/30 bg-warning-container text-warning'
+                                          urgencyLabel
+                                            ? 'border-danger/30 bg-danger-container text-danger'
+                                            : isRunnable
+                                              ? 'border-warning/30 bg-warning-container text-warning'
                                             : 'border-border bg-muted text-muted-foreground'
                                         }`}
                                       >
-                                        {isRunnable ? '未交' : '不可执行'}
+                                        {urgencyLabel ?? (isRunnable ? '未交' : '不可执行')}
                                       </Badge>
                                     </div>
 

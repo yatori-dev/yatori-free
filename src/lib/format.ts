@@ -8,6 +8,17 @@ export function hasDeadlinePassed(endAt: number | undefined, now = Date.now()) {
   return endAt !== undefined && Number.isFinite(endAt) && endAt <= now;
 }
 
+export function getDeadlineUrgencyLabel(endAt: number | undefined, now = Date.now()) {
+  if (endAt === undefined || !Number.isFinite(endAt)) return null;
+
+  const remaining = endAt - now;
+  const hour = 60 * 60 * 1000;
+  if (remaining <= 0 || remaining > 24 * hour) return null;
+  if (remaining <= hour) return '即将截止';
+  if (remaining <= 10 * hour) return `${Math.ceil(remaining / hour)}小时内截止`;
+  return '1天内截止';
+}
+
 export function formatLocalDateTime(
   value: string | number | null | undefined,
   { fallback = '未知', includeYear = false, includeSeconds = true }: LocalDateTimeFormatOptions = {},

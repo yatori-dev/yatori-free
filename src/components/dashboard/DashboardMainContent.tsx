@@ -1,9 +1,10 @@
-import type { RefObject } from 'react';
+import { useMemo, type RefObject } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
 import type { CourseDetails, CourseSummary, StudyIncrement, Task } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 import type { CourseTaskPointProgressMap } from '@/lib/taskProgress';
+import { getDeadlineUrgencyLabel } from '@/lib/format';
 import { SignMonitor } from '@/components/SignMonitor';
 import { TaskSettingsPanel } from './TaskSettingsPanel';
 import { TaskStatusContent } from './TaskStatusContent';
@@ -137,6 +138,17 @@ export function DashboardMainContent({
   onToggleSelectCourseExams,
 }: DashboardMainContentProps) {
   const isLearningTab = activeTab === 'courses' || activeTab === 'works' || activeTab === 'exams';
+  const urgentCounts = useMemo(() => {
+    let works = 0;
+    let exams = 0;
+
+    Object.values(courseDetailsMap).forEach((details) => {
+      works += (details.works ?? []).filter((work) => work.runnable && getDeadlineUrgencyLabel(work.endAt)).length;
+      exams += (details.exams ?? []).filter((exam) => exam.runnable && getDeadlineUrgencyLabel(exam.endAt)).length;
+    });
+
+    return { works, exams };
+  }, [courseDetailsMap]);
 
   return (
     <main ref={mainRef} id="dashboard-main" className="min-h-0 flex-1 overflow-x-clip overflow-y-auto pb-[calc(8.5rem+env(safe-area-inset-bottom))] lg:pb-0">
@@ -149,6 +161,7 @@ export function DashboardMainContent({
                 {mobileLearningTabs.map((tab) => {
                   const active = activeTab === tab.id;
                   const Icon = tab.icon;
+                  const urgentCount = tab.id === 'works' ? urgentCounts.works : tab.id === 'exams' ? urgentCounts.exams : 0;
                   return (
                     <button
                       key={tab.id}
@@ -163,6 +176,14 @@ export function DashboardMainContent({
                     >
                       <Icon className="h-3.5 w-3.5" />
                       <span>{tab.label}</span>
+                      {urgentCount > 0 && (
+                        <span
+                          className="inline-flex min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] leading-4 text-primary-foreground"
+                          aria-label={`${urgentCount} 项即将截止`}
+                        >
+                          {urgentCount > 99 ? '99+' : urgentCount}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
