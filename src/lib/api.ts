@@ -27,7 +27,7 @@ export interface CoursesCustom {
   doExam?: boolean;
   workAutoSubmit?: 0 | 1 | 2;
   examAutoSubmit?: 0 | 1 | 2;
-  answerMode?: string;
+  answerMode?: '' | 'xxt' | 'builtin' | 'internal';
   includeCourses?: string[];
   excludeCourses?: string[];
   coursesSettings?: CourseSetting[];
@@ -61,10 +61,10 @@ export interface Account {
   id: string;
   ownerUserId: string;
   accountType: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   account: string;
   name: string;
-  schoolName?: string;
+  schoolName?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -73,7 +73,7 @@ export interface AuthSession {
   expiresAt: string | null;
   displayName: string;
   avatarUrl: string | null;
-  schoolName?: string;
+  schoolName?: string | null;
   user: User;
   account: Account;
 }
@@ -92,12 +92,12 @@ export interface VersionData {
 export interface Course {
   key: string;
   courseId?: string;
-  courseTeacher?: string;
+  courseTeacher?: string | null;
   beginDate?: string;
   endDate?: string;
   courseName: string;
   isstart?: boolean;
-  state?: number;
+  state?: 0 | 1;
   jobFinishCount?: number;
   jobCount?: number;
   jobRate?: number;
@@ -222,11 +222,11 @@ export interface CourseDetails {
   processing?: boolean;
   processingTaskId?: string;
   chapters?: CourseChapters;
-  documents?: CourseDocument[];
-  works?: CourseWorkItem[];
-  exams?: CourseExamItem[];
+  documents?: CourseDocument[] | null;
+  works?: CourseWorkItem[] | null;
+  exams?: CourseExamItem[] | null;
   studyStats?: StudyStats;
-  taskPoints?: CourseTaskPoint[];
+  taskPoints?: CourseTaskPoint[] | null;
   incomplete?: boolean;
   blockedChapterCount?: number;
   blockedPointCount?: number;
@@ -268,7 +268,7 @@ export interface CourseTaskListResponseData<T> {
 }
 
 export interface TaskListResponseData {
-  tasks: Task[];
+  tasks: TaskSummary[];
 }
 
 export interface TaskCreationLimit {
@@ -284,14 +284,24 @@ export interface TaskTarget {
   itemIds: string[];
 }
 
-export interface CreateTaskRequest {
+interface CreateTaskBase {
   accountId: string;
   autoResume?: boolean;
   bypassDailyStudyLimit?: boolean;
   coursesCustom?: CoursesCustom;
-  kind?: TaskKind;
-  targets?: TaskTarget[];
 }
+
+export type CreateTaskRequest = CreateTaskBase & (
+  | {
+      kind: TaskKind;
+      targets: TaskTarget[];
+    }
+  | {
+      kind?: '';
+      coursesCustom: CoursesCustom;
+      targets?: TaskTarget[];
+    }
+);
 
 export interface EmailNotificationSettings {
   available: boolean;
@@ -323,8 +333,8 @@ export interface LoginRequest {
 export interface LoginData {
   expiresAt: string;
   displayName?: string;
-  avatarUrl?: string;
-  schoolName?: string;
+  avatarUrl?: string | null;
+  schoolName?: string | null;
   user: User;
   account: Account;
 }
@@ -369,6 +379,8 @@ export interface Task {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export type TaskSummary = Omit<Task, 'configSnapshot'>;
 
 export interface TaskConfigSnapshot {
   account?: string;

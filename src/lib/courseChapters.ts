@@ -165,10 +165,10 @@ export function getChapterTaskMetas(chapters: Chapter[]) {
   }));
 }
 
-export function getCourseTaskPointGroups(taskPoints: CourseTaskPoint[] = []) {
+export function getCourseTaskPointGroups(taskPoints: CourseTaskPoint[] | null = []) {
   const groups = new Map<string, CourseTaskPointGroup>();
 
-  for (const taskPoint of taskPoints) {
+  for (const taskPoint of taskPoints ?? []) {
     const key = `${taskPoint.chapterId}:${taskPoint.chapterLabel}:${taskPoint.chapterName}`;
     const group = groups.get(key);
     if (group) {
@@ -205,9 +205,9 @@ function normalizeMatchValue(value: unknown) {
   return '';
 }
 
-export function getChapterDocuments(chapter: Chapter, documents: CourseDocument[] = []) {
+export function getChapterDocuments(chapter: Chapter, documents: CourseDocument[] | null = []) {
   const chapterId = normalizeMatchValue(chapter.id);
-  return documents.filter((document) => {
+  return (documents ?? []).filter((document) => {
     const documentChapterId = normalizeMatchValue(document.chapterId);
     return Boolean(chapterId && documentChapterId && chapterId === documentChapterId);
   });
