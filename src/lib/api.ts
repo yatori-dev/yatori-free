@@ -241,7 +241,6 @@ export type CourseSourceStatusValue = 'ok' | 'failed' | 'skipped';
 
 export interface CourseSourceStatus {
   joined: CourseSourceStatusValue;
-  research: CourseSourceStatusValue;
 }
 
 export interface CourseListResponseData {
@@ -463,6 +462,16 @@ export function getTaskConfigSnapshot(configSnapshot: Task['configSnapshot']) {
 
 export function getTaskCoursesCustomSnapshot(configSnapshot: Task['configSnapshot']) {
   return getTaskConfigSnapshot(configSnapshot)?.coursesCustom;
+}
+
+export function getTaskCourseIdentifiers(configSnapshot: Task['configSnapshot']) {
+  const config = getTaskConfigSnapshot(configSnapshot);
+  const includedCourses = config?.coursesCustom?.includeCourses;
+  if (includedCourses && includedCourses.length > 0) {
+    return includedCourses;
+  }
+
+  return config?.targets?.map(({ classId }) => classId) ?? undefined;
 }
 
 export function getWorkItemTitle(item: CourseWorkItem) {

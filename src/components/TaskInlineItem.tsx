@@ -13,7 +13,7 @@ import {
   RefreshCw, 
   Hourglass,
 } from 'lucide-react';
-import { getTaskConfigSnapshot, getTaskCoursesCustomSnapshot, type Task } from '@/lib/api';
+import { getTaskConfigSnapshot, getTaskCourseIdentifiers, getTaskCoursesCustomSnapshot, type Task } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 import { getTaskCourseTaskPointProgress, type CourseTaskPointProgressMap } from '@/lib/taskProgress';
 import { InlineError } from './common/InlineError';
@@ -237,7 +237,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
     coursesCustom.doWork,
     coursesCustom.doExam,
   ].some((value) => value !== undefined);
-  const includeCourses = coursesCustom?.includeCourses;
+  const includeCourses = getTaskCourseIdentifiers(task.configSnapshot);
   const taskCourseTaskPointProgress = getTaskCourseTaskPointProgress(
     includeCourses,
     courseTaskPointProgressByIdentifier,

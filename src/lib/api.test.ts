@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { apiRequest, getCourses, getUserFacingErrorMessage, login } from './api';
+import { apiRequest, getCourses, getTaskCourseIdentifiers, getUserFacingErrorMessage, login } from './api';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -48,5 +48,12 @@ describe('api boundary', () => {
       processingTaskId: undefined,
     }]);
     expect(response.data.courseDetails['class-1']?.works).toEqual([{ id: 'work-1', runnable: true }]);
+  });
+
+  it('uses task targets when the config snapshot has no included course list', () => {
+    expect(getTaskCourseIdentifiers({
+      kind: 'task_points',
+      targets: [{ classId: 'class-1', itemIds: ['point-1'] }],
+    })).toEqual(['class-1']);
   });
 });
