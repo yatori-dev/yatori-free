@@ -98,7 +98,8 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const [showCourseList, setShowCourseList] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const taskProgress = task.progress ?? null;
-  const taskConfigSnapshot = getTaskConfigSnapshot(task.configSnapshot);
+  const configSnapshot = snapshot?.configSnapshot ?? task.configSnapshot;
+  const taskConfigSnapshot = getTaskConfigSnapshot(configSnapshot);
   const snapshotProgress = snapshot?.progress ?? null;
   const progress = (() => {
     if (!snapshotProgress) return taskProgress;
@@ -222,7 +223,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const canStopTask = stoppableStatuses.includes(task.status) || stoppableStatuses.includes(effectiveStatus);
   const isStoppingTask = task.status === 'stopping' || effectiveStatus === 'stopping';
 
-  const coursesCustom = getTaskCoursesCustomSnapshot(task.configSnapshot);
+  const coursesCustom = getTaskCoursesCustomSnapshot(configSnapshot);
   const workAutoSubmitValue = coursesCustom?.workAutoSubmit;
   const examAutoSubmitValue = coursesCustom?.examAutoSubmit;
   const workAutoSubmitLabel = getAutoSubmitLabel(workAutoSubmitValue);
@@ -237,7 +238,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
     coursesCustom.doWork,
     coursesCustom.doExam,
   ].some((value) => value !== undefined);
-  const includeCourses = getTaskCourseIdentifiers(task.configSnapshot);
+  const includeCourses = getTaskCourseIdentifiers(configSnapshot);
   const taskCourseTaskPointProgress = getTaskCourseTaskPointProgress(
     includeCourses,
     courseTaskPointProgressByIdentifier,

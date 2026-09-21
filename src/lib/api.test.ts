@@ -50,7 +50,12 @@ describe('api boundary', () => {
     expect(response.data.courseDetails['class-1']?.works).toEqual([{ id: 'work-1', runnable: true }]);
   });
 
-  it('uses task targets when the config snapshot has no included course list', () => {
+  it('reads course identifiers from included courses or task targets', () => {
+    expect(getTaskCourseIdentifiers({
+      coursesCustom: { includeCourses: ['class-2'] },
+      targets: [{ classId: 'class-1', itemIds: ['point-1'] }],
+    })).toEqual(['class-2']);
+
     expect(getTaskCourseIdentifiers({
       kind: 'task_points',
       targets: [{ classId: 'class-1', itemIds: ['point-1'] }],

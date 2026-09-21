@@ -4,6 +4,7 @@ import {
   getUserFacingErrorMessage,
   isAuthExitError,
   type Task,
+  type TaskConfigSnapshot,
   type TaskProgress,
 } from '@/lib/api';
 import {
@@ -13,6 +14,7 @@ import {
 
 export interface TaskProgressSnapshot {
   status: Task['status'];
+  configSnapshot?: TaskConfigSnapshot;
   progress: TaskProgress | null;
   errorMessage: string;
 }
@@ -67,6 +69,7 @@ export function useTaskProgressPolling({ tasks, onUnauthorized }: UseTaskProgres
           ...previous,
           [taskId]: {
             status: response.data.status,
+            configSnapshot: response.data.configSnapshot,
             progress: nextProgress,
             errorMessage: '',
           },
@@ -83,6 +86,7 @@ export function useTaskProgressPolling({ tasks, onUnauthorized }: UseTaskProgres
           ...previous,
           [taskId]: {
             status: previous[taskId]?.status ?? 'pending',
+            configSnapshot: previous[taskId]?.configSnapshot,
             progress: previous[taskId]?.progress ?? null,
             errorMessage: getUserFacingErrorMessage(error, '获取任务进度失败'),
           },
