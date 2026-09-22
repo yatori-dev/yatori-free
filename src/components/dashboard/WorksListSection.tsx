@@ -205,6 +205,11 @@ export function WorksListSection({
                           <div className="py-4 text-center text-xs text-muted-foreground">
                             <span>作业明细暂未加载</span>
                           </div>
+                        ) : details.worksError ? (
+                          <div className="flex items-start gap-2 py-4 text-xs text-warning" role="alert">
+                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                            <span>作业读取失败：{details.worksError}</span>
+                          </div>
                         ) : allWorks.length === 0 ? (
                           <div className="py-4 text-center text-xs text-muted-foreground">
                             <span>该课程暂无作业</span>

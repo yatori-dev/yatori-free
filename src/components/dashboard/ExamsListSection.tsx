@@ -215,6 +215,11 @@ export function ExamsListSection({
                           <div className="py-4 text-center text-xs text-muted-foreground">
                             <span>点击上方按钮加载考试明细</span>
                           </div>
+                        ) : details.examsError ? (
+                          <div className="flex items-start gap-2 py-4 text-xs text-warning" role="alert">
+                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                            <span>考试读取失败：{details.examsError}</span>
+                          </div>
                         ) : allExams.length === 0 ? (
                           <div className="py-4 text-center text-xs text-muted-foreground">
                             <span>该课程暂无考试</span>

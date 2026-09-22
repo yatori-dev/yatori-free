@@ -240,6 +240,8 @@ export interface CourseDetails {
   readTaskPointCount?: number;
   taskPointCount?: number;
   taskPointsIncomplete?: boolean;
+  worksError?: string;
+  examsError?: string;
 }
 
 export type CourseSourceStatusValue = 'ok' | 'failed' | 'skipped';

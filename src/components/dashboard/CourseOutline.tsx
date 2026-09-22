@@ -24,6 +24,7 @@ export function CourseOutline({ accountId, courseKey, courseDetails, isFullyExpa
   return (
     <div className="space-y-2">
       {courseDetails.incomplete && <div className="flex items-start gap-2 rounded-md bg-warning-container/40 px-2.5 py-2 text-xs text-warning" role="status"><AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" /><span>部分课程数据读取失败，当前大纲可能不完整。</span></div>}
+      {courseDetails.taskPointsIncomplete && <div className="flex items-start gap-2 rounded-md bg-warning-container/40 px-2.5 py-2 text-xs text-warning" role="status"><AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" /><span>{courseDetails.partialReasons?.join('；') || '任务点读取不完整，当前仅展示已读取内容。'}</span></div>}
       <div className={isFullyExpanded ? undefined : 'max-sm:max-h-64 max-sm:overflow-hidden'}>
         <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">章节大纲 ({chaptersWithTasks.length})</div>
         <div className="grid grid-cols-1 gap-2 pr-1 md:max-h-[300px] md:grid-cols-2 md:overflow-y-auto">

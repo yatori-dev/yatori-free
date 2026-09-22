@@ -41,7 +41,7 @@ export function useTaskProgressPolling({ tasks, onUnauthorized }: UseTaskProgres
   const terminalSnapshotIdsRef = useRef(new Set<string>());
 
   const taskIdsToPoll = tasks
-    .filter((task) => task.status === 'running' || task.status === 'waiting_daily_limit' || task.status === 'stopping')
+    .filter((task) => task.status === 'running' || task.status === 'stopping')
     .map((task) => task.id)
     .join('|');
   const terminalTaskIds = tasks

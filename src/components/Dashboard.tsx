@@ -317,21 +317,61 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       const [worksResult, examsResult] = await Promise.allSettled([getWorks(account.id), getExams(account.id)]);
       const nextDetails: Record<string, CourseDetails> = {};
       if (worksResult.status === 'fulfilled') {
-        worksResult.value.data.courses.forEach(({ course, items }) => {
-          nextDetails[course.key] = { course, works: items ?? [] };
+        const sourceError = worksResult.value.data.sourceStatus.joined === 'ok'
+          ? undefined
+          : '作业列表读取失败，请刷新重试';
+        worksResult.value.data.courses.forEach(({ course, items, error }) => {
+          nextDetails[course.key] = {
+            course,
+            works: items ?? [],
+            ...((error ?? sourceError) ? { worksError: error ?? sourceError } : {}),
+          };
         });
       } else {
         const detailResults = await Promise.allSettled(nextCourses.map((course) => getCourseDetails(account.id, course.key)));
         detailResults.forEach((result, index) => {
           if (result.status === 'fulfilled') {
             const course = nextCourses[index];
-            nextDetails[course.key] = { ...nextDetails[course.key], ...result.value.data };
+            nextDetails[course.key] = {
+              ...nextDetails[course.key],
+              ...result.value.data,
+              ...(result.value.data.works === undefined
+                ? { worksError: getUserFacingErrorMessage(worksResult.reason, '作业列表读取失败，请刷新重试') }
+                : {}),
+            };
           }
+        });
+        nextCourses.forEach((course) => {
+          nextDetails[course.key] ??= {
+            course,
+            works: [],
+            worksError: getUserFacingErrorMessage(worksResult.reason, '作业列表读取失败，请刷新重试'),
+          };
         });
       }
       if (examsResult.status === 'fulfilled') {
-        examsResult.value.data.courses.forEach(({ course, items }) => {
-          nextDetails[course.key] = { ...(nextDetails[course.key] ?? { course }), exams: items ?? [] };
+        const sourceError = examsResult.value.data.sourceStatus.joined === 'ok'
+          ? undefined
+          : '考试列表读取失败，请刷新重试';
+        examsResult.value.data.courses.forEach(({ course, items, error }) => {
+          nextDetails[course.key] = {
+            ...(nextDetails[course.key] ?? { course }),
+            exams: items ?? [],
+            ...((error ?? sourceError) ? { examsError: error ?? sourceError } : {}),
+          };
+        });
+      } else {
+        nextCourses.forEach((course) => {
+          const existing = nextDetails[course.key];
+          nextDetails[course.key] = {
+            ...(existing ?? { course }),
+            ...(existing?.exams === undefined
+              ? {
+                  exams: [],
+                  examsError: getUserFacingErrorMessage(examsResult.reason, '考试列表读取失败，请刷新重试'),
+                }
+              : {}),
+          };
         });
       }
       setCourseDetailsMap(nextDetails);
@@ -559,7 +599,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     if (!courseDetailsMap[courseKey] || !courseDetailsMap[courseKey].chapters) {
       setLoadingDetails((previous) => ({ ...previous, [courseKey]: true }));
       void getCourseDetails(account.id, courseKey)
-        .then((response) => setCourseDetailsMap((previous) => ({ ...previous, [courseKey]: { ...previous[courseKey], ...response.data } })))
+        .then((response) => setCourseDetailsMap((previous) => ({
+          ...previous,
+          [courseKey]: {
+            ...previous[courseKey],
+            ...response.data,
+            worksError: undefined,
+            examsError: undefined,
+          },
+        })))
         .catch((error) => {
           if (isAuthExitError(error)) { notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录')); onLogout(); }
           else toast.error(getUserFacingErrorMessage(error, '加载课程详情失败，请稍后重试'));
@@ -681,7 +729,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       });
 
       if (targets.length === 0) {
-        toast.error('所选课程没有可执行的任务点，请刷新课程后重试');
+        const hasIncompleteDetails = includeCoursesList.some((classId) => {
+          const details = selectedCourseDetails[classId];
+          return details?.incomplete === true || details?.taskPointsIncomplete === true;
+        });
+        toast.error(hasIncompleteDetails
+          ? '课程任务点读取不完整，请刷新课程后重试'
+          : '所选课程没有可执行的任务点，请刷新课程后重试');
         return;
       }
 
