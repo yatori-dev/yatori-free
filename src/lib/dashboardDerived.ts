@@ -1,6 +1,5 @@
 import type { CourseSummary, Task } from './api';
 import { isActiveTaskStatus } from './taskStatus';
-import { courseHasTaskPoints } from './coursePresentation';
 
 export function getTaskCounts(tasks: Task[]) {
   return tasks.reduce((counts, task) => {
@@ -17,8 +16,4 @@ export function getCourseNameMap(courses: CourseSummary[]) {
     if (course.courseId) map[course.courseId] = name;
     return map;
   }, {});
-}
-
-export function getVisibleCourses(courses: CourseSummary[], hideEmpty: boolean) {
-  return hideEmpty ? courses.filter(courseHasTaskPoints) : courses;
 }

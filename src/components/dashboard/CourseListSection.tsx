@@ -197,7 +197,7 @@ export function CourseListSection({
           ) : filteredCourses.length === 0 ? (
             <div className="p-12 text-center font-sans text-sm text-muted-foreground">
               <AlertCircle className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-              {courseSearchQuery.trim() ? '没有匹配的课程，请调整搜索条件。' : '没有可显示课程，可在设置中关闭隐藏无任务点课程。'}
+              {courseSearchQuery.trim() ? '没有匹配的课程，请调整搜索条件。' : '没有可显示课程，请刷新课程后重试。'}
             </div>
           ) : (
             <div className="divide-y divide-border">

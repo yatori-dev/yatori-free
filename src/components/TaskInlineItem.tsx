@@ -361,7 +361,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
 
       {/* Progress Box & Course Switch Cross-fade */}
       {showProgress && !isTerminal && progress && (
-        <TaskProgressPanel progress={progress} status={effectiveStatus} percent={percent} taskPointProgress={taskCourseTaskPointProgress} />
+        <TaskProgressPanel progress={progress} status={effectiveStatus} percent={percent} />
       )}
 
       {/* Date & Time details */}

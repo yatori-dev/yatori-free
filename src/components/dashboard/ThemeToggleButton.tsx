@@ -20,7 +20,6 @@ export function ThemeToggleButton() {
     const nextTheme = isDark ? 'light' : 'dark';
     const applyTheme = () => {
       flushSync(() => setTheme(nextTheme));
-      localStorage.removeItem('yatori-theme');
     };
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { applyTheme(); return; }
     if (typeof document.startViewTransition === 'function') { document.activeViewTransition?.skipTransition(); document.startViewTransition(applyTheme); return; }

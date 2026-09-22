@@ -20,10 +20,9 @@ import { hasActiveStoredSignMonitor } from '@/lib/signMonitor';
 import { isActiveTaskStatus } from '@/lib/taskStatus';
 import { useTaskProgressPolling } from '@/hooks/useTaskProgressPolling';
 import { createCourseTaskPointProgressMap } from '@/lib/taskProgress';
-import { courseHasTaskPoints } from '@/lib/coursePresentation';
 import { hasReadTaskPoints } from '@/lib/courseChapters';
 import { hasDeadlinePassed } from '@/lib/format';
-import { getCourseNameMap, getTaskCounts, getVisibleCourses } from '@/lib/dashboardDerived';
+import { getCourseNameMap, getTaskCounts } from '@/lib/dashboardDerived';
 import { DashboardNavigation, type MobileDashboardTabId } from './dashboard/DashboardNavigation';
 import { mobileDashboardTabOrder } from './dashboard/dashboardNavigationData';
 import { DashboardMainContent } from './dashboard/DashboardMainContent';
@@ -37,7 +36,6 @@ interface DashboardProps {
 }
 
 interface SettingsFormState {
-  hideEmptyTaskCourses: boolean;
   bypassDailyStudyLimit: boolean;
   doChapterTest: boolean;
   workAutoSubmit: 0 | 1 | 2;
@@ -46,7 +44,6 @@ interface SettingsFormState {
 
 interface PersistedSettingsFormState {
   settingsVersion: number;
-  hideEmptyTaskCourses: boolean;
   doChapterTest: boolean;
 }
 
@@ -65,7 +62,6 @@ const TASK_SETTINGS_VERSION = 2;
 
 const DEFAULT_PERSISTED_SETTINGS: PersistedSettingsFormState = {
   settingsVersion: TASK_SETTINGS_VERSION,
-  hideEmptyTaskCourses: false,
   doChapterTest: true,
 };
 
@@ -109,11 +105,8 @@ function readPersistedSettings(accountId: string | null | undefined): PersistedS
     }
 
     const settings = parsed as Partial<PersistedSettingsFormState>;
-    const isCurrentSettingsVersion = settings.settingsVersion === TASK_SETTINGS_VERSION;
-
     return {
       settingsVersion: TASK_SETTINGS_VERSION,
-      hideEmptyTaskCourses: isCurrentSettingsVersion ? settings.hideEmptyTaskCourses !== false : false,
       doChapterTest: settings.doChapterTest !== false,
     };
   } catch (error) {
@@ -274,7 +267,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   };
 
   const {
-    hideEmptyTaskCourses,
     bypassDailyStudyLimit,
     doChapterTest,
     workAutoSubmit,
@@ -496,7 +488,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     });
   };
 
-  const visibleCourses = useMemo(() => getVisibleCourses(courses, hideEmptyTaskCourses), [courses, hideEmptyTaskCourses]);
+  const visibleCourses = courses;
 
   const filteredCourses = useMemo(() => {
     const query = courseSearchQuery.trim().toLocaleLowerCase();
@@ -505,7 +497,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       : visibleCourses;
   }, [courseSearchQuery, visibleCourses]);
 
-  const hiddenEmptyTaskCourseCount = courses.length - visibleCourses.length;
   const selectableCourses = filteredCourses.filter(course => !course.processing);
   const incompleteSelectableCourses = visibleCourses.filter((course) => {
     if (course.processing) return false;
@@ -843,20 +834,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
     const nextForm = { ...persistedSettingsForm, [key]: checked };
 
-    if (key === 'hideEmptyTaskCourses' && checked) {
-      const visibleKeys = new Set(courses.filter(courseHasTaskPoints).map((course) => course.key));
-      setSelectedCourses((prev) => {
-        const next = new Set<string>();
-        prev.forEach((courseKey) => {
-          if (visibleKeys.has(courseKey)) {
-            next.add(courseKey);
-          }
-        });
-        return next.size === prev.size ? prev : next;
-      });
-    }
-
-
     setPersistedSettingsState({
       accountId: currentAccountId,
       form: nextForm,
@@ -1098,8 +1075,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             taskSnapshots={taskSnapshots}
             courseNameByIdentifier={courseNameByIdentifier}
             courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
-            hiddenEmptyTaskCourseCount={hiddenEmptyTaskCourseCount}
-            hideEmptyTaskCourses={hideEmptyTaskCourses}
             bypassDailyStudyLimit={bypassDailyStudyLimit}
             doChapterTest={doChapterTest}
             workAutoSubmit={workAutoSubmit}

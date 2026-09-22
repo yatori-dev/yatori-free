@@ -47,8 +47,6 @@ interface DashboardMainContentProps {
   taskSnapshots: Record<string, TaskProgressSnapshot>;
   courseNameByIdentifier: Record<string, string>;
   courseTaskPointProgressByIdentifier: CourseTaskPointProgressMap;
-  hiddenEmptyTaskCourseCount: number;
-  hideEmptyTaskCourses: boolean;
   bypassDailyStudyLimit: boolean;
   doChapterTest: boolean;
   workAutoSubmit: 0 | 1 | 2;
@@ -66,7 +64,7 @@ interface DashboardMainContentProps {
   onToggleFullCourseOutline: (courseKey: string) => void;
   onTaskFilterChange: (filter: 'active' | 'completed') => void;
   onRefreshTasks: () => void;
-  onSettingSwitch: (key: 'hideEmptyTaskCourses' | 'bypassDailyStudyLimit' | 'doChapterTest', checked: boolean) => void;
+  onSettingSwitch: (key: 'bypassDailyStudyLimit' | 'doChapterTest', checked: boolean) => void;
   onWorkAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onExamAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onSignStatusChange: (active: boolean) => void;
@@ -110,8 +108,6 @@ export function DashboardMainContent({
   taskSnapshots,
   courseNameByIdentifier,
   courseTaskPointProgressByIdentifier,
-  hiddenEmptyTaskCourseCount,
-  hideEmptyTaskCourses,
   bypassDailyStudyLimit,
   doChapterTest,
   workAutoSubmit,
@@ -196,7 +192,7 @@ export function DashboardMainContent({
           <div data-dashboard-tab-content>
           {activeTab === 'courses' && (
             <CourseProgressSummary
-              visibleCount={courses.length - hiddenEmptyTaskCourseCount}
+              visibleCount={courses.length}
               incompleteCount={incompleteSelectableCourses.length}
               activeTaskCount={taskCounts.active}
             />
@@ -279,8 +275,6 @@ export function DashboardMainContent({
 
           <TabsContent value="settings" className="m-0 outline-none">
             <TaskSettingsPanel
-              hiddenEmptyTaskCourseCount={hiddenEmptyTaskCourseCount}
-              hideEmptyTaskCourses={hideEmptyTaskCourses}
               bypassDailyStudyLimit={bypassDailyStudyLimit}
               doChapterTest={doChapterTest}
               onUnauthorized={onUnauthorized}

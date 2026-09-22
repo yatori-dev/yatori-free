@@ -12,7 +12,7 @@ export function TaskCourseBadges({ courses, onShowMore }: TaskCourseBadgesProps)
   return (
     <div className="flex min-w-0 w-full flex-wrap items-center gap-1.5">
       <BookOpen className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-      {courses === undefined ? <span className="text-xs font-medium text-muted-foreground">课程范围未记录</span> : courses.length === 0 ? (
+      {courses === undefined ? <span className="text-xs font-medium text-muted-foreground" title="任务详情接口未返回课程范围">课程范围未返回</span> : courses.length === 0 ? (
         <span className="rounded-md border border-primary/20 bg-primary-container/30 px-2 py-0.5 text-xs font-medium text-primary">未选择课程</span>
       ) : <>
         {visible?.map((name, index) => <span key={`${name}-${index}`} title={name} className="inline-flex min-w-0 max-w-full items-center rounded-md border border-primary/15 bg-primary-container/20 px-2 py-0.5 text-xs font-medium text-primary sm:max-w-[200px]"><span className="min-w-0 truncate">{name}</span></span>)}
