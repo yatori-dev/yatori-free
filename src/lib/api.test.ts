@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { apiRequest, getCourses, getTaskCourseIdentifiers, getUserFacingErrorMessage } from './api';
+import { apiRequest, getCourses, getTaskConfigSnapshot, getTaskCourseIdentifiers, getUserFacingErrorMessage } from './api';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -71,5 +71,16 @@ describe('api boundary', () => {
       kind: 'task_points',
       targets: [{ classId: 'class-1', itemIds: ['point-1'] }],
     })).toEqual(['class-1']);
+  });
+
+  it('keeps course scope when an optional task snapshot field is incompatible', () => {
+    const snapshot = getTaskConfigSnapshot({
+      kind: 'task_points',
+      coursesCustom: { includeCourses: ['class-2'] },
+      targets: [{ classId: 'class-2', itemIds: ['point-1'] }],
+      bypassDailyStudyLimit: 'false',
+    } as never);
+
+    expect(getTaskCourseIdentifiers(snapshot)).toEqual(['class-2']);
   });
 });

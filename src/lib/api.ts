@@ -423,14 +423,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function isOptionalString(value: unknown) {
-  return value === undefined || typeof value === 'string';
-}
-
-function isOptionalBoolean(value: unknown) {
-  return value === undefined || typeof value === 'boolean';
-}
-
 function isOptionalTaskKind(value: unknown): value is TaskKind | undefined {
   return value === undefined || value === 'task_points' || value === 'works' || value === 'exams';
 }
@@ -442,62 +434,30 @@ function isTaskTarget(value: unknown): value is TaskTarget {
     && value.itemIds.every((id) => typeof id === 'string');
 }
 
-function isOptionalTaskTargetArray(value: unknown): value is TaskTarget[] | undefined {
-  return value === undefined || (Array.isArray(value) && value.every(isTaskTarget));
-}
-
-function isOptionalStringArray(value: unknown) {
-  return value === undefined
-    || (Array.isArray(value) && value.every((item) => typeof item === 'string'));
-}
-
-function isOptionalAutoSubmitMode(value: unknown) {
-  return value === undefined || value === 0 || value === 1 || value === 2;
-}
-
-function isStudyIncrement(value: unknown): value is StudyIncrement {
-  return isRecord(value)
-    && ['visitCount', 'videoStudyMinutes', 'readMinutes'].every((key) => (
-      value[key] === undefined || typeof value[key] === 'number'
-    ));
-}
-
-function isCourseSetting(value: unknown): value is CourseSetting {
-  return isRecord(value)
-    && isOptionalString(value.classId)
-    && isOptionalString(value.name)
-    && isOptionalStringArray(value.includeExams)
-    && isOptionalStringArray(value.excludeExams)
-    && (value.studyIncrement === undefined || isStudyIncrement(value.studyIncrement));
-}
-
-function isCoursesCustom(value: unknown): value is CoursesCustom {
-  return isRecord(value)
-    && isOptionalBoolean(value.doChapterTest)
-    && isOptionalBoolean(value.doWork)
-    && isOptionalBoolean(value.doExam)
-    && isOptionalAutoSubmitMode(value.workAutoSubmit)
-    && isOptionalAutoSubmitMode(value.examAutoSubmit)
-    && isOptionalString(value.answerMode)
-    && isOptionalStringArray(value.includeCourses)
-    && isOptionalStringArray(value.excludeCourses)
-    && (value.coursesSettings === undefined || (
-      Array.isArray(value.coursesSettings) && value.coursesSettings.every(isCourseSetting)
-    ));
-}
-
 function isTaskConfigSnapshot(value: unknown): value is TaskConfigSnapshot {
-  return isRecord(value)
-    && isOptionalString(value.account)
-    && isOptionalString(value.accountType)
-    && isOptionalBoolean(value.bypassDailyStudyLimit)
-    && isOptionalTaskKind(value.kind)
-    && isOptionalTaskTargetArray(value.targets)
-    && (value.coursesCustom === undefined || isCoursesCustom(value.coursesCustom));
+  return isRecord(value);
 }
 
 export function getTaskConfigSnapshot(configSnapshot: Task['configSnapshot']) {
-  return isTaskConfigSnapshot(configSnapshot) ? configSnapshot : undefined;
+  if (!isTaskConfigSnapshot(configSnapshot)) {
+    return undefined;
+  }
+
+  // Preserve usable server fields when an older response adds an incompatible
+  // optional field; a single mismatch must not hide the course scope.
+  const snapshot: TaskConfigSnapshot = {};
+  if (typeof configSnapshot.account === 'string') snapshot.account = configSnapshot.account;
+  if (typeof configSnapshot.accountType === 'string') snapshot.accountType = configSnapshot.accountType;
+  if (typeof configSnapshot.bypassDailyStudyLimit === 'boolean') snapshot.bypassDailyStudyLimit = configSnapshot.bypassDailyStudyLimit;
+  if (isOptionalTaskKind(configSnapshot.kind)) snapshot.kind = configSnapshot.kind;
+  if (Array.isArray(configSnapshot.targets)) {
+    const targets = configSnapshot.targets.filter(isTaskTarget);
+    if (targets.length > 0 || configSnapshot.targets.length === 0) snapshot.targets = targets;
+  }
+  if (isRecord(configSnapshot.coursesCustom)) {
+    snapshot.coursesCustom = configSnapshot.coursesCustom as CoursesCustom;
+  }
+  return snapshot;
 }
 
 export function getTaskCoursesCustomSnapshot(configSnapshot: Task['configSnapshot']) {
