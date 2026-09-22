@@ -21,6 +21,7 @@ interface DashboardMainContentProps {
   courses: CourseSummary[];
   filteredCourses: CourseSummary[];
   coursesLoading: boolean;
+  coursesError: string | null;
   courseSearch: string;
   courseSearchQuery: string;
   selectableCourses: CourseSummary[];
@@ -83,6 +84,7 @@ export function DashboardMainContent({
   courses,
   filteredCourses,
   coursesLoading,
+  coursesError,
   courseSearch,
   courseSearchQuery,
   selectableCourses,
@@ -205,6 +207,7 @@ export function DashboardMainContent({
             courses={courses}
             filteredCourses={filteredCourses}
             coursesLoading={coursesLoading}
+            coursesError={coursesError}
             courseSearch={courseSearch}
             courseSearchQuery={courseSearchQuery}
             selectableCourses={selectableCourses}

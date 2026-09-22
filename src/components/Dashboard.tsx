@@ -245,6 +245,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   
   // Loading flags
   const [coursesLoading, setCoursesLoading] = useState(false);
+  const [coursesError, setCoursesError] = useState<string | null>(null);
   const [tasksLoading, setTasksLoading] = useState(false);
   const [creatingTask, setCreatingTask] = useState(false);
   const [stoppingTaskId, setStoppingTaskId] = useState<string | null>(null);
@@ -306,6 +307,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const fetchCourses = useCallback(async () => {
     if (!account) return;
     setCoursesLoading(true);
+    setCoursesError(null);
     try {
       const response = await getCourses(account.id);
       const nextCourses = response.data.courses;
@@ -350,7 +352,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         return;
       }
       console.error(error);
-      toast.error(getUserFacingErrorMessage(error, '加载课程失败，请稍后重试'));
+      const message = getUserFacingErrorMessage(error, '加载课程失败，请稍后重试');
+      setCoursesError(message);
+      toast.error(message);
     } finally {
       setCoursesLoading(false);
     }
@@ -651,8 +655,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       }
 
       const includeCoursesList = Array.from(selectedCourses);
+      const missingCourseKeys = includeCoursesList.filter((classId) => !courseDetailsMap[classId]?.taskPoints);
+      const selectedCourseDetails = { ...courseDetailsMap };
+      if (missingCourseKeys.length > 0) {
+        const detailResults = await Promise.allSettled(
+          missingCourseKeys.map((classId) => getCourseDetails(account.id, classId)),
+        );
+        detailResults.forEach((result, index) => {
+          if (result.status === 'fulfilled') {
+            const classId = missingCourseKeys[index];
+            selectedCourseDetails[classId] = {
+              ...selectedCourseDetails[classId],
+              ...result.value.data,
+            };
+          }
+        });
+        setCourseDetailsMap((previous) => ({ ...previous, ...selectedCourseDetails }));
+      }
+
       const targets: TaskTarget[] = includeCoursesList.flatMap((classId) => {
-        const itemIds = (courseDetailsMap[classId]?.taskPoints ?? [])
+        const itemIds = (selectedCourseDetails[classId]?.taskPoints ?? [])
           .filter((taskPoint) => taskPoint.runnable)
           .map((taskPoint) => taskPoint.id);
         return itemIds.length > 0 ? [{ classId, itemIds }] : [];
@@ -670,7 +692,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           const studyIncrement = studyIncrements[classId] ?? DEFAULT_STUDY_INCREMENT;
           const visitCount = studyIncrement.visitCount ?? 0;
           const videoStudyMinutes = studyIncrement.videoStudyMinutes ?? 0;
-          const readMinutes = hasReadTaskPoints(courseDetailsMap[classId]) ? (studyIncrement.readMinutes ?? 0) : 0;
+          const readMinutes = hasReadTaskPoints(selectedCourseDetails[classId]) ? (studyIncrement.readMinutes ?? 0) : 0;
           if (visitCount === 0 && videoStudyMinutes === 0 && readMinutes === 0) {
             return [];
           }
@@ -996,6 +1018,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             courses={courses}
             filteredCourses={filteredCourses}
             coursesLoading={coursesLoading}
+            coursesError={coursesError}
             courseSearch={courseSearch}
             courseSearchQuery={courseSearchQuery}
             selectableCourses={selectableCourses}

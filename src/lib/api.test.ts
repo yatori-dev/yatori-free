@@ -1,14 +1,17 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { apiRequest, getCourses, getTaskCourseIdentifiers, getUserFacingErrorMessage, login } from './api';
+import { apiRequest, getCourses, getTaskCourseIdentifiers, getUserFacingErrorMessage } from './api';
 
 afterEach(() => vi.unstubAllGlobals());
 
 describe('api boundary', () => {
-  it('adds JSON headers and credentials, then returns successful payloads', async () => {
+  it('sends JSON requests with the session cookie', async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response('{"code":200,"data":{"ok":true}}', { status: 200 }));
     vi.stubGlobal('fetch', fetchMock);
 
-    await login({ account: 'a', password: 'p' });
+    await apiRequest('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ account: 'a', password: 'p' }),
+    });
     expect(fetchMock).toHaveBeenCalledWith('/api/auth/login', expect.objectContaining({
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -25,16 +28,16 @@ describe('api boundary', () => {
     expect(getUserFacingErrorMessage({ status: 401 })).toBe('登录信息已过期，请重新登录');
   });
 
-  it('normalizes complete course details from the course list endpoint', async () => {
+  it('reads course summaries using the documented response shape', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
       code: 200,
       data: {
-        courses: [null, {
+        courses: [{
           course: { key: 'class-1', courseName: '课程一' },
           processing: true,
-          works: [{ id: 'work-1', runnable: true }],
+          processingTaskId: '',
         }],
-        sourceStatus: { joined: 'ok', research: 'ok' },
+        sourceStatus: { joined: 'ok' },
         errors: [],
       },
     }), { status: 200 })));
@@ -45,9 +48,17 @@ describe('api boundary', () => {
       key: 'class-1',
       courseName: '课程一',
       processing: true,
-      processingTaskId: undefined,
+      processingTaskId: '',
     }]);
-    expect(response.data.courseDetails['class-1']?.works).toEqual([{ id: 'work-1', runnable: true }]);
+  });
+
+  it('rejects malformed course entries instead of treating them as an empty list', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      code: 200,
+      data: { courses: [null], sourceStatus: { joined: 'ok' }, errors: [] },
+    }), { status: 200 })));
+
+    await expect(getCourses('account-1')).rejects.toThrow('课程接口响应结构异常');
   });
 
   it('reads course identifiers from included courses or task targets', () => {

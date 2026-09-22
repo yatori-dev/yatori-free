@@ -25,6 +25,7 @@ interface CourseListSectionProps {
   courses: CourseSummary[];
   filteredCourses: CourseSummary[];
   coursesLoading: boolean;
+  coursesError: string | null;
   courseSearch: string;
   courseSearchQuery: string;
   selectableCourses: CourseSummary[];
@@ -65,6 +66,7 @@ export function CourseListSection({
   courses,
   filteredCourses,
   coursesLoading,
+  coursesError,
   courseSearch,
   courseSearchQuery,
   selectableCourses,
@@ -181,6 +183,11 @@ export function CourseListSection({
                 <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4" />
               </svg>
               <p className="mt-4">拉取课程列表中...</p>
+            </div>
+          ) : coursesError ? (
+            <div className="p-12 text-center font-sans text-sm text-danger">
+              <AlertCircle className="mx-auto mb-2 h-8 w-8" />
+              {coursesError}
             </div>
           ) : courses.length === 0 ? (
             <div className="p-12 text-center font-sans text-sm text-muted-foreground">

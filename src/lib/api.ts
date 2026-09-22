@@ -91,8 +91,13 @@ export interface VersionData {
 
 export interface Course {
   key: string;
+  ContentID?: number;
   courseId?: string;
+  chatId?: string;
+  courseDataId?: number;
+  courseImage?: string;
   courseTeacher?: string | null;
+  cpi?: number;
   beginDate?: string;
   endDate?: string;
   courseName: string;
@@ -105,7 +110,7 @@ export interface Course {
 
 export interface CourseSummary extends Course {
   processing: boolean;
-  processingTaskId?: string;
+  processingTaskId: string;
 }
 
 export interface ChapterNode {
@@ -245,15 +250,36 @@ export interface CourseSourceStatus {
 
 export interface CourseListResponseData {
   courses: CourseSummary[];
-  courseDetails?: Record<string, CourseDetails>;
   sourceStatus: CourseSourceStatus;
   errors: Record<string, unknown>[];
 }
 
 interface CourseListApiResponseData {
-  courses: Array<{ course?: Course; processing: boolean; processingTaskId?: string; works?: CourseWorkItem[]; exams?: CourseExamItem[] } | null>;
+  courses: Array<{ course: Course; processing: boolean; processingTaskId: string }>;
   sourceStatus: CourseSourceStatus;
   errors: Record<string, unknown>[];
+}
+
+function isCourseListApiResponseData(value: unknown): value is CourseListApiResponseData {
+  if (!isRecord(value) || !Array.isArray(value.courses) || !isRecord(value.sourceStatus) || !Array.isArray(value.errors) || !value.errors.every(isRecord)) {
+    return false;
+  }
+
+  return value.sourceStatus.joined === 'ok'
+    || value.sourceStatus.joined === 'failed'
+    || value.sourceStatus.joined === 'skipped';
+}
+
+function getCourseListSourceError(errors: Record<string, unknown>[]) {
+  const detail = errors.find((error) => typeof error.message === 'string' || typeof error.error === 'string');
+  const message = detail
+    ? typeof detail.message === 'string'
+      ? detail.message
+      : typeof detail.error === 'string'
+        ? detail.error
+        : null
+    : null;
+  return message?.trim() ? `课程读取失败：${message.trim()}` : '课程源读取失败，请稍后重试';
 }
 
 export interface CourseTaskListItem<T> {
@@ -791,18 +817,28 @@ export function getVersion() {
 export function getCourses(accountId: string) {
   return apiRequest<CourseListApiResponseData>(`/accounts/${encodeApiPathSegment(accountId)}/courses`, undefined, true)
     .then((response) => {
-      const validCourses = response.data.courses.filter((item) => typeof item?.course?.key === 'string') as Array<{ course: Course; processing: boolean; processingTaskId?: string; works?: CourseWorkItem[]; exams?: CourseExamItem[] }>;
-      const courseDetails = Object.fromEntries(validCourses.filter((item) => item.works || item.exams).map((item) => [item.course.key, { course: item.course, processing: item.processing, processingTaskId: item.processingTaskId, works: item.works, exams: item.exams }]));
+      if (!isCourseListApiResponseData(response.data)) {
+        throw new Error('课程接口响应结构异常，请稍后重试');
+      }
+      if (response.data.sourceStatus.joined !== 'ok') {
+        throw new Error(getCourseListSourceError(response.data.errors));
+      }
+
+      const validCourses = response.data.courses.map((item) => {
+        if (!isRecord(item) || !isRecord(item.course) || typeof item.course.key !== 'string' || typeof item.course.courseName !== 'string' || typeof item.processing !== 'boolean' || typeof item.processingTaskId !== 'string') {
+          throw new Error('课程接口响应结构异常，请稍后重试');
+        }
+        return item as { course: Course; processing: boolean; processingTaskId: string };
+      });
 
       return {
         ...response,
         data: {
-          courses: validCourses.map(({ course, processing = false, processingTaskId }) => ({
+          courses: validCourses.map(({ course, processing, processingTaskId }) => ({
             ...course,
             processing,
             processingTaskId,
           })),
-          courseDetails,
           sourceStatus: response.data.sourceStatus,
           errors: response.data.errors,
         },
