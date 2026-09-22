@@ -9,12 +9,11 @@ import {
   getExams,
   getVersion,
   getTasks,
-  getTaskCreationLimit,
   getUserFacingErrorMessage,
   isAuthExitError,
   stopTask,
 } from '@/lib/api';
-import type { AuthSession, CourseDetails, CourseSummary, Task, CoursesCustom, StudyIncrement, TaskTarget, TaskCreationLimit } from '@/lib/api';
+import type { AuthSession, CourseDetails, CourseSummary, Task, CoursesCustom, StudyIncrement, TaskTarget } from '@/lib/api';
 import { notifyAuthExit } from '@/lib/notifications';
 import { isActiveTaskStatus } from '@/lib/taskStatus';
 import { useTaskProgressPolling } from '@/hooks/useTaskProgressPolling';
@@ -228,8 +227,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [courseDetailsMap, setCourseDetailsMap] = useState<Record<string, CourseDetails>>({});
   const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>({});
   const [taskStartConfirmOpen, setTaskStartConfirmOpen] = useState(false);
-  const [taskCreationLimit, setTaskCreationLimit] = useState<TaskCreationLimit | null>(null);
-  const [taskCreationLimitLoading, setTaskCreationLimitLoading] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   
@@ -805,22 +802,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       }
     }
 
-    setTaskCreationLimit(null);
-    setTaskCreationLimitLoading(true);
     setTaskStartConfirmOpen(true);
-    try {
-      const response = await getTaskCreationLimit();
-      setTaskCreationLimit(response.data);
-    } catch (error) {
-      if (isAuthExitError(error)) {
-        notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
-        onLogout();
-        return;
-      }
-      console.error(error);
-    } finally {
-      setTaskCreationLimitLoading(false);
-    }
   };
 
   const updateSettingSwitch = (key: keyof SettingsFormState, checked: boolean) => {
@@ -1108,8 +1090,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         taskStartConfirmOpen={taskStartConfirmOpen}
         taskStartSummary={taskStartSummary}
         taskStartWarnings={taskStartWarnings}
-        taskCreationLimit={taskCreationLimit}
-        taskCreationLimitLoading={taskCreationLimitLoading}
         logoutConfirmOpen={logoutConfirmOpen}
         studyIncrementCourseKey={studyIncrementCourseKey}
         studyIncrementCourse={studyIncrementCourse}
