@@ -5,7 +5,6 @@ import type { CourseDetails, CourseSummary, StudyIncrement, Task } from '@/lib/a
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 import type { CourseTaskPointProgressMap } from '@/lib/taskProgress';
 import { getDeadlineUrgencyLabel } from '@/lib/format';
-import { SignMonitor } from '@/components/SignMonitor';
 import { TaskSettingsPanel } from './TaskSettingsPanel';
 import { TaskStatusContent } from './TaskStatusContent';
 import { CourseListSection } from './CourseListSection';
@@ -67,7 +66,6 @@ interface DashboardMainContentProps {
   onSettingSwitch: (key: 'bypassDailyStudyLimit' | 'doChapterTest', checked: boolean) => void;
   onWorkAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onExamAutoSubmitChange: (value: 0 | 1 | 2) => void;
-  onSignStatusChange: (active: boolean) => void;
   onTabChange: (tab: MobileDashboardTabId) => void;
   onToggleSelectWork: (classId: string, workId: string) => void;
   onToggleSelectCourseWorks: (classId: string) => void;
@@ -128,7 +126,6 @@ export function DashboardMainContent({
   onSettingSwitch,
   onWorkAutoSubmitChange,
   onExamAutoSubmitChange,
-  onSignStatusChange,
   onTabChange,
   onToggleSelectWork,
   onToggleSelectCourseWorks,
@@ -262,16 +259,6 @@ export function DashboardMainContent({
             onToggleSelectCourseExams={onToggleSelectCourseExams}
             onRefreshCourses={onRefreshCourses}
           />
-
-          <TabsContent value="sign" className="m-0 outline-none lg:min-h-0 lg:flex-1">
-            {accountId && (
-              <SignMonitor
-                accountId={accountId}
-                onUnauthorized={onUnauthorized}
-                onStatusChange={onSignStatusChange}
-              />
-            )}
-          </TabsContent>
 
           <TabsContent value="settings" className="m-0 outline-none">
             <TaskSettingsPanel

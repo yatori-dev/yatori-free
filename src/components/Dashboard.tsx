@@ -16,7 +16,6 @@ import {
 } from '@/lib/api';
 import type { AuthSession, CourseDetails, CourseSummary, Task, CoursesCustom, StudyIncrement, TaskTarget, TaskCreationLimit } from '@/lib/api';
 import { notifyAuthExit } from '@/lib/notifications';
-import { hasActiveStoredSignMonitor } from '@/lib/signMonitor';
 import { isActiveTaskStatus } from '@/lib/taskStatus';
 import { useTaskProgressPolling } from '@/hooks/useTaskProgressPolling';
 import { createCourseTaskPointProgressMap } from '@/lib/taskProgress';
@@ -120,7 +119,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const account = session.account;
   const [courses, setCourses] = useState<CourseSummary[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [signMonitorActive, setSignMonitorActive] = useState(() => hasActiveStoredSignMonitor(account.id));
   const [appVersion, setAppVersion] = useState('...');
   const [activeTab, setActiveTab] = useState<MobileDashboardTabId>('courses');
   const [prevTab, setPrevTab] = useState<MobileDashboardTabId>('courses');
@@ -135,7 +133,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     courses: 0,
     works: 0,
     exams: 0,
-    sign: 0,
     tasks: 0,
     settings: 0,
   });
@@ -965,7 +962,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     courses: '章节任务点',
     works: '作业',
     exams: '考试',
-    sign: '自动签到',
     tasks: '任务',
     settings: '设置',
   }[activeTab];
@@ -1013,7 +1009,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           activeTab={activeTab}
           activeTaskCount={taskCounts.active}
           appVersion={appVersion}
-          signMonitorActive={signMonitorActive}
           onTabChange={handleTabChange}
         />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -1095,7 +1090,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             onSettingSwitch={updateSettingSwitch}
             onWorkAutoSubmitChange={updateWorkAutoSubmit}
             onExamAutoSubmitChange={updateExamAutoSubmit}
-            onSignStatusChange={setSignMonitorActive}
             onTabChange={handleTabChange}
             onToggleSelectWork={handleToggleSelectWork}
             onToggleSelectCourseWorks={handleToggleSelectCourseWorks}
@@ -1134,7 +1128,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         mode="mobile"
         activeTab={activeTab}
         activeTaskCount={taskCounts.active}
-        signMonitorActive={signMonitorActive}
         onTabChange={handleTabChange}
       />
     </div>
