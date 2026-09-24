@@ -102,7 +102,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="login-page flex min-h-screen flex-col items-center justify-center bg-background px-4 py-8 transition-colors duration-300">
+    <div className="login-page flex min-h-screen flex-col items-center justify-center bg-background px-4 py-8 transition-colors duration-240">
       <Card className="w-full max-w-[450px] overflow-hidden border-border/70 shadow-floating md:max-w-[min(65.6vw,1024px)]">
         {/* Google Accent Bar */}
         <div className="google-accent-bar">
@@ -120,13 +120,13 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
           {/* Step Indicator */}
           <div className="mb-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none">
-            <span className={`h-1.5 rounded-full transition-all duration-300 ${step === 'account' ? 'w-6 bg-primary' : 'w-2 bg-muted'}`} />
-            <span className={`h-1.5 rounded-full transition-all duration-300 ${step === 'credentials' ? 'w-6 bg-primary' : 'w-2 bg-muted'}`} />
+            <span className={`h-1.5 rounded-full transition-[width,background-color] duration-240 ${step === 'account' ? 'w-6 bg-primary' : 'w-2 bg-muted'}`} />
+            <span className={`h-1.5 rounded-full transition-[width,background-color] duration-240 ${step === 'credentials' ? 'w-6 bg-primary' : 'w-2 bg-muted'}`} />
           </div>
 
           {/* Form and transition layout */}
           <div
-            className="w-full slide-viewport mt-2 transition-[height] duration-300 ease-out"
+            className="w-full slide-viewport mt-2 transition-[height] duration-280 ease-emphasized"
             style={{ height: viewportHeight ? `${viewportHeight}px` : undefined }}
           >
             <div 
@@ -182,7 +182,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                     </a>
                     <Button 
                       type="submit" 
-                      className="h-11 rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground shadow-none transition-all hover:bg-primary-hover md:h-10"
+                      className="h-11 rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground shadow-none transition-colors duration-200 hover:bg-primary-hover md:h-10"
                       disabled={step !== 'account'}
                       tabIndex={step === 'account' ? 0 : -1}
                     >

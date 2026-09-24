@@ -126,7 +126,7 @@ export function CourseListSection({
                 }}
                 placeholder="搜索课程名称"
                 aria-label="搜索课程名称"
-                className="course-search-input h-8 rounded-md border-border/80 bg-background/90 pl-9 pr-9 text-[13px] shadow-none transition-all duration-200 placeholder:text-muted-foreground/80 hover:border-primary/40 focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-primary/10 sm:h-9 sm:rounded-lg sm:pl-10 sm:pr-10 sm:text-sm sm:shadow-sm sm:focus-visible:ring-4"
+                className="course-search-input h-8 rounded-md border-border/80 bg-background/90 pl-9 pr-9 text-[13px] shadow-none transition-[border-color,box-shadow] duration-200 placeholder:text-muted-foreground/80 hover:border-primary/40 focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-primary/10 sm:h-9 sm:rounded-lg sm:pl-10 sm:pr-10 sm:text-sm sm:shadow-sm sm:focus-visible:ring-4"
               />
               {courseSearch && (
                 <button
@@ -136,7 +136,7 @@ export function CourseListSection({
                     onSearchChange('');
                     onSearchQueryChange('');
                   }}
-                  className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-200 hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   aria-label="清除课程搜索"
                 >
                   <X className="h-4 w-4" />
@@ -218,7 +218,7 @@ export function CourseListSection({
 
                 return (
                   <div key={course.key} className="border-b border-border/40 last:border-0">
-                    <div onClick={handleCourseRowClick} className={`relative grid cursor-pointer grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-2 px-3 py-3.5 transition-colors duration-150 ease-standard sm:grid-cols-[auto_minmax(0,1fr)_13rem] sm:gap-x-4 sm:p-5 ${
+                    <div onClick={handleCourseRowClick} className={`relative grid cursor-pointer grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-2 px-3 py-3.5 transition-colors duration-200 ease-standard sm:grid-cols-[auto_minmax(0,1fr)_13rem] sm:gap-x-4 sm:p-5 ${
                       isSelected
                         ? 'bg-primary/5 hover:bg-primary/10 dark:bg-primary/10 dark:hover:bg-primary/15'
                         : 'hover:bg-muted/40'
@@ -281,7 +281,7 @@ export function CourseListSection({
                           variant="ghost"
                           size="sm"
                           onClick={() => onToggleExpandCourse(course.key)}
-                          className={`h-8 w-8 gap-1 rounded border px-0 text-xs transition-all duration-150 sm:w-auto sm:px-2 ${
+                          className={`h-8 w-8 gap-1 rounded border px-0 text-xs transition-[color,background-color,border-color] duration-200 sm:w-auto sm:px-2 ${
                             isExpanded
                               ? 'border-primary/40 bg-primary/10 text-primary'
                               : 'border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary'
@@ -295,7 +295,7 @@ export function CourseListSection({
                     </div>
 
                     {isExpanded && (
-                      <div className="border-t border-border/40 bg-muted/20 px-3 pb-3 pl-11 pt-3 sm:px-5 sm:pb-5 sm:pl-12 sm:pt-4 animate-in fade-in-0 duration-150">
+                      <div className="border-t border-border/40 bg-muted/20 px-3 pb-3 pl-11 pt-3 sm:px-5 sm:pb-5 sm:pl-12 sm:pt-4 animate-in fade-in-0 duration-240 ease-emphasized">
                         {loadingDetails[course.key] ? (
                           <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
                             <svg className="google-spinner h-4 w-4" viewBox="0 0 50 50">

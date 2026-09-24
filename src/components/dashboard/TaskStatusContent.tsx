@@ -45,7 +45,7 @@ export function TaskStatusContent({
           >
             <span
               aria-hidden="true"
-              className={`pointer-events-none absolute bottom-0 left-0 h-0.5 w-20 rounded-full bg-primary transition-transform duration-250 ease-emphasized motion-reduce:transition-none ${taskFilter === 'completed' ? 'translate-x-20' : 'translate-x-0'}`}
+              className={`pointer-events-none absolute bottom-0 left-0 h-0.5 w-20 rounded-full bg-primary transition-transform duration-280 ease-emphasized motion-reduce:transition-none ${taskFilter === 'completed' ? 'translate-x-20' : 'translate-x-0'}`}
             />
             {[
               { id: 'active' as const, label: '进行中', count: taskCounts.active },

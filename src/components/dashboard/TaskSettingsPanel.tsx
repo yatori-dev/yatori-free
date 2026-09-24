@@ -47,7 +47,7 @@ export function TaskSettingsPanel({
               任务行为
             </h2>
 
-            <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-all duration-200 hover:border-border sm:p-5">
+            <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-[border-color] duration-200 hover:border-border sm:p-5">
               <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
                 <Label htmlFor="bypassDailyStudyLimit" className="block cursor-pointer text-sm font-semibold text-foreground">
                   暴力模式
@@ -61,7 +61,7 @@ export function TaskSettingsPanel({
               />
             </div>
 
-            <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-all duration-200 hover:border-border sm:p-5">
+            <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-[border-color] duration-200 hover:border-border sm:p-5">
               <Label htmlFor="doChapterTest" className="block cursor-pointer text-sm font-semibold text-foreground">
                 章节测试自动答题
               </Label>
@@ -78,7 +78,7 @@ export function TaskSettingsPanel({
             <h2 id="display-settings-heading" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               显示
             </h2>
-            <div className="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-all duration-200 hover:border-border sm:p-5">
+            <div className="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-[border-color] duration-200 hover:border-border sm:p-5">
               <div className="min-w-0 space-y-1">
                 <Label htmlFor="theme-setting" className="text-sm font-semibold text-foreground">主题</Label>
               </div>

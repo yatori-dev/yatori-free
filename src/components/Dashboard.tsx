@@ -181,14 +181,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     const animation = content.animate(
       [
         {
-          opacity: 0.82,
-          transform: `translate3d(${mobileTabDirectionRef.current * 10}px, 0, 0) scale(0.995)`,
+          opacity: 0.92,
+          transform: `translate3d(${mobileTabDirectionRef.current * 6}px, 0, 0)`,
         },
-        { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' },
+        { opacity: 1, transform: 'translate3d(0, 0, 0)' },
       ],
       {
-        duration: 210,
-        easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+        duration: 260,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
         fill: 'both',
       },
     );
@@ -937,7 +937,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const tabSwitchDistance = Math.abs(currentIndex - prevIndex);
   const isMovingRight = currentIndex >= prevIndex;
 
-  const translateVal = tabSwitchDistance === 0 ? 0 : 10;
+  const translateVal = tabSwitchDistance === 0 ? 0 : 8;
   const startTranslateX = tabSwitchDistance === 0 ? '0px' : (isMovingRight ? `${translateVal}px` : `-${translateVal}px`);
   const durationMs = 260;
 

@@ -157,7 +157,7 @@ export function ExamsListSection({
                 return (
                   <div
                     key={course.key}
-                    className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-rest transition-all duration-200 ease-standard hover:shadow-raised hover:border-border"
+                    className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-rest transition-[border-color,box-shadow] duration-200 ease-standard hover:shadow-raised hover:border-border"
                   >
                     <div className="flex items-center justify-between gap-3 p-3 sm:p-4 bg-muted/20 transition-colors">
                       <div className="flex min-w-0 items-center gap-2.5 flex-1">
@@ -199,13 +199,13 @@ export function ExamsListSection({
                           className="hidden"
                           aria-label={isExpanded ? '收起考试明细' : '展开考试明细'}
                         >
-                          <ChevronDown className={`h-4 w-4 transition-transform duration-200 ease-standard ${isExpanded ? 'rotate-180' : ''}`} />
+                          <ChevronDown className={`h-4 w-4 transition-transform duration-240 ease-standard ${isExpanded ? 'rotate-180' : ''}`} />
                         </Button>
                       </div>
                     </div>
 
                     {isExpanded && (
-                      <div className="border-t border-border/50 p-3 sm:p-4 bg-card animate-in fade-in-0 duration-150">
+                      <div className="border-t border-border/50 p-3 sm:p-4 bg-card animate-in fade-in-0 duration-240 ease-emphasized">
                         {isLoading ? (
                           <div className="flex items-center justify-center py-6 text-xs text-muted-foreground gap-2">
                             <RefreshCw className="h-4 w-4 animate-spin text-primary" />
@@ -244,11 +244,11 @@ export function ExamsListSection({
                                       onToggleSelectExam(course.key, exam.id);
                                     }
                                   }}
-                                  className={`flex items-start gap-2.5 rounded-lg border p-3 text-xs transition-all duration-150 ease-standard ${
+                                  className={`flex items-start gap-2.5 rounded-lg border p-3 text-xs transition-[color,background-color,border-color] duration-200 ease-standard ${
                                     isSelected
                                       ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20 shadow-xs'
                                       : 'border-border/60 bg-muted/20 hover:border-primary/30 hover:bg-muted/40'
-                                  } ${isRunnable ? 'cursor-pointer active:scale-[0.99]' : 'opacity-60 cursor-not-allowed'}`}
+                                  } ${isRunnable ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}`}
                                 >
                                   <div className="mt-0.5 shrink-0">
                                     {isRunnable ? (

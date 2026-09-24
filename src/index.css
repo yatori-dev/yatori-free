@@ -162,6 +162,11 @@
     /* Motion Easing Tokens */
     --ease-standard: cubic-bezier(0.2, 0, 0, 1);
     --ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
+    --motion-fast: 200ms;
+    --motion-page: 280ms;
+    --motion-panel: 400ms;
+    --motion-close: 200ms;
+    --motion-panel-close: 320ms;
 
     /* 4-Tier Shadow Tokens (Refined depth and ambient lighting) */
     --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.04);
@@ -245,38 +250,21 @@
 }
 
 @utility animate-bottom-bar-enter {
-  animation: bottomBarEnter 280ms var(--ease-emphasized) forwards;
+  animation: bottomBarEnter var(--motion-fast) var(--ease-emphasized) both;
 }
 
 @utility animate-task-success-flash {
-  animation: taskSuccessFlash 1200ms var(--ease-emphasized) forwards;
-}
-
-@utility animate-calm-pulse {
-  animation: calmPulse 2.4s ease-in-out infinite;
-}
-
-@keyframes calmPulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.55;
-    transform: scale(0.94);
-  }
+  animation: taskSuccessFlash 750ms var(--ease-emphasized) forwards;
 }
 
 @keyframes bottomBarEnter {
   0% {
     opacity: 0;
-    transform: translateY(12px) scale(0.98);
-    filter: blur(4px);
+    transform: translateY(6px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
+    transform: translateY(0);
   }
 }
 
@@ -327,13 +315,7 @@
     var(--google-green) 88%,
     var(--google-blue) 100%
   );
-  background-size: 220% 100%;
-  animation: google-mode-gradient 4s ease-in-out infinite alternate;
-}
-
-@keyframes google-mode-gradient {
-  from { background-position: 0% 50%; }
-  to { background-position: 100% 50%; }
+  background-size: 100% 100%;
 }
 
 /* Google Spinner Animation */
@@ -344,9 +326,9 @@
 }
 
 .google-spinner .path {
-  stroke: var(--google-blue);
+  stroke: var(--primary);
   stroke-linecap: round;
-  animation: google-dash 1.5s ease-in-out infinite, google-colors 5.6s ease-in-out infinite;
+  animation: google-dash 1.5s ease-in-out infinite;
 }
 
 @keyframes google-rotate {
@@ -370,13 +352,6 @@
   }
 }
 
-@keyframes google-colors {
-  0%, 100% { stroke: var(--google-blue); }
-  25% { stroke: var(--google-red); }
-  50% { stroke: var(--google-yellow); }
-  75% { stroke: var(--google-green); }
-}
-
 /* Slide Panels */
 .slide-viewport {
   overflow: hidden;
@@ -387,7 +362,7 @@
 .slide-container {
   display: flex;
   width: 200%;
-  transition: transform 0.25s var(--ease-emphasized);
+  transition: transform var(--motion-page) var(--ease-emphasized);
 }
 
 .slide-pane {
@@ -412,7 +387,7 @@
   overflow: hidden !important;
   min-width: 340px !important;
   max-width: min(620px, calc(100vw - 32px)) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: opacity var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard) !important;
 }
 
 /* Google-like colored left strip */
@@ -542,7 +517,7 @@
 
 /* Tabs Content Transition Animation */
 [data-slot="tabs-content"][data-state="active"] {
-  animation: tabFadeIn var(--tab-transition-duration, 0.25s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: tabFadeIn var(--tab-transition-duration, var(--motion-page)) var(--ease-emphasized) both;
 }
 
 /* Avoid compositing an entire long course panel during mobile tab switches. */
@@ -580,7 +555,7 @@
   inset: 0;
   background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.12) 30%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.12) 70%, transparent 100%);
   transform: translateX(-100%);
-  animation: progressShimmer 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: progressShimmer 2.4s linear infinite;
 }
 
 @keyframes progressShimmer {
@@ -594,7 +569,7 @@
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 180ms;
+  animation-duration: 220ms;
   animation-timing-function: var(--ease-standard);
 }
 
@@ -635,19 +610,22 @@
   .google-mode-switch[data-state="checked"] {
     animation: none;
   }
+
+  .google-spinner,
+  .google-spinner .path {
+    animation: none;
+  }
 }
 
 @keyframes loginSuccessReveal {
   from {
     opacity: 0;
-    transform: scale(0.96);
-    filter: blur(3px);
+    transform: translateY(4px);
   }
 
   to {
     opacity: 1;
-    transform: scale(1);
-    filter: blur(0);
+    transform: translateY(0);
   }
 }
 
@@ -664,9 +642,7 @@
 .login-success-view {
   z-index: 50;
   overflow: auto;
-  transform-origin: center;
-  animation: loginSuccessReveal 500ms ease-in-out both;
-  will-change: opacity, transform, filter;
+  animation: loginSuccessReveal 360ms var(--ease-emphasized) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

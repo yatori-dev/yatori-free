@@ -118,7 +118,7 @@ export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersi
         >
           <span
             key={activeMobileIndex}
-            className="absolute left-1/2 top-px h-7 w-10 -translate-x-1/2 rounded-full bg-primary-container/70 animate-in zoom-in-75 duration-200 ease-out motion-reduce:animate-none"
+            className="absolute left-1/2 top-px h-7 w-10 -translate-x-1/2 rounded-full bg-primary-container/70 animate-in fade-in-0 duration-240 ease-emphasized motion-reduce:animate-none"
           />
         </span>
       </span>
@@ -140,10 +140,10 @@ export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersi
             className={`relative z-10 flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             aria-current={active ? 'page' : undefined}
           >
-            <span className={`relative flex h-7 w-10 items-center justify-center rounded-full transition-transform duration-200 ease-out ${active ? 'scale-110' : 'scale-100'}`}>
+            <span className="relative flex h-7 w-10 items-center justify-center rounded-full">
               <Icon className="h-[18px] w-[18px]" />
               {showTaskBadge && (
-                <span className="absolute -right-1 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-mono text-xs font-bold text-primary-foreground ring-2 ring-card animate-in zoom-in-75 duration-200">
+                <span className="absolute -right-1 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-mono text-xs font-bold text-primary-foreground ring-2 ring-card animate-in zoom-in-95 duration-240 ease-emphasized motion-reduce:animate-none">
                   {activeTaskCount}
                 </span>
               )}

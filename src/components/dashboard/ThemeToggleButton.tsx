@@ -26,9 +26,9 @@ export function ThemeToggleButton() {
     const appRoot = document.getElementById('root');
     if (!appRoot || typeof appRoot.animate !== 'function') { applyTheme(); return; }
     themeSwitchingRef.current = true;
-    const fadeOut = appRoot.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 90, easing: 'ease-out', fill: 'forwards' });
+    const fadeOut = appRoot.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, easing: 'ease-out', fill: 'forwards' });
     themeAnimationRef.current = fadeOut;
-    void fadeOut.finished.then(() => { appRoot.style.opacity = '0'; fadeOut.cancel(); applyTheme(); const fadeIn = appRoot.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 90, easing: 'ease-out', fill: 'forwards' }); themeAnimationRef.current = fadeIn; return fadeIn.finished; }).catch(() => undefined).finally(() => { appRoot.style.removeProperty('opacity'); themeAnimationRef.current?.cancel(); themeAnimationRef.current = null; themeSwitchingRef.current = false; });
+    void fadeOut.finished.then(() => { appRoot.style.opacity = '0'; fadeOut.cancel(); applyTheme(); const fadeIn = appRoot.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: 'ease-out', fill: 'forwards' }); themeAnimationRef.current = fadeIn; return fadeIn.finished; }).catch(() => undefined).finally(() => { appRoot.style.removeProperty('opacity'); themeAnimationRef.current?.cancel(); themeAnimationRef.current = null; themeSwitchingRef.current = false; });
   };
 
   return <Button size="icon" variant="ghost" onClick={toggleDarkMode} className="h-8 w-8 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground sm:h-9 sm:w-9" aria-label={isDark ? '切换到浅色主题' : '切换到深色主题'}>{isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</Button>;

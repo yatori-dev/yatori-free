@@ -247,7 +247,7 @@ export function LoginCredentialsStep({
                 {isSendingCode ? (
                   <LoaderCircle className="size-5 animate-spin motion-reduce:animate-none" aria-hidden="true" />
                 ) : showSendSuccess ? (
-                  <Check className="size-5 animate-in zoom-in-50 duration-200 ease-out motion-reduce:animate-none" aria-hidden="true" />
+                  <Check className="size-5 animate-in zoom-in-90 duration-260 ease-emphasized motion-reduce:animate-none" aria-hidden="true" />
                 ) : retrySeconds > 0 ? (
                   <span className="text-xs font-semibold tabular-nums" aria-hidden="true">{retrySeconds}</span>
                 ) : smsSession ? (

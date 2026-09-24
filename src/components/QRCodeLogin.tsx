@@ -195,7 +195,7 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
 
       {/* Dynamic QR / Scanned Morphing Card */}
       {isScanned || isConfirmed ? (
-        <div className="mt-7 flex h-[208px] w-[208px] flex-col items-center justify-center gap-3 rounded-2xl border border-primary/20 bg-primary-container/20 p-4 shadow-sm backdrop-blur-xs animate-in zoom-in-95 duration-300">
+        <div className="mt-7 flex h-[208px] w-[208px] flex-col items-center justify-center gap-3 rounded-2xl border border-primary/20 bg-primary-container/20 p-4 shadow-sm backdrop-blur-xs animate-in fade-in-0 duration-300 ease-emphasized motion-reduce:animate-none">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg shadow-sm">
             {session?.scannedName ? session.scannedName.substring(0, 1) : '通'}
           </div>
@@ -208,12 +208,12 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
             </span>
           </div>
           <div className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary shadow-xs">
-            <span className="h-2 w-2 rounded-full bg-primary animate-calm-pulse" />
+            <span className="h-2 w-2 rounded-full bg-primary" />
             <span>{isConfirmed ? '验证通过' : '等待确认'}</span>
           </div>
         </div>
       ) : (
-        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-2xl border border-border/70 bg-white p-3 shadow-rest transition-all duration-200 ease-standard hover:shadow-raised">
+        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-2xl border border-border/70 bg-white p-3 shadow-rest transition-[border-color,box-shadow] duration-200 ease-standard hover:shadow-raised">
           {session?.qrContent ? (
             <QRCodeSVG
               value={session.qrContent}

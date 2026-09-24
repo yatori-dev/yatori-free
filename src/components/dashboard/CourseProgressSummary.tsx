@@ -32,7 +32,7 @@ export function CourseProgressSummary({ visibleCount, incompleteCount, activeTas
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-muted/70 p-px">
             <div
-              className="h-full rounded-full bg-primary transition-[width] duration-500 ease-emphasized"
+              className="h-full rounded-full bg-primary transition-[width] duration-300 ease-emphasized"
               style={{ width: `${percent}%` }}
             />
           </div>
@@ -46,7 +46,7 @@ export function CourseProgressSummary({ visibleCount, incompleteCount, activeTas
           )}
           {activeTaskCount > 0 && (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-info/25 bg-info-container/30 px-2.5 py-0.5 text-xs font-medium text-info">
-              <span className="h-1.5 w-1.5 rounded-full bg-info animate-calm-pulse" />
+              <span className="h-1.5 w-1.5 rounded-full bg-info" />
               {activeTaskCount} 运行中
             </span>
           )}
