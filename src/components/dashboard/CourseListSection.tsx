@@ -1,15 +1,13 @@
-import { useRef } from 'react';
+import { useRef, type MouseEvent } from 'react';
 import {
   AlertCircle,
   ChevronDown,
   RefreshCw,
   Search,
-  SlidersHorizontal,
   Square,
   X,
 } from 'lucide-react';
-import type { CourseDetails, CourseSummary, StudyIncrement } from '@/lib/api';
-import { hasReadTaskPoints } from '@/lib/courseChapters';
+import type { CourseDetails, CourseSummary } from '@/lib/api';
 import { CourseOutline } from './CourseOutline';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,15 +37,12 @@ interface CourseListSectionProps {
   courseDetailsMap: Record<string, CourseDetails>;
   loadingDetails: Record<string, boolean>;
   stoppingTaskId: string | null;
-  studyIncrements: Record<string, StudyIncrement>;
-  defaultStudyIncrement: StudyIncrement;
   onRefresh: () => void;
   onSearchChange: (value: string) => void;
   onSearchQueryChange: (value: string) => void;
   onToggleSelectAll: () => void;
   onToggleSelectIncomplete: () => void;
   onToggleCourseSelection: (courseKey: string) => void;
-  onOpenStudyIncrementSettings: (courseKey: string) => void;
   onStopTask: (taskId: string) => void;
   onToggleExpandCourse: (courseKey: string) => void;
   onToggleFullCourseOutline: (courseKey: string) => void;
@@ -80,15 +75,12 @@ export function CourseListSection({
   courseDetailsMap,
   loadingDetails,
   stoppingTaskId,
-  studyIncrements,
-  defaultStudyIncrement,
   onRefresh,
   onSearchChange,
   onSearchQueryChange,
   onToggleSelectAll,
   onToggleSelectIncomplete,
   onToggleCourseSelection,
-  onOpenStudyIncrementSettings,
   onStopTask,
   onToggleExpandCourse,
   onToggleFullCourseOutline,
@@ -218,20 +210,15 @@ export function CourseListSection({
                 const isExpanded = expandedCourses.has(course.key);
                 const isCourseOutlineFullyExpanded = fullyExpandedCourseOutlines.has(course.key);
                 const isSelected = selectedCourses.has(course.key);
-                const studyIncrement = studyIncrements[course.key] ?? defaultStudyIncrement;
-                const studyVisitCount = studyIncrement.visitCount ?? 0;
-                const videoStudyMinutes = studyIncrement.videoStudyMinutes ?? 0;
-                const readMinutes = hasReadTaskPoints(courseDetailsMap[course.key]) ? (studyIncrement.readMinutes ?? 0) : 0;
-                const hasStudyIncrement = studyVisitCount > 0 || videoStudyMinutes > 0 || readMinutes > 0;
-                const studyIncrementSummary = [
-                  studyVisitCount > 0 ? `+${studyVisitCount}次` : null,
-                  videoStudyMinutes > 0 ? `视频观看 +${videoStudyMinutes}分钟` : null,
-                  readMinutes > 0 ? `阅读 +${readMinutes}分钟` : null,
-                ].filter(Boolean).join(' ');
+                const handleCourseRowClick = (event: MouseEvent<HTMLDivElement>) => {
+                  const target = event.target as HTMLElement;
+                  if (target.closest('button, input, a, [role="checkbox"]')) return;
+                  onToggleCourseSelection(course.key);
+                };
 
                 return (
                   <div key={course.key} className="border-b border-border/40 last:border-0">
-                    <div className={`relative grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-2 px-3 py-3.5 transition-colors duration-150 ease-standard sm:grid-cols-[auto_minmax(0,1fr)_13rem] sm:gap-x-4 sm:p-5 ${
+                    <div onClick={handleCourseRowClick} className={`relative grid cursor-pointer grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-2 px-3 py-3.5 transition-colors duration-150 ease-standard sm:grid-cols-[auto_minmax(0,1fr)_13rem] sm:gap-x-4 sm:p-5 ${
                       isSelected
                         ? 'bg-primary/5 hover:bg-primary/10 dark:bg-primary/10 dark:hover:bg-primary/15'
                         : 'hover:bg-muted/40'
@@ -277,23 +264,6 @@ export function CourseListSection({
                       </div>
 
                       <div className="flex items-center justify-end gap-1 sm:w-52 sm:flex-nowrap sm:gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled={isProcessing}
-                          onClick={() => onOpenStudyIncrementSettings(course.key)}
-                          className={`h-8 w-8 rounded px-0 text-xs sm:w-auto ${
-                            hasStudyIncrement
-                              ? 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary sm:gap-1 sm:px-2'
-                              : 'text-muted-foreground hover:bg-muted hover:text-foreground sm:gap-1.5 sm:px-2.5'
-                          }`}
-                          title={hasStudyIncrement ? studyIncrementSummary : '设置学习目标'}
-                          aria-label={hasStudyIncrement ? `学习目标：${studyIncrementSummary}` : '设置学习目标'}
-                        >
-                          <SlidersHorizontal className="h-3.5 w-3.5" />
-                          <span className="sr-only sm:not-sr-only">学习目标</span>
-                          {hasStudyIncrement && <span className="hidden text-xs lg:inline">{studyIncrementSummary}</span>}
-                        </Button>
                         {canStopProcessing && (
                           <Button
                             variant="outline"

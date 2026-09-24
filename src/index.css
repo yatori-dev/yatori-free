@@ -519,7 +519,7 @@
 }
 
 @media (max-width: 600px) {
-  /* Sonner adds mobile left/right offsets while keeping the toaster at 100% width. */
+  /* Keep transient feedback out of the mobile header and bottom navigation. */
   [data-sonner-toaster].toaster {
     box-sizing: border-box !important;
     width: auto !important;
@@ -528,14 +528,15 @@
   [data-sonner-toaster].toaster [data-sonner-toast] {
     box-sizing: border-box !important;
     min-width: 0 !important;
-    width: 100% !important;
+    width: fit-content !important;
+    margin-inline: auto !important;
   }
 
   .cn-toast {
     min-width: 0 !important;
-    width: 100% !important;
-    max-width: none !important;
-    padding: 10px 14px !important;
+    width: fit-content !important;
+    max-width: min(360px, calc(100vw - 32px)) !important;
+    padding: 9px 12px !important;
   }
 }
 

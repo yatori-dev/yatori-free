@@ -11,6 +11,7 @@ import { CourseListSection } from './CourseListSection';
 import { CourseProgressSummary } from './CourseProgressSummary';
 import { WorksListSection } from './WorksListSection';
 import { ExamsListSection } from './ExamsListSection';
+import { StudyGoalsPage } from './StudyGoalsPage';
 import { mobileLearningTabs, type MobileDashboardTabId } from './dashboardNavigationData';
 
 interface DashboardMainContentProps {
@@ -214,15 +215,12 @@ export function DashboardMainContent({
             courseDetailsMap={courseDetailsMap}
             loadingDetails={loadingDetails}
             stoppingTaskId={stoppingTaskId}
-            studyIncrements={studyIncrements}
-            defaultStudyIncrement={defaultStudyIncrement}
             onRefresh={onRefreshCourses}
             onSearchChange={onSearchChange}
             onSearchQueryChange={onSearchQueryChange}
             onToggleSelectAll={onToggleSelectAll}
             onToggleSelectIncomplete={onToggleSelectIncomplete}
             onToggleCourseSelection={onToggleCourseSelection}
-            onOpenStudyIncrementSettings={onOpenStudyIncrementSettings}
             onStopTask={onStopTask}
             onToggleExpandCourse={onToggleExpandCourse}
             onToggleFullCourseOutline={onToggleFullCourseOutline}
@@ -266,6 +264,15 @@ export function DashboardMainContent({
               doChapterTest={doChapterTest}
               onUnauthorized={onUnauthorized}
               onSettingSwitch={onSettingSwitch}
+            />
+          </TabsContent>
+
+          <TabsContent value="study" className="m-0 outline-none">
+            <StudyGoalsPage
+              courses={courses}
+              studyIncrements={studyIncrements}
+              defaultStudyIncrement={defaultStudyIncrement}
+              onOpenStudyIncrementSettings={onOpenStudyIncrementSettings}
             />
           </TabsContent>
 

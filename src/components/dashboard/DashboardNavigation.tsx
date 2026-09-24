@@ -113,7 +113,7 @@ export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersi
     >
       <span className="pointer-events-none absolute inset-x-1 inset-y-1" aria-hidden="true">
         <span
-          className="absolute inset-y-0 left-0 w-1/3"
+          className="absolute inset-y-0 left-0 w-1/4"
           style={{ transform: `translate3d(${Math.max(activeMobileIndex, 0) * 100}%, 0, 0)` }}
         >
           <span

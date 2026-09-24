@@ -133,6 +133,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     works: 0,
     exams: 0,
     tasks: 0,
+    study: 0,
     settings: 0,
   });
 
@@ -945,6 +946,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     works: '作业',
     exams: '考试',
     tasks: '任务',
+    study: '学习目标',
     settings: '设置',
   }[activeTab];
 
