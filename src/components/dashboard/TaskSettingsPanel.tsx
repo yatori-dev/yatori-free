@@ -68,7 +68,7 @@ export function TaskSettingsPanel({
               <Switch
                 id="doChapterTest"
                 checked={doChapterTest}
-                onCheckedChange={(checked) => onSettingSwitch('doChapterTest', checked)}
+                onCheckedChange={(checked: boolean) => onSettingSwitch('doChapterTest', checked)}
                 className="shrink-0"
               />
             </div>

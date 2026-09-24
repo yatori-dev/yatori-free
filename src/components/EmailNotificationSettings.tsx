@@ -148,7 +148,7 @@ export function EmailNotificationSettings({ onUnauthorized }: EmailNotificationS
           id="emailNotificationEnabled"
           checked={settings?.enabled ?? false}
           disabled={!hasVerifiedEmail || !settings?.available || isBusy}
-          onCheckedChange={(checked) => void handleEnabledChange(checked)}
+          onCheckedChange={(checked: boolean) => void handleEnabledChange(checked)}
           className="shrink-0"
         />
       </div>

@@ -1,42 +1,27 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Login } from './components/Login';
-import { Dashboard } from './components/Dashboard';
-import { BrandMark } from './components/BrandMark';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { getCurrentSession, getUserFacingErrorMessage, isAuthExitError, logout, type AuthSession } from './lib/api';
 import { Toaster } from '@/components/ui/sonner';
-import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { clearSessionCache } from '@/lib/sessionCache';
 import { clearQRLoginSession } from '@/lib/qrLoginSession';
 
 const LOGOUT_SUPPRESSION_KEY = 'yatori-auth-logout-suppressed';
+const Login = lazy(() => import('./components/Login').then(({ Login: Component }) => ({ default: Component })));
+const Dashboard = lazy(() => import('./components/Dashboard').then(({ Dashboard: Component }) => ({ default: Component })));
 
 function AuthRestoreScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8" aria-busy="true">
-      <Card className="w-full max-w-[450px] overflow-hidden md:max-w-[min(65.6vw,1024px)]">
-        <div className="google-accent-bar" aria-hidden="true">
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
-        <CardContent className="flex min-h-[516px] flex-col items-center justify-center p-8 md:px-12 md:py-10">
-          <div className="flex flex-col items-center gap-2">
-            <BrandMark className="text-3xl" />
-            <div className="text-sm font-medium text-muted-foreground">学习通服务</div>
-          </div>
-
-          <div className="mt-8 flex flex-col items-center gap-3">
-            <svg className="google-spinner" viewBox="0 0 50 50" role="status" aria-label="加载中">
-              <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="4" />
-            </svg>
-            <div className="text-center text-xs font-medium text-muted-foreground">加载中...</div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center gap-4 text-muted-foreground">
+        <span className="google-spinner" role="status" aria-label="加载中" />
+        <span className="text-xs font-medium">加载中...</span>
+      </div>
     </div>
   );
+}
+
+function AppSuspenseFallback() {
+  return <AuthRestoreScreen />;
 }
 
 function App() {
@@ -111,27 +96,29 @@ function App() {
     <>
       {isRestoringSession ? <AuthRestoreScreen /> : (
         <div>
-          {(!session || isLoginTransitioning) && (
-            <div
-              className={isLoginTransitioning ? 'login-success-underlay' : undefined}
-              aria-hidden={isLoginTransitioning || undefined}
-              inert={isLoginTransitioning || undefined}
-            >
-              <Login onLoginSuccess={handleLoginSuccess} />
-            </div>
-          )}
-          {session && (
-            <div
-              className={isLoginTransitioning ? 'login-success-view' : undefined}
-              onAnimationEnd={(event) => {
-                if (event.animationName === 'loginSuccessReveal') {
-                  setIsLoginTransitioning(false);
-                }
-              }}
-            >
-              <Dashboard session={session} onLogout={handleLogout} />
-            </div>
-          )}
+          <Suspense fallback={<AppSuspenseFallback />}>
+            {(!session || isLoginTransitioning) && (
+              <div
+                className={isLoginTransitioning ? 'login-success-underlay' : undefined}
+                aria-hidden={isLoginTransitioning || undefined}
+                inert={isLoginTransitioning || undefined}
+              >
+                <Login onLoginSuccess={handleLoginSuccess} />
+              </div>
+            )}
+            {session && (
+              <div
+                className={isLoginTransitioning ? 'login-success-view' : undefined}
+                onAnimationEnd={(event) => {
+                  if (event.animationName === 'loginSuccessReveal') {
+                    setIsLoginTransitioning(false);
+                  }
+                }}
+              >
+                <Dashboard session={session} onLogout={handleLogout} />
+              </div>
+            )}
+          </Suspense>
         </div>
       )}
       <Toaster

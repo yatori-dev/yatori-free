@@ -5,9 +5,10 @@ interface CourseCheckboxProps {
   disabled?: boolean;
   indeterminate: boolean;
   onChange: () => void;
+  'aria-label'?: string;
 }
 
-export function CourseCheckbox({ checked, disabled = false, indeterminate, onChange }: CourseCheckboxProps) {
+export function CourseCheckbox({ checked, disabled = false, indeterminate, onChange, 'aria-label': ariaLabel }: CourseCheckboxProps) {
   const ref = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -21,6 +22,7 @@ export function CourseCheckbox({ checked, disabled = false, indeterminate, onCha
       checked={checked}
       disabled={disabled}
       onChange={onChange}
+      aria-label={ariaLabel}
       className="h-4 w-4 shrink-0 cursor-pointer rounded border-border bg-card accent-primary disabled:cursor-not-allowed disabled:opacity-50"
     />
   );

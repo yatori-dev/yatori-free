@@ -3,6 +3,11 @@ export const API_BASE_URL = import.meta.env.DEV ? '/api' : 'https://yatori-api.h
 export interface ApiError extends Error {
   status?: number;
   payload?: unknown;
+  kind?: 'timeout' | 'aborted';
+}
+
+export interface ApiRequestOptions extends RequestInit {
+  timeoutMs?: number;
 }
 
 export interface ApiResponse {
@@ -603,48 +608,82 @@ function createApiError(message: string, status: number, payload?: unknown): Api
   return error;
 }
 
-export function apiRequest(path: string, options?: RequestInit): Promise<ApiResponse>;
-export function apiRequest<T>(path: string, options: RequestInit | undefined, requireData: true): Promise<ApiDataResponse<T>>;
-export async function apiRequest<T>(path: string, options: RequestInit = {}, requireData = false) {
-  const headers: Record<string, string> = {};
+const DEFAULT_REQUEST_TIMEOUT_MS = 15_000;
 
-  if (options.body && !('Content-Type' in (options.headers ?? {}))) {
+export function apiRequest(path: string, options?: ApiRequestOptions): Promise<ApiResponse>;
+export function apiRequest<T>(path: string, options: ApiRequestOptions | undefined, requireData: true): Promise<ApiDataResponse<T>>;
+export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}, requireData = false) {
+  const headers: Record<string, string> = {};
+  const { timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, signal: callerSignal, ...requestInit } = options;
+  const controller = new AbortController();
+  let timedOut = false;
+  let callerAborted = callerSignal?.aborted === true;
+  const timeoutId = globalThis.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+  const abortFromCaller = () => {
+    callerAborted = true;
+    controller.abort();
+  };
+  callerSignal?.addEventListener('abort', abortFromCaller, { once: true });
+  if (callerAborted) {
+    controller.abort();
+  }
+
+  if (requestInit.body && !('Content-Type' in (requestInit.headers ?? {}))) {
     headers['Content-Type'] = 'application/json';
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    credentials: 'include',
-    headers: {
-      ...headers,
-      ...options.headers,
-    },
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...requestInit,
+      credentials: 'include',
+      signal: controller.signal,
+      headers: {
+        ...headers,
+        ...requestInit.headers,
+      },
+    });
 
-  const rawBody = await response.text();
-  let payload: unknown = null;
+    const rawBody = await response.text();
+    let payload: unknown = null;
 
-  if (rawBody) {
-    try {
-      payload = JSON.parse(rawBody);
-    } catch {
-      throw createApiError(`接口响应不是 JSON (${response.status})`, response.status);
+    if (rawBody) {
+      try {
+        payload = JSON.parse(rawBody);
+      } catch {
+        throw createApiError(`接口响应不是 JSON (${response.status})`, response.status);
+      }
     }
-  }
 
-  if (!isApiResponse(payload)) {
-    throw createApiError(`接口响应不符合约定 (${response.status})`, response.status, payload);
-  }
+    if (!isApiResponse(payload)) {
+      throw createApiError(`接口响应不符合约定 (${response.status})`, response.status, payload);
+    }
 
-  if (!response.ok || ![200, 201].includes(payload.code)) {
-    throw createApiError(getApiResponseMessage(payload) || `请求失败 (${response.status})`, response.status, payload);
-  }
+    if (!response.ok || ![200, 201].includes(payload.code)) {
+      throw createApiError(getApiResponseMessage(payload) || `请求失败 (${response.status})`, response.status, payload);
+    }
 
-  if (requireData && !('data' in payload)) {
-    throw createApiError(`接口响应缺少 data (${response.status})`, response.status, payload);
-  }
+    if (requireData && !('data' in payload)) {
+      throw createApiError(`接口响应缺少 data (${response.status})`, response.status, payload);
+    }
 
-  return payload as ApiResponse | ApiDataResponse<T>;
+    return payload as ApiResponse | ApiDataResponse<T>;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      const aborted = createApiError(
+        timedOut ? `请求超时 (${timeoutMs}ms)` : '请求已取消',
+        0,
+      );
+      aborted.kind = timedOut ? 'timeout' : callerAborted ? 'aborted' : 'aborted';
+      throw aborted;
+    }
+    throw error;
+  } finally {
+    globalThis.clearTimeout(timeoutId);
+    callerSignal?.removeEventListener('abort', abortFromCaller);
+  }
 }
 
 export async function getCurrentSession() {
@@ -720,17 +759,19 @@ export function login(payload: LoginRequest) {
   }, true);
 }
 
-export function createSMSSession(payload: CreateSMSSessionRequest) {
+export function createSMSSession(payload: CreateSMSSessionRequest, options?: ApiRequestOptions) {
   return apiRequest<SMSSessionData>('/auth/sms-sessions', {
+    ...options,
     method: 'POST',
     body: JSON.stringify(payload),
   }, true);
 }
 
-export function exchangeSMSSession(sessionId: string, payload: ExchangeSMSSessionRequest) {
+export function exchangeSMSSession(sessionId: string, payload: ExchangeSMSSessionRequest, options?: ApiRequestOptions) {
   return apiRequest<LoginData>(
     `/auth/sms-sessions/${encodeApiPathSegment(sessionId)}/session`,
     {
+      ...options,
       method: 'POST',
       body: JSON.stringify(payload),
     },
@@ -738,24 +779,25 @@ export function exchangeSMSSession(sessionId: string, payload: ExchangeSMSSessio
   );
 }
 
-export function createQRSession() {
+export function createQRSession(options?: ApiRequestOptions) {
   return apiRequest<QRSessionData>('/auth/qr-sessions', {
+    ...options,
     method: 'POST',
   }, true);
 }
 
-export function getQRSession(sessionId: string) {
+export function getQRSession(sessionId: string, options?: ApiRequestOptions) {
   return apiRequest<QRSessionData>(
     `/auth/qr-sessions/${encodeApiPathSegment(sessionId)}`,
-    undefined,
+    options,
     true,
   );
 }
 
-export function exchangeQRSession(sessionId: string) {
+export function exchangeQRSession(sessionId: string, options?: ApiRequestOptions) {
   return apiRequest<LoginData>(
     `/auth/qr-sessions/${encodeApiPathSegment(sessionId)}/session`,
-    { method: 'POST' },
+    { ...options, method: 'POST' },
     true,
   );
 }
@@ -770,8 +812,8 @@ export function getVersion() {
   return apiRequest<VersionData>('/version', undefined, true);
 }
 
-export function getCourses(accountId: string) {
-  return apiRequest<CourseListApiResponseData>(`/accounts/${encodeApiPathSegment(accountId)}/courses`, undefined, true)
+export function getCourses(accountId: string, options?: ApiRequestOptions) {
+  return apiRequest<CourseListApiResponseData>(`/accounts/${encodeApiPathSegment(accountId)}/courses`, options, true)
     .then((response) => {
       if (!isCourseListApiResponseData(response.data)) {
         throw new Error('课程接口响应结构异常，请稍后重试');
@@ -802,36 +844,36 @@ export function getCourses(accountId: string) {
     });
 }
 
-export function getCourseDetails(accountId: string, classId: string) {
+export function getCourseDetails(accountId: string, classId: string, options?: ApiRequestOptions) {
   return apiRequest<CourseDetails>(
     `/accounts/${encodeApiPathSegment(accountId)}/courses/${encodeApiPathSegment(classId)}`,
-    undefined,
+    options,
     true,
   );
 }
 
-function getCourseTaskList<T>(accountId: string, kind: 'works' | 'exams') {
+function getCourseTaskList<T>(accountId: string, kind: 'works' | 'exams', options?: ApiRequestOptions) {
   return apiRequest<CourseTaskListResponseData<T>>(
     `/accounts/${encodeApiPathSegment(accountId)}/${kind}`,
-    undefined,
+    options,
     true,
   );
 }
 
-export function getWorks(accountId: string) {
-  return getCourseTaskList<CourseWorkItem>(accountId, 'works');
+export function getWorks(accountId: string, options?: ApiRequestOptions) {
+  return getCourseTaskList<CourseWorkItem>(accountId, 'works', options);
 }
 
-export function getExams(accountId: string) {
-  return getCourseTaskList<CourseExamItem>(accountId, 'exams');
+export function getExams(accountId: string, options?: ApiRequestOptions) {
+  return getCourseTaskList<CourseExamItem>(accountId, 'exams', options);
 }
 
 export function getCourseDocumentDownloadUrl(accountId: string, classId: string, documentId: string) {
   return `${API_BASE_URL}/accounts/${encodeApiPathSegment(accountId)}/courses/${encodeApiPathSegment(classId)}/documents/${encodeApiPathSegment(documentId)}/download`;
 }
 
-export function getTasks() {
-  return apiRequest<TaskListResponseData>('/tasks', undefined, true);
+export function getTasks(options?: ApiRequestOptions) {
+  return apiRequest<TaskListResponseData>('/tasks', options, true);
 }
 
 export function createTask(payload: CreateTaskRequest) {
@@ -841,8 +883,8 @@ export function createTask(payload: CreateTaskRequest) {
   }, true);
 }
 
-export function getTask(taskId: string) {
-  return apiRequest<Task>(`/tasks/${encodeApiPathSegment(taskId)}`, undefined, true);
+export function getTask(taskId: string, options?: ApiRequestOptions) {
+  return apiRequest<Task>(`/tasks/${encodeApiPathSegment(taskId)}`, options, true);
 }
 
 export function stopTask(taskId: string) {

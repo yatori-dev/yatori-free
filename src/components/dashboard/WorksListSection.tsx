@@ -22,13 +22,11 @@ interface WorksListSectionProps {
   coursesLoading: boolean;
   courseDetailsMap: Record<string, CourseDetails>;
   loadingDetails: Record<string, boolean>;
-  expandedCourses: Set<string>;
   selectedWorks: Record<string, Set<string>>;
   hideUnavailable: boolean;
   submitMode: SubmitMode;
   onToggleSelectWork: (classId: string, workId: string) => void;
   onToggleSelectCourseWorks: (classId: string) => void;
-  onToggleExpandCourse: (courseKey: string) => void;
   onRefreshCourses: () => void;
   onSubmitModeChange: (value: SubmitMode) => void;
 }
@@ -42,18 +40,14 @@ export function WorksListSection({
   coursesLoading,
   courseDetailsMap,
   loadingDetails,
-  expandedCourses,
   selectedWorks,
   hideUnavailable,
   submitMode,
   onToggleSelectWork,
   onToggleSelectCourseWorks,
-  onToggleExpandCourse,
   onRefreshCourses,
   onSubmitModeChange,
 }: WorksListSectionProps) {
-  void expandedCourses;
-  void onToggleExpandCourse;
   const totalWorksCount = useMemo(() => {
     let totalWorksCount = 0;
 
@@ -227,13 +221,12 @@ export function WorksListSection({
                               const urgencyLabel = getDeadlineUrgencyLabel(work.endAt);
 
                               return (
-                                <div
+                                <button
+                                  type="button"
                                   key={work.id}
-                                  onClick={() => {
-                                    if (isRunnable) {
-                                      onToggleSelectWork(course.key, work.id);
-                                    }
-                                  }}
+                                  onClick={() => isRunnable && onToggleSelectWork(course.key, work.id)}
+                                  disabled={!isRunnable}
+                                  aria-pressed={isSelected}
                                   className={`flex items-start gap-2.5 rounded-lg border p-3 text-xs transition-[color,background-color,border-color] duration-200 ease-standard ${
                                     isSelected
                                       ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20 shadow-xs'
@@ -279,7 +272,7 @@ export function WorksListSection({
                                       )}
                                     </div>
                                   </div>
-                                </div>
+                                </button>
                               );
                             })}
                           </div>

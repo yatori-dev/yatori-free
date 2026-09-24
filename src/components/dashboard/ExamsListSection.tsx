@@ -24,10 +24,8 @@ interface ExamsListSectionProps {
   courseDetailsMap: Record<string, CourseDetails>;
   loadingDetails: Record<string, boolean>;
   selectedExams: Record<string, Set<string>>;
-  expandedCourses: Set<string>;
   hideUnavailable: boolean;
   submitMode: SubmitMode;
-  onToggleExpandCourse: (courseKey: string) => void;
   onToggleSelectExam: (classId: string, examId: string) => void;
   onToggleSelectCourseExams: (classId: string) => void;
   onRefreshCourses: () => void;
@@ -44,16 +42,13 @@ export function ExamsListSection({
   courseDetailsMap,
   loadingDetails,
   selectedExams,
-  expandedCourses,
   hideUnavailable,
   submitMode,
-  onToggleExpandCourse,
   onToggleSelectExam,
   onToggleSelectCourseExams,
   onRefreshCourses,
   onSubmitModeChange,
 }: ExamsListSectionProps) {
-  void expandedCourses;
   const totalExamsCount = useMemo(() => {
     let totalExamsCount = 0;
 
@@ -143,7 +138,6 @@ export function ExamsListSection({
               {filteredCourses.map((course) => {
                 const details = courseDetailsMap[course.key];
                 const isLoading = loadingDetails[course.key] === true;
-                const isExpanded = true;
                 const allExams = details?.exams ?? [];
                 const exams = getVisibleExams(allExams, hideUnavailable);
                 const runnableExams = exams.filter((exam) => exam.runnable);
@@ -192,19 +186,10 @@ export function ExamsListSection({
                           </Badge>
                         ) : null}
 
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onToggleExpandCourse(course.key)}
-                          className="hidden"
-                          aria-label={isExpanded ? '收起考试明细' : '展开考试明细'}
-                        >
-                          <ChevronDown className={`h-4 w-4 transition-transform duration-240 ease-standard ${isExpanded ? 'rotate-180' : ''}`} />
-                        </Button>
                       </div>
                     </div>
 
-                    {isExpanded && (
+                    {(
                       <div className="border-t border-border/50 p-3 sm:p-4 bg-card animate-in fade-in-0 duration-240 ease-emphasized">
                         {isLoading ? (
                           <div className="flex items-center justify-center py-6 text-xs text-muted-foreground gap-2">
@@ -237,13 +222,12 @@ export function ExamsListSection({
                               const urgencyLabel = getDeadlineUrgencyLabel(exam.endAt);
 
                               return (
-                                <div
+                                <button
+                                  type="button"
                                   key={exam.id}
-                                  onClick={() => {
-                                    if (isRunnable) {
-                                      onToggleSelectExam(course.key, exam.id);
-                                    }
-                                  }}
+                                  onClick={() => isRunnable && onToggleSelectExam(course.key, exam.id)}
+                                  disabled={!isRunnable}
+                                  aria-pressed={isSelected}
                                   className={`flex items-start gap-2.5 rounded-lg border p-3 text-xs transition-[color,background-color,border-color] duration-200 ease-standard ${
                                     isSelected
                                       ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20 shadow-xs'
@@ -289,7 +273,7 @@ export function ExamsListSection({
                                       )}
                                     </div>
                                   </div>
-                                </div>
+                                </button>
                               );
                             })}
                           </div>

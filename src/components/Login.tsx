@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import type { AuthSession, LoginData } from '@/lib/api';
 import { readSavedAccount, saveSavedAccount } from '@/lib/savedAccount';
 import { toast } from 'sonner';
-import { QRCodeLogin } from './QRCodeLogin';
 import { LoginCredentialsStep } from './login/LoginCredentialsStep';
 import { BrandMark } from './BrandMark';
 
@@ -16,6 +15,7 @@ interface LoginProps {
 }
 
 const MAINLAND_MOBILE_PATTERN = /^1[3-9]\d{9}$/;
+const QRCodeLogin = lazy(() => import('./QRCodeLogin').then(({ QRCodeLogin: Component }) => ({ default: Component })));
 
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [step, setStep] = useState<'account' | 'credentials'>('account');
@@ -26,6 +26,15 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const accountPaneRef = useRef<HTMLDivElement>(null);
   const credentialsPaneRef = useRef<HTMLDivElement>(null);
   const [viewportHeight, setViewportHeight] = useState<number>();
+  const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 768px)').matches);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    const handleChange = () => setIsDesktop(mediaQuery.matches);
+    handleChange();
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   useLayoutEffect(() => {
     const pane = step === 'account' ? accountPaneRef.current : credentialsPaneRef.current;
@@ -113,7 +122,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         </div>
 
         <CardContent className="grid p-0 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-          <QRCodeLogin onLoginSuccess={completeLogin} />
+          {isDesktop && (
+            <Suspense fallback={<div className="hidden min-h-[516px] md:flex" aria-hidden="true" />}>
+              <QRCodeLogin onLoginSuccess={completeLogin} />
+            </Suspense>
+          )}
           <div className="login-auth-pane relative flex min-w-0 flex-col items-center p-8 md:min-h-[516px] md:justify-center md:px-12 md:py-10">
           {/* Google Colored Logo */}
           <BrandMark className="mb-4 text-3xl md:hidden" />
@@ -220,7 +233,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         <a href="https://hungrym0.com" className="text-[11px] tracking-[0.03em] hover:no-underline">© 2026 HUNGRY_M0. All rights reserved.</a>
       </div>
 
-      <Dialog open={dialogContent !== null} onOpenChange={(open) => !open && setDialogContent(null)}>
+      <Dialog open={dialogContent !== null} onOpenChange={(open: boolean) => !open && setDialogContent(null)}>
         <DialogContent className="gap-6 p-6 focus:outline-none sm:max-w-[425px]">
           <DialogHeader>
           <DialogTitle className="mb-2 font-sans text-xl font-normal text-foreground">

@@ -234,10 +234,8 @@ export function DashboardMainContent({
             courseDetailsMap={courseDetailsMap}
             loadingDetails={loadingDetails}
             selectedWorks={selectedWorks}
-            expandedCourses={expandedCourses}
             submitMode={workAutoSubmit}
             onSubmitModeChange={onWorkAutoSubmitChange}
-            onToggleExpandCourse={onToggleExpandCourse}
             onToggleSelectWork={onToggleSelectWork}
             onToggleSelectCourseWorks={onToggleSelectCourseWorks}
             onRefreshCourses={onRefreshCourses}
@@ -250,10 +248,8 @@ export function DashboardMainContent({
             courseDetailsMap={courseDetailsMap}
             loadingDetails={loadingDetails}
             selectedExams={selectedExams}
-            expandedCourses={expandedCourses}
             submitMode={examAutoSubmit}
             onSubmitModeChange={onExamAutoSubmitChange}
-            onToggleExpandCourse={onToggleExpandCourse}
             onToggleSelectExam={onToggleSelectExam}
             onToggleSelectCourseExams={onToggleSelectCourseExams}
             onRefreshCourses={onRefreshCourses}

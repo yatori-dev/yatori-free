@@ -27,6 +27,7 @@ import { DashboardMainContent } from './dashboard/DashboardMainContent';
 import { DashboardHeader } from './dashboard/DashboardHeader';
 import { DashboardOverlays } from './dashboard/DashboardOverlays';
 import { toast } from 'sonner';
+import { RequestCoordinator } from '@/lib/requestCoordinator';
 
 interface DashboardProps {
   session: AuthSession;
@@ -241,6 +242,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [tasksLoading, setTasksLoading] = useState(false);
   const [creatingTask, setCreatingTask] = useState(false);
   const [stoppingTaskId, setStoppingTaskId] = useState<string | null>(null);
+  const requestCoordinatorRef = useRef(new RequestCoordinator());
+  const pendingDetailsRef = useRef(new Map<string, Promise<Awaited<ReturnType<typeof getCourseDetails>>>>());
+  const accountIdRef = useRef(account?.id);
 
   // Logs viewer active state
   
@@ -297,15 +301,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const fetchCourses = useCallback(async () => {
     if (!account) return;
+    const request = requestCoordinatorRef.current.begin('courses');
     setCoursesLoading(true);
     setCoursesError(null);
     try {
-      const response = await getCourses(account.id);
+      const response = await getCourses(account.id, { signal: request.signal });
+      if (!requestCoordinatorRef.current.isCurrent('courses', request.requestId)) return;
       const nextCourses = response.data.courses;
       setCourses(nextCourses);
-      setCourseDetailsMap({});
-      setLoadingDetails({});
-      const [worksResult, examsResult] = await Promise.allSettled([getWorks(account.id), getExams(account.id)]);
+      const [worksResult, examsResult] = await Promise.allSettled([
+        getWorks(account.id, { signal: request.signal }),
+        getExams(account.id, { signal: request.signal }),
+      ]);
+      if (!requestCoordinatorRef.current.isCurrent('courses', request.requestId)) return;
       const nextDetails: Record<string, CourseDetails> = {};
       if (worksResult.status === 'fulfilled') {
         const sourceError = worksResult.value.data.sourceStatus.joined === 'ok'
@@ -319,7 +327,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           };
         });
       } else {
-        const detailResults = await Promise.allSettled(nextCourses.map((course) => getCourseDetails(account.id, course.key)));
+        const detailResults = await Promise.allSettled(nextCourses.map((course) => getCourseDetails(account.id, course.key, { signal: request.signal })));
         detailResults.forEach((result, index) => {
           if (result.status === 'fulfilled') {
             const course = nextCourses[index];
@@ -365,7 +373,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           };
         });
       }
-      setCourseDetailsMap(nextDetails);
+      setCourseDetailsMap((previous) => {
+        const next = Object.fromEntries(nextCourses.map((course) => [course.key, {
+          ...previous[course.key],
+          ...nextDetails[course.key],
+        }])) as Record<string, CourseDetails>;
+        return next;
+      });
       const processingCourseKeys = new Set(
         nextCourses.filter((course) => course.processing).map((course) => course.key),
       );
@@ -384,8 +398,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       }
       console.error(error);
       const message = getUserFacingErrorMessage(error, '加载课程失败，请稍后重试');
-      setCoursesError(message);
-      toast.error(message);
+      if (!(error instanceof Error && 'kind' in error && error.kind === 'aborted')) {
+        setCoursesError(message);
+        toast.error(message);
+      }
     } finally {
       setCoursesLoading(false);
     }
@@ -394,11 +410,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const fetchTasks = useCallback(async (options: { showLoading?: boolean; notifyOnError?: boolean } = {}) => {
     const showLoading = options.showLoading ?? true;
     const notifyOnError = options.notifyOnError ?? showLoading;
+    const request = requestCoordinatorRef.current.begin('tasks');
     if (showLoading) {
       setTasksLoading(true);
     }
     try {
-      const response = await getTasks();
+      const response = await getTasks({ signal: request.signal });
+      if (!requestCoordinatorRef.current.isCurrent('tasks', request.requestId)) return;
       setTasks(response.data.tasks);
     } catch (error) {
       if (isAuthExitError(error)) {
@@ -407,7 +425,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         return;
       }
       console.error(error);
-      if (notifyOnError) {
+      if (notifyOnError && !(error instanceof Error && 'kind' in error && error.kind === 'aborted')) {
         toast.error(getUserFacingErrorMessage(error, '加载任务失败，请稍后重试'));
       }
     } finally {
@@ -416,6 +434,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       }
     }
   }, [onLogout]);
+
+  useEffect(() => {
+    if (accountIdRef.current === account?.id) return;
+    requestCoordinatorRef.current.cancelAll();
+    pendingDetailsRef.current.clear();
+    setCourseDetailsMap({});
+    setLoadingDetails({});
+    setCourses([]);
+    setTasks([]);
+    accountIdRef.current = account?.id;
+  }, [account?.id]);
 
   const handleToggleSelectWork = useCallback((classId: string, workId: string) => {
     setSelectedWorks((prev) => {
@@ -588,7 +617,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     });
     if (!courseDetailsMap[courseKey] || !courseDetailsMap[courseKey].chapters) {
       setLoadingDetails((previous) => ({ ...previous, [courseKey]: true }));
-      void getCourseDetails(account.id, courseKey)
+      const detailKey = `${account.id}:${courseKey}`;
+      const pending = pendingDetailsRef.current.get(detailKey) ?? getCourseDetails(account.id, courseKey);
+      pendingDetailsRef.current.set(detailKey, pending);
+      void pending
         .then((response) => setCourseDetailsMap((previous) => ({
           ...previous,
           [courseKey]: {
@@ -602,7 +634,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           if (isAuthExitError(error)) { notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录')); onLogout(); }
           else toast.error(getUserFacingErrorMessage(error, '加载课程详情失败，请稍后重试'));
         })
-        .finally(() => setLoadingDetails((previous) => ({ ...previous, [courseKey]: false })));
+        .finally(() => {
+          if (pendingDetailsRef.current.get(detailKey) === pending) pendingDetailsRef.current.delete(detailKey);
+          setLoadingDetails((previous) => ({ ...previous, [courseKey]: false }));
+        });
     }
   };
 
@@ -988,7 +1023,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       </a>
       <Tabs
         value={activeTab}
-        onValueChange={(value) => handleTabChange(value as MobileDashboardTabId)}
+        onValueChange={(value: string) => handleTabChange(value as MobileDashboardTabId)}
         className="contents"
         style={tabsStyle}
       >

@@ -231,9 +231,15 @@ export function CourseListSection({
                           checked={isSelected}
                           disabled={isProcessing}
                           indeterminate={false}
+                          aria-label={`选择课程：${course.courseName}`}
                           onChange={() => onToggleCourseSelection(course.key)}
                         />
-                        <div className="min-w-0 flex-1">
+                          <button
+                            type="button"
+                            className="min-w-0 flex-1 text-left"
+                            onClick={() => onToggleCourseSelection(course.key)}
+                            aria-pressed={isSelected}
+                          >
                           <div className="flex flex-wrap items-center gap-2">
                             <h3 className="truncate text-xs font-semibold text-foreground sm:text-sm">{course.courseName}</h3>
                             {isProcessing && (
@@ -241,7 +247,6 @@ export function CourseListSection({
                                 处理中
                               </Badge>
                             )}
-                          </div>
                           {(course.beginDate || course.endDate) && (
                             <p className="mt-1 text-[11px] text-muted-foreground">
                               开课时间：{formatCourseDate(course.beginDate) ?? '未设置'}~{formatCourseDate(course.endDate) ?? '未设置'}
@@ -260,7 +265,8 @@ export function CourseListSection({
                               </span>
                             </div>
                           )}
-                        </div>
+                          </div>
+                          </button>
                       </div>
 
                       <div className="flex items-center justify-end gap-1 sm:w-52 sm:flex-nowrap sm:gap-2">
