@@ -10,10 +10,9 @@ interface TaskSettingsSnapshotProps {
   workAutoSubmitLabel: string;
   examAutoSubmitLabel: string;
   enabledAutomationLabels: string[];
-  hasRecordedAutomation: boolean;
 }
 
-export function TaskSettingsSnapshot({ config, coursesCustom, courseNameByIdentifier, studyIncrementSettings, workAutoSubmitLabel, examAutoSubmitLabel, enabledAutomationLabels, hasRecordedAutomation }: TaskSettingsSnapshotProps) {
+export function TaskSettingsSnapshot({ config, coursesCustom, courseNameByIdentifier, studyIncrementSettings, workAutoSubmitLabel, examAutoSubmitLabel, enabledAutomationLabels }: TaskSettingsSnapshotProps) {
   return (
     <div className="mt-1 min-w-0 w-full space-y-3 rounded-lg border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground">
       <div className="flex items-center gap-1.5 border-b border-border/50 pb-1.5 text-xs font-semibold text-foreground"><Settings2 className="w-3.5 h-3.5 text-muted-foreground" /><span>任务配置</span></div>
@@ -23,8 +22,8 @@ export function TaskSettingsSnapshot({ config, coursesCustom, courseNameByIdenti
             {config.kind === 'works' ? '作业' : config.kind === 'exams' ? '考试' : '章节任务'}
           </DetailRow>
         )}
-        {config?.bypassDailyStudyLimit !== undefined && <DetailRow label="每日学时限制">{config.bypassDailyStudyLimit ? '已绕过' : '正常限制'}</DetailRow>}
-        <DetailRow label="自动答题">{enabledAutomationLabels.length > 0 ? enabledAutomationLabels.join('、') : hasRecordedAutomation ? '未开启' : '未记录'}</DetailRow>
+        {(config?.kind === 'task_points' || (config?.kind === undefined && coursesCustom.doChapterTest !== false)) && config?.bypassDailyStudyLimit !== undefined && <DetailRow label="每日学时限制">{config.bypassDailyStudyLimit ? '已绕过' : '正常限制'}</DetailRow>}
+        {enabledAutomationLabels.length > 0 && <DetailRow label="自动答题">{enabledAutomationLabels.join('、')}</DetailRow>}
         {coursesCustom.doWork && <DetailRow label="作业提交">{workAutoSubmitLabel}</DetailRow>}
         {coursesCustom.doExam && <DetailRow label="考试提交">{examAutoSubmitLabel}</DetailRow>}
         {coursesCustom.answerMode && <DetailRow label="答题模式">{coursesCustom.answerMode}</DetailRow>}

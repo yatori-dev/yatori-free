@@ -35,9 +35,9 @@ function getCompactErrorMessage(message: string) {
   const meaningfulParts = detail
     .split(/[，,]/)
     .map((part) => part.trim())
-    .filter((part) => part && !/\s0\s*(?:门|个|项)$/.test(part));
+    .filter((part) => part && !/(?:^|\s)0\s*(?:门|个|项)(?:$|\s)/.test(part));
 
-  return meaningfulParts.join('，') || message;
+  return meaningfulParts.join('，');
 }
 
 function getProgressFallback(status: Task['status'], progressPercent = 0) {
@@ -81,14 +81,14 @@ function getAutoSubmitLabel(value: 0 | 1 | 2 | undefined) {
   }
 
   if (value === 2) {
-    return '模式 2';
+    return '仅保存不提交';
   }
 
   if (value === 1) {
-    return '模式 1';
+    return '直接提交';
   }
 
-  return '模式 0';
+  return '仅保存不提交';
 }
 
 const VISIBLE_COURSE_COUNT = 3;
@@ -220,6 +220,9 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const currentPercent = Math.max(0, Math.min(100, Math.round(rawPercent)));
   const showProgress = progress && snapshotStatuses.includes(effectiveStatus);
   const taskErrorMessage = snapshot?.errorMessage || task.errorMessage || (effectiveStatus === 'failed' ? progress?.message : '');
+  const isWorkTask = taskConfigSnapshot?.kind === 'works';
+  const taskUnitLabel = isWorkTask ? '作业' : '任务点';
+  const displayTaskErrorMessage = (taskErrorMessage ?? '').replaceAll('任务点', taskUnitLabel);
   const canStopTask = stoppableStatuses.includes(task.status) || stoppableStatuses.includes(effectiveStatus);
   const isStoppingTask = task.status === 'stopping' || effectiveStatus === 'stopping';
 
@@ -233,11 +236,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
     coursesCustom?.doWork ? '作业' : null,
     coursesCustom?.doExam ? '考试' : null,
   ].filter(Boolean) as string[];
-  const hasRecordedAutomation = coursesCustom !== undefined && [
-    coursesCustom.doChapterTest,
-    coursesCustom.doWork,
-    coursesCustom.doExam,
-  ].some((value) => value !== undefined);
   const includeCourses = getTaskCourseIdentifiers(configSnapshot);
   const taskCourseTaskPointProgress = getTaskCourseTaskPointProgress(
     includeCourses,
@@ -269,24 +267,24 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
   const processedUnits = (completedUnits ?? 0) + (failedUnits ?? 0);
   const terminalSummary = (() => {
     if (effectiveStatus === 'success') {
-      return hasUnitCounts && totalUnits ? `已完成 ${processedUnits} / ${totalUnits} 个任务点` : '任务已完成';
+      return hasUnitCounts && totalUnits ? `已完成 ${processedUnits} / ${totalUnits} 个${taskUnitLabel}` : '任务已完成';
     }
     if (effectiveStatus === 'stopped') {
-      return hasUnitCounts && totalUnits ? `停止前已处理 ${processedUnits} / ${totalUnits} 个任务点` : '任务已停止';
+      return hasUnitCounts && totalUnits ? `停止前已处理 ${processedUnits} / ${totalUnits} 个${taskUnitLabel}` : '任务已停止';
     }
 
     const unitSummary = hasUnitCounts && totalUnits
       ? (failedUnits ?? 0) > 0
-        ? `任务点失败 ${failedUnits} 个`
+        ? `${taskUnitLabel}失败 ${failedUnits} 个`
         : processedUnits >= totalUnits
-          ? '任务点已完成'
-          : `已处理 ${processedUnits} / ${totalUnits} 个任务点`
+          ? `${taskUnitLabel}已完成`
+          : `已处理 ${processedUnits} / ${totalUnits} 个${taskUnitLabel}`
       : '';
-    const compactError = taskErrorMessage ? getCompactErrorMessage(taskErrorMessage) : '';
+    const compactError = displayTaskErrorMessage ? getCompactErrorMessage(displayTaskErrorMessage) : '';
     const errorSummary = (failedUnits ?? 0) > 0
       ? compactError
           .split('，')
-          .filter((part) => !part.startsWith('任务点失败'))
+          .filter((part) => !part.startsWith(`${taskUnitLabel}失败`))
           .join('，')
       : compactError;
     return [unitSummary, errorSummary].filter(Boolean).join('，') || (effectiveStatus === 'failed' ? '任务未成功完成' : '部分任务未完成');
@@ -353,9 +351,9 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
       )}
 
       {/* Error Message Box */}
-      {taskErrorMessage && !isTerminal && (
+      {displayTaskErrorMessage && !isTerminal && (
         <InlineError title="任务执行异常" className="bg-danger-container/40 font-sans">
-          {taskErrorMessage}
+          {displayTaskErrorMessage}
         </InlineError>
       )}
 
@@ -386,9 +384,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
         <div className="min-h-0 overflow-hidden">
           {isTerminal && (
             <div className="mb-3 space-y-3">
-              {taskErrorMessage && (
-                <InlineError title="异常详情">{taskErrorMessage}</InlineError>
-              )}
               <div className="flex flex-col gap-1 px-1 font-mono text-xs text-muted-foreground">
                 <div className="flex min-w-0 flex-wrap justify-between gap-x-3 gap-y-0.5">
                   <span className="shrink-0">启动时间</span>
@@ -412,7 +407,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({ task, courseName
               workAutoSubmitLabel={workAutoSubmitLabel}
               examAutoSubmitLabel={examAutoSubmitLabel}
               enabledAutomationLabels={enabledAutomationLabels}
-              hasRecordedAutomation={hasRecordedAutomation}
             />
           ) : (
             <div className="mt-1 min-w-0 w-full rounded-lg border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground">任务未保存配置快照</div>

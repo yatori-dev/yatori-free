@@ -43,7 +43,7 @@ export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersi
       <aside className="hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-card lg:flex" aria-label="应用侧边栏">
         <Brand appVersion={appVersion} />
         <nav className="flex flex-1 flex-col gap-1 px-3 py-4" aria-label="主导航">
-          {desktopItems.slice(0, 3).map((item) => {
+          {desktopItems.slice(0, 4).map((item) => {
             const Icon = item.icon;
             const active = activeTab === item.id;
             return (
@@ -96,7 +96,7 @@ export function DashboardNavigation({ mode, activeTab, activeTaskCount, appVersi
             </svg>
             <span>GitHub</span>
           </a>
-          {desktopItems.slice(3).map((item) => {
+          {desktopItems.slice(4).map((item) => {
             const Icon = item.icon;
             const active = activeTab === item.id;
             return <button key={item.id} type="button" onClick={() => onTabChange(item.id)} className={`relative flex min-h-11 w-full items-center justify-start gap-3 rounded-md px-3 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'}`} aria-current={active ? 'page' : undefined} aria-label={item.label}><span className={`absolute inset-y-2 left-0 w-0.5 rounded-full bg-primary transition-opacity duration-200 ${active ? 'opacity-100' : 'opacity-0'}`} /><Icon className="h-4 w-4 shrink-0" /><span>{item.label}</span></button>;

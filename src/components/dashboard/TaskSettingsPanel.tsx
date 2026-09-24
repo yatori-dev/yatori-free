@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTheme } from 'next-themes';
-import { Monitor, Moon, Sun } from 'lucide-react';
+import { Monitor, Moon, Settings, Sun } from 'lucide-react';
 import { EmailNotificationSettings } from '@/components/EmailNotificationSettings';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -38,7 +38,7 @@ export function TaskSettingsPanel({
     <>
       <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:py-0">
       <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4 lg:hidden">
-        <CardTitle className="text-sm font-semibold sm:text-base">设置</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold sm:text-base"><Settings className="h-4 w-4 text-primary" />设置</CardTitle>
       </CardHeader>
       <CardContent className="p-3 text-sm sm:p-6">
         <div className="space-y-5 sm:space-y-6">

@@ -1,7 +1,7 @@
 import { Clock3, Eye, SlidersHorizontal } from 'lucide-react';
 import type { CourseSummary, StudyIncrement } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface StudyGoalsPageProps {
   courses: CourseSummary[];
@@ -24,10 +24,9 @@ export function StudyGoalsPage({ courses, studyIncrements, defaultStudyIncrement
     <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm">
       <CardHeader className="border-b border-border/50 px-3 py-3 sm:px-6 sm:py-4">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold sm:text-base">
-          <SlidersHorizontal className="h-4 w-4 text-primary" />
+          <Clock3 className="h-4 w-4 text-primary" />
           学习目标
         </CardTitle>
-        <CardDescription className="text-xs">为需要刷学习数据的课程设置学习次数和时长</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         <div className="divide-y divide-border">

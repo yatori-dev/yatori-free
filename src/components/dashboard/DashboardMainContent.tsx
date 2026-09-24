@@ -1,5 +1,6 @@
 import { useMemo, type RefObject } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Activity } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
 import type { CourseDetails, CourseSummary, StudyIncrement, Task } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
@@ -279,8 +280,7 @@ export function DashboardMainContent({
           <TabsContent value="tasks" className="m-0 min-h-full outline-none">
             <Card className="min-h-full min-w-0 overflow-hidden rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm sm:ring-0">
               <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
-                <CardTitle className="text-sm font-semibold sm:text-base">任务</CardTitle>
-                <CardDescription className="text-xs">查看任务运行状态与进度</CardDescription>
+                <CardTitle className="flex items-center gap-2 text-sm font-semibold sm:text-base"><Activity className="h-4 w-4 text-primary" />任务</CardTitle>
               </CardHeader>
               <CardContent className="flex min-h-[28rem] min-w-0 flex-col p-0">
                 <TaskStatusContent

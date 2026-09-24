@@ -147,9 +147,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       mobileTabDirectionRef.current = mobileDashboardTabOrder.indexOf(tabId) >= mobileDashboardTabOrder.indexOf(activeTab) ? 1 : -1;
     }
 
+    if (tabId === 'tasks' && !tasks.some((task) => isActiveTaskStatus(task.status))) {
+      setTaskFilter('completed');
+    }
+
     setPrevTab(activeTab);
     setActiveTab(tabId);
-  }, [activeTab]);
+  }, [activeTab, tasks]);
 
   useEffect(() => {
     if (!window.matchMedia('(max-width: 1023px)').matches) {
