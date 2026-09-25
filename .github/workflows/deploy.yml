@@ -24,6 +24,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
         with:
+          version: 12.3.4
           run_install: false
           cache: true
 
