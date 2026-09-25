@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import {
   AlertCircle,
   CheckSquare,
-  ChevronDown,
   FolderSync,
   GraduationCap,
   RefreshCw,

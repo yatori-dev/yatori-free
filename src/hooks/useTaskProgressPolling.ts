@@ -109,9 +109,10 @@ export function useTaskProgressPolling({ tasks, onUnauthorized }: UseTaskProgres
   });
 
   useEffect(() => {
+    const inFlight = inFlightRef.current;
     const taskIds = taskIdsToPoll.split('|');
     const activeIds = new Set(taskIdsToPoll ? taskIds : []);
-    for (const [taskId, controller] of inFlightRef.current) {
+    for (const [taskId, controller] of inFlight) {
       if (!activeIds.has(taskId)) controller.abort();
     }
     setSnapshots((previous) => {
@@ -127,7 +128,7 @@ export function useTaskProgressPolling({ tasks, onUnauthorized }: UseTaskProgres
 
     return () => {
       window.clearInterval(timer);
-      for (const taskId of taskIds) inFlightRef.current.get(taskId)?.abort();
+      for (const taskId of taskIds) inFlight.get(taskId)?.abort();
     };
   }, [taskIdsToPoll, tasks]);
 
