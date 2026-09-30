@@ -189,7 +189,7 @@ export function LoginCredentialsStep({
 
   return (
     <div className="flex w-full flex-col" inert={!active}>
-      <h1 className="mb-5 text-xl font-semibold text-foreground">学习通账号登录</h1>
+      <h1 className="mb-5 text-center text-xl font-semibold text-foreground">学习通账号登录</h1>
 
       <form
         onSubmit={handleSubmit}
