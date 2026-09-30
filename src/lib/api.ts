@@ -1,6 +1,10 @@
-export const API_BASE_URL = import.meta.env.DEV
-  ? '/api'
-  : 'https://yatori-api.hungrym0.com';
+const DEFAULT_API_BASE_URL = 'https://yatori-api.hungrym0.com';
+
+// The API explicitly allows the local Vite origin. Using the absolute origin
+// in development avoids Cloudflare rejecting requests forwarded by Vite's
+// server proxy while preserving cookie-based sessions.
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL?.trim() || DEFAULT_API_BASE_URL;
 
 export interface ApiError extends Error {
   status?: number;

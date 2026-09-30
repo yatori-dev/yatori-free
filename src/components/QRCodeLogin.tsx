@@ -243,34 +243,34 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
   const isError = Boolean(error) || session?.status === "failed";
 
   return (
-    <section className="login-qr-pane hidden min-h-[516px] flex-col items-center justify-center border-r border-border bg-transparent px-10 py-12 text-center md:flex">
-      <BrandMark className="mb-5 text-3xl" />
-      <h1 className="text-2xl font-normal tracking-tight text-foreground">
+    <section className="login-qr-pane hidden min-h-[560px] flex-col items-center justify-center border-r border-border bg-card px-8 py-12 text-center text-foreground md:flex">
+      <BrandMark className="mb-5 text-3xl text-foreground" />
+      <h2 className="text-xl font-semibold text-foreground">
         扫码登录
-      </h1>
+      </h2>
       <p className="mt-2 text-sm text-muted-foreground">使用学习通 App 扫码</p>
 
       {/* Dynamic QR / Scanned Morphing Card */}
       {isScanned || isConfirmed ? (
-        <div className="mt-7 flex h-[208px] w-[208px] flex-col items-center justify-center gap-3 rounded-2xl border border-primary/20 bg-primary-container/20 p-4 shadow-sm backdrop-blur-xs animate-in fade-in-0 duration-300 ease-emphasized motion-reduce:animate-none">
+        <div className="mt-7 flex h-[208px] w-[208px] flex-col items-center justify-center gap-3 rounded-lg border border-border bg-muted/40 p-4 shadow-xs animate-in fade-in-0 duration-200 motion-reduce:animate-none">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg shadow-sm">
             {session?.scannedName ? session.scannedName.substring(0, 1) : "通"}
           </div>
           <div className="flex flex-col items-center gap-0.5">
-            <span className="text-sm font-semibold text-foreground truncate max-w-[170px]">
+            <span className="max-w-[170px] truncate text-sm font-semibold text-foreground">
               {session?.scannedName || "学习通账号"}
             </span>
             <span className="text-xs text-muted-foreground">
               {isConfirmed ? "已确认，跳转中..." : "已扫码，请在手机端确认"}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary shadow-xs">
+          <div className="flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1 text-xs font-medium text-primary shadow-xs">
             <span className="h-2 w-2 rounded-full bg-primary" />
             <span>{isConfirmed ? "验证通过" : "等待确认"}</span>
           </div>
         </div>
       ) : (
-        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-2xl border border-border/70 bg-white p-3 shadow-rest transition-[border-color,box-shadow] duration-200 ease-standard hover:shadow-raised">
+        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-lg border border-border bg-white p-3 shadow-xs transition-[border-color,box-shadow] duration-150 hover:shadow-raised">
           {session?.qrContent ? (
             <QRCodeSVG
               value={session.qrContent}
@@ -281,7 +281,7 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
             />
           ) : isCreating ? (
             <svg
-              className="google-spinner"
+              className="loading-spinner"
               viewBox="0 0 50 50"
               role="status"
               aria-label="正在生成二维码"
@@ -303,7 +303,7 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
 
           {isError && (
             <div
-              className="absolute inset-0 flex items-center justify-center bg-card/90 px-5 text-center backdrop-blur-xs"
+              className="absolute inset-0 flex items-center justify-center bg-card/95 px-5 text-center"
               aria-live="polite"
               role="alert"
             >
@@ -312,12 +312,12 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
           )}
 
           {isExpired && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card/95 px-4 text-foreground backdrop-blur-xs">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card px-4 text-foreground">
               <p className="text-base font-medium">二维码已过期</p>
               <Button
                 type="button"
                 size="sm"
-                className="h-9 gap-2 bg-primary px-3 text-primary-foreground hover:bg-primary-hover"
+                className="h-9 gap-2 px-3"
                 disabled={!canRefresh}
                 onClick={() => void createSession()}
               >
@@ -334,7 +334,7 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
           type="button"
           variant="ghost"
           size="sm"
-          className="mt-5 h-9 gap-2 px-3 text-primary hover:bg-primary-container/30"
+          className="mt-5 h-9 gap-2 px-3 text-muted-foreground hover:bg-muted hover:text-foreground"
           disabled={!canRefresh}
           onClick={() => void createSession()}
         >

@@ -69,7 +69,7 @@ export function TaskSettingsPanel({
                   id="bypassDailyStudyLimit"
                   checked={bypassDailyStudyLimit}
                   onCheckedChange={handleBypassChange}
-                  className="google-mode-switch shrink-0"
+                  className="theme-switch shrink-0"
                 />
               </div>
             </section>

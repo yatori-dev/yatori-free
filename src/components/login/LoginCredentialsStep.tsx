@@ -26,20 +26,24 @@ type LegalDocument = 'terms' | 'privacy';
 
 interface LoginCredentialsStepProps {
   account: string;
+  accountError: string;
+  onAccountChange: (account: string) => void;
+  onAccountErrorChange: (message: string) => void;
   active: boolean;
   agreedToTerms: boolean;
   onAgreedToTermsChange: (agreed: boolean) => void;
-  onBack: () => void;
   onLoginSuccess: (data: LoginData) => void;
   onOpenLegalDocument: (document: LegalDocument) => void;
 }
 
 export function LoginCredentialsStep({
   account,
+  accountError,
+  onAccountChange,
+  onAccountErrorChange,
   active,
   agreedToTerms,
   onAgreedToTermsChange,
-  onBack,
   onLoginSuccess,
   onOpenLegalDocument,
 }: LoginCredentialsStepProps) {
@@ -103,7 +107,7 @@ export function LoginCredentialsStep({
     setSMSError('');
 
     try {
-      const response = await createSMSSession({ phone: account });
+      const response = await createSMSSession({ phone: account.trim() });
       setSMSSession(response.data);
       setSMSCode('');
       setRetrySeconds(Math.max(0, response.data.retryAfterSeconds));
@@ -124,6 +128,15 @@ export function LoginCredentialsStep({
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    const normalizedAccount = account.trim();
+
+    if (!/^1[3-9]\d{9}$/.test(normalizedAccount)) {
+      onAccountErrorChange(
+        normalizedAccount ? '请输入有效的11位手机号' : '请输入您的学习通账号',
+      );
+      return;
+    }
+    onAccountErrorChange('');
 
     if (method === 'password' && !password) {
       setPasswordError('请输入您的密码');
@@ -154,7 +167,7 @@ export function LoginCredentialsStep({
     try {
       const response =
         method === 'password'
-          ? await login({ account, password })
+          ? await login({ account: normalizedAccount, password })
           : await exchangeSMSSession(smsSession!.id, { code: smsCode.trim() });
       onLoginSuccess(response.data);
     } catch (error) {
@@ -175,28 +188,16 @@ export function LoginCredentialsStep({
   };
 
   return (
-    <div className="flex w-full flex-col items-center" inert={!active}>
-      <h1 className="mb-1 text-2xl font-normal text-foreground">继续登录</h1>
-      <p className="mb-5 text-sm text-muted-foreground">
-        使用 {account} 登录学习通
-      </p>
+    <div className="flex w-full flex-col" inert={!active}>
+      <h1 className="mb-5 text-xl font-semibold text-foreground">学习通账号登录</h1>
 
       <form
         onSubmit={handleSubmit}
         autoComplete="on"
         className="w-full space-y-5"
       >
-        <input
-          type="text"
-          name="username"
-          autoComplete="username"
-          value={account}
-          readOnly
-          className="sr-only"
-        />
-
-        <Tabs value={method} onValueChange={handleMethodChange}>
-          <TabsList className="h-11 w-full md:h-10">
+        <Tabs value={method} onValueChange={handleMethodChange} className="gap-5">
+          <TabsList variant="line" className="w-full shrink-0 p-0 group-data-horizontal/tabs:h-11">
             <TabsTrigger value="password" disabled={isBusy}>
               密码登录
             </TabsTrigger>
@@ -205,7 +206,34 @@ export function LoginCredentialsStep({
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="password" className="mt-4 space-y-2">
+          <div className="space-y-2">
+            <Label htmlFor="account">手机号</Label>
+            <Input
+              id="account"
+              name="username"
+              type="text"
+              autoComplete="username"
+              inputMode="tel"
+              maxLength={11}
+              placeholder="手机号"
+              aria-invalid={Boolean(accountError)}
+              aria-describedby={accountError ? 'account-error' : undefined}
+              value={account}
+              onChange={(event) => {
+                onAccountChange(event.target.value);
+                onAccountErrorChange('');
+              }}
+              className="h-11 w-full rounded-md border-input bg-transparent px-4 focus:border-ring focus:ring-1 focus:ring-ring"
+              disabled={isBusy}
+            />
+            {accountError && (
+              <p id="account-error" role="alert" className="ml-1 text-xs text-danger">
+                {accountError}
+              </p>
+            )}
+          </div>
+
+          <TabsContent value="password" className="space-y-2">
             <div className="flex items-center justify-between gap-3">
               <Label htmlFor="password">密码</Label>
               <a
@@ -229,15 +257,16 @@ export function LoginCredentialsStep({
                 aria-describedby={passwordError ? 'password-error' : undefined}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="h-12 w-full rounded-lg border-input bg-transparent pl-4 pr-12 focus:border-primary focus:ring-1 focus:ring-primary"
+                className="h-11 w-full rounded-md border-input bg-transparent pl-4 pr-12 focus:border-ring focus:ring-1 focus:ring-ring"
                 disabled={isBusy}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((visible) => !visible)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-primary"
+                className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-50"
                 disabled={isBusy}
                 aria-label={showPassword ? '隐藏密码' : '显示密码'}
+                title={showPassword ? '隐藏密码' : '显示密码'}
               >
                 {showPassword ? (
                   <EyeOff className="size-5" />
@@ -257,7 +286,7 @@ export function LoginCredentialsStep({
             )}
           </TabsContent>
 
-          <TabsContent value="sms" className="mt-4 space-y-2">
+          <TabsContent value="sms" className="space-y-2">
             <Label htmlFor="sms-code">6位数验证码</Label>
             <div className="flex gap-2">
               <Input
@@ -280,14 +309,13 @@ export function LoginCredentialsStep({
                   setSMSCode(event.target.value);
                   setSMSError('');
                 }}
-                className="h-12 min-w-0 flex-1 rounded-lg border-input bg-transparent px-4 focus:border-primary focus:ring-1 focus:ring-primary"
+                className="h-11 min-w-0 flex-1 rounded-md border-input bg-transparent px-4 focus:border-ring focus:ring-1 focus:ring-ring"
                 disabled={isBusy}
               />
               <Button
                 type="button"
-                size="icon"
                 variant="outline"
-                className={`size-12 shrink-0 rounded-lg transition-colors duration-200 ${showSendSuccess ? 'border-success/40 bg-success-container/50 text-success hover:bg-success-container/50' : 'text-primary'}`}
+                className="h-11 w-28 shrink-0 gap-1.5 rounded-md px-2"
                 disabled={isBusy || retrySeconds > 0}
                 onClick={() => void handleSendCode()}
                 aria-label={sendCodeButtonLabel}
@@ -295,26 +323,27 @@ export function LoginCredentialsStep({
               >
                 {isSendingCode ? (
                   <LoaderCircle
-                    className="size-5 animate-spin motion-reduce:animate-none"
+                    className="size-4 animate-spin motion-reduce:animate-none"
                     aria-hidden="true"
                   />
                 ) : showSendSuccess ? (
-                  <Check
-                    className="size-5 animate-in zoom-in-90 duration-260 ease-emphasized motion-reduce:animate-none"
-                    aria-hidden="true"
-                  />
-                ) : retrySeconds > 0 ? (
-                  <span
-                    className="text-xs font-semibold tabular-nums"
-                    aria-hidden="true"
-                  >
-                    {retrySeconds}
-                  </span>
-                ) : smsSession ? (
-                  <RotateCw className="size-5" aria-hidden="true" />
+                  <Check className="size-4" aria-hidden="true" />
+                ) : retrySeconds > 0 ? null : smsSession ? (
+                  <RotateCw className="size-4" aria-hidden="true" />
                 ) : (
-                  <SendHorizontal className="size-5" aria-hidden="true" />
+                  <SendHorizontal className="size-4" aria-hidden="true" />
                 )}
+                <span className="tabular-nums">
+                  {isSendingCode
+                    ? '发送中...'
+                    : showSendSuccess
+                      ? '已发送'
+                      : retrySeconds > 0
+                        ? `${retrySeconds} 秒`
+                        : smsSession
+                          ? '重新发送'
+                          : '获取验证码'}
+                </span>
               </Button>
             </div>
             {smsError ? (
@@ -373,25 +402,17 @@ export function LoginCredentialsStep({
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-1">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onBack}
-            className="h-11 rounded-lg px-4 text-primary hover:bg-primary-container/30 md:h-10"
-            disabled={isBusy}
-          >
-            返回
-          </Button>
-          <Button
-            type="submit"
-            disabled={isBusy || !agreedToTerms}
-            className="h-11 min-w-24 rounded-lg bg-primary px-6 text-primary-foreground hover:bg-primary-hover md:h-10"
-          >
-            {isLoggingIn ? '正在登录...' : '登录'}
-          </Button>
-        </div>
+        <Button
+          type="submit"
+          disabled={isBusy || !agreedToTerms}
+          className="h-11 w-full rounded-md"
+        >
+          {isLoggingIn ? '正在登录...' : '登录'}
+        </Button>
       </form>
+      <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+        本服务为面向大学生的学习通课程任务提交工具，不收取任何费用，请在受信任设备上使用
+      </p>
     </div>
   );
 }
