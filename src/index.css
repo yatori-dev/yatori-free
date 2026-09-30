@@ -123,6 +123,11 @@
 }
 
 :root {
+    --google-blue: #4285F4;
+    --google-red: #EA4335;
+    --google-yellow: #FBBC05;
+    --google-green: #34A853;
+
     --background: oklch(0.985 0.002 247);
     --foreground: oklch(0.145 0.015 257);
     --card: oklch(1 0 0);
@@ -363,129 +368,6 @@
   flex-shrink: 0;
 }
 
-/* Compact application toast */
-.cn-toast {
-  position: relative !important;
-  font-family: ui-sans-serif, system-ui, sans-serif !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  border-radius: 8px !important;
-  padding: 12px 16px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
-  border: 1px solid var(--border) !important;
-  background-color: var(--card) !important;
-  color: var(--foreground) !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  overflow: hidden !important;
-  min-width: 340px !important;
-  max-width: min(620px, calc(100vw - 32px)) !important;
-  transition: opacity var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard) !important;
-}
-
-.cn-toast::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background-color: var(--info);
-  transition: background-color 0.3s !important;
-}
-
-.cn-toast[data-type="success"]::before {
-  background-color: var(--success) !important;
-}
-
-.cn-toast[data-type="error"]::before {
-  background-color: var(--danger) !important;
-}
-
-.cn-toast[data-type="warning"]::before {
-  background-color: var(--warning) !important;
-}
-
-.cn-toast[data-type="info"]::before {
-  background-color: var(--info) !important;
-}
-
-/* Custom icon sizing and alignment */
-.cn-toast [data-icon] {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 20px !important;
-  height: 20px !important;
-  margin-right: 2px !important;
-  flex-shrink: 0 !important;
-}
-
-.cn-toast[data-type="success"] [data-icon] {
-  color: var(--success) !important;
-}
-
-.cn-toast[data-type="error"] [data-icon] {
-  color: var(--danger) !important;
-}
-
-.cn-toast[data-type="warning"] [data-icon] {
-  color: var(--warning) !important;
-}
-
-.cn-toast[data-type="info"] [data-icon] {
-  color: var(--info) !important;
-}
-
-/* Keep toast content compact and readable */
-.cn-toast [data-title] {
-  display: block !important;
-  font-weight: 600 !important;
-  color: var(--foreground) !important;
-  line-height: 1.5 !important;
-  overflow-wrap: anywhere !important;
-}
-
-.cn-toast [data-description] {
-  display: block !important;
-  color: var(--muted-foreground) !important;
-  font-size: 12px !important;
-  line-height: 1.4 !important;
-  margin-top: 2px !important;
-  overflow-wrap: anywhere !important;
-}
-
-.cn-toast [data-content] {
-  min-width: 0 !important;
-  flex: 1 1 auto !important;
-}
-
-/* Style Sonner action and close button */
-.cn-toast [data-close-button] {
-  position: absolute !important;
-  right: 8px !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  color: var(--muted-foreground) !important;
-  border-radius: 50% !important;
-  padding: 4px !important;
-  width: 24px !important;
-  height: 24px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  transition: background-color 0.2s, color 0.2s !important;
-  border: none !important;
-  background: transparent !important;
-}
-
-.cn-toast [data-close-button]:hover {
-  background-color: var(--accent) !important;
-  color: var(--foreground) !important;
-}
-
 @media (max-width: 600px) {
   /* Keep transient feedback out of the mobile header and bottom navigation. */
   [data-sonner-toaster].toaster {
@@ -498,13 +380,6 @@
     min-width: 0 !important;
     width: fit-content !important;
     margin-inline: auto !important;
-  }
-
-  .cn-toast {
-    min-width: 0 !important;
-    width: fit-content !important;
-    max-width: min(360px, calc(100vw - 32px)) !important;
-    padding: 9px 12px !important;
   }
 }
 

@@ -116,11 +116,11 @@ export function CourseOutline({
                 chapterItem,
                 courseDetails.documents,
               );
-              const statusClassName = resolvedTaskMeta.isLocked
-                ? 'border-border bg-muted text-muted-foreground'
+              const statusVariant = resolvedTaskMeta.isLocked
+                ? 'secondary'
                 : isChapterDone
-                  ? 'border-success/20 bg-success-container text-success'
-                  : 'border-warning/20 bg-warning-container text-warning';
+                  ? 'success'
+                  : 'warning';
               return (
                 <div
                   key={chapterItem.id}
@@ -136,7 +136,8 @@ export function CourseOutline({
                       </span>
                     </div>
                     <Badge
-                      className={`shrink-0 border text-xs font-normal ${statusClassName}`}
+                      variant={statusVariant}
+                      className="shrink-0 text-xs font-normal"
                     >
                       {taskPoints.length > 0
                         ? `任务点: ${resolvedTaskMeta.finished}/${resolvedTaskMeta.total}`

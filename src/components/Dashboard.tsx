@@ -936,15 +936,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     '--tab-transition-duration': `${durationMs}ms`,
     '--tab-transition-start-x': startTranslateX,
   } as React.CSSProperties;
-  const desktopViewTitle = {
-    courses: '章节任务点',
-    works: '作业',
-    exams: '考试',
-    tasks: '任务',
-    study: '学习目标',
-    settings: '设置',
-  }[activeTab];
-
   const overlaySelectedCount = activeTab === 'works'
     ? selectedWorksCount
     : activeTab === 'exams'
@@ -992,7 +983,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <DashboardHeader
-            title={desktopViewTitle}
             appVersion={appVersion}
             session={session}
             accountMenuOpen={accountMenuOpen}
@@ -1009,7 +999,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             onRefreshTasks={() => void fetchTasks()}
             onStopTask={handleStopTask}
             onLogoutRequest={() => setLogoutConfirmOpen(true)}
-            onTabChange={handleTabChange}
           />
           <DashboardMainContent
             mainRef={dashboardMainRef}

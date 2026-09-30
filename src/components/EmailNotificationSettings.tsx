@@ -236,9 +236,9 @@ export function EmailNotificationSettings({
     parsedReminderMinutes <= MAX_DEADLINE_MINUTES &&
     !deadlineReminderMinutes.includes(parsedReminderMinutes);
   return (
-    <div className="space-y-2">
-      <div className="overflow-hidden rounded-xl border border-border/60 bg-muted/20 shadow-xs">
-        <div className="flex items-start gap-3 border-b border-border/40 px-3.5 py-4 sm:px-5">
+    <div className="space-y-5">
+      <div className="border-b border-border pb-4">
+        <div className="flex items-start gap-3 py-4">
           <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-container text-primary">
             <Mail aria-hidden="true" className="size-4" />
           </span>
@@ -265,16 +265,16 @@ export function EmailNotificationSettings({
         </div>
 
         {pendingAction === "load" ? (
-          <p className="px-3.5 py-4 text-xs text-muted-foreground sm:px-5">
+          <p className="py-4 text-xs text-muted-foreground">
             正在读取邮箱设置...
           </p>
         ) : (
-          <div className="animate-in fade-in-0 slide-in-from-top-1 px-3.5 py-4 duration-280 ease-emphasized motion-reduce:animate-none sm:px-5">
+          <div className="py-2">
             <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
               {hasVerifiedEmail ? (
-                <CheckCircle2 aria-hidden="true" className="size-3.5 text-success" />
+                <CheckCircle2 aria-hidden="true" className="size-3.5 shrink-0 text-success" />
               ) : null}
-              <span>{hasVerifiedEmail ? `已验证：${settings?.email}` : "验证邮箱后即可开启通知"}</span>
+              <span className="min-w-0 [overflow-wrap:anywhere]">{hasVerifiedEmail ? `已验证：${settings?.email}` : "验证邮箱后即可开启通知"}</span>
             </div>
             <div
               className={`grid grid-cols-1 gap-2.5 ${hasPendingEmail ? "lg:grid-cols-2 lg:gap-4" : ""}`}
@@ -338,7 +338,7 @@ export function EmailNotificationSettings({
         )}
       </div>
 
-      <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs sm:p-5">
+      <div className="flex items-start gap-3 border-b border-border pb-5">
         <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
           <CheckCircle2 aria-hidden="true" className="size-4" />
         </span>
@@ -359,8 +359,8 @@ export function EmailNotificationSettings({
         />
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border/60 bg-muted/20 shadow-xs">
-        <div className="flex items-start gap-3 border-b border-border/40 px-3.5 py-4 sm:px-5">
+      <div>
+        <div className="flex items-start gap-3 pb-4">
           <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-container text-primary">
             <BellRing aria-hidden="true" className="size-4" />
           </span>
@@ -380,11 +380,11 @@ export function EmailNotificationSettings({
         </div>
 
         {pendingAction === "load" ? (
-          <p className="px-3.5 py-4 text-xs text-muted-foreground sm:px-5">
+          <p className="py-4 text-xs text-muted-foreground">
             正在读取提醒设置...
           </p>
         ) : (
-          <div className="space-y-4 px-3.5 py-4 sm:px-5">
+          <div className="space-y-4">
             {deadlineReminderMinutes.length > 0 && (
               <div className="grid gap-2 sm:grid-cols-2" aria-live="polite">
                 {deadlineReminderMinutes.map((minutes) => (
@@ -412,7 +412,7 @@ export function EmailNotificationSettings({
             )}
 
             <form
-              className="rounded-lg border border-dashed border-border/70 bg-background/60 p-3"
+              className="border-t border-border pt-4"
               onSubmit={handleAddDeadlineReminder}
             >
               <div className="mb-2 flex items-center gap-2 text-xs font-medium text-foreground">

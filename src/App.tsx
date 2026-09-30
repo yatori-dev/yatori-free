@@ -164,7 +164,6 @@ function App() {
       )}
       <Toaster
         position="top-center"
-        richColors
         offset={{ top: 16 }}
         mobileOffset={{
           top: 'calc(88px + env(safe-area-inset-top))',

@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useTheme } from 'next-themes';
-import { Monitor, Moon, Settings, Sun } from 'lucide-react';
+import { AlarmClock, Monitor, Moon, Palette, Settings, Sun, Zap } from 'lucide-react';
 import { EmailNotificationSettings } from '@/components/EmailNotificationSettings';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BypassDailyStudyLimitConfirmDialog } from './BypassDailyStudyLimitConfirmDialog';
 
 type SettingSwitchKey = 'bypassDailyStudyLimit' | 'showDeadlineBadges';
@@ -36,28 +35,31 @@ export function TaskSettingsPanel({
 
   return (
     <>
-      <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:py-0">
-        <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4 lg:hidden">
-          <CardTitle className="flex items-center gap-2 text-sm font-semibold sm:text-base">
+      <section className="w-full min-w-0 max-w-6xl" aria-label="设置">
+        <div className="border-b border-border pb-4 lg:hidden">
+          <h2 className="flex items-center gap-2 text-base font-semibold">
             <Settings className="h-4 w-4 text-primary" />
             设置
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-3 text-sm sm:p-6">
-          <div className="space-y-5 sm:space-y-6">
+          </h2>
+        </div>
+        <div className="pt-4 text-sm lg:pt-0">
+          <div className="space-y-8">
             <section
-              className="space-y-3 sm:space-y-4"
+              className="space-y-2"
               aria-labelledby="task-behavior-settings-heading"
             >
               <h2
                 id="task-behavior-settings-heading"
-                className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                className="text-base font-semibold text-foreground"
               >
                 任务行为
               </h2>
 
-              <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-[border-color] duration-200 hover:border-border sm:p-5">
-                <div className="min-w-0 space-y-1 pr-3 sm:space-y-1.5 sm:pr-4">
+              <div className="flex items-center justify-between gap-4 border-b border-border py-4">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                    <Zap aria-hidden="true" className="size-4" />
+                  </span>
                   <Label
                     htmlFor="bypassDailyStudyLimit"
                     className="block cursor-pointer text-sm font-semibold text-foreground"
@@ -75,17 +77,20 @@ export function TaskSettingsPanel({
             </section>
 
             <section
-              className="space-y-3 sm:space-y-4"
+              className="space-y-2"
               aria-labelledby="display-settings-heading"
             >
               <h2
                 id="display-settings-heading"
-                className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                className="text-base font-semibold text-foreground"
               >
                 显示
               </h2>
-              <div className="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-[border-color] duration-200 hover:border-border sm:p-5">
-                <div className="min-w-0 space-y-1">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border py-4">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                    <Palette aria-hidden="true" className="size-4" />
+                  </span>
                   <Label
                     htmlFor="theme-setting"
                     className="text-sm font-semibold text-foreground"
@@ -95,7 +100,7 @@ export function TaskSettingsPanel({
                 </div>
                 <div
                   id="theme-setting"
-                  className="inline-flex shrink-0 rounded-lg border border-border/70 bg-background/70 p-1 shadow-xs"
+                  className="inline-flex max-w-full flex-wrap rounded-md bg-muted p-1"
                   role="group"
                   aria-label="选择主题"
                 >
@@ -113,9 +118,9 @@ export function TaskSettingsPanel({
                         aria-label={label}
                         title={label}
                         onClick={() => setTheme(value)}
-                        className={`flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground transition-colors sm:px-2.5 ${selected ? 'bg-primary text-primary-foreground shadow-xs' : 'hover:bg-muted hover:text-foreground'}`}
+                        className={`flex h-8 items-center justify-center gap-1.5 rounded-sm px-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-2.5 ${selected ? 'bg-background text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'}`}
                       >
-                        <Icon className="h-4 w-4" />
+                        <Icon aria-hidden="true" className="h-4 w-4" />
                         <span>{label}</span>
                       </button>
                     );
@@ -123,13 +128,18 @@ export function TaskSettingsPanel({
                 </div>
               </div>
               
-              <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs transition-[border-color] duration-200 hover:border-border sm:p-5">
-                <Label
-                  htmlFor="showDeadlineBadges"
-                  className="block cursor-pointer text-sm font-semibold text-foreground"
-                >
-                  临期作业/考试徽章提醒
-                </Label>
+              <div className="flex items-center justify-between gap-4 border-b border-border py-4">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                    <AlarmClock aria-hidden="true" className="size-4" />
+                  </span>
+                  <Label
+                    htmlFor="showDeadlineBadges"
+                    className="block cursor-pointer text-sm font-semibold text-foreground"
+                  >
+                    临期作业/考试徽章提醒
+                  </Label>
+                </div>
                 <Switch
                   id="showDeadlineBadges"
                   checked={showDeadlineBadges}
@@ -147,15 +157,15 @@ export function TaskSettingsPanel({
             >
               <h2
                 id="notification-settings-heading"
-                className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                className="text-base font-semibold text-foreground"
               >
                 通知
               </h2>
               <EmailNotificationSettings onUnauthorized={onUnauthorized} />
             </section>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <BypassDailyStudyLimitConfirmDialog
         open={bypassConfirmOpen}
