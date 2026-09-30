@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
 import { getStudyProgressPercents } from "@/lib/studyProgress";
 import { formatLocalDateTime } from "@/lib/format";
 import {
   Square,
-  Bot,
   CheckCircle2,
   XCircle,
   AlertCircle,
@@ -12,6 +12,7 @@ import {
   ChevronDown,
   RefreshCw,
   Hourglass,
+  Loader2,
 } from "lucide-react";
 import {
   getTaskConfigSnapshot,
@@ -163,67 +164,70 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
     }
   };
 
-  const getStatusDisplay = (status: Task["status"]) => {
+  const getStatusDisplay = (
+    status: Task["status"],
+  ): {
+    label: string;
+    variant: "outline";
+    icon: React.ReactNode;
+    toneClass: string;
+  } => {
     switch (status) {
       case "running":
         return {
           label: "运行中",
-          colorClass: "bg-info-container/50 text-info border-info/25 shadow-xs",
-          icon: (
-            <span className="relative flex h-3.5 w-3.5 items-center justify-center">
-              <span className="absolute inline-flex h-2 w-2 rounded-full bg-info/40" />
-              <Bot className="relative w-3.5 h-3.5 text-info" />
-            </span>
-          ),
+          variant: "outline",
+          icon: <Loader2 className="h-3 w-3 animate-spin" />,
+          toneClass: "text-info",
         };
       case "waiting_daily_limit":
         return {
           label: "等待次日继续",
-          colorClass:
-            "bg-warning-container/50 text-warning border-warning/25 shadow-xs",
-          icon: <Hourglass className="w-3.5 h-3.5 text-warning" />,
+          variant: "outline",
+          icon: <Hourglass className="h-3 w-3" />,
+          toneClass: "text-warning",
         };
       case "success":
         return {
           label: "成功",
-          colorClass:
-            "bg-success-container/50 text-success border-success/25 shadow-xs",
-          icon: <CheckCircle2 className="w-3.5 h-3.5 text-success" />,
+          variant: "outline",
+          icon: <CheckCircle2 className="h-3 w-3" />,
+          toneClass: "text-success",
         };
       case "partial_success":
         return {
           label: "部分成功",
-          colorClass:
-            "bg-warning-container/50 text-warning border-warning/25 shadow-xs",
-          icon: <AlertCircle className="w-3.5 h-3.5 text-warning" />,
+          variant: "outline",
+          icon: <AlertCircle className="h-3 w-3" />,
+          toneClass: "text-warning",
         };
       case "failed":
         return {
           label: "失败",
-          colorClass:
-            "bg-danger-container/50 text-danger border-danger/25 shadow-xs",
-          icon: <XCircle className="w-3.5 h-3.5 text-danger" />,
+          variant: "outline",
+          icon: <XCircle className="h-3 w-3" />,
+          toneClass: "text-danger",
         };
       case "stopping":
         return {
           label: "停止中",
-          colorClass:
-            "bg-warning-container/50 text-warning border-warning/25 shadow-xs",
-          icon: <Hourglass className="w-3.5 h-3.5 text-warning animate-spin" />,
+          variant: "outline",
+          icon: <Loader2 className="h-3 w-3 animate-spin" />,
+          toneClass: "text-warning",
         };
       case "stopped":
         return {
           label: "已停止",
-          colorClass:
-            "bg-muted/70 text-muted-foreground border-border/70 shadow-xs",
-          icon: <Square className="w-3.5 h-3.5 text-muted-foreground" />,
+          variant: "outline",
+          icon: <Square className="h-3 w-3" />,
+          toneClass: "text-muted-foreground",
         };
       default:
         return {
           label: "待执行",
-          colorClass:
-            "bg-muted/50 text-muted-foreground border-border/50 shadow-xs",
-          icon: <Clock className="w-3.5 h-3.5 text-muted-foreground" />,
+          variant: "outline",
+          icon: <Clock className="h-3 w-3" />,
+          toneClass: "text-muted-foreground",
         };
     }
   };
@@ -383,7 +387,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
 
   return (
     <article
-      className={`group flex w-full min-w-0 flex-col gap-3 overflow-hidden rounded-xl border border-border/70 bg-card p-4 shadow-rest transition-[border-color,box-shadow] duration-200 ease-standard hover:border-border hover:shadow-raised sm:gap-4 sm:p-5 ${
+      className={`group flex w-full min-w-0 flex-col gap-3 overflow-hidden rounded-lg border border-border bg-card p-4 transition-colors duration-150 sm:gap-4 sm:p-5 ${
         effectiveStatus === "success" ? "animate-task-success-flash" : ""
       }`}
     >
@@ -391,25 +395,20 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
       <div className="flex w-full min-w-0 flex-col gap-2.5 sm:gap-3">
         <div className="flex min-w-0 items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2 font-mono text-xs text-muted-foreground">
-            <span className="shrink-0 rounded-md border border-border/60 bg-muted/70 px-2 py-0.5 font-semibold text-foreground">
+            <Badge
+              variant="outline"
+              className="font-mono text-xs font-semibold text-foreground"
+            >
               #{task.id.substring(0, 8)}
-            </span>
+            </Badge>
             {taskConfigSnapshot?.kind && (
-              <span
-                className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-sans font-medium ${
-                  taskConfigSnapshot.kind === "works"
-                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                    : taskConfigSnapshot.kind === "exams"
-                      ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-                      : "bg-primary/10 text-primary"
-                }`}
-              >
+              <Badge variant="secondary" className="text-[10px] font-medium">
                 {taskConfigSnapshot.kind === "works"
                   ? "作业"
                   : taskConfigSnapshot.kind === "exams"
                     ? "考试"
                     : "章节任务"}
-              </span>
+              </Badge>
             )}
             <span className="hidden sm:inline-block text-muted-foreground/60">
               •
@@ -419,12 +418,13 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
             </span>
           </div>
 
-          <div
-            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap ${statusInfo.colorClass}`}
+          <Badge
+            variant={statusInfo.variant}
+            className={`gap-1.5 font-medium ${statusInfo.toneClass}`}
           >
             {statusInfo.icon}
             <span>{statusInfo.label}</span>
-          </div>
+          </Badge>
         </div>
 
         {/* Targeted Courses Pills */}
@@ -443,15 +443,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
       {/* Terminal result */}
       {isTerminal && (
         <div
-          className={`flex min-w-0 items-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${
-            effectiveStatus === "success"
-              ? "border-success/30 bg-success-container/30 text-success"
-              : effectiveStatus === "failed"
-                ? "border-danger/30 bg-danger-container/30 text-danger"
-                : effectiveStatus === "partial_success"
-                  ? "border-warning/30 bg-warning-container/30 text-warning"
-                  : "border-border/70 bg-muted/30 text-muted-foreground"
-          }`}
+          className={`flex min-w-0 items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2.5 text-xs font-medium transition-colors ${statusInfo.toneClass}`}
         >
           {effectiveStatus === "success" && (
             <CheckCircle2 className="h-4 w-4 shrink-0" />

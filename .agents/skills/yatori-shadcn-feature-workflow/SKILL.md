@@ -40,6 +40,7 @@ Stay inside that system.
 - Reuse Lucide icons before drawing custom icons.
 - Check both light and dark themes. Theme state uses `next-themes` and the `yatori-theme` storage key.
 - Keep border radius and density aligned with current pages.
+- Never use a tiled dashboard layout: do not arrange page or settings content as a uniform card matrix or mechanical equal-width columns. Prefer content-driven groups, vertical flow, dividers, and intentional whitespace. CSS Grid is allowed only for structural alignment and must not create a checkerboard visual.
 
 ## Context7
 

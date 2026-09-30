@@ -1,9 +1,8 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
-import { Bell, ChevronDown, LogOut, Search } from 'lucide-react';
+import { lazy, Suspense, useState } from 'react';
+import { Bell, ChevronDown, LogOut } from 'lucide-react';
 import { ThemeToggleButton } from './ThemeToggleButton';
 import { BrandMark } from '@/components/BrandMark';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -20,12 +19,10 @@ import {
   YATORI_QQ_GROUP_URL,
   YATORI_REPOSITORY_URL,
 } from '@/lib/externalLinks';
-import type { MobileDashboardTabId } from './dashboardNavigationData';
 
 const AnnouncementMarkdown = lazy(() => import('react-markdown'));
 
 interface DashboardHeaderProps {
-  title: string;
   appVersion: string;
   session: {
     displayName: string;
@@ -46,17 +43,14 @@ interface DashboardHeaderProps {
   onRefreshTasks: () => void;
   onStopTask: (taskId: string) => void;
   onLogoutRequest: () => void;
-  onTabChange: (tab: MobileDashboardTabId) => void;
 }
 
 export function DashboardHeader({
-  title,
   appVersion,
   session,
   accountMenuOpen,
   onAccountMenuChange,
   onLogoutRequest,
-  onTabChange,
 }: DashboardHeaderProps) {
   const announcementReadKey = `yatori-announcement:${session.user.username}`;
   const [announcementOpen, setAnnouncementOpen] = useState(false);
@@ -68,30 +62,6 @@ export function DashboardHeader({
     }
   });
   const announcementRead = readAnnouncementContent === announcementMarkdown;
-  const [commandOpen, setCommandOpen] = useState(false);
-  const [commandQuery, setCommandQuery] = useState('');
-  const commandItems: Array<{ id: MobileDashboardTabId; label: string }> = [
-    { id: 'courses', label: '章节任务' },
-    { id: 'works', label: '作业' },
-    { id: 'exams', label: '考试' },
-    { id: 'study', label: '学习目标' },
-    { id: 'tasks', label: '任务' },
-    { id: 'settings', label: '设置' },
-  ];
-  const filteredCommandItems = commandItems.filter((item) =>
-    item.label.includes(commandQuery.trim()),
-  );
-
-  useEffect(() => {
-    const handleShortcut = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        setCommandOpen(true);
-      }
-    };
-    window.addEventListener('keydown', handleShortcut);
-    return () => window.removeEventListener('keydown', handleShortcut);
-  }, []);
 
   const handleAnnouncementOpenChange = (open: boolean) => {
     setAnnouncementOpen(open);
@@ -106,13 +76,13 @@ export function DashboardHeader({
   };
 
   return (
-    <header className="sticky top-0 z-40 flex min-h-14 items-center justify-between gap-2 border-b border-border bg-background px-3 py-2 sm:min-h-16 sm:px-5 lg:px-6">
+    <header className="sticky top-0 z-40 flex min-h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-background px-3 py-2 sm:px-5 lg:px-6">
       <div className="flex min-w-0 flex-1 items-center lg:hidden">
         <a
           href={YATORI_REPOSITORY_URL}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex min-w-0 max-w-full items-baseline gap-1.5 rounded-md font-semibold leading-none tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex min-w-0 max-w-full items-baseline gap-1.5 rounded-md font-semibold leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label={`在 GitHub 查看 Yatori 学习通服务 v${appVersion} 源码`}
         >
           <BrandMark className="shrink-0 text-xl sm:text-2xl" />
@@ -126,58 +96,6 @@ export function DashboardHeader({
           </span>
         </a>
       </div>
-      <div className="hidden min-w-0 items-center gap-2 lg:flex">
-        <span className="text-xs text-muted-foreground">工作区</span>
-        <span className="text-muted-foreground">/</span>
-        <h1 className="truncate text-base font-semibold text-foreground">{title}</h1>
-      </div>
-      <Dialog open={commandOpen} onOpenChange={setCommandOpen}>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="hidden min-w-44 justify-start gap-2 text-muted-foreground lg:flex"
-          onClick={() => setCommandOpen(true)}
-          aria-label="搜索工作区"
-        >
-          <Search className="size-4" />
-          <span>搜索工作区</span>
-          <kbd className="ml-auto rounded border border-border bg-muted px-1.5 py-0.5 text-[10px]">Ctrl K</kbd>
-        </Button>
-        <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-md">
-          <DialogHeader className="border-b border-border px-4 py-3">
-            <DialogTitle className="sr-only">搜索工作区</DialogTitle>
-            <div className="flex items-center gap-2">
-              <Search className="size-4 text-muted-foreground" />
-              <Input
-                autoFocus
-                value={commandQuery}
-                onChange={(event) => setCommandQuery(event.target.value)}
-                placeholder="搜索章节任务、作业、考试..."
-                className="h-8 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-              />
-            </div>
-          </DialogHeader>
-          <div className="max-h-72 overflow-y-auto p-2">
-            {filteredCommandItems.length > 0 ? filteredCommandItems.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className="flex min-h-10 w-full items-center rounded-md px-3 text-left text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                onClick={() => {
-                  onTabChange(item.id);
-                  setCommandOpen(false);
-                  setCommandQuery('');
-                }}
-              >
-                {item.label}
-              </button>
-            )) : (
-              <p className="px-3 py-6 text-center text-sm text-muted-foreground">没有匹配的工作区</p>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
       <div className="ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-3">
         <ThemeToggleButton />
         <Dialog
@@ -230,7 +148,7 @@ export function DashboardHeader({
           <button
             type="button"
             onClick={() => onAccountMenuChange(!accountMenuOpen)}
-            className="flex min-w-0 items-center gap-2 rounded-md border border-border bg-card px-2 py-1.5 text-left transition-colors duration-150 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-3 sm:px-3"
+            className="flex h-9 min-w-0 items-center gap-2 rounded-md px-1.5 text-left transition-colors duration-150 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-2.5 sm:px-2"
             aria-expanded={accountMenuOpen}
             aria-label={`当前用户 ${session.displayName}`}
           >
@@ -247,11 +165,8 @@ export function DashboardHeader({
               </div>
             )}
             <div className="hidden min-w-0 flex-col text-left min-[360px]:flex">
-              <span className="max-w-[68px] truncate text-[11px] font-bold min-[400px]:max-w-none sm:max-w-[100px] sm:text-xs sm:font-semibold">
+              <span className="max-w-[68px] truncate text-xs font-medium sm:max-w-[100px] sm:text-sm">
                 {session.displayName}
-              </span>
-              <span className="hidden max-w-[100px] truncate text-xs text-muted-foreground sm:block">
-                {session.user.username}
               </span>
             </div>
             <ChevronDown

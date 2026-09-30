@@ -15,7 +15,6 @@ import {
   hasDeadlinePassed,
 } from '@/lib/format';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
 import { CourseCheckbox } from './CourseCheckbox';
@@ -90,13 +89,13 @@ export function WorksListSection({
       value="works"
       className="m-0 outline-none data-[state=inactive]:hidden lg:min-h-0 lg:flex-1"
     >
-      <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:flex lg:h-full lg:min-h-0 lg:flex-col">
-        <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
+      <section className="flex min-w-0 flex-col gap-4" aria-label="作业列表">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
           <div className="flex min-w-0 items-center gap-2">
             <ClipboardList className="h-5 w-5 shrink-0 text-primary" />
-            <CardTitle className="whitespace-nowrap text-sm font-semibold sm:text-base">
+            <h2 className="text-base font-semibold">
               作业
-            </CardTitle>
+            </h2>
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
@@ -109,7 +108,7 @@ export function WorksListSection({
               size="icon"
               onClick={onRefreshCourses}
               disabled={coursesLoading}
-              className="h-8 w-8 shrink-0 rounded-full hover:bg-muted"
+              className="h-9 w-9 shrink-0 rounded-md hover:bg-muted"
               title="刷新课程"
               aria-label="刷新课程"
             >
@@ -118,9 +117,9 @@ export function WorksListSection({
               />
             </Button>
           </div>
-        </CardHeader>
+        </div>
 
-        <CardContent className="flex-1 p-3 sm:p-6 overflow-y-auto">
+        <div className="min-w-0">
           {coursesLoading && courses.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
               <RefreshCw className="h-7 w-7 animate-spin text-primary/70 mb-3" />
@@ -134,28 +133,22 @@ export function WorksListSection({
           ) : (
             <div className="space-y-3">
               {!hasLoadedDetails && (
-                <div className="flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-foreground sm:p-4">
+                <div className="flex items-start gap-2.5 border-b border-border pb-4 text-sm text-foreground">
                   <FolderSync className="mt-0.5 h-4 w-4 text-primary shrink-0" />
                   <div className="flex-1">
                     <p className="font-semibold text-primary">
                       尚未读取作业明细
-                    </p>
-                    <p className="text-muted-foreground mt-0.5">
-                      展开下方课程卡片即可查看作业明细，或点击右上角刷新课程以同步最新数据。
                     </p>
                   </div>
                 </div>
               )}
 
               {hasLoadedDetails && totalWorksCount === 0 && (
-                <div className="flex items-start gap-2.5 rounded-xl border border-border/80 bg-muted/25 p-3 text-xs text-muted-foreground sm:p-4">
+                <div className="flex items-start gap-2.5 border-b border-border pb-4 text-sm text-muted-foreground">
                   <AlertCircle className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="flex-1">
                     <p className="font-semibold text-foreground">
                       当前暂无可执行作业
-                    </p>
-                    <p className="mt-0.5 text-muted-foreground">
-                      各课程已完成明细检查，暂无需要提交的作业。可点击右上角刷新重试。
                     </p>
                   </div>
                 </div>
@@ -180,9 +173,9 @@ export function WorksListSection({
                 return (
                   <div
                     key={course.key}
-                    className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-rest transition-[border-color,box-shadow] duration-200 ease-standard hover:shadow-raised hover:border-border"
+                    className="min-w-0 border-b border-border pb-4 last:border-0"
                   >
-                    <div className="flex items-center justify-between gap-3 p-3 sm:p-4 bg-muted/20 transition-colors">
+                    <div className="flex items-center justify-between gap-3 py-3">
                       <div className="flex min-w-0 items-center gap-2.5 flex-1">
                         {details && runnableWorks.length > 0 ? (
                           <CourseCheckbox
@@ -198,7 +191,7 @@ export function WorksListSection({
 
                         <div className="min-w-0 flex-1 select-none">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-semibold text-foreground text-sm truncate">
+                            <span className="break-words text-sm font-medium text-foreground">
                               {course.courseName}
                             </span>
                             {course.courseTeacher && (
@@ -224,7 +217,7 @@ export function WorksListSection({
                     </div>
 
                     {
-                      <div className="border-t border-border/50 p-3 sm:p-4 bg-card animate-in fade-in-0 duration-240 ease-emphasized">
+                      <div className="min-w-0">
                         {isLoading ? (
                           <div className="flex items-center justify-center py-6 text-xs text-muted-foreground gap-2">
                             <RefreshCw className="h-4 w-4 animate-spin text-primary" />
@@ -273,10 +266,10 @@ export function WorksListSection({
                                   }
                                   disabled={!isRunnable}
                                   aria-pressed={isSelected}
-                                  className={`flex items-start gap-2.5 rounded-lg border p-3 text-xs transition-[color,background-color,border-color] duration-200 ease-standard ${
+                                  className={`flex min-w-0 items-start gap-2.5 rounded-lg border p-3 text-left text-xs transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                                     isSelected
-                                      ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20 shadow-xs'
-                                      : 'border-border/60 bg-muted/20 hover:border-primary/30 hover:bg-muted/40'
+                                      ? 'border-primary bg-muted'
+                                      : 'border-border bg-background hover:bg-muted/50'
                                   } ${isRunnable ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}`}
                                 >
                                   <div className="mt-0.5 shrink-0">
@@ -292,21 +285,22 @@ export function WorksListSection({
                                   </div>
 
                                   <div className="min-w-0 flex-1 space-y-1">
-                                    <div className="flex items-start justify-between gap-2">
+                                    <div className="flex flex-wrap items-start justify-between gap-2">
                                       <span
-                                        className="font-medium text-foreground line-clamp-2"
+                                        className="min-w-0 flex-1 basis-28 break-words font-medium text-foreground"
                                         title={title}
                                       >
                                         {title}
                                       </span>
                                       <Badge
-                                        className={`shrink-0 border text-[10px] font-normal ${
+                                        variant={
                                           urgencyLabel
-                                            ? 'border-danger/30 bg-danger-container text-danger'
+                                            ? 'destructive'
                                             : isRunnable
-                                              ? 'border-warning/30 bg-warning-container text-warning'
-                                              : 'border-border bg-muted text-muted-foreground'
-                                        }`}
+                                              ? 'warning'
+                                              : 'secondary'
+                                        }
+                                        className="shrink-0 text-[10px] font-normal"
                                       >
                                         {urgencyLabel ??
                                           (isRunnable ? '未交' : '不可执行')}
@@ -337,8 +331,8 @@ export function WorksListSection({
               })}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </TabsContent>
   );
 }
