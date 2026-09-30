@@ -155,14 +155,14 @@ export function DashboardMainContent({
     <main
       ref={mainRef}
       id="dashboard-main"
-      className="min-h-0 flex-1 overflow-x-clip overflow-y-auto pb-[calc(8.5rem+env(safe-area-inset-bottom))] lg:pb-0"
+      className="min-h-0 flex-1 overflow-x-clip overflow-y-auto bg-muted/30 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0"
     >
-      <div className="mx-auto w-full min-w-0 px-0 py-0 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
-        <div className="min-w-0">
+      <div className="mx-auto w-full min-w-0 max-w-[1600px] px-3 py-4 sm:px-5 md:px-6 lg:px-8 lg:py-6">
+        <div className="min-w-0 space-y-5">
           {/* Mobile Top Segmented Control for Learning sub-tabs */}
           {isLearningTab && (
-            <div className="px-3 pt-2.5 pb-1 lg:hidden">
-              <div className="flex items-center rounded-xl bg-muted/80 p-1 text-xs font-medium text-muted-foreground shadow-inner">
+            <div className="lg:hidden">
+              <div className="flex items-center rounded-md border border-border bg-card p-1 text-xs font-medium text-muted-foreground shadow-xs">
                 {mobileLearningTabs.map((tab) => {
                   const active = activeTab === tab.id;
                   const Icon = tab.icon;
@@ -177,15 +177,15 @@ export function DashboardMainContent({
                       key={tab.id}
                       type="button"
                       onClick={() => onTabChange(tab.id)}
-                      className={`relative flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-semibold transition-[color,background-color,border-color] duration-200 ${
+                      className={`relative flex min-h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-sm px-2 text-xs font-semibold transition-[color,background-color,border-color] duration-150 ${
                         active
-                          ? 'bg-card text-foreground shadow-sm'
+                            ? 'bg-muted text-foreground shadow-xs'
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                       aria-current={active ? 'page' : undefined}
                     >
-                      <Icon className="h-3.5 w-3.5" />
-                      <span>{tab.label}</span>
+                      <Icon className="h-3.5 w-3.5 shrink-0" />
+                      <span className="min-w-0 truncate">{tab.label}</span>
                       {urgentCount > 0 && (
                         <span
                           className="inline-flex min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] leading-4 text-primary-foreground"

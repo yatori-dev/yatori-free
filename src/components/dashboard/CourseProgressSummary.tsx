@@ -19,10 +19,10 @@ export function CourseProgressSummary({
 
   return (
     <Card className="mb-3 rounded-none border-x-0 border-border/60 bg-card/90 shadow-none sm:mb-4 sm:rounded-xl sm:border-x sm:shadow-rest">
-      <CardContent className="flex items-center gap-4 px-4 py-3 sm:px-5">
+      <CardContent className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-5">
         <div className="min-w-0 flex-1">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+            <div className="flex min-w-0 items-center gap-2">
               <p className="text-sm font-semibold tracking-tight text-foreground">
                 学习进度
               </p>
@@ -30,8 +30,8 @@ export function CourseProgressSummary({
                 {percent}%
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+            <div className="flex min-w-0 max-w-full items-center gap-2">
+              <span className="min-w-0 truncate text-right text-[11px] tabular-nums text-muted-foreground sm:text-xs">
                 {completedTaskPointCount} / {totalTaskPointCount} 个任务点已完成
               </span>
               {incompleteTaskPointCount > 0 && (

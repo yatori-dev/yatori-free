@@ -60,11 +60,11 @@ export function DashboardOverlays({
               type="button"
               onClick={onCreateTask}
               disabled={creatingTask}
-              className="h-auto min-h-11 shrink-0 gap-0.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-floating ring-4 ring-card/80 hover:bg-primary-hover"
+              className="h-auto min-h-11 max-w-[calc(100vw-2rem)] shrink-0 gap-0.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-floating ring-4 ring-card/80 hover:bg-primary-hover"
               title={submitButtonText ?? `提交 ${selectedCount} 项任务`}
               aria-label={submitButtonText ?? `提交 ${selectedCount} 项任务`}
             >
-              <span className="flex items-center gap-2">
+              <span className="flex min-w-0 max-w-full items-center gap-2">
                 {creatingTask ? (
                   <RefreshCw
                     className="h-4 w-4 animate-spin"
@@ -73,7 +73,7 @@ export function DashboardOverlays({
                 ) : (
                   <Play className="h-4 w-4 fill-current" aria-hidden="true" />
                 )}
-                <span>{submitButtonText ?? `提交任务(${selectedCount})`}</span>
+                <span className="min-w-0 truncate">{submitButtonText ?? `提交任务(${selectedCount})`}</span>
               </span>
             </Button>
             {estimatedTaskDuration && (

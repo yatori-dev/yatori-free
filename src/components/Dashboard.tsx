@@ -973,7 +973,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   ].filter((warning): warning is string => warning !== null);
 
   return (
-    <div className="relative flex h-screen min-h-screen h-svh min-h-svh flex-col overflow-hidden bg-background text-foreground font-sans lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)]">
+    <div className="relative flex h-svh min-h-svh flex-col overflow-hidden bg-background font-sans text-foreground lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)]">
       <a href="#dashboard-main" className="sr-only z-[60] rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
         跳到主内容
       </a>
@@ -1009,13 +1009,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             onRefreshTasks={() => void fetchTasks()}
             onStopTask={handleStopTask}
             onLogoutRequest={() => setLogoutConfirmOpen(true)}
+            onTabChange={handleTabChange}
           />
-          <div className="google-accent-bar lg:hidden">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
           <DashboardMainContent
             mainRef={dashboardMainRef}
             activeTab={activeTab}

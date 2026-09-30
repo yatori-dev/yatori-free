@@ -196,7 +196,7 @@ export function CourseListSection({
         <CardContent className="p-0 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           {coursesLoading ? (
             <div className="flex flex-col items-center justify-center p-12 text-sm text-muted-foreground">
-              <svg className="google-spinner" viewBox="0 0 50 50">
+              <svg className="loading-spinner" viewBox="0 0 50 50">
                 <circle
                   className="path"
                   cx="25"
@@ -394,7 +394,7 @@ export function CourseListSection({
                         {loadingDetails[course.key] ? (
                           <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
                             <svg
-                              className="google-spinner h-4 w-4"
+                              className="loading-spinner h-4 w-4"
                               viewBox="0 0 50 50"
                             >
                               <circle

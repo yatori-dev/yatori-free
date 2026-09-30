@@ -2,13 +2,9 @@ import React, {
   lazy,
   Suspense,
   useEffect,
-  useLayoutEffect,
-  useRef,
   useState,
 } from "react";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import { Card, CardContent } from "./ui/card";
 import {
   Dialog,
@@ -29,7 +25,6 @@ interface LoginProps {
   onLoginSuccess: (session: AuthSession) => void;
 }
 
-const MAINLAND_MOBILE_PATTERN = /^1[3-9]\d{9}$/;
 const QRCodeLogin = lazy(() =>
   import("./QRCodeLogin").then(({ QRCodeLogin: Component }) => ({
     default: Component,
@@ -37,16 +32,12 @@ const QRCodeLogin = lazy(() =>
 );
 
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
-  const [step, setStep] = useState<"account" | "credentials">("account");
   const [account, setAccount] = useState("");
   const [accountError, setAccountError] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [dialogContent, setDialogContent] = useState<
     "terms" | "privacy" | null
   >(null);
-  const accountPaneRef = useRef<HTMLDivElement>(null);
-  const credentialsPaneRef = useRef<HTMLDivElement>(null);
-  const [viewportHeight, setViewportHeight] = useState<number>();
   const [isDesktop, setIsDesktop] = useState(
     () => window.matchMedia("(min-width: 768px)").matches,
   );
@@ -58,19 +49,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
-
-  useLayoutEffect(() => {
-    const pane =
-      step === "account" ? accountPaneRef.current : credentialsPaneRef.current;
-    if (!pane) return;
-
-    const updateHeight = () => setViewportHeight(pane.scrollHeight);
-    updateHeight();
-
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(pane);
-    return () => observer.disconnect();
-  }, [accountError, step]);
 
   useEffect(() => {
     let cancelled = false;
@@ -92,33 +70,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     };
   }, []);
 
-  const handleAccountChange = (value: string) => {
-    setAccount(value);
-    setAccountError("");
-  };
-
-  const handleNextStep = (e: React.FormEvent) => {
-    e.preventDefault();
-    setAccountError("");
-
-    const trimmed = account.trim();
-    if (!trimmed) {
-      setAccountError("请输入您的学习通账号");
-      return;
-    }
-
-    if (!MAINLAND_MOBILE_PATTERN.test(trimmed)) {
-      setAccountError("请输入有效的11位手机号");
-      return;
-    }
-
-    setStep("credentials");
-  };
-
-  const handleBackStep = () => {
-    setStep("account");
-  };
-
   const completeLogin = (data: LoginData) => {
     toast.success("登录成功");
     saveSavedAccount({
@@ -135,14 +86,14 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="login-page flex min-h-screen flex-col items-center justify-center bg-background px-4 py-8 transition-colors duration-240">
+    <div className="login-page flex min-h-svh flex-col items-center justify-center overflow-x-hidden bg-background px-4 py-8 transition-colors duration-200 sm:px-6 lg:px-8">
       <a
         href={YATORI_QQ_GROUP_URL}
         target="_blank"
         rel="noreferrer"
         aria-label="加入 QQ 群组"
         title="加入 QQ 群组"
-        className="fixed right-4 top-4 z-10 flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="fixed right-4 top-4 z-10 flex size-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <svg
           aria-hidden="true"
@@ -153,16 +104,8 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           <path d="M824.8 613.2c-16-51.4-34.4-94.6-62.7-165.3C766.5 262.2 689.3 112 511.5 112 331.7 112 256.2 265.2 261 447.9c-28.4 70.8-46.7 113.7-62.7 165.3-34 109.5-23 154.8-14.6 155.8 18 2.2 70.1-82.4 70.1-82.4 0 49 25.2 112.9 79.8 159-26.4 8.1-85.7 29.9-71.6 53.8 11.4 19.3 196.2 12.3 249.5 6.3 53.3 6 238.1 13 249.5-6.3 14.1-23.8-45.3-45.7-71.6-53.8 54.6-46.2 79.8-110.1 79.8-159 0 0 52.1 84.6 70.1 82.4 8.5-1.1 19.5-46.4-14.5-155.8z" />
         </svg>
       </a>
-      <Card className="w-full max-w-[450px] overflow-hidden border-border/70 shadow-floating md:max-w-[min(65.6vw,1024px)]">
-        {/* Google Accent Bar */}
-        <div className="google-accent-bar">
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
-
-        <CardContent className="grid p-0 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <Card className="w-full max-w-[1080px] gap-0 overflow-hidden rounded-lg border-border py-0 shadow-raised">
+        <CardContent className="grid p-0 md:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.1fr)]">
           {isDesktop && (
             <Suspense
               fallback={
@@ -175,131 +118,20 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               <QRCodeLogin onLoginSuccess={completeLogin} />
             </Suspense>
           )}
-          <div className="login-auth-pane relative flex min-w-0 flex-col items-center p-8 md:min-h-[516px] md:justify-center md:px-12 md:py-10">
-            {/* Google Colored Logo */}
+          <div className="login-auth-pane relative flex min-w-0 flex-col items-center bg-card px-6 py-8 md:min-h-[560px] md:justify-center md:px-8 md:py-12 lg:px-12">
             <BrandMark className="mb-4 text-3xl md:hidden" />
-
-            {/* Step Indicator */}
-            <div className="mb-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none">
-              <span
-                className={`h-1.5 rounded-full transition-[width,background-color] duration-240 ${step === "account" ? "w-6 bg-primary" : "w-2 bg-muted"}`}
+            <div className="w-full max-w-[430px]">
+              <LoginCredentialsStep
+                account={account}
+                accountError={accountError}
+                onAccountChange={setAccount}
+                onAccountErrorChange={setAccountError}
+                active
+                agreedToTerms={agreedToTerms}
+                onAgreedToTermsChange={setAgreedToTerms}
+                onLoginSuccess={completeLogin}
+                onOpenLegalDocument={setDialogContent}
               />
-              <span
-                className={`h-1.5 rounded-full transition-[width,background-color] duration-240 ${step === "credentials" ? "w-6 bg-primary" : "w-2 bg-muted"}`}
-              />
-            </div>
-
-            {/* Form and transition layout */}
-            <div
-              className="w-full slide-viewport mt-2 transition-[height] duration-280 ease-emphasized"
-              style={{
-                height: viewportHeight ? `${viewportHeight}px` : undefined,
-              }}
-            >
-              <div
-                className="slide-container"
-                style={{
-                  transform:
-                    step === "credentials"
-                      ? "translateX(-50%)"
-                      : "translateX(0%)",
-                }}
-              >
-                {/* Step 1: Account Input */}
-                <div
-                  ref={accountPaneRef}
-                  className="slide-pane flex flex-col items-center"
-                  aria-hidden={step !== "account"}
-                >
-                  <h1 className="text-2xl text-foreground font-normal mb-1 font-sans">
-                    登录
-                  </h1>
-                  <p className="text-sm text-muted-foreground mb-6 font-sans">
-                    使用您的学习通账号
-                  </p>
-
-                  <form
-                    onSubmit={handleNextStep}
-                    autoComplete="on"
-                    className="w-full space-y-6"
-                  >
-                    <div className="space-y-2">
-                      <Label htmlFor="account">账号</Label>
-                      <Input
-                        id="account"
-                        name="username"
-                        type="text"
-                        autoComplete="username"
-                        inputMode="tel"
-                        maxLength={11}
-                        placeholder="手机号"
-                        aria-invalid={Boolean(accountError)}
-                        aria-describedby={
-                          accountError ? "account-error" : undefined
-                        }
-                        value={account}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          handleAccountChange(e.target.value)
-                        }
-                        className="w-full h-12 px-4 border border-input focus:border-primary focus:ring-1 focus:ring-primary rounded-lg bg-transparent text-foreground"
-                        disabled={step !== "account"}
-                        tabIndex={step === "account" ? 0 : -1}
-                      />
-                      {accountError && (
-                        <p
-                          id="account-error"
-                          role="alert"
-                          className="ml-1 text-xs text-danger"
-                        >
-                          {accountError}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="text-xs text-muted-foreground leading-relaxed">
-                      本服务为面向大学生的学习通课程任务提交工具，不收取任何费用，请在受信任设备上使用
-                    </div>
-
-                    <div className="flex justify-between items-center pt-4">
-                      <a
-                        href="https://hungrym0.com/blog/xxt/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium text-primary hover:underline"
-                        tabIndex={step === "account" ? 0 : -1}
-                      >
-                        了解详情
-                      </a>
-                      <Button
-                        type="submit"
-                        className="h-11 rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground shadow-none transition-colors duration-200 hover:bg-primary-hover md:h-10"
-                        disabled={step !== "account"}
-                        tabIndex={step === "account" ? 0 : -1}
-                      >
-                        下一步
-                      </Button>
-                    </div>
-                  </form>
-                </div>
-
-                {/* Step 2: Login method */}
-                <div
-                  ref={credentialsPaneRef}
-                  className="slide-pane flex flex-col items-center"
-                  aria-hidden={step !== "credentials"}
-                >
-                  <LoginCredentialsStep
-                    key={account.trim()}
-                    account={account.trim()}
-                    active={step === "credentials"}
-                    agreedToTerms={agreedToTerms}
-                    onAgreedToTermsChange={setAgreedToTerms}
-                    onBack={handleBackStep}
-                    onLoginSuccess={completeLogin}
-                    onOpenLegalDocument={setDialogContent}
-                  />
-                </div>
-              </div>
             </div>
           </div>
         </CardContent>
@@ -424,7 +256,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               </div>
             )}
           </div>
-          <DialogFooter className="sm:justify-end gap-2 border-t-0 p-0 bg-transparent mt-2">
+          <DialogFooter className="-mx-6 -mb-6 mt-2 gap-2 border-t-0 bg-transparent p-0 sm:justify-end">
             <Button
               type="button"
               variant="ghost"
