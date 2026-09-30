@@ -25,6 +25,8 @@ interface LoginProps {
   onLoginSuccess: (session: AuthSession) => void;
 }
 
+type LegalDocument = "terms" | "privacy";
+
 const QRCodeLogin = lazy(() =>
   import("./QRCodeLogin").then(({ QRCodeLogin: Component }) => ({
     default: Component,
@@ -35,9 +37,8 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [account, setAccount] = useState("");
   const [accountError, setAccountError] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [dialogContent, setDialogContent] = useState<
-    "terms" | "privacy" | null
-  >(null);
+  const [dialogContent, setDialogContent] = useState<LegalDocument>("terms");
+  const [isLegalDialogOpen, setIsLegalDialogOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(
     () => window.matchMedia("(min-width: 768px)").matches,
   );
@@ -69,6 +70,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       cancelled = true;
     };
   }, []);
+
+  const openLegalDocument = (document: LegalDocument) => {
+    setDialogContent(document);
+    setIsLegalDialogOpen(true);
+  };
 
   const completeLogin = (data: LoginData) => {
     toast.success("登录成功");
@@ -130,7 +136,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 agreedToTerms={agreedToTerms}
                 onAgreedToTermsChange={setAgreedToTerms}
                 onLoginSuccess={completeLogin}
-                onOpenLegalDocument={setDialogContent}
+                onOpenLegalDocument={openLegalDocument}
               />
             </div>
           </div>
@@ -148,10 +154,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       </div>
 
       <Dialog
-        open={dialogContent !== null}
-        onOpenChange={(open: boolean) => !open && setDialogContent(null)}
+        open={isLegalDialogOpen}
+        onOpenChange={setIsLegalDialogOpen}
       >
-        <DialogContent className="gap-6 p-6 focus:outline-none sm:max-w-[425px]">
+        <DialogContent className="max-h-[calc(100svh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] gap-6 overflow-hidden p-6 focus:outline-none md:aspect-video md:w-[calc(100vw-3rem)] md:max-w-5xl">
           <DialogHeader>
             <DialogTitle className="mb-2 font-sans text-xl font-normal text-foreground">
               {dialogContent === "terms" ? "服务条款" : "隐私政策"}
@@ -161,7 +167,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               {dialogContent === "terms" ? "服务条款" : "隐私政策"}内容。
             </DialogDescription>
           </DialogHeader>
-          <div className="max-h-[60vh] overflow-y-auto pr-2 font-sans text-sm leading-relaxed text-muted-foreground">
+          <div className="min-h-0 max-h-[60svh] overflow-y-auto overscroll-contain pr-2 font-sans text-sm leading-relaxed text-muted-foreground md:max-h-none">
             {dialogContent === "terms" ? (
               <div className="space-y-4">
                 <h3 className="font-medium text-foreground">1. 服务概述</h3>
@@ -256,11 +262,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               </div>
             )}
           </div>
-          <DialogFooter className="-mx-6 -mb-6 mt-2 gap-2 border-t-0 bg-transparent p-0 sm:justify-end">
+          <DialogFooter className="mx-0 mb-0 gap-2 border-t-0 bg-transparent p-0 sm:justify-end">
             <Button
               type="button"
               variant="ghost"
-              onClick={() => setDialogContent(null)}
+              onClick={() => setIsLegalDialogOpen(false)}
               className="h-10 rounded-md px-6 text-sm font-medium text-primary shadow-none transition-colors hover:bg-primary-container/40"
             >
               我知道了
