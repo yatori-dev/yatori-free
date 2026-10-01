@@ -14,8 +14,8 @@ export function SubmitModeControl({
   className,
 }: SubmitModeControlProps) {
   return (
-    <div className={cn('flex shrink-0 items-center gap-2', className)}>
-      <span className="text-xs font-medium text-muted-foreground">完成后</span>
+    <div className={cn('flex shrink-0 items-center gap-1.5 sm:gap-2', className)}>
+      <span className="hidden text-xs font-medium text-muted-foreground sm:inline">完成后</span>
       <div
         className="flex rounded-md bg-muted p-0.5"
         role="group"
@@ -26,7 +26,7 @@ export function SubmitModeControl({
           aria-pressed={value !== 1}
           onClick={() => onChange(0)}
           className={cn(
-            'h-8 rounded-sm px-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring lg:h-7 lg:px-2',
+            'h-8 whitespace-nowrap rounded-sm px-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring lg:h-7 lg:px-2',
             value !== 1
               ? 'bg-card text-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground',
@@ -39,7 +39,7 @@ export function SubmitModeControl({
           aria-pressed={value === 1}
           onClick={() => onChange(1)}
           className={cn(
-            'h-8 rounded-sm px-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring lg:h-7 lg:px-2',
+            'h-8 whitespace-nowrap rounded-sm px-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring lg:h-7 lg:px-2',
             value === 1
               ? 'bg-card text-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground',

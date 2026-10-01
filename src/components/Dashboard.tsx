@@ -936,15 +936,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     '--tab-transition-duration': `${durationMs}ms`,
     '--tab-transition-start-x': startTranslateX,
   } as React.CSSProperties;
-  const desktopViewTitle = {
-    courses: '章节任务点',
-    works: '作业',
-    exams: '考试',
-    tasks: '任务',
-    study: '学习目标',
-    settings: '设置',
-  }[activeTab];
-
   const overlaySelectedCount = activeTab === 'works'
     ? selectedWorksCount
     : activeTab === 'exams'
@@ -973,7 +964,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   ].filter((warning): warning is string => warning !== null);
 
   return (
-    <div className="relative flex h-screen min-h-screen h-svh min-h-svh flex-col overflow-hidden bg-background text-foreground font-sans lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)]">
+    <div className="relative flex h-svh min-h-svh flex-col overflow-hidden bg-background font-sans text-foreground lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)]">
       <a href="#dashboard-main" className="sr-only z-[60] rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
         跳到主内容
       </a>
@@ -992,7 +983,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <DashboardHeader
-            title={desktopViewTitle}
             appVersion={appVersion}
             session={session}
             accountMenuOpen={accountMenuOpen}
@@ -1010,12 +1000,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             onStopTask={handleStopTask}
             onLogoutRequest={() => setLogoutConfirmOpen(true)}
           />
-          <div className="google-accent-bar lg:hidden">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
           <DashboardMainContent
             mainRef={dashboardMainRef}
             activeTab={activeTab}

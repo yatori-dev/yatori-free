@@ -5,8 +5,22 @@ import { cloudflare } from '@cloudflare/vite-plugin'
 import path from 'path'
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react(), tailwindcss(), cloudflare()],
+export default defineConfig(({ command, isPreview }) => ({
+  plugins: [
+    react(),
+    tailwindcss(),
+    cloudflare({
+      // Let Vite's same-origin API proxy run before the local Worker.
+      config: command === 'serve' && !isPreview
+        ? (workerConfig) => ({
+            assets: {
+              ...workerConfig.assets,
+              runWorkerFirst: ['/*', '!/api/*'],
+            },
+          })
+        : undefined,
+    }),
+  ],
   server: {
     proxy: {
       '/api': {
@@ -21,4 +35,4 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
-})
+}))

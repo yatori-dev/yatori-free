@@ -8,7 +8,7 @@ export function BrandMark({ className }: BrandMarkProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center font-semibold tracking-tight",
+        "inline-flex items-baseline font-semibold",
         className,
       )}
       aria-hidden="true"

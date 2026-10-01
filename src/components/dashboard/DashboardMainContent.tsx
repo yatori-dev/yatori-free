@@ -1,6 +1,5 @@
 import { useMemo, type RefObject } from 'react';
 import { Activity } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
 import type {
   CourseDetails,
@@ -155,14 +154,14 @@ export function DashboardMainContent({
     <main
       ref={mainRef}
       id="dashboard-main"
-      className="min-h-0 flex-1 overflow-x-clip overflow-y-auto pb-[calc(8.5rem+env(safe-area-inset-bottom))] lg:pb-0"
+      className="min-h-0 flex-1 overflow-x-clip overflow-y-auto bg-background pb-[calc(10rem+env(safe-area-inset-bottom))] lg:pb-24"
     >
-      <div className="mx-auto w-full min-w-0 px-0 py-0 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-6">
-        <div className="min-w-0">
+      <div className="mx-auto w-full min-w-0 max-w-[1600px] px-3 py-4 sm:px-5 lg:px-6 lg:py-6">
+        <div className="min-w-0 space-y-4 sm:space-y-6">
           {/* Mobile Top Segmented Control for Learning sub-tabs */}
           {isLearningTab && (
-            <div className="px-3 pt-2.5 pb-1 lg:hidden">
-              <div className="flex items-center rounded-xl bg-muted/80 p-1 text-xs font-medium text-muted-foreground shadow-inner">
+            <div className="lg:hidden">
+              <div className="flex items-center rounded-lg bg-muted p-1 text-xs font-medium text-muted-foreground">
                 {mobileLearningTabs.map((tab) => {
                   const active = activeTab === tab.id;
                   const Icon = tab.icon;
@@ -177,15 +176,15 @@ export function DashboardMainContent({
                       key={tab.id}
                       type="button"
                       onClick={() => onTabChange(tab.id)}
-                      className={`relative flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-semibold transition-[color,background-color,border-color] duration-200 ${
+                      className={`relative flex min-h-10 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                         active
-                          ? 'bg-card text-foreground shadow-sm'
+                          ? 'bg-background text-foreground shadow-xs'
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                       aria-current={active ? 'page' : undefined}
                     >
-                      <Icon className="h-3.5 w-3.5" />
-                      <span>{tab.label}</span>
+                      <Icon className="h-3.5 w-3.5 shrink-0" />
+                      <span className="min-w-0 truncate">{tab.label}</span>
                       {urgentCount > 0 && (
                         <span
                           className="inline-flex min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] leading-4 text-primary-foreground"
@@ -216,15 +215,6 @@ export function DashboardMainContent({
                     ),
                   0,
                 )}
-                incompleteTaskPointCount={courses.reduce(
-                  (total, course) =>
-                    total + Math.max(
-                      0,
-                      (course.jobCount ?? 0) - (course.jobFinishCount ?? 0),
-                    ),
-                  0,
-                )}
-                activeTaskCount={taskCounts.active}
               />
             )}
 
@@ -300,14 +290,14 @@ export function DashboardMainContent({
             </TabsContent>
 
             <TabsContent value="tasks" className="m-0 min-h-full outline-none">
-              <Card className="min-h-full min-w-0 overflow-hidden rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm sm:ring-0">
-                <CardHeader className="rounded-none border-b border-border/50 px-3 py-2.5 sm:px-6 sm:py-4">
-                  <CardTitle className="flex items-center gap-2 text-sm font-semibold sm:text-base">
+              <section className="min-h-full min-w-0" aria-label="任务">
+                <div className="border-b border-border pb-4">
+                  <h2 className="flex items-center gap-2 text-base font-semibold">
                     <Activity className="h-4 w-4 text-primary" />
                     任务
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex min-h-[28rem] min-w-0 flex-col p-0">
+                  </h2>
+                </div>
+                <div className="flex min-h-[28rem] min-w-0 flex-col">
                   <TaskStatusContent
                     tasks={tasks}
                     filteredTasks={filteredTasks}
@@ -323,8 +313,8 @@ export function DashboardMainContent({
                     onRefresh={onRefreshTasks}
                     onStopTask={onStopTask}
                   />
-                </CardContent>
-              </Card>
+                </div>
+              </section>
             </TabsContent>
           </div>
         </div>

@@ -54,17 +54,17 @@ export function DashboardOverlays({
   return (
     <>
       {selectedCount > 0 && (
-        <div className="absolute bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 animate-bottom-bar-enter lg:bottom-6">
+        <div className="absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] left-1/2 z-30 -translate-x-1/2 animate-bottom-bar-enter lg:bottom-6">
           <div className="flex flex-col items-center gap-1">
             <Button
               type="button"
               onClick={onCreateTask}
               disabled={creatingTask}
-              className="h-auto min-h-11 shrink-0 gap-0.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-floating ring-4 ring-card/80 hover:bg-primary-hover"
+              className="h-auto min-h-11 max-w-[calc(100vw-2rem)] shrink-0 gap-0.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-floating hover:bg-primary-hover"
               title={submitButtonText ?? `提交 ${selectedCount} 项任务`}
               aria-label={submitButtonText ?? `提交 ${selectedCount} 项任务`}
             >
-              <span className="flex items-center gap-2">
+              <span className="flex min-w-0 max-w-full items-center gap-2">
                 {creatingTask ? (
                   <RefreshCw
                     className="h-4 w-4 animate-spin"
@@ -73,12 +73,12 @@ export function DashboardOverlays({
                 ) : (
                   <Play className="h-4 w-4 fill-current" aria-hidden="true" />
                 )}
-                <span>{submitButtonText ?? `提交任务(${selectedCount})`}</span>
+                <span className="min-w-0 truncate">{submitButtonText ?? `提交任务(${selectedCount})`}</span>
               </span>
             </Button>
             {estimatedTaskDuration && (
               <span
-                className="whitespace-nowrap text-[11px] font-medium text-muted-foreground"
+                className="whitespace-nowrap rounded-md bg-background px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
                 role="status"
               >
                 预计所需{estimatedTaskDuration}

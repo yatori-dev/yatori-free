@@ -1,6 +1,7 @@
 import { ExternalLink, LibraryBig } from "lucide-react";
 
 import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -91,9 +92,9 @@ export function OpenSourceDialog() {
                   {project.description}
                 </span>
               </span>
-              <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+              <Badge variant="secondary" className="shrink-0 text-[10px] font-normal">
                 {project.license}
-              </span>
+              </Badge>
             </a>
           ))}
         </div>

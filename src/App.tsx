@@ -31,7 +31,7 @@ function AuthRestoreScreen() {
     >
       <div className="flex flex-col items-center gap-4 text-muted-foreground">
         <svg
-          className="google-spinner"
+          className="loading-spinner"
           viewBox="0 0 50 50"
           role="status"
           aria-label="加载中"
@@ -164,7 +164,6 @@ function App() {
       )}
       <Toaster
         position="top-center"
-        richColors
         offset={{ top: 16 }}
         mobileOffset={{
           top: 'calc(88px + env(safe-area-inset-top))',

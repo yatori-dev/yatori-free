@@ -1,7 +1,6 @@
 import { Clock3, Eye, SlidersHorizontal } from 'lucide-react';
 import type { CourseSummary, StudyIncrement } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface StudyGoalsPageProps {
   courses: CourseSummary[];
@@ -28,14 +27,14 @@ export function StudyGoalsPage({
   onOpenStudyIncrementSettings,
 }: StudyGoalsPageProps) {
   return (
-    <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm">
-      <CardHeader className="border-b border-border/50 px-3 py-3 sm:px-6 sm:py-4">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold sm:text-base">
+    <section className="min-w-0" aria-label="学习目标">
+      <div className="border-b border-border pb-4">
+        <h2 className="flex items-center gap-2 text-base font-semibold">
           <Clock3 className="h-4 w-4 text-primary" />
           学习目标
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
+        </h2>
+      </div>
+      <div>
         <div className="divide-y divide-border">
           {courses.map((course) => {
             const increment =
@@ -48,7 +47,7 @@ export function StudyGoalsPage({
             return (
               <div
                 key={course.key}
-                className="flex items-center gap-3 px-3 py-4 sm:px-6"
+                className="flex items-center gap-3 py-4"
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <div className="hidden size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:flex">
@@ -59,11 +58,11 @@ export function StudyGoalsPage({
                     )}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="truncate text-sm font-semibold text-foreground">
+                    <h3 className="break-words text-sm font-medium text-foreground">
                       {course.courseName}
                     </h3>
                     <p
-                      className={`mt-1 truncate text-xs ${hasGoal ? 'text-primary' : 'text-muted-foreground'}`}
+                      className={`mt-1 break-words text-xs ${hasGoal ? 'text-foreground' : 'text-muted-foreground'}`}
                     >
                       {formatGoal(increment)}
                     </p>
@@ -89,7 +88,7 @@ export function StudyGoalsPage({
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

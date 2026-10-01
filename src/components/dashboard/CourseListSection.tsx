@@ -10,7 +10,6 @@ import {
 import type { CourseDetails, CourseSummary } from '@/lib/api';
 import { CourseOutline } from './CourseOutline';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -117,13 +116,8 @@ export function CourseListSection({
       value="courses"
       className="m-0 outline-none data-[state=inactive]:hidden lg:min-h-0 lg:flex-1"
     >
-      <Card className="rounded-none border-none bg-card py-0 shadow-none ring-0 sm:rounded-xl sm:py-4 sm:shadow-sm lg:flex lg:h-full lg:min-h-0 lg:flex-col">
-        <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-border/50 px-3 py-2 sm:px-6 sm:py-3.5">
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <CardTitle className="hidden whitespace-nowrap text-sm font-semibold sm:block lg:hidden">
-              课程列表
-            </CardTitle>
-          </div>
+      <section className="flex min-w-0 flex-col gap-4" aria-label="课程列表">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 flex-1 items-center justify-between gap-1.5 sm:gap-2">
             <div className="group relative min-w-0 flex-1 sm:max-w-md">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-primary" />
@@ -146,7 +140,7 @@ export function CourseListSection({
                 }}
                 placeholder="搜索课程名称"
                 aria-label="搜索课程名称"
-                className="course-search-input h-8 rounded-md border-border/80 bg-background/90 pl-9 pr-9 text-[13px] shadow-none transition-[border-color,box-shadow] duration-200 placeholder:text-muted-foreground/80 hover:border-primary/40 focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-primary/10 sm:h-9 sm:rounded-lg sm:pl-10 sm:pr-10 sm:text-sm sm:shadow-sm sm:focus-visible:ring-4"
+                className="course-search-input h-10 bg-background pl-9 pr-9 text-sm shadow-none sm:h-9"
               />
               {courseSearch && (
                 <button
@@ -176,7 +170,7 @@ export function CourseListSection({
               variant="ghost"
               disabled={coursesLoading}
               onClick={onRefresh}
-              className="h-8 w-8 shrink-0 rounded-full hover:bg-muted"
+              className="h-10 w-10 shrink-0 rounded-md hover:bg-muted sm:h-9 sm:w-9"
               title="刷新课程"
               aria-label="刷新课程"
             >
@@ -185,18 +179,18 @@ export function CourseListSection({
               />
             </Button>
           </div>
-        </CardHeader>
+        </div>
         {courseSearchQuery.trim() && (
-          <div className="border-b border-border/50 px-4 py-2 sm:px-6 xl:hidden">
+          <div className="xl:hidden">
             <span className="text-xs text-muted-foreground" role="status">
               找到 {filteredCourses.length} 门课程
             </span>
           </div>
         )}
-        <CardContent className="p-0 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+        <div className="min-w-0 overflow-hidden rounded-lg border border-border">
           {coursesLoading ? (
             <div className="flex flex-col items-center justify-center p-12 text-sm text-muted-foreground">
-              <svg className="google-spinner" viewBox="0 0 50 50">
+              <svg className="loading-spinner" viewBox="0 0 50 50">
                 <circle
                   className="path"
                   cx="25"
@@ -269,22 +263,16 @@ export function CourseListSection({
                 return (
                   <div
                     key={course.key}
-                    className="border-b border-border/40 last:border-0"
+                    className="min-w-0"
                   >
                     <div
                       onClick={handleCourseRowClick}
-                      className={`relative grid cursor-pointer grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-2 px-3 py-3.5 transition-colors duration-200 ease-standard sm:grid-cols-[auto_minmax(0,1fr)_13rem] sm:gap-x-4 sm:p-5 ${
+                      className={`grid cursor-pointer grid-cols-[1.25rem_minmax(0,1fr)_auto] items-center gap-x-3 px-3 py-4 transition-colors duration-150 sm:gap-x-4 sm:px-4 ${
                         isSelected
-                          ? 'bg-primary/5 hover:bg-primary/10 dark:bg-primary/10 dark:hover:bg-primary/15'
-                          : 'hover:bg-muted/40'
+                          ? 'bg-muted hover:bg-muted/80'
+                          : 'hover:bg-muted/50'
                       }`}
                     >
-                      {isSelected && (
-                        <span
-                          aria-hidden="true"
-                          className="absolute inset-y-2 left-0 w-1 rounded-r bg-primary"
-                        />
-                      )}
                       <div className="contents">
                         <CourseCheckbox
                           checked={isSelected}
@@ -295,27 +283,24 @@ export function CourseListSection({
                         />
                         <button
                           type="button"
-                          className="min-w-0 w-full text-left"
+                          className="min-w-0 w-full rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           onClick={() => onToggleCourseSelection(course.key)}
                           aria-pressed={isSelected}
                         >
-                          <div className="sm:flex sm:min-w-0 sm:items-center sm:gap-4">
-                            <div className="min-w-0 sm:w-52 sm:shrink-0 lg:w-56">
+                          <div className="lg:flex lg:min-w-0 lg:items-center lg:gap-6">
+                            <div className="min-w-0 lg:w-56 lg:shrink-0 xl:w-64">
                               <div className="flex min-w-0 flex-wrap items-center gap-2">
-                                <h3 className="truncate text-xs font-semibold text-foreground sm:text-sm">
+                                <h3 className="break-words text-sm font-medium text-foreground">
                                   {highlightCourseName(course.courseName, courseSearchQuery)}
                                 </h3>
                                 {isProcessing && (
-                                  <Badge
-                                    variant="outline"
-                                    className="border-warning/20 bg-warning-container text-warning"
-                                  >
+                                  <Badge variant="warning">
                                     处理中
                                   </Badge>
                                 )}
                               </div>
                               {(course.beginDate || course.endDate) && (
-                                <p className="mt-1 truncate text-[11px] text-muted-foreground">
+                                <p className="mt-1 break-words text-xs text-muted-foreground">
                                   开课时间：
                                   {formatCourseDate(course.beginDate) ??
                                     '未设置'}
@@ -330,12 +315,12 @@ export function CourseListSection({
                               )}
                             </div>
                             {jobRate !== null && jobProgressLabel && (
-                              <div className="mt-1.5 grid w-full min-w-0 flex-1 grid-cols-[minmax(0,1fr)_7rem] items-center gap-2 sm:mt-0 sm:grid-cols-[minmax(0,1fr)_8rem] sm:gap-3">
+                              <div className="mt-2 grid w-full min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 lg:mt-0">
                                 <Progress
                                   value={jobRate}
                                   className={`h-1.5 bg-muted ${isProcessing ? 'progress-running' : ''}`}
                                 />
-                                <span className="whitespace-nowrap text-xs font-semibold tabular-nums text-muted-foreground">
+                                <span className="text-xs tabular-nums text-muted-foreground">
                                   {jobProgressLabel}
                                 </span>
                               </div>
@@ -344,7 +329,7 @@ export function CourseListSection({
                         </button>
                       </div>
 
-                      <div className="flex items-center justify-end gap-1 sm:w-52 sm:flex-nowrap sm:gap-2">
+                      <div className="flex items-center justify-end gap-1">
                         {canStopProcessing && (
                           <Button
                             variant="outline"
@@ -372,16 +357,15 @@ export function CourseListSection({
                           variant="ghost"
                           size="sm"
                           onClick={() => onToggleExpandCourse(course.key)}
-                          className={`h-8 w-8 gap-1 rounded border px-0 text-xs transition-[color,background-color,border-color] duration-200 sm:w-auto sm:px-2 ${
+                          className={`h-9 w-9 rounded-md p-0 transition-colors duration-150 ${
                             isExpanded
-                              ? 'border-primary/40 bg-primary/10 text-primary'
-                              : 'border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary'
+                              ? 'bg-muted text-foreground'
+                              : 'text-muted-foreground hover:text-foreground'
                           }`}
                           aria-label={isExpanded ? '收起章节' : '查看章节'}
+                          aria-expanded={isExpanded}
+                          title={isExpanded ? '收起章节' : '查看章节'}
                         >
-                          <span className="sr-only sm:not-sr-only">
-                            {isExpanded ? '收起章节' : '查看章节'}
-                          </span>
                           <ChevronDown
                             className={`h-3.5 w-3.5 transition-transform duration-200 ease-standard ${isExpanded ? 'rotate-180' : ''}`}
                           />
@@ -394,7 +378,7 @@ export function CourseListSection({
                         {loadingDetails[course.key] ? (
                           <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
                             <svg
-                              className="google-spinner h-4 w-4"
+                              className="loading-spinner h-4 w-4"
                               viewBox="0 0 50 50"
                             >
                               <circle
@@ -430,8 +414,8 @@ export function CourseListSection({
               })}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </TabsContent>
   );
 }
