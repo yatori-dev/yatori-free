@@ -5,6 +5,7 @@ import { hasReadTaskPoints } from '@/lib/courseChapters';
 import { LogoutConfirmDialog } from './LogoutConfirmDialog';
 import { StudyIncrementSettings } from '@/components/StudyIncrementSettings';
 import { TaskStartConfirmDialog } from './TaskStartConfirmDialog';
+import { SettingsDialog } from './SettingsDialog';
 
 interface DashboardOverlaysProps {
   selectedCount: number;
@@ -15,6 +16,9 @@ interface DashboardOverlaysProps {
   taskStartSummary: string;
   taskStartWarnings: string[];
   logoutConfirmOpen: boolean;
+  settingsDialogOpen: boolean;
+  bypassDailyStudyLimit: boolean;
+  showDeadlineBadges: boolean;
   studyIncrementCourseKey: string | null;
   studyIncrementCourse: CourseSummary | null;
   studyIncrementCourseDetails?: CourseDetails;
@@ -23,6 +27,11 @@ interface DashboardOverlaysProps {
   onCreateTask: () => void;
   onTaskStartConfirmChange: (open: boolean) => void;
   onLogoutConfirmChange: (open: boolean) => void;
+  onSettingsDialogChange: (open: boolean) => void;
+  onSettingSwitch: (
+    key: 'bypassDailyStudyLimit' | 'showDeadlineBadges',
+    checked: boolean,
+  ) => void;
   onExecuteSubmitTask: () => void;
   onStudyIncrementOpenChange: (open: boolean) => void;
   onSaveStudyIncrement: (classId: string, value: StudyIncrement) => void;
@@ -38,6 +47,9 @@ export function DashboardOverlays({
   taskStartSummary,
   taskStartWarnings,
   logoutConfirmOpen,
+  settingsDialogOpen,
+  bypassDailyStudyLimit,
+  showDeadlineBadges,
   studyIncrementCourseKey,
   studyIncrementCourse,
   studyIncrementCourseDetails,
@@ -46,6 +58,8 @@ export function DashboardOverlays({
   onCreateTask,
   onTaskStartConfirmChange,
   onLogoutConfirmChange,
+  onSettingsDialogChange,
+  onSettingSwitch,
   onExecuteSubmitTask,
   onStudyIncrementOpenChange,
   onSaveStudyIncrement,
@@ -98,6 +112,14 @@ export function DashboardOverlays({
         open={logoutConfirmOpen}
         onOpenChange={onLogoutConfirmChange}
         onConfirm={onLogout}
+      />
+      <SettingsDialog
+        open={settingsDialogOpen}
+        bypassDailyStudyLimit={bypassDailyStudyLimit}
+        showDeadlineBadges={showDeadlineBadges}
+        onOpenChange={onSettingsDialogChange}
+        onUnauthorized={onLogout}
+        onSettingSwitch={onSettingSwitch}
       />
       <StudyIncrementSettings
         open={studyIncrementCourseKey !== null}

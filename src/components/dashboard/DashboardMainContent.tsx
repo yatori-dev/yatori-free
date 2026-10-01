@@ -10,7 +10,6 @@ import type {
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 import type { CourseTaskPointProgressMap } from '@/lib/taskProgress';
 import { getDeadlineUrgencyLabel } from '@/lib/format';
-import { TaskSettingsPanel } from './TaskSettingsPanel';
 import { TaskStatusContent } from './TaskStatusContent';
 import { CourseListSection } from './CourseListSection';
 import { CourseProgressSummary } from './CourseProgressSummary';
@@ -50,11 +49,9 @@ interface DashboardMainContentProps {
   taskSnapshots: Record<string, TaskProgressSnapshot>;
   courseNameByIdentifier: Record<string, string>;
   courseTaskPointProgressByIdentifier: CourseTaskPointProgressMap;
-  bypassDailyStudyLimit: boolean;
   showDeadlineBadges: boolean;
   workAutoSubmit: 0 | 1 | 2;
   examAutoSubmit: 0 | 1 | 2;
-  onUnauthorized: () => void;
   onRefreshCourses: () => void;
   onSearchChange: (value: string) => void;
   onSearchQueryChange: (value: string) => void;
@@ -65,10 +62,6 @@ interface DashboardMainContentProps {
   onToggleFullCourseOutline: (courseKey: string) => void;
   onTaskFilterChange: (filter: 'active' | 'completed') => void;
   onRefreshTasks: () => void;
-  onSettingSwitch: (
-    key: 'bypassDailyStudyLimit' | 'showDeadlineBadges',
-    checked: boolean,
-  ) => void;
   onWorkAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onExamAutoSubmitChange: (value: 0 | 1 | 2) => void;
   onTabChange: (tab: MobileDashboardTabId) => void;
@@ -106,11 +99,9 @@ export function DashboardMainContent({
   taskSnapshots,
   courseNameByIdentifier,
   courseTaskPointProgressByIdentifier,
-  bypassDailyStudyLimit,
   showDeadlineBadges,
   workAutoSubmit,
   examAutoSubmit,
-  onUnauthorized,
   onRefreshCourses,
   onSearchChange,
   onSearchQueryChange,
@@ -121,7 +112,6 @@ export function DashboardMainContent({
   onToggleFullCourseOutline,
   onTaskFilterChange,
   onRefreshTasks,
-  onSettingSwitch,
   onWorkAutoSubmitChange,
   onExamAutoSubmitChange,
   onTabChange,
@@ -270,15 +260,6 @@ export function DashboardMainContent({
               onToggleSelectCourseExams={onToggleSelectCourseExams}
               onRefreshCourses={onRefreshCourses}
             />
-
-            <TabsContent value="settings" className="m-0 outline-none">
-              <TaskSettingsPanel
-                bypassDailyStudyLimit={bypassDailyStudyLimit}
-                showDeadlineBadges={showDeadlineBadges}
-                onUnauthorized={onUnauthorized}
-                onSettingSwitch={onSettingSwitch}
-              />
-            </TabsContent>
 
             <TabsContent value="study" className="m-0 outline-none">
               <StudyGoalsPage

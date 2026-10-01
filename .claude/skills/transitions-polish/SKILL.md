@@ -5,6 +5,8 @@ description: Polish and refine existing motion against the transitions.dev motio
 
 # Transitions Polish
 
+Project constraint: polish only motion that communicates a real state or interaction. Do not introduce motion into static settings groups, theme options, status badges, or compact brand marks for visual effect; preserve layout stability and reduced-motion behavior.
+
 An **add-on** to the [`transitions-dev`](../transitions-dev/SKILL.md) skill. Where `transitions-dev` installs whole transitions, this skill **polishes motion that already exists**: it scans the five motion-token dimensions — **duration, distance, scale, blur, easing** — and suggests the token each value should reference, plus the higher-order rules for *when* a value is right (open/close asymmetry, hover in/out, stagger, delay).
 
 Install it alongside `transitions-dev`, or on its own — the token values are restated below so this skill can audit a project standalone. When it is installed, the transitions.dev **Refine panel** automatically feeds these rules into every **Small refinement** job.

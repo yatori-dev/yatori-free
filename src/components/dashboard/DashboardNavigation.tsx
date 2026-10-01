@@ -84,7 +84,7 @@ function Brand({
         aria-label="在 GitHub 查看 Yatori 学习通服务源码"
       >
         {collapsed ? (
-          <img src="https://yatori.hungrym0.com/favicon.svg" alt="" className="size-7 shrink-0 object-contain" />
+          <BrandMark compact className="text-2xl" />
         ) : (
           <BrandMark className="shrink-0 text-2xl" />
         )}
@@ -121,7 +121,7 @@ function DesktopNavigation({
       <button
         type="button"
         onClick={() => setCollapsed((value) => !value)}
-        className="absolute left-full top-3 z-50 ml-2 flex size-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground shadow-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="absolute -right-3 top-4 z-50 flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label={collapsed ? '展开侧栏' : '折叠侧栏'}
         title={collapsed ? '展开侧栏' : '折叠侧栏'}
       >

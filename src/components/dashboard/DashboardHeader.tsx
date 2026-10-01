@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from 'react';
-import { Bell, ChevronDown, LogOut } from 'lucide-react';
+import { Bell, LogOut } from 'lucide-react';
 import { ThemeToggleButton } from './ThemeToggleButton';
 import { BrandMark } from '@/components/BrandMark';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import announcementMarkdown from '@/content/announcement.md?raw';
 import type { Task } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
@@ -144,38 +152,35 @@ export function DashboardHeader({
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => onAccountMenuChange(!accountMenuOpen)}
-            className="flex h-9 min-w-0 items-center gap-2 rounded-md px-1.5 text-left transition-colors duration-150 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-2.5 sm:px-2"
-            aria-expanded={accountMenuOpen}
-            aria-label={`当前用户 ${session.displayName}`}
-          >
-            {session.avatarUrl ? (
-              <img
-                src={session.avatarUrl}
-                alt="头像"
-                className="h-6 w-6 rounded-full object-cover ring-1 ring-border sm:h-7 sm:w-7"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground sm:h-7 sm:w-7 sm:text-xs">
-                {session.displayName.substring(0, 1).toUpperCase()}
+        <DropdownMenu open={accountMenuOpen} onOpenChange={onAccountMenuChange} modal={false}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="h-9 gap-2 px-1.5 sm:gap-2.5 sm:px-2"
+              aria-label={`当前用户 ${session.displayName}`}
+            >
+              {session.avatarUrl ? (
+                <img
+                  src={session.avatarUrl}
+                  alt="头像"
+                  className="h-6 w-6 rounded-full object-cover ring-1 ring-border sm:h-7 sm:w-7"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground sm:h-7 sm:w-7 sm:text-xs">
+                  {session.displayName.substring(0, 1).toUpperCase()}
+                </div>
+              )}
+              <div className="hidden min-w-0 flex-col text-left min-[360px]:flex">
+                <span className="max-w-[68px] truncate text-xs font-medium sm:max-w-[100px] sm:text-sm">
+                  {session.displayName}
+                </span>
               </div>
-            )}
-            <div className="hidden min-w-0 flex-col text-left min-[360px]:flex">
-              <span className="max-w-[68px] truncate text-xs font-medium sm:max-w-[100px] sm:text-sm">
-                {session.displayName}
-              </span>
-            </div>
-            <ChevronDown
-              className={`size-4 text-muted-foreground transition-transform duration-200 ease-standard ${accountMenuOpen ? 'rotate-180' : ''}`}
-            />
-          </button>
-          {accountMenuOpen && (
-            <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-56 max-w-[calc(100vw-1rem)] rounded-md border border-border bg-popover p-1.5 text-popover-foreground shadow-floating animate-in fade-in-0 zoom-in-95 duration-150 motion-reduce:animate-none">
-              <div className="border-b border-border px-3 pb-2 pt-1">
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col gap-1">
                 <p className="truncate text-sm font-semibold">
                   {session.displayName}
                 </p>
@@ -183,13 +188,14 @@ export function DashboardHeader({
                   {session.user.username}
                 </p>
               </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild className="lg:hidden">
               <a
                 href={YATORI_QQ_GROUP_URL}
                 target="_blank"
                 rel="noreferrer"
-                onClick={() => onAccountMenuChange(false)}
-                className="mt-1 flex min-h-10 w-full items-center gap-2 rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
-                aria-label="加入QQ群组"
+                className="flex items-center gap-2"
               >
                 <img
                   src={QQ_LOGO_URL}
@@ -198,33 +204,34 @@ export function DashboardHeader({
                 />
                 QQ群组
               </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="lg:hidden">
               <a
                 href={YATORI_REPOSITORY_URL}
                 target="_blank"
                 rel="noreferrer"
-                onClick={() => onAccountMenuChange(false)}
-                className="flex min-h-10 w-full items-center gap-2 rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
-                aria-label="查看 GitHub 仓库"
+                className="flex items-center gap-2"
               >
                 <svg className="size-4" aria-hidden="true">
                   <use href="/icons.svg#github-icon" />
                 </svg>
                 GitHub 仓库
               </a>
-              <button
-                type="button"
-                onClick={() => {
-                  onAccountMenuChange(false);
-                  onLogoutRequest();
-                }}
-                className="flex min-h-10 w-full items-center gap-2 rounded-md px-3 text-sm text-destructive transition-colors hover:bg-destructive/10"
-              >
-                <LogOut className="size-4" />
-                退出登录
-              </button>
-            </div>
-          )}
-        </div>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="lg:hidden" />
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => {
+                onAccountMenuChange(false);
+                onLogoutRequest();
+              }}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="size-4" />
+              退出登录
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
