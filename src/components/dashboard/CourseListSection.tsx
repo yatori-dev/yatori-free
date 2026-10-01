@@ -274,13 +274,38 @@ export function CourseListSection({
                       }`}
                     >
                       <div className="contents">
-                        <CourseCheckbox
-                          checked={isSelected}
-                          disabled={isProcessing}
-                          indeterminate={false}
-                          aria-label={`选择课程：${course.courseName}`}
-                          onChange={() => onToggleCourseSelection(course.key)}
-                        />
+                        {canStopProcessing ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            disabled={isStoppingProcessing}
+                            onClick={() =>
+                              onStopTask(course.processingTaskId as string)
+                            }
+                            className="size-5 rounded border-danger/40 p-0 text-danger hover:border-danger hover:bg-danger-container/20 max-sm:min-h-5 max-sm:min-w-5"
+                            aria-label={
+                              isStoppingProcessing ? '停止任务中' : '停止任务'
+                            }
+                            title={
+                              isStoppingProcessing ? '停止任务中' : '停止任务'
+                            }
+                          >
+                            {isStoppingProcessing ? (
+                              <RefreshCw className="size-3 animate-spin" />
+                            ) : (
+                              <Square className="size-3 fill-current" />
+                            )}
+                          </Button>
+                        ) : (
+                          <CourseCheckbox
+                            checked={isSelected}
+                            disabled={isProcessing}
+                            indeterminate={false}
+                            aria-label={`选择课程：${course.courseName}`}
+                            onChange={() => onToggleCourseSelection(course.key)}
+                          />
+                        )}
                         <button
                           type="button"
                           className="min-w-0 w-full rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -330,29 +355,6 @@ export function CourseListSection({
                       </div>
 
                       <div className="flex items-center justify-end gap-1">
-                        {canStopProcessing && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={isStoppingProcessing}
-                            onClick={() =>
-                              onStopTask(course.processingTaskId as string)
-                            }
-                            className="h-8 w-8 gap-1 rounded border-danger/30 px-0 text-xs text-danger hover:border-danger hover:bg-danger-container/20 sm:w-auto sm:px-2.5"
-                            aria-label={
-                              isStoppingProcessing ? '停止任务中' : '停止任务'
-                            }
-                          >
-                            {isStoppingProcessing ? (
-                              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Square className="h-3.5 w-3.5 fill-current" />
-                            )}
-                            <span className="sr-only sm:not-sr-only">
-                              {isStoppingProcessing ? '停止中' : '停止'}
-                            </span>
-                          </Button>
-                        )}
                         <Button
                           variant="ghost"
                           size="sm"

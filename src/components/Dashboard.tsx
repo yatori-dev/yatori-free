@@ -121,6 +121,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [appVersion, setAppVersion] = useState('...');
   const [activeTab, setActiveTab] = useState<MobileDashboardTabId>('courses');
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [prevTab, setPrevTab] = useState<MobileDashboardTabId>('courses');
   const [taskFilter, setTaskFilter] = useState<'active' | 'completed'>('active');
   const [courseSearch, setCourseSearch] = useState('');
@@ -139,6 +140,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   });
 
   const handleTabChange = useCallback((tabId: MobileDashboardTabId) => {
+    if (tabId === 'settings') {
+      setSettingsDialogOpen(true);
+      return;
+    }
+
+    setSettingsDialogOpen(false);
+
     if (tabId === activeTab) {
       return;
     }
@@ -976,7 +984,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       >
         <DashboardNavigation
           mode="desktop"
-          activeTab={activeTab}
+          activeTab={settingsDialogOpen ? 'settings' : activeTab}
           activeTaskCount={taskCounts.active}
           appVersion={appVersion}
           onTabChange={handleTabChange}
@@ -1028,11 +1036,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             taskSnapshots={taskSnapshots}
             courseNameByIdentifier={courseNameByIdentifier}
             courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
-            bypassDailyStudyLimit={bypassDailyStudyLimit}
             showDeadlineBadges={showDeadlineBadges}
             workAutoSubmit={workAutoSubmit}
             examAutoSubmit={examAutoSubmit}
-            onUnauthorized={onLogout}
             onRefreshCourses={fetchCourses}
             onSearchChange={setCourseSearch}
             onSearchQueryChange={setCourseSearchQuery}
@@ -1043,7 +1049,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             onToggleFullCourseOutline={toggleFullCourseOutline}
             onTaskFilterChange={setTaskFilter}
             onRefreshTasks={() => void fetchTasks()}
-            onSettingSwitch={updateSettingSwitch}
             onWorkAutoSubmitChange={updateWorkAutoSubmit}
             onExamAutoSubmitChange={updateExamAutoSubmit}
             onTabChange={handleTabChange}
@@ -1065,6 +1070,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         taskStartSummary={taskStartSummary}
         taskStartWarnings={taskStartWarnings}
         logoutConfirmOpen={logoutConfirmOpen}
+        settingsDialogOpen={settingsDialogOpen}
+        bypassDailyStudyLimit={bypassDailyStudyLimit}
+        showDeadlineBadges={showDeadlineBadges}
         studyIncrementCourseKey={studyIncrementCourseKey}
         studyIncrementCourse={studyIncrementCourse}
         studyIncrementCourseDetails={studyIncrementCourseDetails}
@@ -1073,6 +1081,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         onCreateTask={createTaskWithSelection}
         onTaskStartConfirmChange={setTaskStartConfirmOpen}
         onLogoutConfirmChange={setLogoutConfirmOpen}
+        onSettingsDialogChange={setSettingsDialogOpen}
+        onSettingSwitch={updateSettingSwitch}
         onExecuteSubmitTask={executeSubmitTask}
         onStudyIncrementOpenChange={(open) => { if (!open) setStudyIncrementCourseKey(null); }}
         onSaveStudyIncrement={saveStudyIncrement}
@@ -1080,7 +1090,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       />
       <DashboardNavigation
         mode="mobile"
-        activeTab={activeTab}
+        activeTab={settingsDialogOpen ? 'settings' : activeTab}
         activeTaskCount={taskCounts.active}
         onTabChange={handleTabChange}
       />

@@ -46,6 +46,8 @@ Thirty-two portable CSS transitions, each namespaced under `t-*` selectors with 
 
 ## Decision rules
 
+Project constraint: motion is secondary to the existing shadcn information hierarchy. Do not add animation merely to decorate settings rows, badges, theme options, or brand marks. Preserve layout stability on narrow screens and keep the reduced-motion guard for every installed transition.
+
 When the user asks for a transition, match against the visible UI element first, then the verb:
 
 - **Trigger + small dot floating on top** → notification badge.

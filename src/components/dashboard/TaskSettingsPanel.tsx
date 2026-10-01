@@ -10,7 +10,6 @@ import {
   Zap,
 } from 'lucide-react';
 import { EmailNotificationSettings } from '@/components/EmailNotificationSettings';
-import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -64,26 +63,19 @@ export function TaskSettingsPanel({
 
   return (
     <>
-      <section className="w-full min-w-0 max-w-6xl" aria-label="设置">
-        <header className="mb-6 border-b border-border pb-5">
-          <h1 className="text-2xl font-bold text-foreground md:text-3xl">设置</h1>
-          <p className="mt-1 text-sm text-muted-foreground md:text-base">
-            调整 Yatori 服务的设置项
-          </p>
-        </header>
-
+      <section className="flex min-h-0 w-full min-w-0 flex-1" aria-label="设置分类与内容">
         <Tabs
           value={activeSettingSection}
           onValueChange={setActiveSettingSection}
           orientation="vertical"
-          className="min-w-0 flex-col gap-6 md:flex-row md:gap-10"
+          className="min-h-0 min-w-0 flex-1 flex-col gap-0 md:flex-row"
         >
-          <div className="md:hidden">
+          <div className="shrink-0 border-b px-4 py-3 md:hidden">
             <Select
               value={activeSettingSection}
               onValueChange={setActiveSettingSection}
             >
-              <SelectTrigger aria-label="设置分类" className="h-11 w-full">
+              <SelectTrigger aria-label="设置分类" className="w-full data-[size=default]:h-11">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -98,13 +90,13 @@ export function TaskSettingsPanel({
           </div>
           <TabsList
             aria-label="设置分类"
-            className="hidden w-full min-w-0 justify-start gap-1 overflow-x-auto border-b border-border bg-transparent pb-2 md:sticky md:top-0 md:flex md:h-fit md:w-52 md:items-stretch md:overflow-visible md:border-b-0 md:border-r md:pb-0 md:pr-4"
+            className="hidden w-44 shrink-0 items-stretch justify-start gap-1 self-stretch overflow-y-auto rounded-none border-r bg-muted/30 p-3 group-data-vertical/tabs:h-auto md:flex"
           >
             {settingSections.map(({ value, label, Icon }) => (
               <TabsTrigger
                 key={value}
                 value={value}
-                className="w-auto flex-none justify-start gap-3 rounded-md px-3 py-2.5 text-sm data-active:bg-muted data-active:font-medium data-active:shadow-none md:w-full"
+                className="h-11 w-full flex-none justify-start gap-2 rounded-md px-3 text-sm font-medium hover:bg-muted data-active:bg-muted data-active:text-foreground data-active:shadow-none"
               >
                 <Icon aria-hidden="true" className="size-4" />
                 {label}
@@ -115,112 +107,99 @@ export function TaskSettingsPanel({
           <TabsContent
             value="behavior"
             forceMount
-            className="min-w-0 data-[state=inactive]:hidden"
+            className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-4 [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:p-6 data-[state=inactive]:hidden"
           >
-            <div className="space-y-4">
-              <div className="border-b border-border pb-4">
-                <h2 className="text-xl font-semibold text-foreground">任务行为</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  设置章节任务点、作业/考试处理行为选项
-                </p>
+            <div className="space-y-6">
+              <div className="border-b pb-4">
+                <h2 className="text-lg font-medium">任务行为</h2>
               </div>
-              <Card
-                size="sm"
-                className="flex-row items-center justify-between gap-4 p-4 shadow-none"
-              >
-                <div className="flex min-w-0 items-center gap-3">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex min-w-0 items-start gap-3">
                   <Zap
                     aria-hidden="true"
-                    className="size-4 shrink-0 text-muted-foreground"
+                    className="mt-0.5 size-4 shrink-0 text-muted-foreground"
                   />
-                  <Label
-                    htmlFor="bypassDailyStudyLimit"
-                    className="block cursor-pointer text-sm font-semibold text-foreground"
-                  >
-                    暴力模式
-                  </Label>
+                  <div>
+                    <Label
+                      htmlFor="bypassDailyStudyLimit"
+                      className="block cursor-pointer text-sm font-semibold text-foreground"
+                    >
+                      暴力模式
+                    </Label>
+                    <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                      50 并发处理任务并无视每日学时限制
+                    </p>
+                  </div>
                 </div>
                 <Switch
                   id="bypassDailyStudyLimit"
                   checked={bypassDailyStudyLimit}
                   onCheckedChange={handleBypassChange}
-                  className="theme-switch shrink-0"
+                  className="theme-switch mt-0.5 shrink-0"
                 />
-              </Card>
+              </div>
             </div>
           </TabsContent>
 
           <TabsContent
             value="appearance"
             forceMount
-            className="min-w-0 data-[state=inactive]:hidden"
+            className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-4 [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:p-6 data-[state=inactive]:hidden"
           >
-            <div className="space-y-4">
-              <div className="border-b border-border pb-4">
-                <h2 className="text-xl font-semibold text-foreground">显示</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  设置界面主题或其他显示选项
-                </p>
+            <div className="space-y-6">
+              <div className="border-b pb-4">
+                <h2 className="text-lg font-medium">显示</h2>
               </div>
 
-              <Card
-                size="sm"
-                className="flex-row flex-wrap items-center justify-between gap-4 p-4 shadow-none"
-              >
-                <div className="flex min-w-0 items-center gap-3">
+              <div className="flex flex-wrap items-start justify-between gap-4 border-b pb-6">
+                <div className="flex min-w-0 items-start gap-3">
                   <Palette
                     aria-hidden="true"
-                    className="size-4 shrink-0 text-muted-foreground"
+                    className="mt-0.5 size-4 shrink-0 text-muted-foreground"
                   />
-                  <span className="text-sm font-semibold text-foreground">
-                    主题
-                  </span>
+                  <div>
+                    <Label htmlFor="theme-setting" className="text-sm font-semibold text-foreground">主题</Label>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      选择浅色、深色或跟随系统
+                    </p>
+                  </div>
                 </div>
-                <div
-                  id="theme-setting"
-                  className="inline-flex max-w-full flex-wrap rounded-md bg-muted p-1"
-                  role="group"
-                  aria-label="选择主题"
-                >
-                  {[
-                    { value: 'system', label: '跟随系统', Icon: Monitor },
-                    { value: 'light', label: '浅色', Icon: Sun },
-                    { value: 'dark', label: '深色', Icon: Moon },
-                  ].map(({ value, label, Icon }) => {
-                    const selected = (theme ?? 'system') === value;
-                    return (
-                      <button
-                        key={value}
-                        type="button"
-                        aria-pressed={selected}
-                        aria-label={label}
-                        title={label}
-                        onClick={() => setTheme(value)}
-                        className={`flex h-8 items-center justify-center gap-1.5 rounded-sm px-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-2.5 ${selected ? 'bg-background text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'}`}
-                      >
+                <Select value={theme ?? 'system'} onValueChange={setTheme}>
+                  <SelectTrigger id="theme-setting" className="w-40 shrink-0 data-[size=default]:h-11">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[
+                      { value: 'system', label: '跟随系统', Icon: Monitor },
+                      { value: 'light', label: '浅色', Icon: Sun },
+                      { value: 'dark', label: '深色', Icon: Moon },
+                    ].map(({ value, label, Icon }) => (
+                      <SelectItem key={value} value={value}>
                         <Icon aria-hidden="true" className="size-4" />
-                        <span>{label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </Card>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Card
-                size="sm"
-                className="flex-row items-center justify-between gap-4 p-4 shadow-none"
-              >
-                <div className="flex min-w-0 items-center gap-3">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex min-w-0 items-start gap-3">
                   <AlarmClock
                     aria-hidden="true"
-                    className="size-4 shrink-0 text-muted-foreground"
+                    className="mt-0.5 size-4 shrink-0 text-muted-foreground"
                   />
-                  <Label
-                    htmlFor="showDeadlineBadges"
-                    className="block cursor-pointer text-sm font-semibold text-foreground"
-                  >
-                    临期作业/考试徽章提醒
-                  </Label>
+                  <div>
+                    <Label
+                      htmlFor="showDeadlineBadges"
+                      className="block cursor-pointer text-sm font-semibold text-foreground"
+                    >
+                      临期作业/考试徽章提醒
+                    </Label>
+                    <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                      在课程列表中显示即将截止的任务
+                    </p>
+                  </div>
                 </div>
                 <Switch
                   id="showDeadlineBadges"
@@ -228,23 +207,20 @@ export function TaskSettingsPanel({
                   onCheckedChange={(checked: boolean) =>
                     onSettingSwitch('showDeadlineBadges', checked)
                   }
-                  className="shrink-0"
+                  className="mt-0.5 shrink-0"
                 />
-              </Card>
+              </div>
             </div>
           </TabsContent>
 
           <TabsContent
             value="notifications"
             forceMount
-            className="min-w-0 data-[state=inactive]:hidden"
+            className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-4 [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:p-6 data-[state=inactive]:hidden"
           >
-            <div className="space-y-4">
-              <div className="border-b border-border pb-4">
-                <h2 className="text-xl font-semibold text-foreground">通知</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  管理邮件提醒
-                </p>
+            <div className="space-y-6">
+              <div className="border-b pb-4">
+                <h2 className="text-lg font-medium">通知</h2>
               </div>
               <EmailNotificationSettings onUnauthorized={onUnauthorized} />
             </div>

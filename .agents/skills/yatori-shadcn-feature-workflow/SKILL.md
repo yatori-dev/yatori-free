@@ -30,7 +30,7 @@ Stay inside that system.
 2. If a primitive is missing, add a focused local primitive under `src/components/ui/`; `components.json` has no registry configured.
 3. Keep feature components under `src/components/`.
 4. Keep copy short and task-facing.
-5. Run build and lint after UI changes.
+5. Do not run browser or visual regression checks, builds, or static checks from this skill in this repository; report the changed UI surface and leave CI/user visual review as the verification boundary defined by `AGENTS.md`.
 
 ## Rules
 
@@ -41,6 +41,9 @@ Stay inside that system.
 - Check both light and dark themes. Theme state uses `next-themes` and the `yatori-theme` storage key.
 - Keep border radius and density aligned with current pages.
 - Never use a tiled dashboard layout: do not arrange page or settings content as a uniform card matrix or mechanical equal-width columns. Prefer content-driven groups, vertical flow, dividers, and intentional whitespace. CSS Grid is allowed only for structural alignment and must not create a checkerboard visual.
+- For settings, preserve vertical category navigation on desktop, a single category selector on mobile, and one content flow per category. Use headings, short descriptions, and dividers; do not turn every row into a card.
+- For notification settings, keep email binding, verification, notification enablement, and deadline reminders as distinct groups. Render status from real state with text plus an icon; never use color alone.
+- Theme controls must expose light, dark, and system choices using existing semantic tokens and a clear selected state. Preserve compact brand-mark behavior when space is constrained.
 
 ## Context7
 
