@@ -320,7 +320,7 @@ export function EmailNotificationSettings({
           <div className="space-y-0.5">
             <p className="font-medium text-destructive">邮件通知服务暂不可用</p>
             <p className="text-xs text-destructive/80">
-              后端通知服务尚未就绪，目前无法发送邮件。
+              后端通知服务尚未就绪，目前无法发送邮件
             </p>
           </div>
         </div>
@@ -341,7 +341,7 @@ export function EmailNotificationSettings({
                   </Badge>
                 )}
                 {hasPendingEmail && (
-                  <Badge variant="outline" className="h-5 gap-1 border-warning/50 bg-warning/10 text-warning">
+                  <Badge variant="warning" className="h-5 gap-1">
                     <Clock className="size-3" />
                     待验证
                   </Badge>

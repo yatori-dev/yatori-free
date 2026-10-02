@@ -147,7 +147,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       <div className="login-footer mt-8 flex gap-6 text-xs font-sans text-muted-foreground">
         <a
           href="https://hungrym0.com"
-          className="text-[11px] tracking-[0.03em] hover:no-underline"
+          className="text-[11px] tracking-[0.03em] transition-colors hover:text-foreground"
         >
           © 2026 HUNGRY_M0. All rights reserved.
         </a>
@@ -157,33 +157,33 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         open={isLegalDialogOpen}
         onOpenChange={setIsLegalDialogOpen}
       >
-        <DialogContent className="max-h-[calc(100svh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] gap-6 overflow-hidden p-6 focus:outline-none md:aspect-video md:w-[calc(100vw-3rem)] md:max-w-5xl">
+        <DialogContent className="max-h-[calc(100svh-2rem-env(safe-area-inset-bottom))] grid-rows-[auto_minmax(0,1fr)_auto] gap-6 overflow-hidden p-6 focus:outline-none md:aspect-video md:w-[calc(100vw-3rem)] md:max-w-5xl">
           <DialogHeader>
             <DialogTitle className="mb-2 font-sans text-xl font-normal text-foreground">
               {dialogContent === "terms" ? "服务条款" : "隐私政策"}
             </DialogTitle>
             <DialogDescription className="font-sans text-sm text-muted-foreground">
               请仔细阅读以下
-              {dialogContent === "terms" ? "服务条款" : "隐私政策"}内容。
+              {dialogContent === "terms" ? "服务条款" : "隐私政策"}内容
             </DialogDescription>
           </DialogHeader>
-          <div className="min-h-0 max-h-[60svh] overflow-y-auto overscroll-contain pr-2 font-sans text-sm leading-relaxed text-muted-foreground md:max-h-none">
+          <div className="min-h-0 max-h-[calc(60svh-env(safe-area-inset-bottom))] overflow-y-auto overscroll-contain pr-2 font-sans text-sm leading-relaxed text-muted-foreground md:max-h-none">
             {dialogContent === "terms" ? (
               <div className="space-y-4">
                 <h3 className="font-medium text-foreground">1. 服务概述</h3>
                 <p>
                   Yatori
-                  是一个面向大学生的学习通课程任务提交辅助工具。本服务完全免费，不收取任何费用。使用本服务，即表示您同意受本服务条款约束。
+                  是一个面向大学生的学习通课程任务提交辅助工具，本服务完全免费，不收取任何费用，使用本服务即表示您同意受本服务条款约束
                 </p>
 
                 <h3 className="font-medium text-foreground">2. 服务范围</h3>
                 <p>
-                  本服务仅提供辅助功能，您需要自行承担在学习通平台上的所有学术相关行为的责任。我们不参与任何课程内容的评估或成绩认定。
+                  本服务仅提供辅助功能，您需要自行承担在学习通平台上的所有学术相关行为的责任，我们不参与任何课程内容的评估或成绩认定
                 </p>
 
                 <h3 className="font-medium text-foreground">3. 使用许可</h3>
                 <p>
-                  我们授予您有限的、非独占的、可撤销的许可来访问和使用本服务。您必须：
+                  我们授予您有限的、非独占的、可撤销的许可来访问和使用本服务，您必须：
                 </p>
                 <ul className="list-disc pl-5 space-y-1 text-sm">
                   <li>仅将此服务用于个人、非商业目的</li>
@@ -194,22 +194,22 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
                 <h3 className="font-medium text-foreground">4. 用户责任</h3>
                 <p>
-                  您对使用本服务的任何行为承担全部责任。您同意不利用本服务从事任何违反学校规定、平台协议或法律的行为。如因不当使用导致任何后果，本服务不承担责任。
+                  您对使用本服务的任何行为承担全部责任，您同意不利用本服务从事任何违反学校规定、平台协议或法律的行为，如因不当使用导致任何后果，本服务不承担责任
                 </p>
 
                 <h3 className="font-medium text-foreground">5. 账户安全</h3>
                 <p>
-                  您需对账户下发生的所有活动负责。请妥善保管您的账户凭证，不要与他人共享。如发现异常活动，请立即更改密码。
+                  您需对账户下发生的所有活动负责，请妥善保管您的账户凭证，不要与他人共享，如发现异常活动，请立即更改密码
                 </p>
 
                 <h3 className="font-medium text-foreground">6. 免责声明</h3>
                 <p>
-                  本服务按"现状"提供，不提供任何明示或暗示的担保。我们不保证服务的中断、错误、或第三方平台的政策变化不会影响本服务的功能。
+                  本服务按"现状"提供，不提供任何明示或暗示的担保，我们不保证服务的中断、错误、或第三方平台的政策变化不会影响本服务的功能
                 </p>
 
                 <h3 className="font-medium text-foreground">7. 服务终止</h3>
                 <p>
-                  我们保留在任何时间以任何原因暂停或终止您的访问权限的权利，如违反本条款或从事不当行为。
+                  我们保留在任何时间以任何原因暂停或终止您的访问权限的权利，如违反本条款或从事不当行为
                 </p>
               </div>
             ) : (
@@ -231,33 +231,33 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                   <li>诊断和修复技术问题</li>
                 </ul>
                 <p className="text-sm mt-2">
-                  我们绝不会未经您同意向第三方出售、租赁或交换您的个人信息。
+                  我们绝不会未经您同意向第三方出售、租赁或交换您的个人信息
                 </p>
 
                 <h3 className="font-medium text-foreground">3. 密码安全</h3>
                 <p>
-                  您的学习通密码是敏感信息。本服务不在本地保存密码，浏览器是否保存密码由您使用的浏览器或系统密码管理器决定。
+                  您的学习通密码是敏感信息，本服务不在本地保存密码，浏览器是否保存密码由您使用的浏览器或系统密码管理器决定
                 </p>
 
                 <h3 className="font-medium text-foreground">4. 数据安全措施</h3>
                 <p>
-                  我们采取必要的技术措施保护您的数据安全，包括加密传输和访问控制。但请注意，互联网传输本身存在风险，我们无法保证
-                  100% 的安全。
+                  我们采取必要的技术措施保护您的数据安全，包括加密传输和访问控制，但请注意，互联网传输本身存在风险，我们无法保证
+                  100% 的安全
                 </p>
 
                 <h3 className="font-medium text-foreground">5. 数据保留</h3>
                 <p>
-                  我们仅在必要期间内保留您的信息。当您删除账户或停止使用本服务时，我们将根据要求适当处理您的数据。
+                  我们仅在必要期间内保留您的信息，当您删除账户或停止使用本服务时，我们将根据要求适当处理您的数据
                 </p>
 
                 <h3 className="font-medium text-foreground">6. 第三方链接</h3>
                 <p>
-                  本服务可能包含指向第三方网站的链接。我们对第三方网站的隐私实践不负责任。访问第三方网站时，请自行查阅其隐私政策。
+                  本服务可能包含指向第三方网站的链接，我们对第三方网站的隐私实践不负责任，访问第三方网站时，请自行查阅其隐私政策
                 </p>
 
                 <h3 className="font-medium text-foreground">7. 政策更新</h3>
                 <p>
-                  我们保留随时更新本隐私政策的权利。重大变更将通过服务界面通知。继续使用本服务表示您接受更新后的政策。
+                  我们保留随时更新本隐私政策的权利，重大变更将通过服务界面通知，继续使用本服务表示您接受更新后的政策
                 </p>
               </div>
             )}

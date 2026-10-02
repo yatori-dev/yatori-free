@@ -191,7 +191,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       [
         {
           opacity: 0.92,
-          transform: `translate3d(${mobileTabDirectionRef.current * 6}px, 0, 0)`,
+          transform: `translate3d(${mobileTabDirectionRef.current * 8}px, 0, 0)`,
         },
         { opacity: 1, transform: 'translate3d(0, 0, 0)' },
       ],
@@ -959,16 +959,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       : `开始章节任务(${selectedCourses.size})`;
 
   const taskStartSummary = activeTab === 'works'
-    ? `将开始处理 ${selectedWorksCount} 份作业，完成后${workAutoSubmit === 1 ? '自动提交' : '仅保存答案'}。`
+    ? `将开始处理 ${selectedWorksCount} 份作业，完成后${workAutoSubmit === 1 ? '自动提交' : '仅保存答案'}`
     : activeTab === 'exams'
-      ? `将开始处理 ${selectedExamsCount} 场考试，完成后${examAutoSubmit === 1 ? '自动提交' : '仅保存答案'}。`
-      : `将开始处理 ${selectedCourses.size} 门课程的章节任务。`;
+      ? `将开始处理 ${selectedExamsCount} 场考试，完成后${examAutoSubmit === 1 ? '自动提交' : '仅保存答案'}`
+      : `将开始处理 ${selectedCourses.size} 门课程的章节任务`;
 
   const currentHour = new Date().getHours();
   const taskStartWarnings = [
-    currentHour >= 23 || currentHour < 7 ? '当前为夜间时段，任务进度可能被学习通打回。' : null,
-    activeTab === 'courses' && bypassDailyStudyLimit ? '已启用暴力模式，存在进度被检测并打回的风险。' : null,
-    activeTab === 'exams' && examAutoSubmit === 1 ? '考试答完后将直接提交，提交后通常无法修改。' : null,
+    currentHour >= 23 || currentHour < 7 ? '当前为夜间时段，任务进度可能被学习通打回' : null,
+    activeTab === 'courses' && bypassDailyStudyLimit ? '已启用暴力模式，存在进度被检测并打回的风险' : null,
+    activeTab === 'exams' && examAutoSubmit === 1 ? '考试答完后将直接提交，提交后通常无法修改' : null,
   ].filter((warning): warning is string => warning !== null);
 
   return (

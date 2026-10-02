@@ -33,13 +33,13 @@ export function SettingsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="flex h-[calc(100dvh-2rem)] max-h-[42.5rem] w-[calc(100%-2rem)] max-w-4xl flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl"
+        className="flex h-[calc(100dvh-2rem-env(safe-area-inset-bottom))] max-h-[42.5rem] w-[calc(100%-2rem)] max-w-4xl flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl"
       >
-        <div className="flex shrink-0 items-center justify-between gap-4 border-b px-4 py-3 md:px-6">
+        <div className="flex shrink-0 items-center justify-between gap-4 border-b px-4 py-3 sm:px-6">
           <DialogHeader>
             <DialogTitle className="text-lg leading-7">设置</DialogTitle>
             <DialogDescription className="sr-only">
-              管理任务行为、界面显示和邮件提醒。
+              管理任务行为、界面显示和邮件提醒
             </DialogDescription>
           </DialogHeader>
           <Button

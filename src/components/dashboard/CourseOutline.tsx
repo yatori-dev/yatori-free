@@ -69,7 +69,7 @@ export function CourseOutline({
           role="status"
         >
           <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          <span>部分课程数据读取失败，当前大纲可能不完整。</span>
+          <span>部分课程数据读取失败，当前大纲可能不完整</span>
         </div>
       )}
       {courseDetails.taskPointsIncomplete && (
@@ -80,7 +80,7 @@ export function CourseOutline({
           <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>
             {courseDetails.partialReasons?.join('；') ||
-              '任务点读取不完整，当前仅展示已读取内容。'}
+              '任务点读取不完整，当前仅展示已读取内容'}
           </span>
         </div>
       )}
