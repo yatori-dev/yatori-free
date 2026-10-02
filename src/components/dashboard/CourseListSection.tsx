@@ -150,7 +150,7 @@ export function CourseListSection({
                     onSearchChange('');
                     onSearchQueryChange('');
                   }}
-                  className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-200 hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-200 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   aria-label="清除课程搜索"
                 >
                   <X className="h-4 w-4" />
@@ -210,14 +210,14 @@ export function CourseListSection({
           ) : courses.length === 0 ? (
             <div className="p-12 text-center font-sans text-sm text-muted-foreground">
               <AlertCircle className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-              暂无关联课程，您可以尝试点击右上角刷新重试。
+              暂无关联课程，您可以尝试点击右上角刷新重试
             </div>
           ) : filteredCourses.length === 0 ? (
             <div className="p-12 text-center font-sans text-sm text-muted-foreground">
               <AlertCircle className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
               {courseSearchQuery.trim()
-                ? '没有匹配的课程，请调整搜索条件。'
-                : '没有可显示课程，请刷新课程后重试。'}
+                ? '没有匹配的课程，请调整搜索条件'
+                : '没有可显示课程，请刷新课程后重试'}
             </div>
           ) : (
             <div className="divide-y divide-border">
@@ -406,7 +406,7 @@ export function CourseListSection({
                           />
                         ) : (
                           <div className="py-2 text-xs text-muted-foreground">
-                            无法加载章节。请点击右上角刷新重试。
+                            无法加载章节，请点击右上角刷新重试
                           </div>
                         )}
                       </div>
