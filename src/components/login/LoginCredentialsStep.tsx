@@ -572,9 +572,25 @@ export function LoginCredentialsStep({
         <Button
           type="submit"
           disabled={isBusy || !agreedToTerms}
-          className="h-11 w-full rounded-[var(--radius-md)]"
+          aria-busy={isLoggingIn}
+          className="relative h-11 w-full overflow-hidden rounded-[var(--radius-md)]"
         >
-          {isLoggingIn ? '正在登录...' : '登录'}
+          {isLoggingIn ? (
+            <>
+              <span className="inline-flex items-center gap-2" aria-live="polite">
+                <LoaderCircle
+                  className="size-4 animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
+                正在登录
+              </span>
+              <span className="login-progress-track" aria-hidden="true">
+                <span className="login-progress-indicator" />
+              </span>
+            </>
+          ) : (
+            '登录'
+          )}
         </Button>
       </form>
       <p className="mt-4 text-xs leading-relaxed text-muted-foreground">

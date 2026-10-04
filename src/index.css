@@ -521,6 +521,42 @@
   }
 }
 
+@keyframes loginProgressSweep {
+  from {
+    transform: translateX(-110%);
+  }
+
+  to {
+    transform: translateX(290%);
+  }
+}
+
+.login-progress-track {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  overflow: hidden;
+  background: color-mix(in oklch, var(--primary-foreground) 24%, transparent);
+}
+
+.login-progress-indicator {
+  display: block;
+  width: 35%;
+  height: 100%;
+  background: var(--primary-foreground);
+  animation: loginProgressSweep 1.15s var(--ease-standard) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-progress-indicator {
+    width: 100%;
+    animation: none;
+    opacity: 0.55;
+  }
+}
+
 .login-success-underlay,
 .login-success-view {
   position: fixed;
