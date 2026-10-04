@@ -135,7 +135,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     works: 0,
     exams: 0,
     tasks: 0,
-    study: 0,
     settings: 0,
   });
 
@@ -614,10 +613,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     });
   };
 
-  const openStudyIncrementSettings = (classId: string) => {
-    setStudyIncrementCourseKey(classId);
-  };
-
   const getSelectedProcessingCourses = (courseKeys: string[]) => {
     const courseKeySet = new Set(courseKeys);
     return courses.filter((course) => course.processing && courseKeySet.has(course.key));
@@ -1024,8 +1019,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             courseDetailsMap={courseDetailsMap}
             loadingDetails={loadingDetails}
             stoppingTaskId={stoppingTaskId}
-            studyIncrements={studyIncrements}
-            defaultStudyIncrement={DEFAULT_STUDY_INCREMENT}
             taskCounts={taskCounts}
             tasks={tasks}
             filteredTasks={filteredTasks}
@@ -1041,7 +1034,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             onSearchChange={setCourseSearch}
             onSearchQueryChange={setCourseSearchQuery}
             onToggleCourseSelection={toggleCourseSelection}
-            onOpenStudyIncrementSettings={openStudyIncrementSettings}
             onStopTask={handleStopTask}
             onToggleExpandCourse={toggleExpandCourse}
             onToggleFullCourseOutline={toggleFullCourseOutline}
