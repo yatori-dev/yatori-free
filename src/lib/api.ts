@@ -397,6 +397,12 @@ export interface LoginData {
 
 export interface CreateSMSSessionRequest {
   phone: string;
+  turnstileToken?: string;
+}
+
+export interface SMSConfig {
+  enabled: boolean;
+  siteKey?: string;
 }
 
 export interface ExchangeSMSSessionRequest {
@@ -875,6 +881,10 @@ export function createSMSSession(
     },
     true,
   );
+}
+
+export function getSMSConfig(options?: ApiRequestOptions) {
+  return apiRequest<SMSConfig>('/auth/sms-config', options, true);
 }
 
 export function exchangeSMSSession(

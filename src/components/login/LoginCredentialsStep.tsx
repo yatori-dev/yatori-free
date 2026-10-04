@@ -1,4 +1,11 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type FormEvent,
+} from 'react';
 import {
   Check,
   Eye,
@@ -11,6 +18,7 @@ import { toast } from 'sonner';
 import {
   createSMSSession,
   exchangeSMSSession,
+  getSMSConfig,
   getUserFacingErrorMessage,
   login,
   type LoginData,
@@ -23,6 +31,121 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type LoginMethod = 'password' | 'sms';
 type LegalDocument = 'terms' | 'privacy';
+
+interface TurnstileApi {
+  render: (
+    container: HTMLElement,
+    options: {
+      sitekey: string;
+      action: string;
+      callback: (token: string) => void;
+      'expired-callback': () => void;
+      'error-callback': () => void;
+    },
+  ) => string | number;
+  reset: (widgetId?: string | number) => void;
+  remove?: (widgetId: string | number) => void;
+}
+
+declare global {
+  interface Window {
+    turnstile?: TurnstileApi;
+  }
+}
+
+let turnstileScriptPromise: Promise<void> | null = null;
+
+function loadTurnstileScript() {
+  if (window.turnstile) {
+    return Promise.resolve();
+  }
+  if (turnstileScriptPromise) {
+    return turnstileScriptPromise;
+  }
+
+  turnstileScriptPromise = new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>(
+      'script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]',
+    );
+    if (existing) {
+      existing.addEventListener('load', () => resolve(), { once: true });
+      existing.addEventListener('error', () => reject(new Error('验证组件加载失败')), {
+        once: true,
+      });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('验证组件加载失败'));
+    document.head.appendChild(script);
+  });
+  return turnstileScriptPromise;
+}
+
+interface TurnstileWidgetHandle {
+  reset: () => void;
+}
+
+interface TurnstileWidgetProps {
+  siteKey: string;
+  resetSignal: number;
+  onToken: (token: string) => void;
+}
+
+const TurnstileWidget = forwardRef<TurnstileWidgetHandle, TurnstileWidgetProps>(
+  function TurnstileWidget({ siteKey, resetSignal, onToken }, ref) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const widgetIdRef = useRef<string | number | undefined>(undefined);
+
+    const reset = () => {
+      if (window.turnstile && widgetIdRef.current !== undefined) {
+        window.turnstile.reset(widgetIdRef.current);
+      }
+      onToken('');
+    };
+
+    useImperativeHandle(ref, () => ({ reset }), [onToken]);
+
+    useEffect(() => {
+      let cancelled = false;
+      void loadTurnstileScript()
+        .then(() => {
+          if (cancelled || !containerRef.current || !window.turnstile) {
+            return;
+          }
+          containerRef.current.replaceChildren();
+          widgetIdRef.current = window.turnstile.render(containerRef.current, {
+            sitekey: siteKey,
+            action: 'sms_send',
+            callback: onToken,
+            'expired-callback': reset,
+            'error-callback': reset,
+          });
+        })
+        .catch(() => onToken(''));
+
+      return () => {
+        cancelled = true;
+        if (window.turnstile && widgetIdRef.current !== undefined) {
+          window.turnstile.remove?.(widgetIdRef.current);
+          widgetIdRef.current = undefined;
+        }
+      };
+    }, [onToken, siteKey]);
+
+    useEffect(() => {
+      if (resetSignal > 0) {
+        reset();
+      }
+    }, [resetSignal]);
+
+    return <div ref={containerRef} className="min-h-[65px]" aria-label="人机验证" />;
+  },
+);
 
 interface LoginCredentialsStepProps {
   account: string;
@@ -58,6 +181,28 @@ export function LoginCredentialsStep({
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [showSendSuccess, setShowSendSuccess] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [smsConfig, setSMSConfig] = useState<{ enabled: boolean; siteKey?: string } | null>(null);
+  const [smsTurnstileToken, setSMSTurnstileToken] = useState('');
+  const [turnstileResetSignal, setTurnstileResetSignal] = useState(0);
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void getSMSConfig()
+      .then((response) => {
+        if (!cancelled) {
+          setSMSConfig(response.data);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSMSConfig({ enabled: false });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (retrySeconds <= 0) {
@@ -103,11 +248,21 @@ export function LoginCredentialsStep({
       return;
     }
 
+    if (smsConfig?.enabled && (!smsConfig.siteKey || !smsTurnstileToken)) {
+      setSMSError('请先完成人机验证');
+      return;
+    }
+
     setIsSendingCode(true);
     setSMSError('');
 
     try {
-      const response = await createSMSSession({ phone: account.trim() });
+      const response = await createSMSSession({
+        phone: account.trim(),
+        ...(smsConfig?.enabled && smsTurnstileToken
+          ? { turnstileToken: smsTurnstileToken }
+          : {}),
+      });
       setSMSSession(response.data);
       setSMSCode('');
       setRetrySeconds(Math.max(0, response.data.retryAfterSeconds));
@@ -123,6 +278,8 @@ export function LoginCredentialsStep({
       toast.error(message);
     } finally {
       setIsSendingCode(false);
+      setSMSTurnstileToken('');
+      setTurnstileResetSignal((value) => value + 1);
     }
   };
 
@@ -151,6 +308,7 @@ export function LoginCredentialsStep({
 
       if (Date.parse(smsSession.expiresAt) <= Date.now()) {
         setSMSError('验证码已过期，请重新获取');
+        turnstileRef.current?.reset();
         return;
       }
 
@@ -180,6 +338,7 @@ export function LoginCredentialsStep({
         setPasswordError(message);
       } else {
         setSMSError(message);
+        turnstileRef.current?.reset();
       }
       toast.error(message);
     } finally {
@@ -287,6 +446,14 @@ export function LoginCredentialsStep({
           </TabsContent>
 
           <TabsContent value="sms" className="space-y-2">
+            {smsConfig?.enabled && smsConfig.siteKey ? (
+              <TurnstileWidget
+                ref={turnstileRef}
+                siteKey={smsConfig.siteKey}
+                resetSignal={turnstileResetSignal}
+                onToken={setSMSTurnstileToken}
+              />
+            ) : null}
             <Label htmlFor="sms-code">6位数验证码</Label>
             <div className="flex gap-2">
               <Input
