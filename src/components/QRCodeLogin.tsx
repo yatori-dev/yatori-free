@@ -250,9 +250,8 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
       </h2>
       <p className="mt-2 text-sm text-muted-foreground">使用学习通 App 扫码</p>
 
-      {/* Dynamic QR / Scanned Morphing Card */}
       {isScanned || isConfirmed ? (
-        <div className="mt-7 flex h-[208px] w-[208px] flex-col items-center justify-center gap-3 rounded-lg border border-border bg-muted/40 p-4 shadow-xs animate-in fade-in-0 duration-200 motion-reduce:animate-none">
+        <div className="mt-7 flex h-[208px] w-[208px] flex-col items-center justify-center gap-3 rounded-[var(--radius-lg)] border border-border bg-muted/40 p-4 shadow-xs animate-in fade-in-0 duration-[var(--motion-fast)] motion-reduce:animate-none">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg shadow-sm">
             {session?.scannedName ? session.scannedName.substring(0, 1) : "通"}
           </div>
@@ -264,13 +263,13 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
               {isConfirmed ? "已确认，跳转中..." : "已扫码，请在手机端确认"}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1 text-xs font-medium text-primary shadow-xs">
+          <div className="flex items-center gap-1.5 rounded-[var(--radius-md)] border border-border bg-card px-3 py-1 text-xs font-medium text-primary shadow-xs">
             <span className="h-2 w-2 rounded-full bg-primary" />
             <span>{isConfirmed ? "验证通过" : "等待确认"}</span>
           </div>
         </div>
       ) : (
-        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-lg border border-border bg-white p-3 shadow-xs transition-[border-color,box-shadow] duration-150 hover:shadow-raised">
+        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-[var(--radius-lg)] border border-border bg-white p-3 shadow-xs transition-[border-color,box-shadow] duration-[var(--motion-fast)] hover:shadow-raised">
           {session?.qrContent ? (
             <QRCodeSVG
               value={session.qrContent}

@@ -223,7 +223,7 @@ export function LoginCredentialsStep({
                 onAccountChange(event.target.value);
                 onAccountErrorChange('');
               }}
-              className="h-11 w-full rounded-md border-input bg-transparent px-4 focus:border-ring focus:ring-1 focus:ring-ring"
+              className="h-11 w-full rounded-[var(--radius-md)] border-input bg-transparent px-4 focus:border-ring focus:ring-1 focus:ring-ring"
               disabled={isBusy}
             />
             {accountError && (
@@ -257,13 +257,13 @@ export function LoginCredentialsStep({
                 aria-describedby={passwordError ? 'password-error' : undefined}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="h-11 w-full rounded-md border-input bg-transparent pl-4 pr-12 focus:border-ring focus:ring-1 focus:ring-ring"
+                className="h-11 w-full rounded-[var(--radius-md)] border-input bg-transparent pl-4 pr-12 focus:border-ring focus:ring-1 focus:ring-ring"
                 disabled={isBusy}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((visible) => !visible)}
-                className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-50"
+                className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-[var(--radius-sm)] text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-50"
                 disabled={isBusy}
                 aria-label={showPassword ? '隐藏密码' : '显示密码'}
                 title={showPassword ? '隐藏密码' : '显示密码'}
@@ -309,13 +309,13 @@ export function LoginCredentialsStep({
                   setSMSCode(event.target.value);
                   setSMSError('');
                 }}
-                className="h-11 min-w-0 flex-1 rounded-md border-input bg-transparent px-4 focus:border-ring focus:ring-1 focus:ring-ring"
+                className="h-11 min-w-0 flex-1 rounded-[var(--radius-md)] border-input bg-transparent px-4 focus:border-ring focus:ring-1 focus:ring-ring"
                 disabled={isBusy}
               />
               <Button
                 type="button"
                 variant="outline"
-                className="h-11 w-28 shrink-0 gap-1.5 rounded-md px-2"
+                className="h-11 w-28 shrink-0 gap-1.5 rounded-[var(--radius-md)] px-2"
                 disabled={isBusy || retrySeconds > 0}
                 onClick={() => void handleSendCode()}
                 aria-label={sendCodeButtonLabel}
@@ -405,7 +405,7 @@ export function LoginCredentialsStep({
         <Button
           type="submit"
           disabled={isBusy || !agreedToTerms}
-          className="h-11 w-full rounded-md"
+          className="h-11 w-full rounded-[var(--radius-md)]"
         >
           {isLoggingIn ? '正在登录...' : '登录'}
         </Button>

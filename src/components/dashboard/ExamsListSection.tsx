@@ -108,7 +108,7 @@ export function ExamsListSection({
               size="icon"
               onClick={onRefreshCourses}
               disabled={coursesLoading}
-              className="h-9 w-9 shrink-0 rounded-md hover:bg-muted"
+              className="h-9 w-9 shrink-0 rounded-[var(--radius-md)] hover:bg-muted"
               title="刷新课程"
               aria-label="刷新课程"
             >
@@ -268,7 +268,7 @@ export function ExamsListSection({
                                   }
                                   disabled={!isRunnable}
                                   aria-pressed={isSelected}
-                                  className={`flex min-w-0 items-start gap-2.5 rounded-lg border p-3 text-left text-xs transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                                  className={`flex min-w-0 items-start gap-2.5 rounded-[var(--radius-lg)] border p-3 text-left text-xs transition-colors duration-[var(--motion-fast)] ease-[var(--ease-standard)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                                     isSelected
                                       ? 'border-primary bg-muted'
                                       : 'border-border bg-background hover:bg-muted/50'

@@ -59,7 +59,7 @@ function StudyMetric({ icon: Icon, label, metric, unit }: StudyMetricProps) {
     : "";
 
   return (
-    <div className="rounded-md border border-border/50 bg-card/60 p-2.5">
+    <div className="rounded-[var(--radius-md)] border border-border/50 bg-card/60 p-2.5">
       <div className="flex min-w-0 flex-col gap-1 text-xs">
         <span className="flex min-w-0 flex-1 items-center gap-1.5 font-medium text-foreground">
           <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
@@ -115,7 +115,7 @@ export function TaskStudyProgress({ courses }: TaskStudyProgressProps) {
           return (
             <div
               key={course.classId}
-              className="rounded-lg border border-border/60 bg-card/70 p-2.5"
+              className="rounded-[var(--radius-lg)] border border-border/60 bg-card/70 p-2.5"
             >
               <p
                 className="truncate text-xs font-medium text-foreground"

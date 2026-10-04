@@ -40,7 +40,7 @@ export function TaskStartConfirmDialog({
         </DialogHeader>
 
         {warnings.length > 0 && (
-          <div className="space-y-2 rounded-lg border border-warning/30 bg-warning-container/40 p-3 text-xs text-foreground/80">
+          <div className="space-y-2 rounded-[var(--radius-lg)] border border-warning/30 bg-warning-container/40 p-3 text-xs text-foreground/80">
             {warnings.map((warning) => (
               <div key={warning} className="flex items-start gap-2.5">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />

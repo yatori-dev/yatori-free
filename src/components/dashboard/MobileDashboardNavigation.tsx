@@ -27,7 +27,7 @@ export function MobileDashboardNavigation({
             key={item.id}
             type="button"
             onClick={() => onTabChange(item.id === 'courses' && isLearningActive ? activeTab : item.id)}
-            className={`flex h-12 min-w-0 flex-col items-center justify-center gap-0.5 rounded-full text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground hover:text-foreground'}`}
+            className={`flex h-12 min-w-0 flex-col items-center justify-center gap-0.5 rounded-full text-xs transition-colors duration-[var(--motion-fast)] ease-[var(--ease-standard)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground hover:text-foreground'}`}
             aria-current={active ? 'page' : undefined}
             aria-label={item.id === 'tasks' && activeTaskCount > 0 ? `任务，${activeTaskCount} 项进行中` : item.label}
           >

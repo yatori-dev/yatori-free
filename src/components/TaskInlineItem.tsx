@@ -158,7 +158,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
     try {
       await actionFn(id);
     } catch {
-      // Ignored: Toasted by parent
     } finally {
       setActionLoading(false);
     }
@@ -387,11 +386,10 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
 
   return (
     <article
-      className={`group flex w-full min-w-0 flex-col gap-3 overflow-hidden rounded-lg border border-border bg-card p-4 transition-colors duration-150 sm:gap-4 sm:p-5 ${
+      className={`group flex w-full min-w-0 flex-col gap-3 overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card p-4 transition-colors duration-[var(--motion-fast)] sm:gap-4 sm:p-5 ${
         effectiveStatus === "success" ? "animate-task-success-flash" : ""
       }`}
     >
-      {/* Task Header & Execution Status */}
       <div className="flex w-full min-w-0 flex-col gap-2.5 sm:gap-3">
         <div className="flex min-w-0 items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2 font-mono text-xs text-muted-foreground">
@@ -427,7 +425,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
           </Badge>
         </div>
 
-        {/* Targeted Courses Pills */}
         <TaskCourseBadges
           courses={displayCourses}
           onShowMore={() => setShowCourseList(true)}
@@ -440,10 +437,9 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         onOpenChange={setShowCourseList}
       />
 
-      {/* Terminal result */}
       {isTerminal && (
         <div
-          className={`flex min-w-0 items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2.5 text-xs font-medium transition-colors ${statusInfo.toneClass}`}
+          className={`flex min-w-0 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-muted/30 px-3 py-2.5 text-xs font-medium transition-colors ${statusInfo.toneClass}`}
         >
           {effectiveStatus === "success" && (
             <CheckCircle2 className="h-4 w-4 shrink-0" />
@@ -461,7 +457,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         </div>
       )}
 
-      {/* Error Message Box */}
       {displayTaskErrorMessage && !isTerminal && (
         <InlineError
           title="任务执行异常"
@@ -471,7 +466,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         </InlineError>
       )}
 
-      {/* Progress Box & Course Switch Cross-fade */}
       {showProgress && !isTerminal && progress && (
         <TaskProgressPanel
           progress={progress}
@@ -480,7 +474,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         />
       )}
 
-      {/* Date & Time details */}
       {!isTerminal && (
         <div className="flex flex-col gap-1 px-1 font-mono text-xs text-muted-foreground">
           <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 min-w-0">
@@ -500,9 +493,8 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         </div>
       )}
 
-      {/* Settings Snapshot (Collapsible Drawer - Secondary) */}
       <div
-        className={`grid transition-[grid-template-rows,opacity] duration-280 ease-emphasized motion-reduce:transition-none ${showDetails ? "grid-rows-[1fr] opacity-100" : "pointer-events-none grid-rows-[0fr] opacity-0"}`}
+        className={`grid transition-[grid-template-rows,opacity] duration-[var(--motion-page)] ease-[var(--ease-emphasized)] motion-reduce:transition-none ${showDetails ? "grid-rows-[1fr] opacity-100" : "pointer-events-none grid-rows-[0fr] opacity-0"}`}
         aria-hidden={!showDetails}
       >
         <div className="min-h-0 overflow-hidden">
@@ -539,14 +531,13 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
               enabledAutomationLabels={enabledAutomationLabels}
             />
           ) : (
-            <div className="mt-1 min-w-0 w-full rounded-lg border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground">
+            <div className="mt-1 min-w-0 w-full rounded-[var(--radius-lg)] border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground">
               任务未保存配置快照
             </div>
           )}
         </div>
       </div>
 
-      {/* Card Action Footer */}
       <div className="mt-0.5 flex w-full min-w-0 flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-2.5 sm:pt-3">
         <Button
           size="sm"
@@ -556,7 +547,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
           className="h-8 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/70 px-3 flex items-center gap-1.5 transition-colors shrink-0"
         >
           <ChevronDown
-            className={`w-3.5 h-3.5 transition-transform duration-240 ease-standard ${showDetails ? "rotate-180" : ""}`}
+            className={`w-3.5 h-3.5 transition-transform duration-[var(--motion-fast)] ease-[var(--ease-standard)] ${showDetails ? "rotate-180" : ""}`}
           />
           <span>
             {isTerminal

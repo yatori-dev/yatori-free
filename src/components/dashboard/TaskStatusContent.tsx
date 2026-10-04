@@ -45,7 +45,7 @@ export function TaskStatusContent({
           >
             <span
               aria-hidden="true"
-              className={`pointer-events-none absolute bottom-0 left-0 h-0.5 w-20 rounded-full bg-primary transition-transform duration-280 ease-emphasized motion-reduce:transition-none ${taskFilter === 'completed' ? 'translate-x-20' : 'translate-x-0'}`}
+              className={`pointer-events-none absolute bottom-0 left-0 h-0.5 w-20 rounded-full bg-primary transition-transform duration-[var(--motion-page)] ease-[var(--ease-emphasized)] motion-reduce:transition-none ${taskFilter === 'completed' ? 'translate-x-20' : 'translate-x-0'}`}
             />
             {[
               {
@@ -91,7 +91,7 @@ export function TaskStatusContent({
           variant="ghost"
           disabled={tasksLoading}
           onClick={onRefresh}
-          className="h-8 w-8 shrink-0 rounded-md sm:h-9 sm:w-9"
+          className="h-8 w-8 shrink-0 rounded-[var(--radius-md)] sm:h-9 sm:w-9"
           aria-label="刷新任务列表"
         >
           <RefreshCw
@@ -107,14 +107,14 @@ export function TaskStatusContent({
           </div>
         ) : tasks.length === 0 ? (
           <div className="flex h-full min-h-56 flex-col items-center justify-center gap-3 p-8 text-center">
-            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-muted text-muted-foreground">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)] bg-muted text-muted-foreground">
               <Activity className="h-6 w-6 stroke-[1.5]" />
             </div>
             <p className="text-xs text-muted-foreground">暂无历史任务</p>
           </div>
         ) : filteredTasks.length === 0 ? (
           <div className="flex h-full min-h-56 flex-col items-center justify-center gap-3 p-8 text-center">
-            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-muted text-muted-foreground">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)] bg-muted text-muted-foreground">
               <Activity className="h-6 w-6 stroke-[1.5]" />
             </div>
             <p className="text-xs text-muted-foreground">

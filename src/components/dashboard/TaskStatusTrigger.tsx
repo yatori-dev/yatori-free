@@ -20,7 +20,7 @@ export function TaskStatusTrigger({
     <Button
       variant="ghost"
       className={cn(
-        'hidden h-9 shrink-0 gap-2 rounded-md px-2.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground data-[state=open]:bg-muted data-[state=open]:text-foreground lg:inline-flex',
+        'hidden h-9 shrink-0 gap-2 rounded-[var(--radius-md)] px-2.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground data-[state=open]:bg-muted data-[state=open]:text-foreground lg:inline-flex',
         className,
       )}
       aria-label={

@@ -50,7 +50,7 @@ export function StudyGoalsPage({
                 className="flex items-center gap-3 py-4"
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <div className="hidden size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:flex">
+                  <div className="hidden size-9 shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-primary/10 text-primary sm:flex">
                     {increment.videoStudyMinutes || increment.readMinutes ? (
                       <Clock3 className="h-4 w-4" />
                     ) : (
