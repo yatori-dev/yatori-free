@@ -16,7 +16,7 @@ export function MobileDashboardNavigation({
 
   return (
     <nav
-      className="absolute inset-x-0 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 mx-auto grid h-14 w-[calc(100%-3rem)] max-w-sm grid-cols-4 items-center rounded-full border border-border bg-card p-1 shadow-floating lg:hidden"
+      className="absolute inset-x-0 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 mx-auto grid h-14 w-[calc(100%-3rem)] max-w-sm grid-cols-3 items-center rounded-full border border-border bg-card p-1 shadow-floating lg:hidden"
       aria-label="移动主导航"
     >
       {mobileItems.map((item) => {

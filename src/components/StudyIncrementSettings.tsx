@@ -7,9 +7,9 @@ import {
   LoaderCircle,
   Minus,
   Plus,
+  RotateCcw,
   SlidersHorizontal,
 } from "lucide-react";
-import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -20,6 +20,13 @@ import {
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import type { Course, StudyIncrement, StudyStats } from "@/lib/api";
 
 interface StudyIncrementSettingsProps {
@@ -77,111 +84,108 @@ function StepperField({
 
   return (
     <section
-      className="space-y-2 rounded-[var(--radius-lg)] border border-border/70 bg-card p-2.5 shadow-xs sm:space-y-3 sm:rounded-[var(--radius-xl)] sm:p-4"
+      className="flex min-w-0 flex-col gap-4 py-5 first:pt-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-6"
       aria-labelledby={`${id}-label`}
     >
-      <div className="flex items-start justify-between gap-2 sm:gap-3">
-        <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-primary/10 text-primary sm:size-8 sm:rounded-[var(--radius-lg)]">
-            <Icon className="h-4 w-4" />
+      <div className="min-w-0 flex-1 space-y-2">
+        <Label
+          id={`${id}-label`}
+          htmlFor={id}
+          className="flex items-start gap-2 text-sm font-medium text-foreground"
+        >
+          <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <span className="[overflow-wrap:anywhere]">{label}</span>
+        </Label>
+        <p
+          id={`${id}-current`}
+          className="flex flex-wrap items-baseline gap-x-2 text-xs leading-5 text-muted-foreground"
+        >
+          <span>当前累计</span>
+          <span className="font-medium tabular-nums text-foreground">
+            {currentValue ?? "--"}
+            {currentValue !== undefined && <span className="ml-1">{unit}</span>}
           </span>
-          <div className="min-w-0">
-            <Label
-              id={`${id}-label`}
-              htmlFor={id}
-              className="text-sm font-semibold text-foreground"
-            >
-              {label}
-            </Label>
-            <p
-              id={`${id}-current`}
-              className="mt-0.5 flex shrink-0 items-baseline gap-1 whitespace-nowrap text-xs font-medium text-foreground sm:mt-1 sm:gap-1.5 sm:text-sm"
-            >
-              <span className="text-muted-foreground">当前累计</span>
-              <span className="text-sm font-semibold tabular-nums text-primary sm:text-base">
-                {currentValue ?? "--"}
-                {currentValue !== undefined && (
-                  <span className="ml-0.5 text-sm font-medium">{unit}</span>
-                )}
-              </span>
-            </p>
-          </div>
-        </div>
-        <Badge
-          variant="outline"
-          className="shrink-0 font-normal tabular-nums text-muted-foreground"
-        >
-          上限 {maximum}
-          {unit}
-        </Badge>
+        </p>
+        <p id={`${id}-maximum`} className="text-xs leading-5 text-muted-foreground">
+          本次最多增加 {maximum} {unit}
+        </p>
       </div>
-      <div className="grid grid-cols-[2.25rem_minmax(0,1fr)_2.25rem] items-center gap-2 sm:grid-cols-[2.75rem_minmax(0,1fr)_2.75rem]">
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          className="h-9 w-9 sm:h-11 sm:w-11"
-          disabled={numericValue === 0}
-          onClick={() => setValue(numericValue - step)}
-          aria-label={`${label}减少 ${step}${unit}`}
-        >
-          <Minus className="h-4 w-4" />
-        </Button>
-        <div className="relative">
-          <Input
-            id={id}
-            type="number"
-            inputMode="numeric"
-            min={0}
-            max={maximum}
-            step={step}
-            value={value}
-            onChange={(event) => updateValue(event.target.value)}
-            className="h-9 pr-12 text-center text-sm font-semibold tabular-nums sm:h-11 sm:text-base"
-            aria-describedby={`${id}-current`}
-          />
-          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground">
-            {unit}
-          </span>
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          className="h-9 w-9 sm:h-11 sm:w-11"
-          disabled={numericValue === maximum}
-          onClick={() => setValue(numericValue + step)}
-          aria-label={`${label}增加 ${step}${unit}`}
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-xs text-muted-foreground">快捷增加</span>
-        {presets.map((preset) => (
+
+      <div className="w-full min-w-0 space-y-2 sm:w-56 sm:shrink-0">
+        <div className="flex items-center gap-2">
           <Button
-            key={preset}
             type="button"
-            variant={numericValue === preset ? "secondary" : "outline"}
-            size="sm"
-            className="h-7 px-2.5 text-xs"
-            onClick={() => setValue(preset)}
+            variant="outline"
+            size="icon-lg"
+            className="shadow-none"
+            disabled={numericValue === 0}
+            onClick={() => setValue(numericValue - step)}
+            aria-label={`${label}减少 ${step}${unit}`}
+            title={`减少 ${step}${unit}`}
           >
-            {preset}
-            {unit}
+            <Minus className="size-4" aria-hidden="true" />
           </Button>
-        ))}
-        {numericValue > 0 && (
+          <div className="relative min-w-0 flex-1">
+            <Input
+              id={id}
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={maximum}
+              step={step}
+              value={value}
+              onChange={(event) => updateValue(event.target.value)}
+              className="h-9 pr-12 text-center font-medium tabular-nums shadow-none"
+              aria-describedby={`${id}-current ${id}-maximum`}
+            />
+            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground">
+              {unit}
+            </span>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-lg"
+            className="shadow-none"
+            disabled={numericValue === maximum}
+            onClick={() => setValue(numericValue + step)}
+            aria-label={`${label}增加 ${step}${unit}`}
+            title={`增加 ${step}${unit}`}
+          >
+            <Plus className="size-4" aria-hidden="true" />
+          </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <Select
+            value={presets.includes(numericValue) ? String(numericValue) : ""}
+            onValueChange={(nextValue) => setValue(Number(nextValue))}
+          >
+            <SelectTrigger
+              className="min-w-0 flex-1 data-[size=default]:h-9"
+              aria-label={`${label}常用增加量`}
+            >
+              <SelectValue placeholder="常用增加量" />
+            </SelectTrigger>
+            <SelectContent>
+              {presets.map((preset) => (
+                <SelectItem key={preset} value={String(preset)}>
+                  {preset} {unit}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button
             type="button"
             variant="ghost"
-            size="sm"
-            className="ml-auto h-7 px-2 text-xs"
+            size="icon-lg"
+            disabled={numericValue === 0}
+            title="清零"
+            aria-label={`${label}清零`}
             onClick={() => onChange("")}
           >
-            清零
+            <RotateCcw className="size-4" aria-hidden="true" />
           </Button>
-        )}
+        </div>
       </div>
     </section>
   );
@@ -275,30 +279,30 @@ function StudyIncrementDialog({
   return (
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100dvh-1rem)] max-w-[calc(100%-1rem)] grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden p-0 sm:max-h-[calc(100dvh-2rem)] sm:max-w-xl">
-        <DialogHeader className="border-b border-border/50 px-3 py-3 pr-11 sm:px-5 sm:py-4 sm:pr-12">
-          <DialogTitle className="flex items-center gap-2">
-            <SlidersHorizontal className="h-4 w-4 text-primary" />
+        <DialogHeader className="border-b border-border px-4 py-4 pr-12 sm:px-6 sm:py-5 sm:pr-12">
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <SlidersHorizontal className="size-4 text-muted-foreground" aria-hidden="true" />
             学习目标
           </DialogTitle>
-          <DialogDescription className="truncate" title={course.courseName}>
+          <DialogDescription className="text-start leading-5 [overflow-wrap:anywhere]">
             {course.courseName}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={save} className="contents">
-          <div className="min-h-0 min-w-0 space-y-2.5 overflow-x-hidden overflow-y-auto px-3 py-3 sm:space-y-3 sm:px-5 sm:py-4">
+          <div className="min-h-0 min-w-0 space-y-5 overflow-x-hidden overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
             {!courseDetailsReady ? (
-              <div className="flex min-h-56 flex-col items-center justify-center gap-3 rounded-[var(--radius-xl)] border border-dashed border-border/70 bg-muted/20 p-6 text-center">
+              <div className="flex min-h-56 flex-col items-center justify-center gap-3 p-6 text-center" role={courseDetailsLoading ? "status" : "alert"}>
                 {courseDetailsLoading ? (
                   <>
-                    <LoaderCircle className="h-5 w-5 animate-spin text-primary" />
+                    <LoaderCircle className="size-5 animate-spin text-muted-foreground" aria-hidden="true" />
                     <p className="text-sm font-medium text-foreground">
                       正在读取课程任务
                     </p>
                   </>
                 ) : (
                   <>
-                    <AlertCircle className="h-5 w-5 text-muted-foreground" />
+                    <AlertCircle className="size-5 text-muted-foreground" aria-hidden="true" />
                     <p className="text-sm font-medium text-foreground">
                       课程任务读取失败
                     </p>
@@ -309,10 +313,10 @@ function StudyIncrementDialog({
               <>
                 {!studyStats?.available && (
                   <div
-                    className="flex items-start gap-2 rounded-[var(--radius-lg)] bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground"
+                    className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"
                     role="status"
                   >
-                    <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <AlertCircle className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
                     <span>{studyStats?.message || "当前学习数据不可用"}</span>
                   </div>
                 )}
@@ -321,7 +325,7 @@ function StudyIncrementDialog({
                   本次增加
                 </h3>
 
-                <div className="space-y-2 sm:space-y-2.5">
+                <div className="divide-y divide-border">
                   <StepperField
                     id={`study-visit-${course.key}`}
                     icon={Eye}
@@ -377,7 +381,7 @@ function StudyIncrementDialog({
             )}
           </div>
 
-          <div className="flex shrink-0 justify-end gap-2 border-t border-border/50 bg-muted/30 p-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] sm:px-5 sm:py-3 sm:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+          <div className="flex shrink-0 justify-end gap-2 border-t border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-6 sm:py-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom))]">
             <Button
               type="button"
               variant="outline"

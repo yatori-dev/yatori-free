@@ -4,7 +4,6 @@ import { TabsContent } from '@/components/ui/tabs';
 import type {
   CourseDetails,
   CourseSummary,
-  StudyIncrement,
   Task,
 } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
@@ -15,7 +14,6 @@ import { CourseListSection } from './CourseListSection';
 import { CourseProgressSummary } from './CourseProgressSummary';
 import { WorksListSection } from './WorksListSection';
 import { ExamsListSection } from './ExamsListSection';
-import { StudyGoalsPage } from './StudyGoalsPage';
 import {
   mobileLearningTabs,
   type MobileDashboardTabId,
@@ -39,8 +37,6 @@ interface DashboardMainContentProps {
   courseDetailsMap: Record<string, CourseDetails>;
   loadingDetails: Record<string, boolean>;
   stoppingTaskId: string | null;
-  studyIncrements: Record<string, StudyIncrement>;
-  defaultStudyIncrement: StudyIncrement;
   taskCounts: { active: number; completed: number };
   tasks: Task[];
   filteredTasks: Task[];
@@ -56,7 +52,6 @@ interface DashboardMainContentProps {
   onSearchChange: (value: string) => void;
   onSearchQueryChange: (value: string) => void;
   onToggleCourseSelection: (courseKey: string) => void;
-  onOpenStudyIncrementSettings: (courseKey: string) => void;
   onStopTask: (taskId: string) => void;
   onToggleExpandCourse: (courseKey: string) => void;
   onToggleFullCourseOutline: (courseKey: string) => void;
@@ -89,8 +84,6 @@ export function DashboardMainContent({
   courseDetailsMap,
   loadingDetails,
   stoppingTaskId,
-  studyIncrements,
-  defaultStudyIncrement,
   taskCounts,
   tasks,
   filteredTasks,
@@ -106,7 +99,6 @@ export function DashboardMainContent({
   onSearchChange,
   onSearchQueryChange,
   onToggleCourseSelection,
-  onOpenStudyIncrementSettings,
   onStopTask,
   onToggleExpandCourse,
   onToggleFullCourseOutline,
@@ -259,15 +251,6 @@ export function DashboardMainContent({
               onToggleSelectCourseExams={onToggleSelectCourseExams}
               onRefreshCourses={onRefreshCourses}
             />
-
-            <TabsContent value="study" className="m-0 outline-none">
-              <StudyGoalsPage
-                courses={courses}
-                studyIncrements={studyIncrements}
-                defaultStudyIncrement={defaultStudyIncrement}
-                onOpenStudyIncrementSettings={onOpenStudyIncrementSettings}
-              />
-            </TabsContent>
 
             <TabsContent value="tasks" className="m-0 min-h-full outline-none">
               <section className="min-h-full min-w-0" aria-label="任务">
