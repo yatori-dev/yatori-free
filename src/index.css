@@ -67,9 +67,28 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: ui-sans-serif, system-ui, sans-serif;
-    --font-sans: ui-sans-serif, system-ui, sans-serif;
-    
+    /* Typography */
+    --font-display: ui-sans-serif, system-ui, sans-serif;
+    --font-body: ui-sans-serif, system-ui, sans-serif;
+
+    /* Fluid Type Scale */
+    --text-xs: clamp(0.6875rem, 0.65rem + 0.15vw, 0.75rem);
+    --text-sm: clamp(0.8125rem, 0.75rem + 0.25vw, 0.875rem);
+    --text-base: clamp(0.875rem, 0.8rem + 0.3vw, 1rem);
+    --text-lg: clamp(1rem, 0.9rem + 0.4vw, 1.125rem);
+    --text-xl: clamp(1.125rem, 1rem + 0.5vw, 1.25rem);
+
+    /* Spacing Scale */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+
     /* Shadcn mappings */
     --color-ring: var(--ring);
     --color-input: var(--input);
@@ -123,11 +142,13 @@
 }
 
 :root {
+    /* Brand Colors - Used in BrandMark only */
     --google-blue: #4285F4;
     --google-red: #EA4335;
     --google-yellow: #FBBC05;
     --google-green: #34A853;
 
+    /* Semantic Colors */
     --background: oklch(0.985 0.002 247);
     --foreground: oklch(0.145 0.015 257);
     --card: oklch(1 0 0);
@@ -172,14 +193,17 @@
     --sidebar-accent-foreground: oklch(0.38 0.12 240);
     --sidebar-border: oklch(0.91 0.008 257);
 
-    /* Motion Easing Tokens */
-    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
-    --ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
+    /* Motion Tokens */
+    --motion-instant: 100ms;
     --motion-fast: 200ms;
     --motion-page: 280ms;
     --motion-panel: 400ms;
     --motion-close: 200ms;
     --motion-panel-close: 320ms;
+
+    /* Easing Tokens */
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
 
     /* 4-Tier Shadow Tokens (Refined depth and ambient lighting) */
     --shadow-xs: 0 1px 2px rgb(15 23 42 / 0.04);

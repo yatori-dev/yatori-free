@@ -29,7 +29,7 @@ export function TaskSettingsSnapshot({
   enabledAutomationLabels,
 }: TaskSettingsSnapshotProps) {
   return (
-    <div className="mt-1 min-w-0 w-full space-y-3 rounded-lg border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground">
+    <div className="mt-1 min-w-0 w-full space-y-3 rounded-[var(--radius-lg)] border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground">
       <div className="flex items-center gap-1.5 border-b border-border/50 pb-1.5 text-xs font-semibold text-foreground">
         <Settings2 className="w-3.5 h-3.5 text-muted-foreground" />
         <span>任务配置</span>

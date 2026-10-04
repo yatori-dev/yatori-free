@@ -33,7 +33,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/15 duration-[var(--motion-page)] ease-emphasized supports-backdrop-filter:backdrop-blur-xs data-open:duration-[var(--motion-page)] data-open:animate-in data-open:fade-in-0 data-closed:duration-[var(--motion-close)] data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 isolate z-50 bg-black/15 duration-[var(--motion-page)] ease-[var(--ease-emphasized)] supports-backdrop-filter:backdrop-blur-xs data-open:duration-[var(--motion-page)] data-open:animate-in data-open:fade-in-0 data-closed:duration-[var(--motion-close)] data-closed:animate-out data-closed:fade-out-0",
         className,
       )}
       {...props}
@@ -55,7 +55,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-lg border border-border bg-popover p-5 text-sm text-popover-foreground shadow-overlay duration-[var(--motion-page)] ease-emphasized outline-none sm:max-w-sm data-open:duration-[var(--motion-page)] data-open:animate-in data-open:fade-in-0 data-open:zoom-in-[0.98] data-closed:duration-[var(--motion-close)] data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-[0.99]",
+          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-[var(--space-4)] rounded-[var(--radius-lg)] border border-border bg-popover p-[var(--space-5)] text-sm text-popover-foreground shadow-overlay duration-[var(--motion-page)] ease-[var(--ease-emphasized)] outline-none sm:max-w-sm data-open:duration-[var(--motion-page)] data-open:animate-in data-open:fade-in-0 data-open:zoom-in-[0.98] data-closed:duration-[var(--motion-close)] data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-[0.99]",
           className,
         )}
         {...props}
@@ -100,7 +100,7 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        "-mx-5 -mb-5 flex flex-row justify-end gap-2 rounded-b-lg border-t bg-muted/50 p-4",
+        "-mx-[var(--space-5)] -mb-[var(--space-5)] flex flex-row justify-end gap-2 rounded-b-[var(--radius-lg)] border-t bg-muted/50 p-[var(--space-4)]",
         className,
       )}
       {...props}

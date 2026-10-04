@@ -70,7 +70,7 @@ export function TaskSettingsPanel({
           orientation="vertical"
           className="min-h-0 min-w-0 flex-1 flex-col gap-0 md:flex-row"
         >
-          <div className="shrink-0 border-b px-4 py-3 md:hidden">
+          <div className="shrink-0 border-b px-[var(--space-4)] py-[var(--space-3)] md:hidden">
             <Select
               value={activeSettingSection}
               onValueChange={setActiveSettingSection}
@@ -90,13 +90,13 @@ export function TaskSettingsPanel({
           </div>
           <TabsList
             aria-label="设置分类"
-            className="hidden w-44 shrink-0 items-stretch justify-start gap-1 self-stretch overflow-y-auto rounded-none border-r bg-muted/30 p-3 group-data-vertical/tabs:h-auto md:flex"
+            className="hidden w-44 shrink-0 items-stretch justify-start gap-1 self-stretch overflow-y-auto rounded-none border-r bg-muted/30 p-[var(--space-3)] group-data-vertical/tabs:h-auto md:flex"
           >
             {settingSections.map(({ value, label, Icon }) => (
               <TabsTrigger
                 key={value}
                 value={value}
-                className="h-11 w-full flex-none justify-start gap-2 rounded-md px-3 text-sm font-medium hover:bg-muted data-active:bg-muted data-active:text-foreground data-active:shadow-none"
+                className="h-11 w-full flex-none justify-start gap-2 rounded-[var(--radius-md)] px-[var(--space-3)] text-sm font-medium hover:bg-muted data-active:bg-muted data-active:text-foreground data-active:shadow-none"
               >
                 <Icon aria-hidden="true" className="size-4" />
                 {label}
@@ -107,14 +107,14 @@ export function TaskSettingsPanel({
           <TabsContent
             value="behavior"
             forceMount
-            className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-4 [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:p-6 data-[state=inactive]:hidden"
+            className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-[var(--space-5)] [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:p-[var(--space-6)] data-[state=inactive]:hidden"
           >
-            <div className="space-y-6">
-              <div className="border-b pb-4">
+            <div className="space-y-[var(--space-6)]">
+              <div className="border-b pb-[var(--space-4)]">
                 <h2 className="text-lg font-medium">任务行为</h2>
               </div>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex min-w-0 items-start gap-3">
+              <div className="flex items-start justify-between gap-[var(--space-4)]">
+                <div className="flex min-w-0 items-start gap-[var(--space-3)]">
                   <Zap
                     aria-hidden="true"
                     className="mt-0.5 size-4 shrink-0 text-muted-foreground"
@@ -144,15 +144,15 @@ export function TaskSettingsPanel({
           <TabsContent
             value="appearance"
             forceMount
-            className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-4 [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:p-6 data-[state=inactive]:hidden"
+            className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-[var(--space-5)] [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:p-[var(--space-6)] data-[state=inactive]:hidden"
           >
-            <div className="space-y-6">
-              <div className="border-b pb-4">
+            <div className="space-y-[var(--space-6)]">
+              <div className="border-b pb-[var(--space-4)]">
                 <h2 className="text-lg font-medium">显示</h2>
               </div>
 
-              <div className="flex flex-wrap items-start justify-between gap-4 border-b pb-6">
-                <div className="flex min-w-0 items-start gap-3">
+              <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)] border-b pb-[var(--space-6)]">
+                <div className="flex min-w-0 items-start gap-[var(--space-3)]">
                   <Palette
                     aria-hidden="true"
                     className="mt-0.5 size-4 shrink-0 text-muted-foreground"
@@ -183,8 +183,8 @@ export function TaskSettingsPanel({
                 </Select>
               </div>
 
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex min-w-0 items-start gap-3">
+              <div className="flex items-start justify-between gap-[var(--space-4)]">
+                <div className="flex min-w-0 items-start gap-[var(--space-3)]">
                   <AlarmClock
                     aria-hidden="true"
                     className="mt-0.5 size-4 shrink-0 text-muted-foreground"
@@ -216,10 +216,10 @@ export function TaskSettingsPanel({
           <TabsContent
             value="notifications"
             forceMount
-            className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-4 [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:p-6 data-[state=inactive]:hidden"
+            className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-[var(--space-5)] [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:p-[var(--space-6)] data-[state=inactive]:hidden"
           >
-            <div className="space-y-6">
-              <div className="border-b pb-4">
+            <div className="space-y-[var(--space-6)]">
+              <div className="border-b pb-[var(--space-4)]">
                 <h2 className="text-lg font-medium">通知</h2>
               </div>
               <EmailNotificationSettings onUnauthorized={onUnauthorized} />

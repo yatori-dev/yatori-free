@@ -77,20 +77,18 @@ export function DashboardHeader({
       setReadAnnouncementContent(announcementMarkdown);
       try {
         localStorage.setItem(announcementReadKey, announcementMarkdown);
-      } catch {
-        // Keep the current view usable when browser storage is unavailable.
-      }
+      } catch {}}
     }
   };
 
   return (
-    <header className="sticky top-0 z-40 flex min-h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-background px-3 py-2 sm:px-5 lg:px-6">
+    <header className="sticky top-0 z-40 flex min-h-14 shrink-0 items-center justify-between gap-[var(--space-3)] border-b border-border bg-background px-[var(--space-3)] py-2 sm:px-[var(--space-5)] lg:px-[var(--space-6)]">
       <div className="flex min-w-0 flex-1 items-center lg:hidden">
         <a
           href={YATORI_REPOSITORY_URL}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex min-w-0 max-w-full items-baseline gap-1.5 rounded-md font-semibold leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex min-w-0 max-w-full items-baseline gap-1.5 rounded-[var(--radius-md)] font-semibold leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label={`在 GitHub 查看 Yatori 学习通服务 v${appVersion} 源码`}
         >
           <BrandMark className="shrink-0 text-xl sm:text-2xl" />
@@ -104,7 +102,7 @@ export function DashboardHeader({
           </span>
         </a>
       </div>
-      <div className="ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-3">
+      <div className="ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-[var(--space-3)]">
         <ThemeToggleButton />
         <Dialog
           open={announcementOpen}
@@ -115,7 +113,7 @@ export function DashboardHeader({
             variant="ghost"
             size="icon"
             onClick={() => handleAnnouncementOpenChange(true)}
-            className="relative h-9 w-9 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="relative h-9 w-9 rounded-[var(--radius-md)] text-muted-foreground hover:bg-muted hover:text-foreground"
             aria-label="查看公告"
             title="公告"
           >
@@ -127,11 +125,11 @@ export function DashboardHeader({
               />
             )}
           </Button>
-          <DialogContent showCloseButton={false} className="gap-5 sm:max-w-md">
+          <DialogContent showCloseButton={false} className="gap-[var(--space-5)] sm:max-w-md">
             <DialogHeader>
               <DialogTitle>公告</DialogTitle>
             </DialogHeader>
-            <div className="max-h-[60vh] overflow-y-auto text-sm leading-6 text-foreground [&_a]:text-primary [&_a]:underline [&_h1]:mb-3 [&_h1]:text-lg [&_h1]:font-semibold [&_h2]:mb-2 [&_h2]:mt-4 [&_h2]:text-base [&_h2]:font-semibold [&_li]:ml-5 [&_li]:list-disc [&_ol>li]:list-decimal [&_p]:mb-3 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_ul]:mb-3">
+            <div className="max-h-[60vh] overflow-y-auto text-sm leading-6 text-foreground [&_a]:text-primary [&_a]:underline [&_h1]:mb-[var(--space-3)] [&_h1]:text-lg [&_h1]:font-semibold [&_h2]:mb-2 [&_h2]:mt-[var(--space-4)] [&_h2]:text-base [&_h2]:font-semibold [&_li]:ml-[var(--space-5)] [&_li]:list-disc [&_ol>li]:list-decimal [&_p]:mb-[var(--space-3)] [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_ul]:mb-[var(--space-3)]">
               <Suspense
                 fallback={
                   <p className="text-muted-foreground">正在加载公告…</p>

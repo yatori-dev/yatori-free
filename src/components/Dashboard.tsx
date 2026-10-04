@@ -232,7 +232,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     [courses],
   );
 
-  // Selection and Expandable Course Detail States
   const [selectedCourses, setSelectedCourses] = useState<Set<string>>(new Set());
   const [selectedWorks, setSelectedWorks] = useState<Record<string, Set<string>>>({});
   const [selectedExams, setSelectedExams] = useState<Record<string, Set<string>>>({});
@@ -244,7 +243,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   
-  // Loading flags
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [coursesError, setCoursesError] = useState<string | null>(null);
   const [tasksLoading, setTasksLoading] = useState(false);
@@ -254,10 +252,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const pendingDetailsRef = useRef(new Map<string, Promise<Awaited<ReturnType<typeof getCourseDetails>>>>());
   const accountIdRef = useRef(account?.id);
 
-  // Logs viewer active state
   
 
-  // Settings form states
   const currentAccountId = account?.id ?? null;
   const [persistedSettingsState, setPersistedSettingsState] = useState<PersistedSettingsState>(() => ({
     accountId: currentAccountId,
@@ -899,7 +895,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     );
   }, [persistedSettingsState]);
 
-  // Keep the task list fresh only while unfinished tasks exist.
   useEffect(() => {
     if (!account || !hasActiveTasks) {
       return;
@@ -929,7 +924,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     };
   }, []);
 
-  // Tab transition calculations (fixed 10px displacement for calm navigation)
   const tabsList = mobileDashboardTabOrder;
   const prevIndex = tabsList.indexOf(prevTab);
   const currentIndex = tabsList.indexOf(activeTab);
@@ -973,7 +967,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   return (
     <div className="relative flex h-svh min-h-svh flex-col overflow-hidden bg-background font-sans text-foreground lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)]">
-      <a href="#dashboard-main" className="sr-only z-[60] rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
+      <a href="#dashboard-main" className="sr-only z-[60] rounded-[var(--radius-md)] bg-primary px-3 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
         跳到主内容
       </a>
       <Tabs

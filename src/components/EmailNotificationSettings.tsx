@@ -315,7 +315,7 @@ export function EmailNotificationSettings({
   return (
     <div className="space-y-6">
       {!isAvailable && (
-        <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm">
+        <div className="flex items-start gap-3 rounded-[var(--radius-lg)] border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
           <div className="space-y-0.5">
             <p className="font-medium text-destructive">邮件通知服务暂不可用</p>
@@ -326,7 +326,6 @@ export function EmailNotificationSettings({
         </div>
       )}
 
-      {/* 邮箱绑定 */}
       <div className="space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3">
@@ -371,14 +370,14 @@ export function EmailNotificationSettings({
         </div>
 
         {hasVerifiedEmail && !hasPendingEmail && !isEditingEmail && (
-          <div className="flex items-center gap-2 rounded-md bg-muted/40 px-3 py-2 text-sm">
+          <div className="flex items-center gap-2 rounded-[var(--radius-md)] bg-muted/40 px-3 py-2 text-sm">
             <CheckCircle2 className="size-4 shrink-0 text-success" />
             <span className="font-mono text-xs">{settings?.email}</span>
           </div>
         )}
 
         {hasPendingEmail && (
-          <div className="space-y-3 rounded-md border border-warning/30 bg-warning/5 p-3">
+          <div className="space-y-3 rounded-[var(--radius-md)] border border-warning/30 bg-warning/5 p-3">
             <div className="flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:justify-between">
               <span className="text-foreground/80">
                 验证码已发送至{" "}
@@ -514,7 +513,6 @@ export function EmailNotificationSettings({
 
       <div className="h-px bg-border" />
 
-      {/* 通知开关 */}
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-4 py-1">
           <div className="flex min-w-0 items-start gap-3">
@@ -567,7 +565,6 @@ export function EmailNotificationSettings({
 
       <div className="h-px bg-border" />
 
-      {/* 临期提醒 */}
       <div className="space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3">
@@ -592,7 +589,7 @@ export function EmailNotificationSettings({
         </div>
 
         {deadlineReminderMinutes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-md border border-dashed py-8 text-center">
+          <div className="flex flex-col items-center justify-center rounded-[var(--radius-md)] border border-dashed py-8 text-center">
             <Clock className="mb-2 size-5 text-muted-foreground/50" />
             <p className="text-xs text-muted-foreground">暂未设置临期提醒</p>
             <p className="mt-0.5 text-xs text-muted-foreground/70">
@@ -604,7 +601,7 @@ export function EmailNotificationSettings({
             {deadlineReminderMinutes.map((minutes) => (
               <div
                 key={minutes}
-                className="inline-flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-1.5 text-xs transition-colors hover:bg-muted/60"
+                className="inline-flex items-center gap-2 rounded-[var(--radius-md)] border bg-muted/30 px-3 py-1.5 text-xs transition-colors hover:bg-muted/60"
               >
                 <span className="font-medium">
                   提前 {formatReminderTime(minutes)}
@@ -614,7 +611,7 @@ export function EmailNotificationSettings({
                   aria-label={`删除提前 ${formatReminderTime(minutes)} 提醒`}
                   disabled={!hasVerifiedEmail || !isAvailable || isBusy}
                   onClick={() => handleRemoveDeadlineReminder(minutes)}
-                  className="inline-flex size-4 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none"
+                  className="inline-flex size-4 items-center justify-center rounded-[var(--radius-sm)] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none"
                 >
                   <X className="size-3" />
                 </button>

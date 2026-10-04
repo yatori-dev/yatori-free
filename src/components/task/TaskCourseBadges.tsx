@@ -46,7 +46,7 @@ export function TaskCourseBadges({
               size="sm"
               onClick={onShowMore}
               aria-haspopup="dialog"
-              className="h-6 gap-1 rounded-md px-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+              className="h-6 gap-1 rounded-[var(--radius-md)] px-2 text-xs font-medium text-muted-foreground hover:text-foreground"
             >
               另 {hiddenCount} 门<ChevronRight className="h-3.5 w-3.5" />
             </Button>

@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { LoginCredentialsStep } from "./login/LoginCredentialsStep";
 import { BrandMark } from "./BrandMark";
 import { YATORI_QQ_GROUP_URL } from "@/lib/externalLinks";
+import { ThemeToggleButton } from "./dashboard/ThemeToggleButton";
 
 interface LoginProps {
   onLoginSuccess: (session: AuthSession) => void;
@@ -92,14 +93,17 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="login-page flex min-h-svh flex-col items-center justify-center overflow-x-hidden bg-background px-4 py-8 transition-colors duration-200 sm:px-6 lg:px-8">
+    <div className="login-page flex min-h-svh flex-col items-center justify-center overflow-x-hidden bg-background px-4 py-8 transition-colors duration-[var(--motion-fast)] sm:px-6 lg:px-8">
+      <div className="fixed right-16 top-4 z-10">
+        <ThemeToggleButton />
+      </div>
       <a
         href={YATORI_QQ_GROUP_URL}
         target="_blank"
         rel="noreferrer"
         aria-label="加入 QQ 群组"
         title="加入 QQ 群组"
-        className="fixed right-4 top-4 z-10 flex size-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="fixed right-4 top-4 z-10 flex size-10 items-center justify-center rounded-[var(--radius-md)] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <svg
           aria-hidden="true"
@@ -110,7 +114,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           <path d="M824.8 613.2c-16-51.4-34.4-94.6-62.7-165.3C766.5 262.2 689.3 112 511.5 112 331.7 112 256.2 265.2 261 447.9c-28.4 70.8-46.7 113.7-62.7 165.3-34 109.5-23 154.8-14.6 155.8 18 2.2 70.1-82.4 70.1-82.4 0 49 25.2 112.9 79.8 159-26.4 8.1-85.7 29.9-71.6 53.8 11.4 19.3 196.2 12.3 249.5 6.3 53.3 6 238.1 13 249.5-6.3 14.1-23.8-45.3-45.7-71.6-53.8 54.6-46.2 79.8-110.1 79.8-159 0 0 52.1 84.6 70.1 82.4 8.5-1.1 19.5-46.4-14.5-155.8z" />
         </svg>
       </a>
-      <Card className="w-full max-w-[1080px] gap-0 overflow-hidden rounded-lg border-border py-0 shadow-raised">
+      <Card className="w-full max-w-[1080px] gap-0 overflow-hidden rounded-[var(--radius-lg)] border-border py-0 shadow-raised">
         <CardContent className="grid p-0 md:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.1fr)]">
           {isDesktop && (
             <Suspense
@@ -143,7 +147,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         </CardContent>
       </Card>
 
-      {/* Footer Info */}
       <div className="login-footer mt-8 flex gap-6 text-xs font-sans text-muted-foreground">
         <a
           href="https://hungrym0.com"
@@ -267,7 +270,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               type="button"
               variant="ghost"
               onClick={() => setIsLegalDialogOpen(false)}
-              className="h-10 rounded-md px-6 text-sm font-medium text-primary shadow-none transition-colors hover:bg-primary-container/40"
+              className="h-10 rounded-[var(--radius-md)] px-6 text-sm font-medium text-primary shadow-none transition-colors hover:bg-primary-container/40"
             >
               我知道了
             </Button>

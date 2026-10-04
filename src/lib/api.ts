@@ -1,7 +1,5 @@
 const DEFAULT_API_BASE_URL = 'https://yatori-api.hungrym0.com';
 
-// Keep development requests same-origin so the HttpOnly __Host- session cookie
-// is stored by the local Vite origin instead of being blocked as cross-site.
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL?.trim() ||
   (import.meta.env.DEV ? '/api' : DEFAULT_API_BASE_URL);
@@ -485,8 +483,6 @@ export function getTaskConfigSnapshot(configSnapshot: Task['configSnapshot']) {
     return undefined;
   }
 
-  // Preserve usable server fields when an older response adds an incompatible
-  // optional field; a single mismatch must not hide the course scope.
   const snapshot: TaskConfigSnapshot = {};
   if (typeof configSnapshot.account === 'string')
     snapshot.account = configSnapshot.account;

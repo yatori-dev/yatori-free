@@ -65,7 +65,7 @@ export function CourseOutline({
     <div className="space-y-2">
       {courseDetails.incomplete && (
         <div
-          className="flex items-start gap-2 rounded-md bg-warning-container/40 px-2.5 py-2 text-xs text-warning"
+          className="flex items-start gap-2 rounded-[var(--radius-md)] bg-warning-container/40 px-2.5 py-2 text-xs text-warning"
           role="status"
         >
           <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -74,7 +74,7 @@ export function CourseOutline({
       )}
       {courseDetails.taskPointsIncomplete && (
         <div
-          className="flex items-start gap-2 rounded-md bg-warning-container/40 px-2.5 py-2 text-xs text-warning"
+          className="flex items-start gap-2 rounded-[var(--radius-md)] bg-warning-container/40 px-2.5 py-2 text-xs text-warning"
           role="status"
         >
           <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -124,7 +124,7 @@ export function CourseOutline({
               return (
                 <div
                   key={chapterItem.id}
-                  className="rounded-lg border border-border/60 bg-card p-3 text-xs shadow-xs transition-[border-color,box-shadow] duration-200 hover:border-primary/30 hover:shadow-sm"
+                  className="rounded-[var(--radius-lg)] border border-border/60 bg-card p-3 text-xs shadow-xs transition-[border-color,box-shadow] duration-[var(--motion-fast)] ease-[var(--ease-standard)] hover:border-primary/30 hover:shadow-sm"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
@@ -151,7 +151,7 @@ export function CourseOutline({
                       {taskPoints.map((taskPoint) => (
                         <div
                           key={taskPoint.id}
-                          className="flex items-center gap-2 rounded-md bg-muted/40 px-2.5 py-1.5 transition-colors hover:bg-muted/70"
+                          className="flex items-center gap-2 rounded-[var(--radius-md)] bg-muted/40 px-2.5 py-1.5 transition-colors duration-[var(--motion-fast)] ease-[var(--ease-standard)] hover:bg-muted/70"
                         >
                           <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary">
                             {COURSE_TASK_POINT_KIND_LABELS[taskPoint.kind]}
@@ -185,7 +185,7 @@ export function CourseOutline({
                         return (
                           <div
                             key={document.id}
-                            className="flex items-center gap-2 rounded-md bg-muted/40 px-2.5 py-1.5 transition-colors hover:bg-muted/70"
+                            className="flex items-center gap-2 rounded-[var(--radius-md)] bg-muted/40 px-2.5 py-1.5 transition-colors duration-[var(--motion-fast)] ease-[var(--ease-standard)] hover:bg-muted/70"
                           >
                             <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                             <div className="min-w-0 flex-1">
@@ -201,7 +201,7 @@ export function CourseOutline({
                               asChild
                               variant="ghost"
                               size="sm"
-                              className="h-7 w-7 shrink-0 rounded p-0 text-primary hover:bg-primary/10 transition-colors"
+                              className="h-7 w-7 shrink-0 rounded-[var(--radius-lg)] p-0 text-primary hover:bg-primary/10 transition-colors duration-[var(--motion-fast)] ease-[var(--ease-standard)]"
                             >
                               <a
                                 href={getCourseDocumentDownloadUrl(

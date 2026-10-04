@@ -14,12 +14,12 @@ export function TaskProgressPanel({
   percent,
 }: TaskProgressPanelProps) {
   return (
-    <div className="w-full min-w-0 space-y-3 rounded-xl border border-border/60 bg-muted/30 p-3.5 shadow-xs sm:space-y-4 sm:p-4">
+    <div className="w-full min-w-0 space-y-3 rounded-[var(--radius-xl)] border border-border/60 bg-muted/30 p-3.5 shadow-xs sm:space-y-4 sm:p-4">
       <div className="flex items-end justify-between gap-3 text-xs">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div
             key={progress.currentCourse}
-            className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-foreground animate-in fade-in duration-260 ease-in-out"
+            className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-foreground animate-in fade-in duration-[var(--motion-page)] ease-[var(--ease-standard)]"
             title={progress.currentCourse || '等待中...'}
           >
             <span className="truncate">

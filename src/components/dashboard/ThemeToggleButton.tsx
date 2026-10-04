@@ -41,7 +41,7 @@ export function ThemeToggleButton() {
     themeSwitchingRef.current = true;
     const fadeOut = appRoot.animate([{ opacity: 1 }, { opacity: 0 }], {
       duration: 140,
-      easing: 'ease-out',
+      easing: 'cubic-bezier(0.2, 0, 0, 1)',
       fill: 'forwards',
     });
     themeAnimationRef.current = fadeOut;
@@ -52,7 +52,7 @@ export function ThemeToggleButton() {
         applyTheme();
         const fadeIn = appRoot.animate([{ opacity: 0 }, { opacity: 1 }], {
           duration: 180,
-          easing: 'ease-out',
+          easing: 'cubic-bezier(0.2, 0, 0, 1)',
           fill: 'forwards',
         });
         themeAnimationRef.current = fadeIn;
@@ -72,7 +72,7 @@ export function ThemeToggleButton() {
       size="icon"
       variant="ghost"
       onClick={toggleDarkMode}
-      className="h-8 w-8 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground sm:h-9 sm:w-9"
+      className="h-8 w-8 rounded-[var(--radius-md)] text-muted-foreground hover:bg-muted hover:text-foreground sm:h-9 sm:w-9"
       aria-label={isDark ? '切换到浅色主题' : '切换到深色主题'}
     >
       {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}

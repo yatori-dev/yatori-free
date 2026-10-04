@@ -47,9 +47,7 @@ export function readQRLoginSession() {
     if (isStoredQRLoginSession(parsed) && !isExpired(parsed.expiresAt)) {
       return parsed;
     }
-  } catch {
-    // Invalid local data is discarded before a new QR session is created.
-  }
+  } catch {}
 
   sessionStorage.removeItem(QR_LOGIN_SESSION_KEY);
   return null;

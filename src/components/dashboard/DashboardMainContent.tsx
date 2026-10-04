@@ -148,10 +148,9 @@ export function DashboardMainContent({
     >
       <div className="mx-auto w-full min-w-0 max-w-[1600px] px-3 py-4 sm:px-5 lg:px-6 lg:py-6">
         <div className="min-w-0 space-y-4 sm:space-y-6">
-          {/* Mobile Top Segmented Control for Learning sub-tabs */}
           {isLearningTab && (
             <div className="lg:hidden">
-              <div className="flex items-center rounded-lg bg-muted p-1 text-xs font-medium text-muted-foreground">
+              <div className="flex items-center rounded-[var(--radius-lg)] bg-muted p-1 text-xs font-medium text-muted-foreground">
                 {mobileLearningTabs.map((tab) => {
                   const active = activeTab === tab.id;
                   const Icon = tab.icon;
@@ -166,7 +165,7 @@ export function DashboardMainContent({
                       key={tab.id}
                       type="button"
                       onClick={() => onTabChange(tab.id)}
-                      className={`relative flex min-h-10 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      className={`relative flex min-h-10 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-md)] px-2 text-xs font-medium transition-colors duration-[var(--motion-fast)] ease-[var(--ease-standard)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                         active
                           ? 'bg-background text-foreground shadow-xs'
                           : 'text-muted-foreground hover:text-foreground'

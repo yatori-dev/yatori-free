@@ -73,7 +73,7 @@ function highlightCourseName(courseName: string, searchTerm: string): ReactNode 
     parts.push(
       <mark
         key={matchIndex}
-        className="rounded-sm bg-primary-container px-0.5 text-foreground"
+        className="rounded-[var(--radius-sm)] bg-primary-container px-0.5 text-foreground"
       >
         {courseName.slice(matchIndex, matchIndex + query.length)}
       </mark>,
@@ -116,11 +116,11 @@ export function CourseListSection({
       value="courses"
       className="m-0 outline-none data-[state=inactive]:hidden lg:min-h-0 lg:flex-1"
     >
-      <section className="flex min-w-0 flex-col gap-4" aria-label="课程列表">
+      <section className="flex min-w-0 flex-col gap-[var(--space-4)]" aria-label="课程列表">
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 flex-1 items-center justify-between gap-1.5 sm:gap-2">
             <div className="group relative min-w-0 flex-1 sm:max-w-md">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-primary" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors duration-[var(--motion-fast)] ease-[var(--ease-standard)] group-focus-within:text-primary" />
               <Input
                 type="search"
                 value={courseSearch}
@@ -140,7 +140,7 @@ export function CourseListSection({
                 }}
                 placeholder="搜索课程名称"
                 aria-label="搜索课程名称"
-                className="course-search-input h-10 bg-background pl-9 pr-9 text-sm shadow-none sm:h-9"
+                className="course-search-input h-9 bg-background pl-9 pr-9 text-sm shadow-none"
               />
               {courseSearch && (
                 <button
@@ -150,7 +150,7 @@ export function CourseListSection({
                     onSearchChange('');
                     onSearchQueryChange('');
                   }}
-                  className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-200 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-[var(--radius-lg)] text-muted-foreground transition-colors duration-[var(--motion-fast)] ease-[var(--ease-standard)] hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   aria-label="清除课程搜索"
                 >
                   <X className="h-4 w-4" />
@@ -170,7 +170,7 @@ export function CourseListSection({
               variant="ghost"
               disabled={coursesLoading}
               onClick={onRefresh}
-              className="h-10 w-10 shrink-0 rounded-md hover:bg-muted sm:h-9 sm:w-9"
+              className="h-9 w-9 shrink-0 rounded-[var(--radius-md)] hover:bg-muted"
               title="刷新课程"
               aria-label="刷新课程"
             >
@@ -187,7 +187,7 @@ export function CourseListSection({
             </span>
           </div>
         )}
-        <div className="min-w-0 overflow-hidden rounded-lg border border-border">
+        <div className="min-w-0 overflow-hidden rounded-[var(--radius-lg)] border border-border shadow-rest">
           {coursesLoading ? (
             <div className="flex flex-col items-center justify-center p-12 text-sm text-muted-foreground">
               <svg className="loading-spinner" viewBox="0 0 50 50">
@@ -267,7 +267,7 @@ export function CourseListSection({
                   >
                     <div
                       onClick={handleCourseRowClick}
-                      className={`grid cursor-pointer grid-cols-[1.25rem_minmax(0,1fr)_auto] items-center gap-x-3 px-3 py-4 transition-colors duration-150 sm:gap-x-4 sm:px-4 ${
+                      className={`grid cursor-pointer grid-cols-[1.25rem_minmax(0,1fr)_auto] items-center gap-x-[var(--space-3)] px-[var(--space-3)] py-[var(--space-4)] transition-colors duration-[var(--motion-fast)] ease-[var(--ease-standard)] sm:gap-x-[var(--space-4)] sm:px-[var(--space-4)] ${
                         isSelected
                           ? 'bg-muted hover:bg-muted/80'
                           : 'hover:bg-muted/50'
@@ -308,11 +308,11 @@ export function CourseListSection({
                         )}
                         <button
                           type="button"
-                          className="min-w-0 w-full rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="min-w-0 w-full rounded-[var(--radius-sm)] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           onClick={() => onToggleCourseSelection(course.key)}
                           aria-pressed={isSelected}
                         >
-                          <div className="lg:flex lg:min-w-0 lg:items-center lg:gap-6">
+                          <div className="lg:flex lg:min-w-0 lg:items-center lg:gap-[var(--space-6)]">
                             <div className="min-w-0 lg:w-56 lg:shrink-0 xl:w-64">
                               <div className="flex min-w-0 flex-wrap items-center gap-2">
                                 <h3 className="break-words text-sm font-medium text-foreground">
@@ -334,13 +334,13 @@ export function CourseListSection({
                                 </p>
                               )}
                               {processingTaskLabel && (
-                                <span className="mt-1 inline-flex w-fit items-center rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
+                                <span className="mt-1 inline-flex w-fit items-center rounded-[var(--radius-md)] bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
                                   #{processingTaskLabel}
                                 </span>
                               )}
                             </div>
                             {jobRate !== null && jobProgressLabel && (
-                              <div className="mt-2 grid w-full min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 lg:mt-0">
+                              <div className="mt-2 grid w-full min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-[var(--space-3)] lg:mt-0">
                                 <Progress
                                   value={jobRate}
                                   className={`h-1.5 bg-muted ${isProcessing ? 'progress-running' : ''}`}
@@ -359,7 +359,7 @@ export function CourseListSection({
                           variant="ghost"
                           size="sm"
                           onClick={() => onToggleExpandCourse(course.key)}
-                          className={`h-9 w-9 rounded-md p-0 transition-colors duration-150 ${
+                          className={`h-9 w-9 rounded-[var(--radius-md)] p-0 transition-colors duration-[var(--motion-fast)] ease-[var(--ease-standard)] ${
                             isExpanded
                               ? 'bg-muted text-foreground'
                               : 'text-muted-foreground hover:text-foreground'
@@ -369,14 +369,14 @@ export function CourseListSection({
                           title={isExpanded ? '收起章节' : '查看章节'}
                         >
                           <ChevronDown
-                            className={`h-3.5 w-3.5 transition-transform duration-200 ease-standard ${isExpanded ? 'rotate-180' : ''}`}
+                            className={`h-3.5 w-3.5 transition-transform duration-[var(--motion-fast)] ease-[var(--ease-standard)] ${isExpanded ? 'rotate-180' : ''}`}
                           />
                         </Button>
                       </div>
                     </div>
 
                     {isExpanded && (
-                      <div className="border-t border-border/40 bg-muted/20 px-3 pb-3 pl-11 pt-3 sm:px-5 sm:pb-5 sm:pl-12 sm:pt-4 animate-in fade-in-0 duration-240 ease-emphasized">
+                      <div className="border-t border-border/40 bg-muted/20 px-[var(--space-3)] pb-[var(--space-3)] pl-11 pt-[var(--space-3)] sm:px-[var(--space-5)] sm:pb-[var(--space-5)] sm:pl-12 sm:pt-[var(--space-4)] animate-in fade-in-0 duration-[var(--motion-fast)] ease-[var(--ease-emphasized)]">
                         {loadingDetails[course.key] ? (
                           <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
                             <svg

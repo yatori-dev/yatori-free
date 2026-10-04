@@ -74,7 +74,7 @@ export function DashboardOverlays({
               type="button"
               onClick={onCreateTask}
               disabled={creatingTask}
-              className="h-auto min-h-11 max-w-[calc(100vw-2rem)] shrink-0 gap-0.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-floating hover:bg-primary-hover"
+              className="h-auto min-h-11 max-w-[calc(100vw-2rem)] shrink-0 gap-0.5 rounded-[var(--radius-md)] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-floating hover:bg-primary-hover"
               title={submitButtonText ?? `提交 ${selectedCount} 项任务`}
               aria-label={submitButtonText ?? `提交 ${selectedCount} 项任务`}
             >
@@ -92,7 +92,7 @@ export function DashboardOverlays({
             </Button>
             {estimatedTaskDuration && (
               <span
-                className="whitespace-nowrap rounded-md bg-background px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
+                className="whitespace-nowrap rounded-[var(--radius-md)] bg-background px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
                 role="status"
               >
                 预计所需{estimatedTaskDuration}

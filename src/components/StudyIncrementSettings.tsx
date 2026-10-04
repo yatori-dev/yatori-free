@@ -77,12 +77,12 @@ function StepperField({
 
   return (
     <section
-      className="space-y-2 rounded-lg border border-border/70 bg-card p-2.5 shadow-xs sm:space-y-3 sm:rounded-xl sm:p-4"
+      className="space-y-2 rounded-[var(--radius-lg)] border border-border/70 bg-card p-2.5 shadow-xs sm:space-y-3 sm:rounded-[var(--radius-xl)] sm:p-4"
       aria-labelledby={`${id}-label`}
     >
       <div className="flex items-start justify-between gap-2 sm:gap-3">
         <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary sm:size-8 sm:rounded-lg">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-primary/10 text-primary sm:size-8 sm:rounded-[var(--radius-lg)]">
             <Icon className="h-4 w-4" />
           </span>
           <div className="min-w-0">
@@ -288,7 +288,7 @@ function StudyIncrementDialog({
         <form onSubmit={save} className="contents">
           <div className="min-h-0 min-w-0 space-y-2.5 overflow-x-hidden overflow-y-auto px-3 py-3 sm:space-y-3 sm:px-5 sm:py-4">
             {!courseDetailsReady ? (
-              <div className="flex min-h-56 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/70 bg-muted/20 p-6 text-center">
+              <div className="flex min-h-56 flex-col items-center justify-center gap-3 rounded-[var(--radius-xl)] border border-dashed border-border/70 bg-muted/20 p-6 text-center">
                 {courseDetailsLoading ? (
                   <>
                     <LoaderCircle className="h-5 w-5 animate-spin text-primary" />
@@ -309,7 +309,7 @@ function StudyIncrementDialog({
               <>
                 {!studyStats?.available && (
                   <div
-                    className="flex items-start gap-2 rounded-lg bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground"
+                    className="flex items-start gap-2 rounded-[var(--radius-lg)] bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground"
                     role="status"
                   >
                     <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
