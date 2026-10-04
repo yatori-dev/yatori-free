@@ -242,6 +242,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [taskStartConfirmOpen, setTaskStartConfirmOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [coursesError, setCoursesError] = useState<string | null>(null);
@@ -978,6 +979,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       >
         <DashboardNavigation
           mode="desktop"
+          collapsed={sidebarCollapsed}
           activeTab={settingsDialogOpen ? 'settings' : activeTab}
           activeTaskCount={taskCounts.active}
           appVersion={appVersion}
@@ -988,6 +990,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             appVersion={appVersion}
             session={session}
             accountMenuOpen={accountMenuOpen}
+            sidebarCollapsed={sidebarCollapsed}
+            onSidebarToggle={() => setSidebarCollapsed((collapsed) => !collapsed)}
             taskCounts={taskCounts}
             tasks={tasks}
             filteredTasks={filteredTasks}

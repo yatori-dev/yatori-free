@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from 'react';
-import { Bell, LogOut } from 'lucide-react';
+import { Bell, LogOut, PanelLeft } from 'lucide-react';
 import { ThemeToggleButton } from './ThemeToggleButton';
 import { BrandMark } from '@/components/BrandMark';
 import { Button } from '@/components/ui/button';
@@ -38,6 +38,8 @@ interface DashboardHeaderProps {
     avatarUrl?: string | null;
   };
   accountMenuOpen: boolean;
+  sidebarCollapsed: boolean;
+  onSidebarToggle: () => void;
   taskCounts: { active: number; completed: number };
   tasks: Task[];
   filteredTasks: Task[];
@@ -57,6 +59,8 @@ export function DashboardHeader({
   appVersion,
   session,
   accountMenuOpen,
+  sidebarCollapsed,
+  onSidebarToggle,
   onAccountMenuChange,
   onLogoutRequest,
 }: DashboardHeaderProps) {
@@ -77,12 +81,27 @@ export function DashboardHeader({
       setReadAnnouncementContent(announcementMarkdown);
       try {
         localStorage.setItem(announcementReadKey, announcementMarkdown);
-      } catch {}}
+      } catch {}
     }
   };
 
   return (
     <header className="sticky top-0 z-40 flex min-h-14 shrink-0 items-center justify-between gap-[var(--space-3)] border-b border-border bg-background px-[var(--space-3)] py-2 sm:px-[var(--space-5)] lg:px-[var(--space-6)]">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        data-sidebar="trigger"
+        data-slot="sidebar-trigger"
+        className="hidden size-7 shrink-0 text-muted-foreground hover:text-foreground lg:inline-flex"
+        onClick={onSidebarToggle}
+        aria-controls="dashboard-sidebar"
+        aria-expanded={!sidebarCollapsed}
+        aria-label={sidebarCollapsed ? '展开侧栏' : '折叠侧栏'}
+        title={sidebarCollapsed ? '展开侧栏' : '折叠侧栏'}
+      >
+        <PanelLeft className="size-4" aria-hidden="true" />
+      </Button>
       <div className="flex min-w-0 flex-1 items-center lg:hidden">
         <a
           href={YATORI_REPOSITORY_URL}
