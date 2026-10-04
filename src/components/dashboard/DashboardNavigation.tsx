@@ -123,7 +123,7 @@ function DesktopNavigation({
         collapsed={collapsed}
       />
       <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3" aria-label="主导航">
-        {desktopItems.slice(0, 4).map((item) => (
+        {desktopItems.slice(0, 3).map((item) => (
           <NavigationItem
             key={item.id}
             label={item.label}
@@ -144,7 +144,7 @@ function DesktopNavigation({
         <div className="my-3 border-t border-border" />
         <NavigationItem
           label="设置"
-          icon={desktopItems[4].icon}
+          icon={desktopItems[3].icon}
           collapsed={collapsed}
           active={activeTab === 'settings'}
           onClick={() => onTabChange('settings')}
