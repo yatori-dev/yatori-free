@@ -1,8 +1,5 @@
-import { useState } from 'react';
 import {
   Activity,
-  ChevronLeft,
-  ChevronRight,
   type LucideIcon,
 } from 'lucide-react';
 import { BrandMark } from '@/components/BrandMark';
@@ -20,6 +17,7 @@ interface DashboardNavigationProps {
   activeTab: MobileDashboardTabId;
   activeTaskCount: number;
   appVersion?: string;
+  collapsed?: boolean;
   onTabChange: (tab: MobileDashboardTabId) => void;
 }
 
@@ -84,7 +82,13 @@ function Brand({
         aria-label="在 GitHub 查看 Yatori 学习通服务源码"
       >
         {collapsed ? (
-          <BrandMark compact className="text-2xl" />
+          <img
+            src="/favicon.svg"
+            alt=""
+            width={28}
+            height={28}
+            className="size-7 shrink-0 object-contain"
+          />
         ) : (
           <BrandMark className="shrink-0 text-2xl" />
         )}
@@ -105,12 +109,12 @@ function DesktopNavigation({
   activeTab,
   activeTaskCount,
   appVersion,
+  collapsed = false,
   onTabChange,
 }: Omit<DashboardNavigationProps, 'mode'>) {
-  const [collapsed, setCollapsed] = useState(false);
-
   return (
     <aside
+      id="dashboard-sidebar"
       className={`relative hidden h-screen shrink-0 flex-col border-r border-border bg-sidebar text-sidebar-foreground transition-[width] duration-[var(--motion-fast)] ease-[var(--ease-standard)] motion-reduce:transition-none lg:flex ${collapsed ? 'w-16' : 'w-64'}`}
       aria-label="应用侧边栏"
     >
@@ -118,15 +122,6 @@ function DesktopNavigation({
         appVersion={appVersion}
         collapsed={collapsed}
       />
-      <button
-        type="button"
-        onClick={() => setCollapsed((value) => !value)}
-        className="absolute -right-3 top-4 z-50 flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-xs transition-colors duration-[var(--motion-fast)] ease-[var(--ease-standard)] hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        aria-label={collapsed ? '展开侧栏' : '折叠侧栏'}
-        title={collapsed ? '展开侧栏' : '折叠侧栏'}
-      >
-        {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
-      </button>
       <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3" aria-label="主导航">
         {desktopItems.slice(0, 4).map((item) => (
           <NavigationItem
