@@ -57,7 +57,7 @@
 - ![Go 1.27.1](https://img.shields.io/badge/Go&nbsp;1.27.1-net/http-blue.svg?style=flat-square&logo=go&logoColor=white)
 - ![SQLite](https://img.shields.io/badge/SQLite-3-yellow.svg?style=flat-square&logo=sqlite&logoColor=white)
 - ![systemd](https://img.shields.io/badge/systemd-257-red.svg?style=flat-square&logo=systemd&logoColor=white)
-- ![Cloudflare Tunnel](https://img.shields.io/badge/Cloudflare%20Tunnel-2026.9.3-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
+- ![Cloudflare Tunnel](https://img.shields.io/badge/Cloudflare%20Tunnel-2026.10.0-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
 
 **后端以闭源方式提供网络服务，该仓库仅提供网页服务的前端面板**
 
@@ -69,6 +69,7 @@
 | [chaoxing_tool](https://github.com/liuyunfz/chaoxing_tool) | 学习通课程文档资源下载参考实现 | GPL-3.0 |
 | [CxKitty](https://github.com/MMitsuha/CxKitty) | 学习通扫码登录协议参考 | GPL-3.0 |
 | [shadcn-admin](https://github.com/satnaing/shadcn-admin) | UI 视觉效果参考 | MIT |
+| [N1搜题](https://tk.n1t.cn/) | **由社区赞助的题库！** | ❤️ |
 
 ## 声明
 
