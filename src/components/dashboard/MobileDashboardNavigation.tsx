@@ -30,12 +30,12 @@ export function MobileDashboardNavigation({
           className="absolute inset-y-0 left-0 w-1/3"
           style={{
             transform: `translate3d(${Math.max(activeMobileIndex, 0) * 100}%, 0, 0)`,
-            transition: 'transform var(--motion-fast) var(--ease-emphasized)',
+            transition: 'transform var(--duration-fast) var(--ease-smooth-out)',
           }}
         >
           <span
             key={activeMobileIndex}
-            className="absolute left-1/2 top-px h-7 w-10 -translate-x-1/2 rounded-full bg-primary-container/70 animate-in fade-in-0 duration-240 ease-emphasized motion-reduce:animate-none"
+            className="absolute left-1/2 top-px h-7 w-10 -translate-x-1/2 rounded-full bg-primary-container/70 animate-in fade-in-0 duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] motion-reduce:animate-none"
           />
         </span>
       </span>
@@ -54,14 +54,14 @@ export function MobileDashboardNavigation({
                 onTabChange(item.id);
               }
             }}
-            className={`relative z-10 flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+            className={`relative z-10 flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-full transition-colors duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             aria-current={active ? 'page' : undefined}
             aria-label={item.id === 'tasks' && activeTaskCount > 0 ? `任务，${activeTaskCount} 项进行中` : item.label}
           >
             <span className="relative flex h-7 w-10 items-center justify-center rounded-full">
               <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
               {showTaskBadge && (
-                <span className="absolute -right-1 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-mono text-xs font-bold text-primary-foreground ring-2 ring-card animate-in zoom-in-95 duration-240 ease-emphasized motion-reduce:animate-none" aria-hidden="true">
+                <span className="absolute -right-1 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-mono text-xs font-bold text-primary-foreground ring-2 ring-card animate-in zoom-in-95 duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] motion-reduce:animate-none" aria-hidden="true">
                   {activeTaskCount > 99 ? '99+' : activeTaskCount}
                 </span>
               )}

@@ -97,7 +97,7 @@ export default function TaskDashboardCharts({ tasks, onSelectGroup }: TaskDashbo
           </div>
           <div className="min-w-0 flex-1 space-y-1 xl:w-full">
             {distribution.map((group) => (
-              <button key={group.key} type="button" onClick={() => onSelectGroup(group.key)} title={group.key === 'attention' ? '失败或部分完成' : `查看${group.label}`} className="flex min-h-9 w-full items-center gap-2 rounded-[var(--radius-md)] px-2 text-xs transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`查看${group.label}任务，${group.count} 项`}>
+              <button key={group.key} type="button" onClick={() => onSelectGroup(group.key)} title={group.key === 'attention' ? '失败或部分完成' : `查看${group.label}`} className="flex min-h-9 w-full items-center gap-2 rounded-[var(--radius-md)] px-2 text-xs transition-colors duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`查看${group.label}任务，${group.count} 项`}>
                 <span className="h-2.5 w-2.5 shrink-0 rounded-[var(--radius-sm)]" style={{ backgroundColor: group.color }} aria-hidden="true" />
                 <span className="min-w-0 flex-1 text-left">{group.label}</span>
                 <span className="font-medium tabular-nums">{group.count}</span>

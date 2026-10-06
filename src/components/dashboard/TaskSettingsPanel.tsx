@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import {
   AlarmClock,
@@ -51,7 +51,19 @@ export function TaskSettingsPanel({
 }: TaskSettingsPanelProps) {
   const [bypassConfirmOpen, setBypassConfirmOpen] = useState(false);
   const [activeSettingSection, setActiveSettingSection] = useState('behavior');
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches,
+  );
   const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    const handleChange = () => setIsDesktop(mediaQuery.matches);
+    handleChange();
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
   const changeSection = (value: string) => {
     if (value !== activeSettingSection) {
       changeView(() => setActiveSettingSection(value), 'settings');
@@ -73,36 +85,18 @@ export function TaskSettingsPanel({
         <Tabs
           value={activeSettingSection}
           onValueChange={changeSection}
-          orientation="vertical"
-          className="min-h-0 min-w-0 flex-1 flex-col gap-0 md:flex-row"
+          orientation={isDesktop ? 'vertical' : 'horizontal'}
+          className="min-w-0 flex-1 flex-col gap-3 md:flex-row md:gap-0"
         >
-          <div className="shrink-0 border-b px-[var(--space-4)] py-[var(--space-3)] md:hidden">
-            <Select
-              value={activeSettingSection}
-              onValueChange={changeSection}
-            >
-              <SelectTrigger aria-label="设置分类" className="w-full data-[size=default]:h-11">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {settingSections.map(({ value, label, Icon }) => (
-                  <SelectItem key={value} value={value}>
-                    <Icon aria-hidden="true" className="size-4" />
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
           <TabsList
             aria-label="设置分类"
-            className="hidden w-44 shrink-0 items-stretch justify-start gap-1 self-stretch overflow-y-auto rounded-none border-r bg-muted/30 p-[var(--space-3)] group-data-vertical/tabs:h-auto md:flex"
+            className="flex w-full shrink-0 items-stretch justify-start gap-0 rounded-[var(--radius-lg)] bg-muted p-1 text-xs font-medium text-muted-foreground group-data-horizontal/tabs:h-auto md:w-44 md:flex-col md:gap-1 md:self-stretch md:rounded-none md:bg-muted/30 md:p-[var(--space-3)] md:text-sm md:border-r group-data-vertical/tabs:h-auto"
           >
             {settingSections.map(({ value, label, Icon }) => (
               <TabsTrigger
                 key={value}
                 value={value}
-                className="h-11 w-full flex-none justify-start gap-2 rounded-[var(--radius-md)] px-[var(--space-3)] text-sm font-medium hover:bg-muted data-active:bg-muted data-active:text-foreground data-active:shadow-none"
+                className="relative h-10 min-w-0 flex-1 justify-center gap-1.5 rounded-[var(--radius-md)] border-0 px-2 text-xs font-medium text-muted-foreground transition-colors duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] hover:text-foreground focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-active:text-foreground md:h-11 md:w-full md:flex-none md:justify-start md:gap-2 md:px-[var(--space-3)] md:text-sm"
               >
                 <Icon aria-hidden="true" className="size-4" />
                 {label}
@@ -113,7 +107,7 @@ export function TaskSettingsPanel({
           <TabsContent
             value="behavior"
             forceMount
-            className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-[var(--space-5)] [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:p-[var(--space-6)] data-[state=inactive]:hidden"
+            className="min-w-0 flex-1 overflow-visible overscroll-contain p-[var(--space-4)] [overflow-wrap:anywhere] md:min-h-0 md:overflow-y-auto sm:p-[var(--space-6)] data-[state=inactive]:hidden"
           >
             <div className="space-y-[var(--space-6)]">
               <div className="border-b pb-[var(--space-4)]">
@@ -150,7 +144,7 @@ export function TaskSettingsPanel({
           <TabsContent
             value="appearance"
             forceMount
-            className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-[var(--space-5)] [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:p-[var(--space-6)] data-[state=inactive]:hidden"
+            className="min-w-0 flex-1 overflow-visible overscroll-contain p-[var(--space-4)] [overflow-wrap:anywhere] md:min-h-0 md:overflow-y-auto sm:p-[var(--space-6)] data-[state=inactive]:hidden"
           >
             <div className="space-y-[var(--space-6)]">
               <div className="border-b pb-[var(--space-4)]">
@@ -222,7 +216,7 @@ export function TaskSettingsPanel({
           <TabsContent
             value="notifications"
             forceMount
-            className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-[var(--space-5)] [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:p-[var(--space-6)] data-[state=inactive]:hidden"
+            className="min-w-0 flex-1 overflow-visible overscroll-contain p-[var(--space-4)] [overflow-wrap:anywhere] md:min-h-0 md:overflow-y-auto sm:p-[var(--space-6)] data-[state=inactive]:hidden"
           >
             <div className="space-y-[var(--space-6)]">
               <div className="border-b pb-[var(--space-4)]">
