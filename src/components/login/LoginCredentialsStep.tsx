@@ -24,6 +24,7 @@ import {
   login,
   type LoginData,
   type SMSSessionData,
+  type SMSTurnstileConfig,
 } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -97,12 +98,13 @@ interface TurnstileWidgetHandle {
 
 interface TurnstileWidgetProps {
   siteKey: string;
+  action: SMSTurnstileConfig['action'];
   resetSignal: number;
   onToken: (token: string) => void;
 }
 
 const TurnstileWidget = forwardRef<TurnstileWidgetHandle, TurnstileWidgetProps>(
-  function TurnstileWidget({ siteKey, resetSignal, onToken }, ref) {
+  function TurnstileWidget({ siteKey, action, resetSignal, onToken }, ref) {
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetIdRef = useRef<string | number | undefined>(undefined);
 
@@ -125,7 +127,7 @@ const TurnstileWidget = forwardRef<TurnstileWidgetHandle, TurnstileWidgetProps>(
           containerRef.current.replaceChildren();
           widgetIdRef.current = window.turnstile.render(containerRef.current, {
             sitekey: siteKey,
-            action: 'sms_send',
+            action,
             callback: onToken,
             'expired-callback': reset,
             'error-callback': reset,
@@ -140,7 +142,7 @@ const TurnstileWidget = forwardRef<TurnstileWidgetHandle, TurnstileWidgetProps>(
           widgetIdRef.current = undefined;
         }
       };
-    }, [onToken, reset, siteKey]);
+    }, [action, onToken, reset, siteKey]);
 
     useEffect(() => {
       if (resetSignal > 0) {
@@ -186,12 +188,14 @@ export function LoginCredentialsStep({
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [showSendSuccess, setShowSendSuccess] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [smsConfig, setSMSConfig] = useState<{ enabled: boolean; siteKey?: string } | null>(null);
+  const [smsConfig, setSMSConfig] = useState<SMSTurnstileConfig | null>(null);
+  const [smsConfigError, setSMSConfigError] = useState('');
+  const [smsConfigRetry, setSMSConfigRetry] = useState(0);
   const [smsTurnstileToken, setSMSTurnstileToken] = useState('');
   const [turnstileResetSignal, setTurnstileResetSignal] = useState(0);
   const turnstileRef = useRef<TurnstileWidgetHandle>(null);
   const configuredSiteKey = smsConfig?.enabled ? smsConfig.siteKey : undefined;
-  const isTurnstilePreview = import.meta.env.DEV && !configuredSiteKey;
+  const isTurnstilePreview = import.meta.env.DEV && smsConfig?.enabled === false;
   const turnstileSiteKey = configuredSiteKey ||
     (isTurnstilePreview ? TURNSTILE_PREVIEW_SITE_KEY : undefined);
   const handleTurnstileToken = useCallback((token: string) => {
@@ -200,21 +204,25 @@ export function LoginCredentialsStep({
 
   useEffect(() => {
     let cancelled = false;
-    void getSMSConfig()
+    const controller = new AbortController();
+    void getSMSConfig({ signal: controller.signal })
       .then((response) => {
         if (!cancelled) {
-          setSMSConfig(response.data);
+          setSMSConfig(response.data.turnstile);
         }
       })
-      .catch(() => {
+      .catch((error) => {
         if (!cancelled) {
-          setSMSConfig({ enabled: false });
+          setSMSConfigError(
+            getUserFacingErrorMessage(error, '短信验证配置读取失败，请重试'),
+          );
         }
       });
     return () => {
       cancelled = true;
+      controller.abort();
     };
-  }, []);
+  }, [smsConfigRetry]);
 
   useEffect(() => {
     if (retrySeconds <= 0) {
@@ -238,15 +246,19 @@ export function LoginCredentialsStep({
   }, [showSendSuccess]);
 
   const isBusy = isSendingCode || isLoggingIn;
-  const sendCodeButtonLabel = isSendingCode
-    ? '正在发送验证码'
-    : showSendSuccess
-      ? '验证码已发送'
-      : retrySeconds > 0
-        ? `${retrySeconds} 秒后可重新发送验证码`
-        : smsSession
-          ? '重新发送验证码'
-          : '获取验证码';
+  const isLoadingSMSConfig = !smsConfig && !smsConfigError;
+  const displayedSMSError = smsError || smsConfigError;
+  const sendCodeButtonLabel = isLoadingSMSConfig
+    ? '正在读取短信验证配置'
+    : isSendingCode
+      ? '正在发送验证码'
+      : showSendSuccess
+        ? '验证码已发送'
+        : retrySeconds > 0
+          ? `${retrySeconds} 秒后可重新发送验证码`
+          : smsSession
+            ? '重新发送验证码'
+            : '获取验证码';
 
   const handleMethodChange = (value: string) => {
     const nextMethod = value as LoginMethod;
@@ -256,7 +268,7 @@ export function LoginCredentialsStep({
   };
 
   const handleSendCode = async () => {
-    if (isTurnstilePreview || isBusy || retrySeconds > 0) {
+    if (!smsConfig || isTurnstilePreview || isBusy || retrySeconds > 0) {
       return;
     }
 
@@ -462,6 +474,7 @@ export function LoginCredentialsStep({
               <TurnstileWidget
                 ref={turnstileRef}
                 siteKey={turnstileSiteKey}
+                action={smsConfig?.action ?? 'sms_send'}
                 resetSignal={turnstileResetSignal}
                 onToken={handleTurnstileToken}
               />
@@ -475,9 +488,9 @@ export function LoginCredentialsStep({
                 autoComplete="one-time-code"
                 inputMode="numeric"
                 placeholder="验证码"
-                aria-invalid={Boolean(smsError)}
+                aria-invalid={Boolean(displayedSMSError)}
                 aria-describedby={
-                  smsError
+                  displayedSMSError
                     ? 'sms-code-error'
                     : smsSession
                       ? 'sms-code-status'
@@ -495,12 +508,12 @@ export function LoginCredentialsStep({
                 type="button"
                 variant="outline"
                 className="h-11 w-28 shrink-0 gap-1.5 rounded-[var(--radius-md)] px-2"
-                disabled={isTurnstilePreview || isBusy || retrySeconds > 0}
+                disabled={!smsConfig || isTurnstilePreview || isBusy || retrySeconds > 0}
                 onClick={() => void handleSendCode()}
                 aria-label={sendCodeButtonLabel}
                 title={sendCodeButtonLabel}
               >
-                {isSendingCode ? (
+                {isLoadingSMSConfig || isSendingCode ? (
                   <LoaderCircle
                     className="size-4 animate-spin motion-reduce:animate-none"
                     aria-hidden="true"
@@ -513,26 +526,49 @@ export function LoginCredentialsStep({
                   <SendHorizontal className="size-4" aria-hidden="true" />
                 )}
                 <span className="tabular-nums">
-                  {isSendingCode
-                    ? '发送中...'
-                    : showSendSuccess
-                      ? '已发送'
-                      : retrySeconds > 0
-                        ? `${retrySeconds} 秒`
-                        : smsSession
-                          ? '重新发送'
-                          : '获取验证码'}
+                  {isLoadingSMSConfig
+                    ? '加载中...'
+                    : isSendingCode
+                      ? '发送中...'
+                      : showSendSuccess
+                        ? '已发送'
+                        : retrySeconds > 0
+                          ? `${retrySeconds} 秒`
+                          : smsSession
+                            ? '重新发送'
+                            : '获取验证码'}
                 </span>
               </Button>
             </div>
-            {smsError ? (
-              <p
-                id="sms-code-error"
-                role="alert"
-                className="ml-1 text-xs text-danger"
-              >
-                {smsError}
-              </p>
+            {displayedSMSError ? (
+              <div className="flex items-start gap-2">
+                <p
+                  id="sms-code-error"
+                  role="alert"
+                  className="ml-1 min-w-0 flex-1 text-xs text-danger"
+                >
+                  {displayedSMSError}
+                </p>
+                {smsConfigError && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="重试读取短信验证配置"
+                    title="重试读取短信验证配置"
+                    disabled={isBusy}
+                    onClick={() => {
+                      setSMSError('');
+                      setSMSConfig(null);
+                      setSMSConfigError('');
+                      setSMSTurnstileToken('');
+                      setSMSConfigRetry((value) => value + 1);
+                    }}
+                  >
+                    <RotateCw className="size-4" aria-hidden="true" />
+                  </Button>
+                )}
+              </div>
             ) : smsSession ? (
               <p
                 id="sms-code-status"

@@ -38,12 +38,11 @@ export function TaskSettingsSnapshot({
   const chapterStrategyLabel =
     coursesCustom.doChapterTest === false ? '仅视频' : '自动答题';
   const aggressiveModeLabel =
-    config?.bypassDailyStudyLimit === true || config?.aggressiveMode === true
+    config?.executionMode === 'aggressive'
       ? '已启用'
-      : config?.bypassDailyStudyLimit === undefined &&
-          config?.aggressiveMode === undefined
-        ? '未记录'
-        : '未启用';
+      : config?.executionMode === 'normal'
+        ? '未启用'
+        : '未记录';
 
   return (
     <div className="mt-1 min-w-0 w-full space-y-3 border-t border-border pt-4 text-xs text-muted-foreground">

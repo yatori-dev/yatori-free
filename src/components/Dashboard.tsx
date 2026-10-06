@@ -716,7 +716,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         accountId: account.id,
         kind: 'task_points',
         targets,
-        bypassDailyStudyLimit,
+        executionMode: bypassDailyStudyLimit ? 'aggressive' : 'normal',
         coursesCustom: customConfig,
       });
 

@@ -329,6 +329,8 @@ export interface TaskListResponseData {
 
 export type TaskKind = 'task_points' | 'works' | 'exams';
 
+export type TaskExecutionMode = 'normal' | 'aggressive';
+
 export interface TaskTarget {
   classId: string;
   itemIds: string[];
@@ -337,7 +339,7 @@ export interface TaskTarget {
 interface CreateTaskBase {
   accountId: string;
   autoResume?: boolean;
-  bypassDailyStudyLimit?: boolean;
+  executionMode?: TaskExecutionMode;
   coursesCustom?: CoursesCustom;
 }
 
@@ -400,9 +402,14 @@ export interface CreateSMSSessionRequest {
   turnstileToken?: string;
 }
 
-export interface SMSConfig {
+export interface SMSTurnstileConfig {
   enabled: boolean;
-  siteKey?: string;
+  siteKey: string;
+  action: 'sms_send';
+}
+
+export interface SMSConfig {
+  turnstile: SMSTurnstileConfig;
 }
 
 export interface ExchangeSMSSessionRequest {
@@ -452,8 +459,7 @@ export type TaskSummary = Omit<Task, 'configSnapshot'>;
 export interface TaskConfigSnapshot {
   account?: string;
   accountType?: string;
-  aggressiveMode?: boolean;
-  bypassDailyStudyLimit?: boolean;
+  executionMode?: TaskExecutionMode;
   coursesCustom?: CoursesCustom;
   kind?: TaskKind;
   targets?: TaskTarget[];
@@ -495,10 +501,11 @@ export function getTaskConfigSnapshot(configSnapshot: Task['configSnapshot']) {
     snapshot.account = configSnapshot.account;
   if (typeof configSnapshot.accountType === 'string')
     snapshot.accountType = configSnapshot.accountType;
-  if (typeof configSnapshot.aggressiveMode === 'boolean')
-    snapshot.aggressiveMode = configSnapshot.aggressiveMode;
-  if (typeof configSnapshot.bypassDailyStudyLimit === 'boolean')
-    snapshot.bypassDailyStudyLimit = configSnapshot.bypassDailyStudyLimit;
+  if (
+    configSnapshot.executionMode === 'normal' ||
+    configSnapshot.executionMode === 'aggressive'
+  )
+    snapshot.executionMode = configSnapshot.executionMode;
   if (isOptionalTaskKind(configSnapshot.kind))
     snapshot.kind = configSnapshot.kind;
   if (Array.isArray(configSnapshot.targets)) {
@@ -813,53 +820,6 @@ export async function getCurrentSession() {
   } satisfies AuthSession;
 }
 
-export interface SignLog {
-  id: string;
-  courseName?: string;
-  signName?: string;
-  activityStatus?: number;
-  activityTime?: string;
-  personalStatus?: number | null;
-  signInActivityId?: string;
-  signOutActivityId?: string;
-  signOutPublishAt?: string | null;
-  signType?: string;
-  signedCount?: number | null;
-  submittedAt?: string;
-  totalCount?: number | null;
-  createdAt: string;
-}
-
-export interface SignHistoryError {
-  classId: string;
-  courseName: string;
-  error: string;
-}
-
-export interface SignMonitorStatus {
-  id: string;
-  ownerUserId?: string;
-  accountId: string;
-  enabled: boolean;
-  status: 'stopped' | 'running' | 'reconnecting' | 'failed';
-  pollIntervalSeconds?: number;
-  maxRunSeconds?: number;
-  lastError?: string;
-  startedAt?: string | null;
-  stoppedAt?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
-  discoveryMode?: string;
-  discoverySource?: string;
-  nextRetryAt?: string | null;
-  pendingReason?: string;
-}
-
-export interface SignLogsResponseData {
-  logs: SignLog[];
-  errors: SignHistoryError[];
-}
-
 export function login(payload: LoginRequest) {
   return apiRequest<LoginData>(
     '/auth/login',
@@ -887,7 +847,19 @@ export function createSMSSession(
 }
 
 export function getSMSConfig(options?: ApiRequestOptions) {
-  return apiRequest<SMSConfig>('/auth/sms-config', options, true);
+  return apiRequest<SMSConfig>('/auth/sms-config', options, true).then((response) => {
+    const config = isRecord(response.data) ? response.data.turnstile : undefined;
+    if (
+      !isRecord(config) ||
+      typeof config.enabled !== 'boolean' ||
+      typeof config.siteKey !== 'string' ||
+      config.action !== 'sms_send' ||
+      (config.enabled && !config.siteKey.trim())
+    ) {
+      throw new Error('短信验证配置异常，请重试');
+    }
+    return response;
+  });
 }
 
 export function exchangeSMSSession(
@@ -1127,34 +1099,6 @@ export function updateDeadlineEmailNotification(
       method: 'PUT',
       body: JSON.stringify(payload),
     },
-    true,
-  );
-}
-
-export function startSignMonitor(accountId: string) {
-  return apiRequest<SignMonitorStatus>(
-    `/accounts/${encodeApiPathSegment(accountId)}/sign-monitor/start`,
-    {
-      method: 'POST',
-    },
-    true,
-  );
-}
-
-export function stopSignMonitor(accountId: string) {
-  return apiRequest<SignMonitorStatus>(
-    `/accounts/${encodeApiPathSegment(accountId)}/sign-monitor/stop`,
-    {
-      method: 'POST',
-    },
-    true,
-  );
-}
-
-export function getSignLogs(accountId: string) {
-  return apiRequest<SignLogsResponseData>(
-    `/accounts/${encodeApiPathSegment(accountId)}/sign-logs`,
-    undefined,
     true,
   );
 }
