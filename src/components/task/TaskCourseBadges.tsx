@@ -1,6 +1,5 @@
 import { BookOpen, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 
 interface TaskCourseBadgesProps {
   courses?: string[];
@@ -24,20 +23,19 @@ export function TaskCourseBadges({
           课程范围未返回
         </span>
       ) : courses.length === 0 ? (
-        <Badge variant="secondary" className="text-xs">
+        <span className="text-xs text-muted-foreground">
           未选择课程
-        </Badge>
+        </span>
       ) : (
         <>
           {visible?.map((name, index) => (
-            <Badge
+            <span
               key={`${name}-${index}`}
-              variant="secondary"
               title={name}
-              className="min-w-0 max-w-full font-normal sm:max-w-[200px]"
+              className="min-w-0 max-w-full truncate text-xs text-foreground sm:max-w-[200px]"
             >
-              <span className="truncate">{name}</span>
-            </Badge>
+              {index > 0 && <span className="mr-1.5 text-muted-foreground" aria-hidden="true">/</span>}{name}
+            </span>
           ))}
           {hiddenCount > 0 && (
             <Button

@@ -1,5 +1,4 @@
 import { useMemo, type RefObject } from 'react';
-import { Activity } from 'lucide-react';
 import { TabsContent } from '@/components/ui/tabs';
 import type {
   CourseDetails,
@@ -37,9 +36,7 @@ interface DashboardMainContentProps {
   courseDetailsMap: Record<string, CourseDetails>;
   loadingDetails: Record<string, boolean>;
   stoppingTaskId: string | null;
-  taskCounts: { active: number; completed: number };
   tasks: Task[];
-  filteredTasks: Task[];
   taskFilter: 'active' | 'completed';
   tasksLoading: boolean;
   taskSnapshots: Record<string, TaskProgressSnapshot>;
@@ -84,9 +81,7 @@ export function DashboardMainContent({
   courseDetailsMap,
   loadingDetails,
   stoppingTaskId,
-  taskCounts,
   tasks,
-  filteredTasks,
   taskFilter,
   tasksLoading,
   taskSnapshots,
@@ -254,17 +249,9 @@ export function DashboardMainContent({
 
             <TabsContent value="tasks" className="m-0 min-h-full outline-none">
               <section className="min-h-full min-w-0" aria-label="任务">
-                <div className="border-b border-border pb-4">
-                  <h2 className="flex items-center gap-2 text-base font-semibold">
-                    <Activity className="h-4 w-4 text-primary" />
-                    任务
-                  </h2>
-                </div>
                 <div className="flex min-h-[28rem] min-w-0 flex-col">
                   <TaskStatusContent
                     tasks={tasks}
-                    filteredTasks={filteredTasks}
-                    taskCounts={taskCounts}
                     taskFilter={taskFilter}
                     tasksLoading={tasksLoading}
                     taskSnapshots={taskSnapshots}

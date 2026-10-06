@@ -1019,9 +1019,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             courseDetailsMap={courseDetailsMap}
             loadingDetails={loadingDetails}
             stoppingTaskId={stoppingTaskId}
-            taskCounts={taskCounts}
             tasks={tasks}
-            filteredTasks={filteredTasks}
             taskFilter={taskFilter}
             tasksLoading={tasksLoading}
             taskSnapshots={taskSnapshots}
