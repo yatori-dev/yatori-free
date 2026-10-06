@@ -47,7 +47,9 @@ export function readQRLoginSession() {
     if (isStoredQRLoginSession(parsed) && !isExpired(parsed.expiresAt)) {
       return parsed;
     }
-  } catch {}
+  } catch {
+    // Invalid session data is removed by the cleanup below.
+  }
 
   sessionStorage.removeItem(QR_LOGIN_SESSION_KEY);
   return null;
