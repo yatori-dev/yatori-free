@@ -16,7 +16,6 @@ interface TaskSettingsSnapshotProps {
   }>;
   workAutoSubmitLabel: string;
   examAutoSubmitLabel: string;
-  enabledAutomationLabels: string[];
 }
 
 export function TaskSettingsSnapshot({
@@ -26,8 +25,26 @@ export function TaskSettingsSnapshot({
   studyIncrementSettings,
   workAutoSubmitLabel,
   examAutoSubmitLabel,
-  enabledAutomationLabels,
 }: TaskSettingsSnapshotProps) {
+  const showChapterStrategy =
+    config?.kind === 'task_points' ||
+    (config?.kind === undefined && coursesCustom.doChapterTest !== false);
+  const showWorkStrategy =
+    config?.kind === 'works' ||
+    (config?.kind === undefined && coursesCustom.doWork);
+  const showExamStrategy =
+    config?.kind === 'exams' ||
+    (config?.kind === undefined && coursesCustom.doExam);
+  const chapterStrategyLabel =
+    coursesCustom.doChapterTest === false ? '仅视频' : '自动答题';
+  const aggressiveModeLabel =
+    config?.bypassDailyStudyLimit === true || config?.aggressiveMode === true
+      ? '已启用'
+      : config?.bypassDailyStudyLimit === undefined &&
+          config?.aggressiveMode === undefined
+        ? '未记录'
+        : '未启用';
+
   return (
     <div className="mt-1 min-w-0 w-full space-y-3 border-t border-border pt-4 text-xs text-muted-foreground">
       <div className="flex items-center gap-1.5 border-b border-border/50 pb-1.5 text-xs font-semibold text-foreground">
@@ -35,33 +52,23 @@ export function TaskSettingsSnapshot({
         <span>任务配置</span>
       </div>
       <div className="space-y-2 font-sans">
-        {config?.kind && (
-          <DetailRow label="任务类型">
-            {config.kind === 'works'
-              ? '作业'
-              : config.kind === 'exams'
-                ? '考试'
-                : '章节任务'}
+        <DetailRow label="暴力模式">
+          {aggressiveModeLabel}
+        </DetailRow>
+        {showChapterStrategy && (
+          <DetailRow label={config?.kind ? '答题策略' : '章节答题策略'}>
+            {chapterStrategyLabel}
           </DetailRow>
         )}
-        {(config?.kind === 'task_points' ||
-          (config?.kind === undefined &&
-            coursesCustom.doChapterTest !== false)) &&
-          config?.bypassDailyStudyLimit !== undefined && (
-            <DetailRow label="每日学时限制">
-              {config.bypassDailyStudyLimit ? '已绕过' : '正常限制'}
-            </DetailRow>
-          )}
-        {enabledAutomationLabels.length > 0 && (
-          <DetailRow label="自动答题">
-            {enabledAutomationLabels.join('、')}
+        {showWorkStrategy && (
+          <DetailRow label={config?.kind ? '答题策略' : '作业答题策略'}>
+            {workAutoSubmitLabel}
           </DetailRow>
         )}
-        {coursesCustom.doWork && (
-          <DetailRow label="作业提交">{workAutoSubmitLabel}</DetailRow>
-        )}
-        {coursesCustom.doExam && (
-          <DetailRow label="考试提交">{examAutoSubmitLabel}</DetailRow>
+        {showExamStrategy && (
+          <DetailRow label={config?.kind ? '答题策略' : '考试答题策略'}>
+            {examAutoSubmitLabel}
+          </DetailRow>
         )}
         {coursesCustom.answerMode && (
           <DetailRow label="答题模式">{coursesCustom.answerMode}</DetailRow>

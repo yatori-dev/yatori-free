@@ -452,6 +452,7 @@ export type TaskSummary = Omit<Task, 'configSnapshot'>;
 export interface TaskConfigSnapshot {
   account?: string;
   accountType?: string;
+  aggressiveMode?: boolean;
   bypassDailyStudyLimit?: boolean;
   coursesCustom?: CoursesCustom;
   kind?: TaskKind;
@@ -494,6 +495,8 @@ export function getTaskConfigSnapshot(configSnapshot: Task['configSnapshot']) {
     snapshot.account = configSnapshot.account;
   if (typeof configSnapshot.accountType === 'string')
     snapshot.accountType = configSnapshot.accountType;
+  if (typeof configSnapshot.aggressiveMode === 'boolean')
+    snapshot.aggressiveMode = configSnapshot.aggressiveMode;
   if (typeof configSnapshot.bypassDailyStudyLimit === 'boolean')
     snapshot.bypassDailyStudyLimit = configSnapshot.bypassDailyStudyLimit;
   if (isOptionalTaskKind(configSnapshot.kind))
