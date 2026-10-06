@@ -94,7 +94,7 @@ function getAutoSubmitLabel(value: 0 | 1 | 2 | undefined) {
   }
 
   if (value === 2) {
-    return "仅保存不提交";
+    return "有空答案时仅保存不提交";
   }
 
   if (value === 1) {
@@ -268,11 +268,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
   const examAutoSubmitValue = coursesCustom?.examAutoSubmit;
   const workAutoSubmitLabel = getAutoSubmitLabel(workAutoSubmitValue);
   const examAutoSubmitLabel = getAutoSubmitLabel(examAutoSubmitValue);
-  const enabledAutomationLabels = [
-    coursesCustom?.doChapterTest ? "章节测试" : null,
-    coursesCustom?.doWork ? "作业" : null,
-    coursesCustom?.doExam ? "考试" : null,
-  ].filter(Boolean) as string[];
   const includeCourses = getTaskCourseIdentifiers(configSnapshot);
   const taskCourseTaskPointProgress = getTaskCourseTaskPointProgress(
     includeCourses,
@@ -436,7 +431,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
       >
         <div className="min-h-0 space-y-4 overflow-hidden">
           {showProgress && progress && (
-            <TaskProgressPanel progress={progress} percent={percent} />
+            <TaskProgressPanel progress={progress} />
           )}
           <div className="mb-3 space-y-3">
             <div className="flex flex-col gap-1 text-xs text-muted-foreground">
@@ -458,15 +453,14 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
               )}
             </div>
           </div>
-          {coursesCustom ? (
+          {taskConfigSnapshot ? (
             <TaskSettingsSnapshot
               config={taskConfigSnapshot}
-              coursesCustom={coursesCustom}
+              coursesCustom={coursesCustom ?? {}}
               courseNameByIdentifier={courseNameByIdentifier}
               studyIncrementSettings={studyIncrementSettings}
               workAutoSubmitLabel={workAutoSubmitLabel}
               examAutoSubmitLabel={examAutoSubmitLabel}
-              enabledAutomationLabels={enabledAutomationLabels}
             />
           ) : (
             <div className="mt-1 min-w-0 w-full border-t border-border pt-3 text-xs text-muted-foreground">
