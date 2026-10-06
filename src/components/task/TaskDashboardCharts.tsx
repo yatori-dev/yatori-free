@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   Bar, BarChart, CartesianGrid, Pie, PieChart,
-  ResponsiveContainer, Tooltip, XAxis, YAxis,
+  ResponsiveContainer, Tooltip, XAxis, YAxis, matchByDataKey,
 } from 'recharts';
 import type { Task } from '@/lib/api';
 import {
@@ -24,6 +24,8 @@ const tooltipStyle = {
   fontSize: 12,
 };
 
+const matchHistoryDate = matchByDataKey('date');
+
 export default function TaskDashboardCharts({ tasks, onSelectGroup }: TaskDashboardChartsProps) {
   const [days, setDays] = useState(7);
   const [barsAnimated, setBarsAnimated] = useState(false);
@@ -37,6 +39,13 @@ export default function TaskDashboardCharts({ tasks, onSelectGroup }: TaskDashbo
   const pieData = useMemo(() => distribution.filter((group) => group.count > 0), [distribution]);
   const totalCreated = history.reduce((sum, day) => sum + day.count, 0);
 
+  const handleDaysChange = (value: string) => {
+    const nextDays = Number(value);
+    if (nextDays === days) return;
+    setBarsAnimated(false);
+    setDays(nextDays);
+  };
+
   return (
     <div className="flex min-w-0 flex-col border-b border-border xl:flex-row">
       <section className="min-w-0 flex-1 py-6 xl:pr-8" aria-label="任务创建记录">
@@ -47,7 +56,7 @@ export default function TaskDashboardCharts({ tasks, onSelectGroup }: TaskDashbo
               近 {days} 天创建 {totalCreated} 项
             </p>
           </div>
-          <Select value={String(days)} onValueChange={(value) => setDays(Number(value))}>
+          <Select value={String(days)} onValueChange={handleDaysChange}>
             <SelectTrigger className="h-9 w-28" aria-label="统计时间范围">
               <SelectValue />
             </SelectTrigger>
@@ -65,7 +74,7 @@ export default function TaskDashboardCharts({ tasks, onSelectGroup }: TaskDashbo
               <XAxis dataKey="label" tickLine={false} axisLine={false} minTickGap={18} tickMargin={10} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} />
               <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={40} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} />
               <Tooltip cursor={{ fill: 'var(--muted)' }} contentStyle={tooltipStyle} itemStyle={{ color: 'var(--foreground)' }} formatter={(value) => [`${value} 项`, '创建任务']} />
-              <Bar dataKey="count" name="创建任务" fill="var(--primary)" radius={[3, 3, 0, 0]} maxBarSize={36} isAnimationActive={barsAnimated ? false : 'auto'} animationBegin={0} animationDuration={animationDuration} animationEasing="ease-out" onAnimationEnd={() => setBarsAnimated(true)} />
+              <Bar dataKey="count" name="创建任务" fill="var(--primary)" radius={[3, 3, 0, 0]} maxBarSize={36} isAnimationActive={barsAnimated ? false : 'auto'} animationMatchBy={matchHistoryDate} animationBegin={0} animationDuration={animationDuration} animationEasing="ease-out" onAnimationEnd={() => setBarsAnimated(true)} />
             </BarChart>
           </ResponsiveContainer>
         </div>
