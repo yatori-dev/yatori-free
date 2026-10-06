@@ -157,6 +157,10 @@
   isolation: isolate;
 }
 
+.dashboard-mobile-navigation {
+  view-transition-name: mobile-dashboard-navigation;
+}
+
 .motion-highlight {
   position: absolute;
   top: 0;
@@ -243,6 +247,14 @@ html:active-view-transition-type(yatori-view)::view-transition-old(yatori-conten
 
 html:active-view-transition-type(yatori-view)::view-transition-new(yatori-content) {
   animation: motion-content-in var(--motion-page) var(--ease-smooth-out) both;
+}
+
+/* The fixed mobile navigation should stay opaque while dashboard content changes. */
+html:active-view-transition-type(yatori-view)::view-transition-old(mobile-dashboard-navigation),
+html:active-view-transition-type(yatori-view)::view-transition-new(mobile-dashboard-navigation),
+html:active-view-transition-type(yatori-dashboard)::view-transition-old(mobile-dashboard-navigation),
+html:active-view-transition-type(yatori-dashboard)::view-transition-new(mobile-dashboard-navigation) {
+  animation: none;
 }
 
 @keyframes motion-fade-in { from { opacity: 0; } to { opacity: 1; } }
