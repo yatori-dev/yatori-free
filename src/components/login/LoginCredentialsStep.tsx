@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -31,6 +32,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type LoginMethod = 'password' | 'sms';
 type LegalDocument = 'terms' | 'privacy';
+
+// Cloudflare's visible, always-pass key is only used for local layout preview.
+const TURNSTILE_PREVIEW_SITE_KEY = '1x00000000000000000000AA';
 
 interface TurnstileApi {
   render: (
@@ -101,14 +105,14 @@ const TurnstileWidget = forwardRef<TurnstileWidgetHandle, TurnstileWidgetProps>(
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetIdRef = useRef<string | number | undefined>(undefined);
 
-    const reset = () => {
+    const reset = useCallback(() => {
       if (window.turnstile && widgetIdRef.current !== undefined) {
         window.turnstile.reset(widgetIdRef.current);
       }
       onToken('');
-    };
+    }, [onToken]);
 
-    useImperativeHandle(ref, () => ({ reset }), [onToken]);
+    useImperativeHandle(ref, () => ({ reset }), [reset]);
 
     useEffect(() => {
       let cancelled = false;
@@ -135,13 +139,13 @@ const TurnstileWidget = forwardRef<TurnstileWidgetHandle, TurnstileWidgetProps>(
           widgetIdRef.current = undefined;
         }
       };
-    }, [onToken, siteKey]);
+    }, [onToken, reset, siteKey]);
 
     useEffect(() => {
       if (resetSignal > 0) {
         reset();
       }
-    }, [resetSignal]);
+    }, [reset, resetSignal]);
 
     return <div ref={containerRef} className="min-h-[65px]" aria-label="人机验证" />;
   },
@@ -185,6 +189,13 @@ export function LoginCredentialsStep({
   const [smsTurnstileToken, setSMSTurnstileToken] = useState('');
   const [turnstileResetSignal, setTurnstileResetSignal] = useState(0);
   const turnstileRef = useRef<TurnstileWidgetHandle>(null);
+  const configuredSiteKey = smsConfig?.enabled ? smsConfig.siteKey : undefined;
+  const isTurnstilePreview = import.meta.env.DEV && !configuredSiteKey;
+  const turnstileSiteKey = configuredSiteKey ||
+    (isTurnstilePreview ? TURNSTILE_PREVIEW_SITE_KEY : undefined);
+  const handleTurnstileToken = useCallback((token: string) => {
+    setSMSTurnstileToken(isTurnstilePreview ? '' : token);
+  }, [isTurnstilePreview]);
 
   useEffect(() => {
     let cancelled = false;
@@ -244,7 +255,7 @@ export function LoginCredentialsStep({
   };
 
   const handleSendCode = async () => {
-    if (isBusy || retrySeconds > 0) {
+    if (isTurnstilePreview || isBusy || retrySeconds > 0) {
       return;
     }
 
@@ -446,12 +457,12 @@ export function LoginCredentialsStep({
           </TabsContent>
 
           <TabsContent value="sms" className="space-y-2">
-            {smsConfig?.enabled && smsConfig.siteKey ? (
+            {turnstileSiteKey ? (
               <TurnstileWidget
                 ref={turnstileRef}
-                siteKey={smsConfig.siteKey}
+                siteKey={turnstileSiteKey}
                 resetSignal={turnstileResetSignal}
-                onToken={setSMSTurnstileToken}
+                onToken={handleTurnstileToken}
               />
             ) : null}
             <Label htmlFor="sms-code">6位数验证码</Label>
@@ -483,7 +494,7 @@ export function LoginCredentialsStep({
                 type="button"
                 variant="outline"
                 className="h-11 w-28 shrink-0 gap-1.5 rounded-[var(--radius-md)] px-2"
-                disabled={isBusy || retrySeconds > 0}
+                disabled={isTurnstilePreview || isBusy || retrySeconds > 0}
                 onClick={() => void handleSendCode()}
                 aria-label={sendCodeButtonLabel}
                 title={sendCodeButtonLabel}

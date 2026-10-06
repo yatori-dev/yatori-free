@@ -81,7 +81,9 @@ export function DashboardHeader({
       setReadAnnouncementContent(announcementMarkdown);
       try {
         localStorage.setItem(announcementReadKey, announcementMarkdown);
-      } catch {}
+      } catch {
+        // Local storage can be unavailable in restricted browser contexts.
+      }
     }
   };
 

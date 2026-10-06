@@ -127,6 +127,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
     try {
       await actionFn(id);
     } catch {
+      // Ignore action errors here; loading state is cleared in finally.
     } finally {
       setActionLoading(false);
     }
