@@ -68,6 +68,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+    --default-transition-duration: var(--duration-fast);
+    --default-transition-timing-function: var(--ease-smooth-out);
+
     /* Typography */
     --font-display: ui-sans-serif, system-ui, sans-serif;
     --font-body: ui-sans-serif, system-ui, sans-serif;
@@ -193,18 +196,6 @@
     --sidebar-accent: oklch(0.95 0.03 240);
     --sidebar-accent-foreground: oklch(0.38 0.12 240);
     --sidebar-border: oklch(0.91 0.008 257);
-
-    /* Motion Tokens */
-    --motion-instant: var(--duration-micro);
-    --motion-fast: var(--duration-fast);
-    --motion-page: var(--duration-fast);
-    --motion-panel: var(--duration-slow);
-    --motion-close: var(--duration-quick);
-    --motion-panel-close: var(--duration-medium);
-
-    /* Easing Tokens */
-    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
-    --ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
 
     /* 4-Tier Shadow Tokens (Refined depth and ambient lighting) */
     --shadow-xs: 0 1px 2px rgb(15 23 42 / 0.04);

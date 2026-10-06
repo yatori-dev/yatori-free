@@ -387,7 +387,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         </div>
         <div className="flex shrink-0 items-center gap-1 self-end @3xl:col-start-4 @3xl:row-start-1 @3xl:self-center">
           <Button size="icon" variant="ghost" onClick={() => setShowDetails(!showDetails)} aria-expanded={showDetails} aria-controls={detailsId} aria-label={showDetails ? "收起任务详情" : "展开任务详情"} title={showDetails ? "收起任务详情" : "展开任务详情"} className="h-9 w-9 text-muted-foreground">
-            <ChevronDown className={`h-4 w-4 transition-transform duration-[var(--motion-fast)] motion-reduce:transition-none ${showDetails ? "rotate-180" : ""}`} />
+            <ChevronDown className={`motion-disclosure-chevron h-4 w-4 ${showDetails ? "rotate-180" : ""}`} />
           </Button>
           {canStopTask && <Button size="icon" variant="ghost" disabled={isStoppingTask || actionLoading} onClick={() => handleAction(onStopTask, task.id)} aria-label={isStoppingTask ? "任务停止中" : "停止任务"} title={isStoppingTask ? "任务停止中" : "停止任务"} className="h-9 w-9 text-danger hover:bg-danger-container hover:text-danger">
             {actionLoading || isStoppingTask ? <RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Square className="h-3.5 w-3.5" />}

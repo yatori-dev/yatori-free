@@ -9,6 +9,14 @@
   --duration-very-slow: 500ms;
   --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: ease-in-out;
+  --ease-standard: var(--ease-smooth-out);
+  --ease-emphasized: var(--ease-smooth-out);
+  --motion-instant: var(--duration-micro);
+  --motion-fast: var(--duration-fast);
+  --motion-page: var(--duration-fast);
+  --motion-panel: var(--duration-slow);
+  --motion-close: var(--duration-quick);
+  --motion-panel-close: var(--duration-medium);
   --distance-micro: 4px;
   --distance-base: 8px;
   --scale-modal: 0.96;
@@ -21,7 +29,7 @@
   --icon-swap-dur: var(--duration-fast);
   --icon-swap-blur: 2px;
   --icon-swap-start-scale: 0.25;
-  --icon-swap-ease: ease-in-out;
+  --icon-swap-ease: var(--ease-in-out);
 }
 
 .motion-page-loading,
@@ -35,14 +43,25 @@
   animation-name: motion-fade-in;
 }
 
-.motion-dialog-overlay[data-state="open"],
-.motion-sheet-overlay[data-state="open"] {
+html[data-view-motion="fallback"] .motion-tab-content[data-state="active"] {
   animation: motion-fade-in var(--motion-page) var(--ease-smooth-out);
 }
 
-.motion-dialog-overlay[data-state="closed"],
-.motion-sheet-overlay[data-state="closed"] {
+.motion-dialog-overlay[data-state="open"] {
+  animation: motion-fade-in var(--motion-page) var(--ease-smooth-out);
+}
+
+.motion-sheet-overlay[data-state="open"] {
+  animation: motion-fade-in var(--motion-panel) var(--ease-smooth-out);
+}
+
+.motion-dialog-overlay[data-state="closed"] {
   animation: motion-fade-out var(--motion-close) var(--ease-smooth-out) forwards;
+  pointer-events: none;
+}
+
+.motion-sheet-overlay[data-state="closed"] {
+  animation: motion-fade-out var(--motion-panel-close) var(--ease-smooth-out) forwards;
   pointer-events: none;
 }
 
@@ -107,17 +126,13 @@
 .t-acc-panel-inner {
   overflow: hidden;
   opacity: 0;
-  filter: blur(2px);
   transition:
-    opacity var(--acc-collapse) var(--acc-ease),
-    filter var(--acc-collapse) var(--acc-ease);
+    opacity var(--acc-collapse) var(--acc-ease);
 }
 .t-acc[data-open="true"] .t-acc-panel-inner {
   opacity: 1;
-  filter: blur(0);
   transition:
-    opacity var(--acc-expand) var(--acc-ease),
-    filter var(--acc-expand) var(--acc-ease);
+    opacity var(--acc-expand) var(--acc-ease);
 }
 .t-acc-chevron {
   display: inline-flex;
@@ -127,6 +142,10 @@
 }
 .t-acc-chevron path { vector-effect: non-scaling-stroke; }
 .t-acc[data-open="true"] .t-acc-chevron { transform: scaleY(-1); }
+
+.motion-disclosure-chevron {
+  transition: transform var(--acc-chevron) var(--acc-ease);
+}
 
 .t-icon-swap {
   position: relative;
@@ -138,7 +157,6 @@
     opacity var(--icon-swap-dur) var(--icon-swap-ease),
     filter var(--icon-swap-dur) var(--icon-swap-ease),
     transform var(--icon-swap-dur) var(--icon-swap-ease);
-  will-change: opacity, filter, transform;
 }
 .t-icon-swap[data-state="a"] .t-icon[data-icon="a"],
 .t-icon-swap[data-state="b"] .t-icon[data-icon="b"] {
@@ -184,9 +202,13 @@
 .motion-highlight[data-visible="false"] { opacity: 0; }
 
 [data-slot="tabs-list"] > .motion-highlight { background: var(--background); }
+@media (min-width: 768px) {
+  .settings-view [data-slot="tabs-list"] > .motion-highlight { background: var(--muted); }
+}
 [data-slot="tabs-list"][data-variant="line"] > .motion-highlight { background: var(--foreground); border-radius: 0; }
-.motion-menu > .motion-highlight { background: var(--accent); }
-.motion-menu.motion-highlight-host [data-highlighted] { background: transparent; }
+.motion-menu .motion-highlight { background: var(--accent); }
+.motion-menu.motion-highlight-host [data-highlighted],
+.motion-menu .motion-highlight-host [data-highlighted] { background: transparent; }
 .motion-menu.motion-highlight-host [data-variant="destructive"][data-highlighted] { background: var(--danger-container); }
 .motion-highlight-host[data-motion-nav] > .motion-highlight { background: var(--sidebar-accent); border-radius: var(--radius-md); }
 .motion-highlight-host[data-motion-nav] > [aria-current="page"] { background: transparent; }
@@ -272,12 +294,12 @@ html:active-view-transition-type(yatori-dashboard)::view-transition-new(mobile-d
   to { opacity: 0; transform: scale(var(--scale-menu-close)); }
 }
 @keyframes motion-dialog-in {
-  from { opacity: 0; transform: perspective(800px) rotateX(-6deg) scale(var(--scale-modal)); }
-  to { opacity: 1; transform: perspective(800px) rotateX(0deg) scale(1); }
+  from { opacity: 0; transform: scale(var(--scale-modal)); }
+  to { opacity: 1; transform: scale(1); }
 }
 @keyframes motion-dialog-out {
-  from { opacity: 1; transform: perspective(800px) rotateX(0deg) scale(1); }
-  to { opacity: 0; transform: perspective(800px) rotateX(-3deg) scale(var(--scale-modal)); }
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(var(--scale-modal)); }
 }
 @keyframes motion-sheet-in {
   from { opacity: 0; transform: translateX(100%); }
@@ -289,13 +311,14 @@ html:active-view-transition-type(yatori-dashboard)::view-transition-new(mobile-d
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .t-acc-panel, .t-acc-panel-inner, .t-acc-chevron {
+  .t-acc-panel, .t-acc-panel-inner, .t-acc-chevron, .motion-disclosure-chevron {
     transition: none !important;
   }
   .t-icon-swap .t-icon { transition: none !important; }
   .motion-page-loading,
   .motion-view-enter,
   .motion-content-enter,
+  .motion-tab-content,
   .motion-dialog,
   .motion-dialog-overlay,
   .motion-menu,

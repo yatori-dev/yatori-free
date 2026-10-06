@@ -76,7 +76,7 @@ export function OpenSourceDialog() {
               href={project.url}
               target="_blank"
               rel="noreferrer"
-              className="group flex min-w-0 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-card p-2.5 transition-[color,background-color,border-color] duration-[var(--motion-fast)] hover:border-primary/50 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-3 sm:p-3"
+              className="group flex min-w-0 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-card p-2.5 transition-[color,background-color,border-color] duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] hover:border-primary/50 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-3 sm:p-3"
             >
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-muted text-foreground sm:h-10 sm:w-10 sm:rounded-[var(--radius-lg)]">
                 <svg className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true">

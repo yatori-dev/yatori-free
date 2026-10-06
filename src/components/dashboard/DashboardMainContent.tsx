@@ -14,6 +14,7 @@ import { CourseListSection } from './CourseListSection';
 import { CourseProgressSummary } from './CourseProgressSummary';
 import { WorksListSection } from './WorksListSection';
 import { ExamsListSection } from './ExamsListSection';
+import { TaskSettingsPanel } from './TaskSettingsPanel';
 import {
   mobileLearningTabs,
   type MobileDashboardTabId,
@@ -46,6 +47,12 @@ interface DashboardMainContentProps {
   showDeadlineBadges: boolean;
   workAutoSubmit: 0 | 1 | 2;
   examAutoSubmit: 0 | 1 | 2;
+  bypassDailyStudyLimit: boolean;
+  onUnauthorized: () => void;
+  onSettingSwitch: (
+    key: 'bypassDailyStudyLimit' | 'showDeadlineBadges',
+    checked: boolean,
+  ) => void;
   onRefreshCourses: () => void;
   onSearchChange: (value: string) => void;
   onSearchQueryChange: (value: string) => void;
@@ -91,6 +98,9 @@ export function DashboardMainContent({
   showDeadlineBadges,
   workAutoSubmit,
   examAutoSubmit,
+  bypassDailyStudyLimit,
+  onUnauthorized,
+  onSettingSwitch,
   onRefreshCourses,
   onSearchChange,
   onSearchQueryChange,
@@ -132,10 +142,20 @@ export function DashboardMainContent({
     <main
       ref={mainRef}
       id="dashboard-main"
-      className="min-h-0 flex-1 overflow-x-clip overflow-y-auto bg-background pb-[calc(10rem+env(safe-area-inset-bottom))] lg:pb-24"
+      className={`min-h-0 flex-1 overflow-x-clip overflow-y-auto bg-background pb-[calc(10rem+env(safe-area-inset-bottom))] lg:pb-24 ${activeTab === 'settings' ? 'no-scrollbar' : ''}`}
     >
-      <div className="mx-auto w-full min-w-0 max-w-[1600px] px-3 py-4 sm:px-5 lg:px-6 lg:py-6">
-        <div className="min-w-0 space-y-4 sm:space-y-6">
+      {activeTab === 'settings' ? (
+        <div data-dashboard-tab-content className="mx-auto flex min-h-full w-full min-w-0 max-w-[1600px] px-3 py-4 sm:px-5 lg:px-6 lg:py-6">
+          <TaskSettingsPanel
+            bypassDailyStudyLimit={bypassDailyStudyLimit}
+            showDeadlineBadges={showDeadlineBadges}
+            onUnauthorized={onUnauthorized}
+            onSettingSwitch={onSettingSwitch}
+          />
+        </div>
+      ) : (
+        <div className="mx-auto w-full min-w-0 max-w-[1600px] px-3 py-4 sm:px-5 lg:px-6 lg:py-6">
+          <div className="min-w-0 space-y-4 sm:space-y-6">
           {isLearningTab && (
             <div className="lg:hidden">
               <div className="motion-highlight-host relative flex items-center rounded-[var(--radius-lg)] bg-muted p-1 text-xs font-medium text-muted-foreground" data-motion-learning>
@@ -269,8 +289,9 @@ export function DashboardMainContent({
               </section>
             </TabsContent>
           </div>
+          </div>
         </div>
-      </div>
+      )}
     </main>
   );
 }

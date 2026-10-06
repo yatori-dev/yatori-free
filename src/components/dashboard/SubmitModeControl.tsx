@@ -29,7 +29,7 @@ export function SubmitModeControl({
           aria-pressed={value !== 1}
           onClick={() => onChange(0)}
           className={cn(
-            'h-8 whitespace-nowrap rounded-[var(--radius-sm)] px-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring lg:h-7 lg:px-2',
+            'h-8 whitespace-nowrap rounded-[var(--radius-sm)] px-1.5 text-xs font-medium transition-colors duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] focus-visible:ring-2 focus-visible:ring-ring lg:h-7 lg:px-2',
             value !== 1
               ? 'bg-card text-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground',
@@ -42,7 +42,7 @@ export function SubmitModeControl({
           aria-pressed={value === 1}
           onClick={() => onChange(1)}
           className={cn(
-            'h-8 whitespace-nowrap rounded-[var(--radius-sm)] px-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring lg:h-7 lg:px-2',
+            'h-8 whitespace-nowrap rounded-[var(--radius-sm)] px-1.5 text-xs font-medium transition-colors duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] focus-visible:ring-2 focus-visible:ring-ring lg:h-7 lg:px-2',
             value === 1
               ? 'bg-card text-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground',

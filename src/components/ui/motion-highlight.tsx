@@ -25,8 +25,13 @@ export function MotionHighlight({
       }
       const vertical = host.getAttribute('aria-orientation') === 'vertical';
       const line = variant === 'line';
-      const x = active.offsetLeft + (line && vertical ? active.offsetWidth - 2 : 0);
-      const y = active.offsetTop + (line && !vertical ? active.offsetHeight - 2 : 0);
+      let x = line && vertical ? active.offsetWidth - 2 : 0;
+      let y = line && !vertical ? active.offsetHeight - 2 : 0;
+      // Grouped select options can have an offset parent inside the viewport.
+      for (let item: HTMLElement | null = active; item && item !== host; item = item.offsetParent as HTMLElement | null) {
+        x += item.offsetLeft;
+        y += item.offsetTop;
+      }
       if (!animate) indicator.style.transition = 'none';
       indicator.style.transform = `translate(${x}px, ${y}px)`;
       indicator.style.width = `${line && vertical ? 2 : active.offsetWidth}px`;
@@ -43,7 +48,7 @@ export function MotionHighlight({
     const observeItems = () => {
       resize.disconnect();
       resize.observe(host);
-      host.querySelectorAll<HTMLElement>('[role="tab"], [role^="menuitem"], button, a').forEach((item) => resize.observe(item));
+      host.querySelectorAll<HTMLElement>('[role="tab"], [role="option"], [role^="menuitem"], button, a').forEach((item) => resize.observe(item));
     };
     const mutation = new MutationObserver((records) => {
       const itemsChanged = records.some((record) => record.type === 'childList');

@@ -269,7 +269,7 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
           </div>
         </div>
       ) : (
-        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-[var(--radius-lg)] border border-border bg-white p-3 shadow-xs transition-[border-color,box-shadow] duration-[var(--motion-fast)] hover:shadow-raised">
+        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-[var(--radius-lg)] border border-border bg-white p-3 shadow-xs transition-[border-color,box-shadow] duration-[var(--motion-fast)] ease-[var(--ease-standard)] hover:shadow-raised">
           {session?.qrContent ? (
             <QRCodeSVG
               value={session.qrContent}

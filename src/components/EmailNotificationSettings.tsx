@@ -601,7 +601,7 @@ export function EmailNotificationSettings({
             {deadlineReminderMinutes.map((minutes) => (
               <div
                 key={minutes}
-                className="inline-flex items-center gap-2 rounded-[var(--radius-md)] border bg-muted/30 px-3 py-1.5 text-xs transition-colors hover:bg-muted/60"
+                className="inline-flex items-center gap-2 rounded-[var(--radius-md)] border bg-muted/30 px-3 py-1.5 text-xs transition-colors duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] hover:bg-muted/60"
               >
                 <span className="font-medium">
                   提前 {formatReminderTime(minutes)}
@@ -611,7 +611,7 @@ export function EmailNotificationSettings({
                   aria-label={`删除提前 ${formatReminderTime(minutes)} 提醒`}
                   disabled={!hasVerifiedEmail || !isAvailable || isBusy}
                   onClick={() => handleRemoveDeadlineReminder(minutes)}
-                  className="inline-flex size-4 items-center justify-center rounded-[var(--radius-sm)] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none"
+                  className="inline-flex size-4 items-center justify-center rounded-[var(--radius-sm)] text-muted-foreground transition-colors duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] hover:bg-accent hover:text-foreground disabled:pointer-events-none"
                 >
                   <X className="size-3" />
                 </button>

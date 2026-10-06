@@ -6,10 +6,12 @@ export function changeView(update: () => void, view: 'dashboard' | 'settings' | 
     typeof document.startViewTransition !== 'function' ||
     !CSS.supports('selector(:active-view-transition-type(yatori-view))')
   ) {
+    document.documentElement.dataset.viewMotion = 'fallback';
     update();
     return;
   }
 
+  document.documentElement.dataset.viewMotion = 'native';
   document.activeViewTransition?.skipTransition();
   const transition = document.startViewTransition({
     types: ['yatori-view', `yatori-${view}`],

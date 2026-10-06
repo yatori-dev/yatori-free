@@ -370,7 +370,7 @@ export function CourseListSection({
                           title={isExpanded ? '收起章节' : '查看章节'}
                         >
                           <ChevronDown
-                            className={`h-3.5 w-3.5 transition-transform duration-[var(--motion-fast)] ease-[var(--ease-standard)] ${isExpanded ? 'rotate-180' : ''}`}
+                            className={`motion-disclosure-chevron h-3.5 w-3.5 ${isExpanded ? 'rotate-180' : ''}`}
                           />
                         </Button>
                       </div>

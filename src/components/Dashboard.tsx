@@ -136,6 +136,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const handleTabChange = useCallback((tabId: MobileDashboardTabId) => {
     if (tabId === 'settings') {
+      if (window.matchMedia('(max-width: 1023px)').matches) {
+        setSettingsDialogOpen(false);
+
+        if (activeTab === 'settings') {
+          return;
+        }
+
+        mobileTabScrollPositions.current[activeTab] = dashboardMainRef.current?.scrollTop ?? 0;
+        changeView(() => {
+          setActiveTab('settings');
+        }, 'dashboard');
+        return;
+      }
+
       setSettingsDialogOpen(true);
       return;
     }
@@ -975,6 +989,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             showDeadlineBadges={showDeadlineBadges}
             workAutoSubmit={workAutoSubmit}
             examAutoSubmit={examAutoSubmit}
+            bypassDailyStudyLimit={bypassDailyStudyLimit}
+            onUnauthorized={onLogout}
+            onSettingSwitch={updateSettingSwitch}
             onRefreshCourses={fetchCourses}
             onSearchChange={setCourseSearch}
             onSearchQueryChange={setCourseSearchQuery}
