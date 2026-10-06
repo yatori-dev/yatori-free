@@ -1,4 +1,4 @@
-import { Settings2, Sparkles } from 'lucide-react';
+import { Settings2, Target } from 'lucide-react';
 import type {
   CoursesCustom,
   TaskConfigSnapshot,
@@ -29,7 +29,7 @@ export function TaskSettingsSnapshot({
   enabledAutomationLabels,
 }: TaskSettingsSnapshotProps) {
   return (
-    <div className="mt-1 min-w-0 w-full space-y-3 rounded-[var(--radius-lg)] border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground">
+    <div className="mt-1 min-w-0 w-full space-y-3 border-t border-border pt-4 text-xs text-muted-foreground">
       <div className="flex items-center gap-1.5 border-b border-border/50 pb-1.5 text-xs font-semibold text-foreground">
         <Settings2 className="w-3.5 h-3.5 text-muted-foreground" />
         <span>任务配置</span>
@@ -69,7 +69,7 @@ export function TaskSettingsSnapshot({
         {studyIncrementSettings.length > 0 && (
           <div className="space-y-1.5 border-t border-border/50 pt-2.5">
             <span className="flex items-center gap-1">
-              <Sparkles className="h-3 w-3 text-primary" />
+              <Target className="h-3 w-3 text-muted-foreground" />
               学习目标
             </span>
             {studyIncrementSettings.map(({ classId, studyIncrement }) => {
@@ -90,12 +90,12 @@ export function TaskSettingsSnapshot({
               return (
                 <div
                   key={classId}
-                  className="flex justify-between gap-2 text-foreground"
+                  className="flex min-w-0 flex-col gap-1 py-1 text-foreground sm:flex-row sm:justify-between sm:gap-4"
                 >
                   <span className="truncate" title={name}>
                     {name}
                   </span>
-                  <span className="shrink-0 font-semibold tabular-nums">
+                  <span className="min-w-0 font-medium tabular-nums wrap-anywhere sm:text-right">
                     {increments || '未设置'}
                   </span>
                 </div>

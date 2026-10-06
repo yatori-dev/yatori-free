@@ -1,157 +1,138 @@
-import { Activity, RefreshCw } from 'lucide-react';
+import { lazy, Suspense, useState } from 'react';
+import { Activity, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TaskInlineItem } from '@/components/TaskInlineItem';
-import type { Task } from '@/lib/api';
+import { TaskChartsSkeleton } from '@/components/task/TaskChartsSkeleton';
+import { TaskListToolbar, type TaskListKind, type TaskListSort, type TaskListStatus } from '@/components/task/TaskListToolbar';
+import { getTaskGroup, type TaskGroup } from '@/lib/taskDashboard';
+import { getTaskConfigSnapshot, getTaskCourseIdentifiers, type Task } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 import type { CourseTaskPointProgressMap } from '@/lib/taskProgress';
+import { getTaskCreatedTime, getTaskPresentation } from '@/lib/taskPresentation';
+import { isActiveTaskStatus } from '@/lib/taskStatus';
 
-type TaskFilter = 'active' | 'completed';
+const TaskDashboardCharts = lazy(() => import('@/components/task/TaskDashboardCharts'));
+const PAGE_SIZE = 10;
 
 interface TaskStatusContentProps {
   tasks: Task[];
-  filteredTasks: Task[];
-  taskCounts: { active: number; completed: number };
-  taskFilter: TaskFilter;
+  taskFilter: 'active' | 'completed';
   tasksLoading: boolean;
   taskSnapshots: Record<string, TaskProgressSnapshot>;
   courseNameByIdentifier: Record<string, string>;
   courseTaskPointProgressByIdentifier: CourseTaskPointProgressMap;
-  onTaskFilterChange: (filter: TaskFilter) => void;
+  onTaskFilterChange: (filter: 'active' | 'completed') => void;
   onRefresh: () => void;
   onStopTask: (taskId: string) => void;
 }
 
 export function TaskStatusContent({
-  tasks,
-  filteredTasks,
-  taskCounts,
-  taskFilter,
-  tasksLoading,
-  taskSnapshots,
-  courseNameByIdentifier,
-  courseTaskPointProgressByIdentifier,
-  onTaskFilterChange,
-  onRefresh,
-  onStopTask,
+  tasks, taskFilter, tasksLoading, taskSnapshots, courseNameByIdentifier,
+  courseTaskPointProgressByIdentifier, onTaskFilterChange, onRefresh, onStopTask,
 }: TaskStatusContentProps) {
-  return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div className="flex items-center justify-between gap-3 border-b border-border py-3">
-        {tasks.length > 0 ? (
-          <div
-            className="relative flex min-w-0 overflow-x-auto no-scrollbar"
-            role="group"
-            aria-label="任务状态筛选"
-          >
-            <span
-              aria-hidden="true"
-              className={`pointer-events-none absolute bottom-0 left-0 h-0.5 w-20 rounded-full bg-primary transition-transform duration-[var(--motion-page)] ease-[var(--ease-emphasized)] motion-reduce:transition-none ${taskFilter === 'completed' ? 'translate-x-20' : 'translate-x-0'}`}
-            />
-            {[
-              {
-                id: 'active' as const,
-                label: '进行中',
-                count: taskCounts.active,
-              },
-              {
-                id: 'completed' as const,
-                label: '已结束',
-                count: taskCounts.completed,
-              },
-            ].map((filter) => (
-              <button
-                key={filter.id}
-                type="button"
-                onClick={() => onTaskFilterChange(filter.id)}
-                className={`relative flex min-h-9 w-20 shrink-0 items-center justify-center gap-1.5 px-0.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-11 ${
-                  taskFilter === filter.id
-                    ? 'text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                aria-pressed={taskFilter === filter.id}
-              >
-                {filter.label}
-                <span
-                  className={`rounded-full px-1.5 py-0.5 font-mono text-[11px] tabular-nums transition-colors ${
-                    taskFilter === filter.id
-                      ? 'bg-primary/10 text-primary font-semibold'
-                      : 'bg-muted/70 text-muted-foreground'
-                  }`}
-                >
-                  {filter.count}
-                </span>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <span className="text-xs text-muted-foreground">任务状态</span>
-        )}
-        <Button
-          size="icon"
-          variant="ghost"
-          disabled={tasksLoading}
-          onClick={onRefresh}
-          className="h-8 w-8 shrink-0 rounded-[var(--radius-md)] sm:h-9 sm:w-9"
-          aria-label="刷新任务列表"
-        >
-          <RefreshCw
-            className={`h-4 w-4 ${tasksLoading ? 'animate-spin' : ''}`}
-          />
-        </Button>
-      </div>
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState<TaskListStatus>('all');
+  const [kind, setKind] = useState<TaskListKind>('all');
+  const [sort, setSort] = useState<TaskListSort>('newest');
+  const [page, setPage] = useState(1);
+  const effectiveTasks = tasks.map((task) => {
+    const presentation = getTaskPresentation(task, taskSnapshots[task.id]);
+    return { ...task, ...presentation, progress: presentation.progress ?? undefined };
+  });
+  const activeCount = effectiveTasks.filter((task) => isActiveTaskStatus(task.status)).length;
+  const query = search.trim().toLocaleLowerCase();
+  const matchingTasks = tasks.filter((task, index) => {
+    const effectiveTask = effectiveTasks[index];
+    if (isActiveTaskStatus(effectiveTask.status) !== (taskFilter === 'active')) return false;
+    if (status === 'attention') {
+      if (getTaskGroup(effectiveTask.status) !== 'attention') return false;
+    } else if (status !== 'all' && effectiveTask.status !== status) {
+      return false;
+    }
+    if (kind !== 'all' && getTaskConfigSnapshot(effectiveTask.configSnapshot)?.kind !== kind) return false;
+    if (!query) return true;
+    const courses = getTaskCourseIdentifiers(effectiveTask.configSnapshot) ?? [];
+    const searchableText = [task.id, effectiveTask.progress?.currentCourse, ...courses.map((identifier) => courseNameByIdentifier[identifier.trim()] ?? identifier)];
+    return searchableText.some((value) => value?.toLocaleLowerCase().includes(query));
+  }).sort((left, right) => {
+    const difference = getTaskCreatedTime(left) - getTaskCreatedTime(right);
+    return sort === 'newest' ? -difference : difference;
+  });
+  const pageCount = Math.max(1, Math.ceil(matchingTasks.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pageTasks = matchingTasks.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-        {tasksLoading && tasks.length === 0 ? (
-          <div className="flex h-full min-h-56 items-center justify-center p-8 text-sm text-muted-foreground">
-            获取任务状态中...
+  const changeTab = (value: 'active' | 'completed') => {
+    onTaskFilterChange(value);
+    setStatus('all');
+    setPage(1);
+  };
+  const selectGroup = (group: TaskGroup) => {
+    changeTab(group === 'active' ? 'active' : 'completed');
+    setStatus(group === 'active' ? 'all' : group === 'attention' ? 'attention' : group);
+    setKind('all');
+    setSearch('');
+  };
+  const resetFilters = () => {
+    setSearch('');
+    setStatus('all');
+    setKind('all');
+    setPage(1);
+  };
+  const hasFilters = Boolean(query) || status !== 'all' || kind !== 'all';
+
+  return (
+    <div className="min-w-0" aria-busy={tasksLoading}>
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-5">
+        <div>
+          <h2 className="text-xl font-semibold">任务</h2>
+          {tasks.length > 0 && <p className="mt-1 text-xs text-muted-foreground">{activeCount > 0 ? `${activeCount} 项进行中` : '当前没有进行中的任务'}</p>}
+        </div>
+        <Button size="sm" variant="outline" disabled={tasksLoading} onClick={onRefresh} className="h-9 gap-2" title="刷新任务列表">
+          <RefreshCw className={`h-4 w-4 ${tasksLoading ? 'animate-spin motion-reduce:animate-none' : ''}`} aria-hidden="true" />
+          刷新
+        </Button>
+      </header>
+      {tasksLoading && tasks.length === 0 ? (
+        <TaskChartsSkeleton />
+      ) : tasks.length === 0 ? (
+        <div className="flex min-h-72 flex-col items-center justify-center gap-3 text-center">
+          <Activity className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+          <p className="text-sm font-medium">暂无任务</p>
+        </div>
+      ) : (
+        <>
+          <Suspense fallback={<TaskChartsSkeleton />}>
+            <TaskDashboardCharts tasks={effectiveTasks} onSelectGroup={selectGroup} />
+          </Suspense>
+          <TaskListToolbar taskFilter={taskFilter} counts={{ active: activeCount, completed: tasks.length - activeCount }} search={search} status={status} kind={kind} sort={sort}
+            onTabChange={changeTab}
+            onSearchChange={(value) => { setSearch(value); setPage(1); }}
+            onStatusChange={(value) => { setStatus(value); setPage(1); }}
+            onKindChange={(value) => { setKind(value); setPage(1); }}
+            onSortChange={(value) => { setSort(value); setPage(1); }} />
+          <div className="min-w-0 border-t border-border">
+            {pageTasks.length > 0 ? pageTasks.map((task) => (
+              <TaskInlineItem key={task.id} task={task} snapshot={taskSnapshots[task.id]} courseNameByIdentifier={courseNameByIdentifier} courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier} onStopTask={onStopTask} />
+            )) : (
+              <div className="flex min-h-48 flex-col items-center justify-center gap-3 px-4 text-center">
+                <p className="text-sm text-muted-foreground">{hasFilters ? '没有匹配的任务' : taskFilter === 'active' ? '暂无进行中的任务' : '暂无已结束的任务'}</p>
+                <Button variant="outline" size="sm" onClick={hasFilters ? resetFilters : () => changeTab(taskFilter === 'active' ? 'completed' : 'active')}>
+                  {hasFilters ? '清除筛选' : taskFilter === 'active' ? '查看已结束' : '查看进行中'}
+                </Button>
+              </div>
+            )}
           </div>
-        ) : tasks.length === 0 ? (
-          <div className="flex h-full min-h-56 flex-col items-center justify-center gap-3 p-8 text-center">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)] bg-muted text-muted-foreground">
-              <Activity className="h-6 w-6 stroke-[1.5]" />
-            </div>
-            <p className="text-xs text-muted-foreground">暂无历史任务</p>
-          </div>
-        ) : filteredTasks.length === 0 ? (
-          <div className="flex h-full min-h-56 flex-col items-center justify-center gap-3 p-8 text-center">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)] bg-muted text-muted-foreground">
-              <Activity className="h-6 w-6 stroke-[1.5]" />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {taskFilter === 'active'
-                ? '暂无进行中的任务'
-                : '暂无已结束的任务'}
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                onTaskFilterChange(
-                  taskFilter === 'active' ? 'completed' : 'active',
-                )
-              }
-              className="h-9 text-xs"
-            >
-              {taskFilter === 'active' ? '查看已结束' : '查看进行中'}
-            </Button>
-          </div>
-        ) : (
-          <div className="flex min-w-0 flex-col gap-3 py-4">
-            {filteredTasks.map((task) => (
-              <TaskInlineItem
-                key={task.id}
-                task={task}
-                snapshot={taskSnapshots[task.id]}
-                courseNameByIdentifier={courseNameByIdentifier}
-                courseTaskPointProgressByIdentifier={
-                  courseTaskPointProgressByIdentifier
-                }
-                onStopTask={onStopTask}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+          <footer className="flex flex-wrap items-center justify-between gap-3 py-4 text-xs text-muted-foreground">
+            <span role="status">共 {matchingTasks.length} 项{matchingTasks.length > 0 ? ` · 显示 ${(currentPage - 1) * PAGE_SIZE + 1} - ${Math.min(currentPage * PAGE_SIZE, matchingTasks.length)} 项` : ''}</span>
+            {pageCount > 1 && <div className="flex items-center gap-2">
+              <span className="mr-1 tabular-nums">第 {currentPage} / {pageCount} 页</span>
+              <Button variant="outline" size="icon" className="h-8 w-8" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)} aria-label="上一页" title="上一页"><ChevronLeft className="h-4 w-4" /></Button>
+              <Button variant="outline" size="icon" className="h-8 w-8" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)} aria-label="下一页" title="下一页"><ChevronRight className="h-4 w-4" /></Button>
+            </div>}
+          </footer>
+        </>
+      )}
     </div>
   );
 }

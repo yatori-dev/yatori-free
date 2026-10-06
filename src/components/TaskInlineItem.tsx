@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
+import { Progress } from "./ui/progress";
 import { getStudyProgressPercents } from "@/lib/studyProgress";
 import { formatLocalDateTime } from "@/lib/format";
 import {
@@ -30,6 +30,7 @@ import { TaskCourseBadges } from "./task/TaskCourseBadges";
 import { TaskCourseListDialog } from "./task/TaskCourseListDialog";
 import { TaskProgressPanel } from "./task/TaskProgressPanel";
 import { TaskSettingsSnapshot } from "./task/TaskSettingsSnapshot";
+import { getTaskPresentation } from "@/lib/taskPresentation";
 
 interface TaskInlineItemProps {
   task: Task;
@@ -114,41 +115,9 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
   const [showDetails, setShowDetails] = useState(false);
   const [showCourseList, setShowCourseList] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
-  const taskProgress = task.progress ?? null;
-  const configSnapshot = snapshot?.configSnapshot ?? task.configSnapshot;
+  const detailsId = useId();
+  const { status: effectiveStatus, progress, configSnapshot } = getTaskPresentation(task, snapshot);
   const taskConfigSnapshot = getTaskConfigSnapshot(configSnapshot);
-  const snapshotProgress = snapshot?.progress ?? null;
-  const progress = (() => {
-    if (!snapshotProgress) return taskProgress;
-    if (!taskProgress) return snapshotProgress;
-
-    const taskTime = Date.parse(taskProgress.updatedAt ?? "");
-    const snapshotTime = Date.parse(snapshotProgress.updatedAt ?? "");
-    return Number.isNaN(taskTime) ||
-      Number.isNaN(snapshotTime) ||
-      snapshotTime >= taskTime
-      ? snapshotProgress
-      : taskProgress;
-  })();
-
-  const taskStatusIsTerminal = [
-    "stopped",
-    "success",
-    "partial_success",
-    "failed",
-  ].includes(task.status);
-  const polledStatusIsTerminal =
-    snapshot?.status !== undefined &&
-    ["stopped", "success", "partial_success", "failed"].includes(
-      snapshot.status,
-    );
-  const effectiveStatus = taskStatusIsTerminal
-    ? task.status
-    : polledStatusIsTerminal
-      ? snapshot.status
-      : task.status === "stopping"
-        ? task.status
-        : (snapshot?.status ?? task.status);
 
   const handleAction = async (
     actionFn: (id: string) => void | Promise<void>,
@@ -188,14 +157,14 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         };
       case "success":
         return {
-          label: "成功",
+          label: "已完成",
           variant: "outline",
           icon: <CheckCircle2 className="h-3 w-3" />,
           toneClass: "text-success",
         };
       case "partial_success":
         return {
-          label: "部分成功",
+          label: "部分完成",
           variant: "outline",
           icon: <AlertCircle className="h-3 w-3" />,
           toneClass: "text-warning",
@@ -317,6 +286,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
     aggregatedPercent === null
       ? currentPercent
       : Math.max(0, Math.min(100, Math.round(aggregatedPercent)));
+  const hasProgress = effectiveStatus === "success" || derivedPercent !== null || progressParts.length > 0 || aggregatedPercent !== null;
   const studyIncrementSettings =
     coursesCustom?.coursesSettings?.flatMap((setting) => {
       if (!setting.classId || !setting.studyIncrement) {
@@ -386,49 +356,41 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
 
   return (
     <article
-      className={`group flex w-full min-w-0 flex-col gap-3 overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card p-4 transition-colors duration-[var(--motion-fast)] sm:gap-4 sm:p-5 ${
-        effectiveStatus === "success" ? "animate-task-success-flash" : ""
-      }`}
+      className="@container group flex w-full min-w-0 flex-col gap-3 border-b border-border py-4 sm:py-5"
     >
-      <div className="flex w-full min-w-0 flex-col gap-2.5 sm:gap-3">
-        <div className="flex min-w-0 items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2 font-mono text-xs text-muted-foreground">
-            <Badge
-              variant="outline"
-              className="font-mono text-xs font-semibold text-foreground"
-            >
-              #{task.id.substring(0, 8)}
-            </Badge>
-            {taskConfigSnapshot?.kind && (
-              <Badge variant="secondary" className="text-[10px] font-medium">
-                {taskConfigSnapshot.kind === "works"
-                  ? "作业"
-                  : taskConfigSnapshot.kind === "exams"
-                    ? "考试"
-                    : "章节任务"}
-              </Badge>
-            )}
-            <span className="hidden sm:inline-block text-muted-foreground/60">
-              •
-            </span>
-            <span className="hidden sm:inline-block truncate text-muted-foreground">
-              {task.startedAt ? formatLocalDateTime(task.startedAt) : "未启动"}
-            </span>
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-3 @3xl:grid-cols-[minmax(0,1.4fr)_8rem_minmax(14rem,1fr)_auto] @3xl:items-center @3xl:gap-x-6">
+        <div className="min-w-0">
+          <div className="mb-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+            <h4 className="text-sm font-semibold">
+              {taskConfigSnapshot?.kind === "works" ? "作业" : taskConfigSnapshot?.kind === "exams" ? "考试" : taskConfigSnapshot?.kind === "task_points" ? "章节任务" : "学习任务"}
+            </h4>
+            <span className="text-xs tabular-nums text-muted-foreground" title={task.id}>#{task.id.substring(0, 8)}</span>
           </div>
-
-          <Badge
-            variant={statusInfo.variant}
-            className={`gap-1.5 font-medium ${statusInfo.toneClass}`}
-          >
-            {statusInfo.icon}
-            <span>{statusInfo.label}</span>
-          </Badge>
+          <TaskCourseBadges courses={displayCourses} onShowMore={() => setShowCourseList(true)} />
+          {!isTerminal && (progress?.currentTitle || progress?.currentChapter) && <p className="mt-1.5 truncate text-xs text-muted-foreground" title={progress.currentTitle || progress.currentChapter}>{progress.currentTitle || progress.currentChapter}</p>}
+          <p className="mt-2 text-xs text-muted-foreground">
+            {task.createdAt ? `创建于 ${formatLocalDateTime(task.createdAt)}` : task.startedAt ? `启动于 ${formatLocalDateTime(task.startedAt)}` : "尚未启动"}
+          </p>
         </div>
-
-        <TaskCourseBadges
-          courses={displayCourses}
-          onShowMore={() => setShowCourseList(true)}
-        />
+        <span className={`flex min-w-0 items-center gap-1.5 text-xs @3xl:col-start-2 @3xl:row-start-1 ${statusInfo.toneClass}`}>
+          {statusInfo.icon}<span>{statusInfo.label}</span>
+        </span>
+        <div className="min-w-0 space-y-1.5 @3xl:col-start-3 @3xl:row-start-1">
+          <div className="flex items-center justify-between gap-2 text-xs">
+            <span className="text-muted-foreground">{aggregatedPercent !== null ? "课程进度" : "执行进度"}</span>
+            <span className="font-medium tabular-nums">{hasProgress ? `${percent}%` : "暂无进度"}</span>
+          </div>
+          {hasProgress && <Progress value={percent} className="h-1.5 bg-muted" />}
+          {hasUnitCounts && <p className="text-xs tabular-nums text-muted-foreground">已处理 {processedUnits} / {totalUnits}</p>}
+        </div>
+        <div className="flex shrink-0 items-center gap-1 self-end @3xl:col-start-4 @3xl:row-start-1 @3xl:self-center">
+          <Button size="icon" variant="ghost" onClick={() => setShowDetails(!showDetails)} aria-expanded={showDetails} aria-controls={detailsId} aria-label={showDetails ? "收起任务详情" : "展开任务详情"} title={showDetails ? "收起任务详情" : "展开任务详情"} className="h-9 w-9 text-muted-foreground">
+            <ChevronDown className={`h-4 w-4 transition-transform duration-[var(--motion-fast)] motion-reduce:transition-none ${showDetails ? "rotate-180" : ""}`} />
+          </Button>
+          {canStopTask && <Button size="icon" variant="ghost" disabled={isStoppingTask || actionLoading} onClick={() => handleAction(onStopTask, task.id)} aria-label={isStoppingTask ? "任务停止中" : "停止任务"} title={isStoppingTask ? "任务停止中" : "停止任务"} className="h-9 w-9 text-danger hover:bg-danger-container hover:text-danger">
+            {actionLoading || isStoppingTask ? <RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Square className="h-3.5 w-3.5" />}
+          </Button>}
+        </div>
       </div>
 
       <TaskCourseListDialog
@@ -439,7 +401,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
 
       {isTerminal && (
         <div
-          className={`flex min-w-0 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-muted/30 px-3 py-2.5 text-xs font-medium transition-colors ${statusInfo.toneClass}`}
+          className={`flex min-w-0 items-start gap-2 text-xs ${statusInfo.toneClass}`}
         >
           {effectiveStatus === "success" && (
             <CheckCircle2 className="h-4 w-4 shrink-0" />
@@ -466,41 +428,19 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         </InlineError>
       )}
 
-      {showProgress && !isTerminal && progress && (
-        <TaskProgressPanel
-          progress={progress}
-          status={effectiveStatus}
-          percent={percent}
-        />
-      )}
-
-      {!isTerminal && (
-        <div className="flex flex-col gap-1 px-1 font-mono text-xs text-muted-foreground">
-          <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 min-w-0">
-            <span className="shrink-0">启动时间:</span>
-            <span className="text-right wrap-anywhere">
-              {task.startedAt ? formatLocalDateTime(task.startedAt) : "未启动"}
-            </span>
-          </div>
-          {task.stoppedAt && (
-            <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 min-w-0">
-              <span className="shrink-0">结束时间:</span>
-              <span className="text-right wrap-anywhere">
-                {formatLocalDateTime(task.stoppedAt)}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-
       <div
+        id={detailsId}
         className={`grid transition-[grid-template-rows,opacity] duration-[var(--motion-page)] ease-[var(--ease-emphasized)] motion-reduce:transition-none ${showDetails ? "grid-rows-[1fr] opacity-100" : "pointer-events-none grid-rows-[0fr] opacity-0"}`}
         aria-hidden={!showDetails}
+        inert={!showDetails}
       >
-        <div className="min-h-0 overflow-hidden">
-          {isTerminal && (
+        <div className="min-h-0 space-y-4 overflow-hidden">
+          {showDetails && showProgress && progress && (
+            <TaskProgressPanel progress={progress} percent={percent} />
+          )}
+          {showDetails && (
             <div className="mb-3 space-y-3">
-              <div className="flex flex-col gap-1 px-1 font-mono text-xs text-muted-foreground">
+              <div className="flex flex-col gap-1 text-xs text-muted-foreground">
                 <div className="flex min-w-0 flex-wrap justify-between gap-x-3 gap-y-0.5">
                   <span className="shrink-0">启动时间</span>
                   <span className="text-right wrap-anywhere">
@@ -531,53 +471,11 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
               enabledAutomationLabels={enabledAutomationLabels}
             />
           ) : (
-            <div className="mt-1 min-w-0 w-full rounded-[var(--radius-lg)] border border-border/50 bg-muted/30 p-3 text-xs text-muted-foreground">
+            <div className="mt-1 min-w-0 w-full border-t border-border pt-3 text-xs text-muted-foreground">
               任务未保存配置快照
             </div>
           )}
         </div>
-      </div>
-
-      <div className="mt-0.5 flex w-full min-w-0 flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-2.5 sm:pt-3">
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => setShowDetails(!showDetails)}
-          aria-expanded={showDetails}
-          className="h-8 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/70 px-3 flex items-center gap-1.5 transition-colors shrink-0"
-        >
-          <ChevronDown
-            className={`w-3.5 h-3.5 transition-transform duration-[var(--motion-fast)] ease-[var(--ease-standard)] ${showDetails ? "rotate-180" : ""}`}
-          />
-          <span>
-            {isTerminal
-              ? showDetails
-                ? "收起详情"
-                : "查看详情"
-              : showDetails
-                ? "收起参数"
-                : "配置参数"}
-          </span>
-        </Button>
-
-        {canStopTask && (
-          <div className="flex items-center gap-2 shrink-0">
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={isStoppingTask || actionLoading}
-              onClick={() => handleAction(onStopTask, task.id)}
-              className="h-8 px-4 border-danger/30 text-danger hover:bg-danger-container/50 hover:border-danger text-xs font-semibold flex items-center gap-1.5 transition-colors"
-            >
-              {actionLoading || isStoppingTask ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Square className="w-3.5 h-3.5 fill-current" />
-              )}
-              {isStoppingTask ? "停止中" : "停止"}
-            </Button>
-          </div>
-        )}
       </div>
     </article>
   );

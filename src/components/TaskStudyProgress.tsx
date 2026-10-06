@@ -1,5 +1,7 @@
-import { BookOpen, Clock3, Eye, FileText, Target } from "lucide-react";
+import { BookOpen, Clock3, Eye, FileText } from "lucide-react";
 import type { CourseStudyProgress, StudyMetricProgress } from "@/lib/api";
+import { Progress } from "@/components/ui/progress";
+import { getStudyMetricPercent } from "@/lib/studyProgress";
 
 interface TaskStudyProgressProps {
   courses: CourseStudyProgress[];
@@ -57,28 +59,29 @@ function StudyMetric({ icon: Icon, label, metric, unit }: StudyMetricProps) {
   const statusMessage = ["failed", "skipped"].includes(metric.status)
     ? metric.message.trim()
     : "";
+  const percent = getStudyMetricPercent(metric);
 
   return (
-    <div className="rounded-[var(--radius-md)] border border-border/50 bg-card/60 p-2.5">
-      <div className="flex min-w-0 flex-col gap-1 text-xs">
+    <div className="min-w-0 space-y-2 py-3">
+      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs">
         <span className="flex min-w-0 flex-1 items-center gap-1.5 font-medium text-foreground">
-          <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
+          <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           <span className="truncate">{label}</span>
         </span>
         <span className="shrink-0 whitespace-nowrap text-muted-foreground">
           {STUDY_METRIC_STATUS_LABELS[metric.status]}
         </span>
       </div>
-      <div className="mt-2 flex flex-col items-start gap-1">
-        <span className="shrink-0 whitespace-nowrap text-sm font-semibold tabular-nums text-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs">
+        <span className="font-medium tabular-nums text-foreground">
           已 {formatDelta(increment, unit)}
         </span>
-        <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-xs text-muted-foreground">
-          <Target className="h-3 w-3" />
-          {formatDelta(targetIncrement, unit)}
+        <span className="tabular-nums text-muted-foreground">
+          目标 {formatDelta(targetIncrement, unit)}
         </span>
       </div>
-      <div className="mt-1 whitespace-nowrap text-xs text-muted-foreground tabular-nums">
+      {percent !== null && <Progress value={percent} className="h-1.5 bg-muted" />}
+      <div className="mt-1 text-xs text-muted-foreground tabular-nums wrap-anywhere">
         当前 {metric.current}/{formatValue(metric.target, unit)}
       </div>
       {statusMessage && (
@@ -110,12 +113,12 @@ export function TaskStudyProgress({ courses }: TaskStudyProgressProps) {
           学习目标进度
         </div>
       </div>
-      <div className="space-y-2">
+      <div className="divide-y divide-border">
         {visibleCourses.map(({ course, metrics }) => {
           return (
             <div
               key={course.classId}
-              className="rounded-[var(--radius-lg)] border border-border/60 bg-card/70 p-2.5"
+              className="min-w-0 py-3 first:pt-0 last:pb-0"
             >
               <p
                 className="truncate text-xs font-medium text-foreground"
@@ -123,7 +126,7 @@ export function TaskStudyProgress({ courses }: TaskStudyProgressProps) {
               >
                 {course.courseName}
               </p>
-              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-3">
+              <div className="mt-1 divide-y divide-border/60">
                 {metrics.map(({ icon: Icon, label, metric, unit }) => (
                   <StudyMetric
                     key={label}
