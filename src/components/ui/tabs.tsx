@@ -6,6 +6,7 @@ import * as TabsPrimitive from "@radix-ui/react-tabs";
 
 import { cn } from "@/lib/utils";
 import { tabsListVariants } from "./tabs-variants";
+import { MotionHighlight } from "./motion-highlight";
 
 function Tabs({
   className,
@@ -29,6 +30,7 @@ function Tabs({
 function TabsList({
   className,
   variant = "default",
+  children,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List> &
   VariantProps<typeof tabsListVariants>) {
@@ -36,9 +38,12 @@ function TabsList({
     <TabsPrimitive.List
       data-slot="tabs-list"
       data-variant={variant}
-      className={cn(tabsListVariants({ variant }), className)}
+      className={cn("motion-highlight-host relative", tabsListVariants({ variant }), className)}
       {...props}
-    />
+    >
+      {children}
+      <MotionHighlight selector='[aria-selected="true"], [data-state="active"]' variant={variant === "line" ? "line" : "surface"} />
+    </TabsPrimitive.List>
   );
 }
 

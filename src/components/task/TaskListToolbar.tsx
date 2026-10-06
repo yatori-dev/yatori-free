@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import type { Task, TaskKind } from '@/lib/api';
 import { isActiveTaskStatus } from '@/lib/taskStatus';
 import { taskStatusLabels } from '@/lib/taskDashboard';
+import { MotionHighlight } from '@/components/ui/motion-highlight';
 
 export type TaskListStatus = 'all' | 'attention' | Task['status'];
 export type TaskListKind = 'all' | TaskKind;
@@ -35,7 +36,8 @@ export function TaskListToolbar({
     <div className="space-y-4 py-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h3 className="text-sm font-semibold">任务列表</h3>
-        <div className="inline-flex shrink-0 gap-1 rounded-[var(--radius-md)] bg-muted p-1" role="group" aria-label="任务状态分组">
+        <div className="motion-highlight-host relative inline-flex shrink-0 gap-1 rounded-[var(--radius-md)] bg-muted p-1" data-motion-segment role="group" aria-label="任务状态分组">
+          <MotionHighlight selector='[aria-pressed="true"]' />
           {(['active', 'completed'] as const).map((value) => (
             <Button key={value} variant="ghost" size="sm" onClick={() => onTabChange(value)} aria-pressed={taskFilter === value} className={`h-8 gap-2 px-3 text-xs ${taskFilter === value ? 'bg-background text-foreground hover:bg-background' : 'text-muted-foreground'}`}>
               {value === 'active' ? '进行中' : '已结束'}<span className="tabular-nums">{counts[value]}</span>

@@ -197,7 +197,7 @@ export function DashboardHeader({
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
+          <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col gap-1">
                 <p className="truncate text-sm font-semibold">

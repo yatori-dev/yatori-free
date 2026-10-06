@@ -1,0 +1,296 @@
+/* Motion patterns adapted from Animate UI; see /animate-ui-license.txt. */
+:root {
+  --duration-stagger: 40ms;
+  --duration-micro: 80ms;
+  --duration-quick: 150ms;
+  --duration-fast: 250ms;
+  --duration-medium: 350ms;
+  --duration-slow: 400ms;
+  --duration-very-slow: 500ms;
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: ease-in-out;
+  --distance-micro: 4px;
+  --distance-base: 8px;
+  --scale-modal: 0.96;
+  --scale-menu: 0.97;
+  --scale-menu-close: 0.99;
+  --acc-expand: var(--duration-fast);
+  --acc-collapse: var(--duration-fast);
+  --acc-chevron: var(--duration-fast);
+  --acc-ease: var(--ease-smooth-out);
+  --icon-swap-dur: var(--duration-fast);
+  --icon-swap-blur: 2px;
+  --icon-swap-start-scale: 0.25;
+  --icon-swap-ease: ease-in-out;
+}
+
+.motion-page-loading,
+.motion-view-enter,
+.motion-content-enter {
+  animation: motion-content-in var(--motion-page) var(--ease-smooth-out);
+}
+
+.motion-view-enter {
+  /* Opacity alone keeps fixed headers and navigation anchored to the viewport. */
+  animation-name: motion-fade-in;
+}
+
+.motion-dialog-overlay[data-state="open"],
+.motion-sheet-overlay[data-state="open"] {
+  animation: motion-fade-in var(--motion-page) var(--ease-smooth-out);
+}
+
+.motion-dialog-overlay[data-state="closed"],
+.motion-sheet-overlay[data-state="closed"] {
+  animation: motion-fade-out var(--motion-close) var(--ease-smooth-out) forwards;
+  pointer-events: none;
+}
+
+.motion-dialog {
+  transform-origin: center;
+}
+
+.motion-dialog[data-state="open"] {
+  animation: motion-dialog-in var(--motion-page) var(--ease-smooth-out);
+}
+
+.motion-dialog[data-state="closed"] {
+  animation: motion-dialog-out var(--motion-close) var(--ease-smooth-out) forwards;
+  pointer-events: none;
+}
+
+.motion-menu {
+  --menu-x: 0px;
+  --menu-y: 0px;
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin, var(--radix-select-content-transform-origin, center));
+}
+
+.motion-menu[data-side="bottom"] { --menu-y: calc(-1 * var(--distance-micro)); }
+.motion-menu[data-side="top"] { --menu-y: var(--distance-micro); }
+.motion-menu[data-side="left"] { --menu-x: var(--distance-micro); }
+.motion-menu[data-side="right"] { --menu-x: calc(-1 * var(--distance-micro)); }
+
+.motion-menu[data-state="open"] {
+  animation: motion-menu-in var(--motion-fast) var(--ease-smooth-out);
+}
+
+.motion-menu[data-state="closed"] {
+  animation: motion-menu-out var(--motion-close) var(--ease-smooth-out) forwards;
+  pointer-events: none;
+}
+
+.motion-menu[data-align-trigger="true"] {
+  --menu-x: 0px;
+  --menu-y: 0px;
+  transform-origin: center;
+}
+
+.motion-sheet[data-state="open"] {
+  animation: motion-sheet-in var(--motion-panel) var(--ease-smooth-out);
+}
+
+.motion-sheet[data-state="closed"] {
+  animation: motion-sheet-out var(--motion-panel-close) var(--ease-smooth-out) forwards;
+  pointer-events: none;
+}
+
+/* transitions-dev: accordion and icon swap */
+.t-acc-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--acc-collapse) var(--acc-ease);
+}
+.t-acc[data-open="true"] .t-acc-panel {
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--acc-expand) var(--acc-ease);
+}
+.t-acc-panel-inner {
+  overflow: hidden;
+  opacity: 0;
+  filter: blur(2px);
+  transition:
+    opacity var(--acc-collapse) var(--acc-ease),
+    filter var(--acc-collapse) var(--acc-ease);
+}
+.t-acc[data-open="true"] .t-acc-panel-inner {
+  opacity: 1;
+  filter: blur(0);
+  transition:
+    opacity var(--acc-expand) var(--acc-ease),
+    filter var(--acc-expand) var(--acc-ease);
+}
+.t-acc-chevron {
+  display: inline-flex;
+  transform: scaleY(1);
+  transform-origin: center;
+  transition: transform var(--acc-chevron) var(--acc-ease);
+}
+.t-acc-chevron path { vector-effect: non-scaling-stroke; }
+.t-acc[data-open="true"] .t-acc-chevron { transform: scaleY(-1); }
+
+.t-icon-swap {
+  position: relative;
+  display: inline-grid;
+}
+.t-icon-swap .t-icon {
+  grid-area: 1 / 1;
+  transition:
+    opacity var(--icon-swap-dur) var(--icon-swap-ease),
+    filter var(--icon-swap-dur) var(--icon-swap-ease),
+    transform var(--icon-swap-dur) var(--icon-swap-ease);
+  will-change: opacity, filter, transform;
+}
+.t-icon-swap[data-state="a"] .t-icon[data-icon="a"],
+.t-icon-swap[data-state="b"] .t-icon[data-icon="b"] {
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1);
+}
+.t-icon-swap[data-state="a"] .t-icon[data-icon="b"],
+.t-icon-swap[data-state="b"] .t-icon[data-icon="a"] {
+  opacity: 0;
+  filter: blur(var(--icon-swap-blur));
+  transform: scale(var(--icon-swap-start-scale));
+}
+
+.motion-highlight-host {
+  isolation: isolate;
+}
+
+.motion-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+}
+
+.motion-highlight[data-ready="true"] {
+  opacity: 1;
+  transition:
+    transform var(--motion-fast) var(--ease-smooth-out),
+    width var(--motion-fast) var(--ease-smooth-out),
+    height var(--motion-fast) var(--ease-smooth-out),
+    opacity var(--motion-close) var(--ease-smooth-out);
+}
+
+.motion-highlight[data-visible="false"] { opacity: 0; }
+
+[data-slot="tabs-list"] > .motion-highlight { background: var(--background); }
+[data-slot="tabs-list"][data-variant="line"] > .motion-highlight { background: var(--foreground); border-radius: 0; }
+.motion-menu > .motion-highlight { background: var(--accent); }
+.motion-menu.motion-highlight-host [data-highlighted] { background: transparent; }
+.motion-menu.motion-highlight-host [data-variant="destructive"][data-highlighted] { background: var(--danger-container); }
+.motion-highlight-host[data-motion-nav] > .motion-highlight { background: var(--sidebar-accent); border-radius: var(--radius-md); }
+.motion-highlight-host[data-motion-nav] > [aria-current="page"] { background: transparent; }
+.motion-highlight-host[aria-label="移动主导航"] > .motion-highlight { border-radius: inherit; background: var(--muted); }
+.motion-highlight-host[data-motion-learning] > .motion-highlight { background: var(--background); border-radius: var(--radius-md); }
+.motion-highlight-host[data-motion-learning] > [aria-current="page"] { background: transparent; box-shadow: none; }
+.motion-highlight-host[data-motion-segment] > .motion-highlight { background: var(--card); }
+.motion-highlight-host[data-motion-segment] > [aria-pressed="true"] { background: transparent; box-shadow: none; }
+
+[data-slot="tabs-list"] > [data-slot="tabs-trigger"][data-state="active"] {
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-slot="tabs-list"][data-variant="line"] > [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+
+[data-slot="select-trigger"] > svg:last-child {
+  transition: transform var(--motion-fast) var(--ease-smooth-out);
+}
+
+[data-slot="select-trigger"][data-state="open"] > svg:last-child { transform: rotate(180deg); }
+
+.toaster [data-sonner-toast] {
+  transition:
+    transform var(--motion-panel) var(--ease-smooth-out),
+    opacity var(--motion-panel) var(--ease-smooth-out),
+    height var(--motion-panel) var(--ease-smooth-out),
+    box-shadow var(--motion-fast) var(--ease-smooth-out);
+}
+
+.toaster [data-sonner-toast][data-removed="true"] {
+  transition-duration: var(--motion-panel-close);
+}
+.toaster [data-sonner-toast][data-swiping="true"] { transition: none; }
+
+/* Capture only the surface being switched, preserving other regions and state. */
+html:active-view-transition-type(yatori-dashboard) [data-dashboard-tab-content],
+html:active-view-transition-type(yatori-settings) .settings-view [data-slot="tabs-content"][data-state="active"],
+html:active-view-transition-type(yatori-credentials) .credentials-view [data-slot="tabs-content"][data-state="active"] {
+  view-transition-name: yatori-content;
+}
+
+html:active-view-transition-type(yatori-view)::view-transition-old(root),
+html:active-view-transition-type(yatori-view)::view-transition-new(root) {
+  animation: none;
+}
+
+html:active-view-transition-type(yatori-view)::view-transition-group(*) {
+  animation-duration: var(--motion-page);
+  animation-timing-function: var(--ease-smooth-out);
+}
+
+html:active-view-transition-type(yatori-view)::view-transition-old(yatori-content) {
+  animation: motion-fade-out var(--motion-close) var(--ease-smooth-out) both;
+}
+
+html:active-view-transition-type(yatori-view)::view-transition-new(yatori-content) {
+  animation: motion-content-in var(--motion-page) var(--ease-smooth-out) both;
+}
+
+@keyframes motion-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes motion-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes motion-content-in {
+  from { opacity: 0; transform: translateY(var(--distance-micro)); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes motion-menu-in {
+  from { opacity: 0; transform: translate(var(--menu-x), var(--menu-y)) scale(var(--scale-menu)); }
+  to { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+@keyframes motion-menu-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(var(--scale-menu-close)); }
+}
+@keyframes motion-dialog-in {
+  from { opacity: 0; transform: perspective(800px) rotateX(-6deg) scale(var(--scale-modal)); }
+  to { opacity: 1; transform: perspective(800px) rotateX(0deg) scale(1); }
+}
+@keyframes motion-dialog-out {
+  from { opacity: 1; transform: perspective(800px) rotateX(0deg) scale(1); }
+  to { opacity: 0; transform: perspective(800px) rotateX(-3deg) scale(var(--scale-modal)); }
+}
+@keyframes motion-sheet-in {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes motion-sheet-out {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-acc-panel, .t-acc-panel-inner, .t-acc-chevron {
+    transition: none !important;
+  }
+  .t-icon-swap .t-icon { transition: none !important; }
+  .motion-page-loading,
+  .motion-view-enter,
+  .motion-content-enter,
+  .motion-dialog,
+  .motion-dialog-overlay,
+  .motion-menu,
+  .motion-sheet,
+  .motion-sheet-overlay {
+    animation-duration: 0.01ms !important;
+  }
+  .motion-highlight,
+  .toaster [data-sonner-toast] { transition: none !important; }
+}

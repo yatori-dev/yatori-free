@@ -93,7 +93,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="login-page flex min-h-svh flex-col items-center justify-center overflow-x-hidden bg-background px-4 py-8 transition-colors duration-[var(--motion-fast)] sm:px-6 lg:px-8">
+    <div className="motion-view-enter login-page flex min-h-svh flex-col items-center justify-center overflow-x-hidden bg-background px-4 py-8 transition-colors duration-[var(--motion-fast)] sm:px-6 lg:px-8">
       <div className="fixed right-16 top-4 z-10">
         <ThemeToggleButton />
       </div>

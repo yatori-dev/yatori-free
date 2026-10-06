@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { changeView } from '@/lib/motion';
 
 type LoginMethod = 'password' | 'sms';
 type LegalDocument = 'terms' | 'privacy';
@@ -249,7 +250,7 @@ export function LoginCredentialsStep({
 
   const handleMethodChange = (value: string) => {
     const nextMethod = value as LoginMethod;
-    setMethod(nextMethod);
+    changeView(() => setMethod(nextMethod), 'credentials');
     setPasswordError('');
     setSMSError('');
   };
@@ -364,7 +365,7 @@ export function LoginCredentialsStep({
       <form
         onSubmit={handleSubmit}
         autoComplete="on"
-        className="w-full space-y-5"
+        className="credentials-view w-full space-y-5"
       >
         <Tabs value={method} onValueChange={handleMethodChange} className="gap-5">
           <TabsList variant="line" className="w-full shrink-0 p-0 group-data-horizontal/tabs:h-11">

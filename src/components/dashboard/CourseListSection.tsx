@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
+import { CollapsiblePanel } from '@/components/ui/collapsible-panel';
 import { CourseCheckbox } from './CourseCheckbox';
 
 interface CourseListSectionProps {
@@ -375,8 +376,10 @@ export function CourseListSection({
                       </div>
                     </div>
 
-                    {isExpanded && (
-                      <div className="border-t border-border/40 bg-muted/20 px-[var(--space-3)] pb-[var(--space-3)] pl-11 pt-[var(--space-3)] sm:px-[var(--space-5)] sm:pb-[var(--space-5)] sm:pl-12 sm:pt-[var(--space-4)] animate-in fade-in-0 duration-[var(--motion-fast)] ease-[var(--ease-emphasized)]">
+                    <CollapsiblePanel
+                      open={isExpanded}
+                      className="border-t border-border/40 bg-muted/20 px-[var(--space-3)] pb-[var(--space-3)] pl-11 pt-[var(--space-3)] sm:px-[var(--space-5)] sm:pb-[var(--space-5)] sm:pl-12 sm:pt-[var(--space-4)]"
+                    >
                         {loadingDetails[course.key] ? (
                           <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
                             <svg
@@ -409,8 +412,7 @@ export function CourseListSection({
                             无法加载章节，请点击右上角刷新重试
                           </div>
                         )}
-                      </div>
-                    )}
+                    </CollapsiblePanel>
                   </div>
                 );
               })}

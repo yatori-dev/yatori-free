@@ -251,7 +251,7 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
       <p className="mt-2 text-sm text-muted-foreground">使用学习通 App 扫码</p>
 
       {isScanned || isConfirmed ? (
-        <div className="mt-7 flex h-[208px] w-[208px] flex-col items-center justify-center gap-3 rounded-[var(--radius-lg)] border border-border bg-muted/40 p-4 shadow-xs animate-in fade-in-0 duration-[var(--motion-fast)] motion-reduce:animate-none">
+        <div className="motion-content-enter mt-7 flex h-[208px] w-[208px] flex-col items-center justify-center gap-3 rounded-[var(--radius-lg)] border border-border bg-muted/40 p-4 shadow-xs">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg shadow-sm">
             {session?.scannedName ? session.scannedName.substring(0, 1) : "通"}
           </div>
