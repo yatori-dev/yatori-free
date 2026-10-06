@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   apiRequest,
   getCourses,
+  getSMSConfig,
   getTaskConfigSnapshot,
   getTaskCourseIdentifiers,
   getUserFacingErrorMessage,
@@ -152,14 +153,61 @@ describe('api boundary', () => {
     ).toEqual(['class-1']);
   });
 
+  it.each([false, true])(
+    'reads nested SMS verification configuration when enabled=%s',
+    async (enabled) => {
+      const turnstile = {
+        enabled,
+        siteKey: enabled ? 'site-key' : '',
+        action: 'sms_send',
+      };
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue(
+          new Response(JSON.stringify({ code: 200, data: { turnstile } }), {
+            status: 200,
+          }),
+        ),
+      );
+
+      expect((await getSMSConfig()).data.turnstile).toEqual(turnstile);
+    },
+  );
+
+  it.each([
+    { enabled: false, siteKey: '' },
+    { turnstile: { enabled: true, siteKey: '', action: 'sms_send' } },
+    { turnstile: { enabled: true, siteKey: 'site-key', action: 'other' } },
+  ])(
+    'rejects unusable SMS configuration instead of disabling verification: %j',
+    async (data) => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue(
+          new Response(JSON.stringify({ code: 200, data }), { status: 200 }),
+        ),
+      );
+
+      await expect(getSMSConfig()).rejects.toThrow('短信验证配置异常，请重试');
+    },
+  );
+
   it('keeps course scope when an optional task snapshot field is incompatible', () => {
     const snapshot = getTaskConfigSnapshot({
       kind: 'task_points',
       coursesCustom: { includeCourses: ['class-2'] },
       targets: [{ classId: 'class-2', itemIds: ['point-1'] }],
-      bypassDailyStudyLimit: 'false',
+      executionMode: 'unknown',
     } as never);
 
     expect(getTaskCourseIdentifiers(snapshot)).toEqual(['class-2']);
+    expect(snapshot?.executionMode).toBeUndefined();
   });
+
+  it.each(['normal', 'aggressive'] as const)(
+    'preserves the %s execution mode in task snapshots',
+    (executionMode) => {
+      expect(getTaskConfigSnapshot({ executionMode })).toEqual({ executionMode });
+    },
+  );
 });
