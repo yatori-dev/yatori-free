@@ -28,6 +28,7 @@ import {
 import { InlineError } from "./common/InlineError";
 import { TaskCourseBadges } from "./task/TaskCourseBadges";
 import { TaskCourseListDialog } from "./task/TaskCourseListDialog";
+import { CollapsiblePanel } from "./ui/collapsible-panel";
 import { TaskProgressPanel } from "./task/TaskProgressPanel";
 import { TaskSettingsSnapshot } from "./task/TaskSettingsSnapshot";
 import { getTaskPresentation } from "@/lib/taskPresentation";
@@ -429,38 +430,34 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         </InlineError>
       )}
 
-      <div
+      <CollapsiblePanel
         id={detailsId}
-        className={`grid transition-[grid-template-rows,opacity] duration-[var(--motion-page)] ease-[var(--ease-emphasized)] motion-reduce:transition-none ${showDetails ? "grid-rows-[1fr] opacity-100" : "pointer-events-none grid-rows-[0fr] opacity-0"}`}
-        aria-hidden={!showDetails}
-        inert={!showDetails}
+        open={showDetails}
       >
         <div className="min-h-0 space-y-4 overflow-hidden">
-          {showDetails && showProgress && progress && (
+          {showProgress && progress && (
             <TaskProgressPanel progress={progress} percent={percent} />
           )}
-          {showDetails && (
-            <div className="mb-3 space-y-3">
-              <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+          <div className="mb-3 space-y-3">
+            <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+              <div className="flex min-w-0 flex-wrap justify-between gap-x-3 gap-y-0.5">
+                <span className="shrink-0">启动时间</span>
+                <span className="text-right wrap-anywhere">
+                  {task.startedAt
+                    ? formatLocalDateTime(task.startedAt)
+                    : "未启动"}
+                </span>
+              </div>
+              {task.stoppedAt && (
                 <div className="flex min-w-0 flex-wrap justify-between gap-x-3 gap-y-0.5">
-                  <span className="shrink-0">启动时间</span>
+                  <span className="shrink-0">结束时间</span>
                   <span className="text-right wrap-anywhere">
-                    {task.startedAt
-                      ? formatLocalDateTime(task.startedAt)
-                      : "未启动"}
+                    {formatLocalDateTime(task.stoppedAt)}
                   </span>
                 </div>
-                {task.stoppedAt && (
-                  <div className="flex min-w-0 flex-wrap justify-between gap-x-3 gap-y-0.5">
-                    <span className="shrink-0">结束时间</span>
-                    <span className="text-right wrap-anywhere">
-                      {formatLocalDateTime(task.stoppedAt)}
-                    </span>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
-          )}
+          </div>
           {coursesCustom ? (
             <TaskSettingsSnapshot
               config={taskConfigSnapshot}
@@ -477,7 +474,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
             </div>
           )}
         </div>
-      </div>
+      </CollapsiblePanel>
     </article>
   );
 };

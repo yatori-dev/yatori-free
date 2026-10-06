@@ -1,5 +1,6 @@
 import { useMemo, type RefObject } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
+import { MotionHighlight } from '@/components/ui/motion-highlight';
 import type {
   CourseDetails,
   CourseSummary,
@@ -137,7 +138,8 @@ export function DashboardMainContent({
         <div className="min-w-0 space-y-4 sm:space-y-6">
           {isLearningTab && (
             <div className="lg:hidden">
-              <div className="flex items-center rounded-[var(--radius-lg)] bg-muted p-1 text-xs font-medium text-muted-foreground">
+              <div className="motion-highlight-host relative flex items-center rounded-[var(--radius-lg)] bg-muted p-1 text-xs font-medium text-muted-foreground" data-motion-learning>
+                <MotionHighlight selector='[aria-current="page"]' />
                 {mobileLearningTabs.map((tab) => {
                   const active = activeTab === tab.id;
                   const Icon = tab.icon;

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./styles/motion.css";
 
 @custom-variant data-open {
   &:where([data-state="open"]),
@@ -194,12 +195,12 @@
     --sidebar-border: oklch(0.91 0.008 257);
 
     /* Motion Tokens */
-    --motion-instant: 100ms;
-    --motion-fast: 200ms;
-    --motion-page: 280ms;
-    --motion-panel: 400ms;
-    --motion-close: 200ms;
-    --motion-panel-close: 320ms;
+    --motion-instant: var(--duration-micro);
+    --motion-fast: var(--duration-fast);
+    --motion-page: var(--duration-fast);
+    --motion-panel: var(--duration-slow);
+    --motion-close: var(--duration-quick);
+    --motion-panel-close: var(--duration-medium);
 
     /* Easing Tokens */
     --ease-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -293,40 +294,6 @@
   transition-timing-function: var(--ease-emphasized);
 }
 
-@utility animate-bottom-bar-enter {
-  animation: bottomBarEnter var(--motion-fast) var(--ease-emphasized) both;
-}
-
-@utility animate-task-success-flash {
-  animation: taskSuccessFlash 750ms var(--ease-emphasized) forwards;
-}
-
-@keyframes bottomBarEnter {
-  0% {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes taskSuccessFlash {
-  0% {
-    border-color: var(--success);
-    box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.2), var(--shadow-raised);
-  }
-  50% {
-    border-color: var(--success);
-    box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.15), var(--shadow-raised);
-  }
-  100% {
-    border-color: var(--border);
-    box-shadow: var(--shadow-rest);
-  }
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -374,24 +341,6 @@
   }
 }
 
-/* Slide Panels */
-.slide-viewport {
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-}
-
-.slide-container {
-  display: flex;
-  width: 200%;
-  transition: transform var(--motion-page) var(--ease-emphasized);
-}
-
-.slide-pane {
-  width: 50%;
-  flex-shrink: 0;
-}
-
 @media (max-width: 600px) {
   /* Keep transient feedback out of the mobile header and bottom navigation. */
   [data-sonner-toaster].toaster {
@@ -404,29 +353,6 @@
     min-width: 0 !important;
     width: fit-content !important;
     margin-inline: auto !important;
-  }
-}
-
-/* Tabs Content Transition Animation */
-[data-slot="tabs-content"][data-state="active"] {
-  animation: tabFadeIn var(--tab-transition-duration, var(--motion-page)) var(--ease-emphasized) both;
-}
-
-/* Avoid compositing an entire long course panel during mobile tab switches. */
-@media (max-width: 1023px) {
-  [data-slot="tabs-content"][data-state="active"] {
-    animation: none;
-  }
-}
-
-@keyframes tabFadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(var(--tab-transition-start-x, 8px));
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
   }
 }
 
@@ -459,32 +385,6 @@
   }
 }
 
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 220ms;
-  animation-timing-function: var(--ease-standard);
-}
-
-::view-transition-old(root) {
-  animation-name: theme-fade-out;
-}
-
-::view-transition-new(root) {
-  animation-name: theme-fade-in;
-}
-
-@keyframes theme-fade-out {
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes theme-fade-in {
-  from {
-    opacity: 0;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -506,18 +406,6 @@
   .loading-spinner,
   .loading-spinner .path {
     animation: none;
-  }
-}
-
-@keyframes loginSuccessReveal {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -554,28 +442,6 @@
     width: 100%;
     animation: none;
     opacity: 0.55;
-  }
-}
-
-.login-success-underlay,
-.login-success-view {
-  position: fixed;
-  inset: 0;
-}
-
-.login-success-underlay {
-  overflow: hidden;
-}
-
-.login-success-view {
-  z-index: 50;
-  overflow: auto;
-  animation: loginSuccessReveal 360ms var(--ease-emphasized) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .login-success-view {
-    animation: none;
   }
 }
 

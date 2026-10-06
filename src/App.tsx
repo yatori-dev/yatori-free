@@ -26,7 +26,7 @@ const Dashboard = lazy(() =>
 function AuthRestoreScreen() {
   return (
     <div
-      className="flex min-h-screen items-center justify-center bg-background px-4 py-8"
+      className="motion-page-loading flex min-h-screen items-center justify-center bg-background px-4 py-8"
       aria-busy="true"
     >
       <div className="flex flex-col items-center gap-4 text-muted-foreground">
@@ -57,7 +57,6 @@ function AppSuspenseFallback() {
 
 function App() {
   const [session, setSession] = useState<AuthSession | null>(null);
-  const [isLoginTransitioning, setIsLoginTransitioning] = useState(false);
   const [isRestoringSession, setIsRestoringSession] = useState(() => {
     return sessionStorage.getItem(LOGOUT_SUPPRESSION_KEY) !== '1';
   });
@@ -99,9 +98,6 @@ function App() {
     clearSessionCache();
     clearQRLoginSession();
     sessionStorage.removeItem(LOGOUT_SUPPRESSION_KEY);
-    setIsLoginTransitioning(
-      !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-    );
     setSession(newSession);
     setIsRestoringSession(false);
   }, []);
@@ -121,7 +117,6 @@ function App() {
         );
       }
     } finally {
-      setIsLoginTransitioning(false);
       setSession(null);
       setIsRestoringSession(false);
     }
@@ -134,30 +129,10 @@ function App() {
       ) : (
         <div>
           <Suspense fallback={<AppSuspenseFallback />}>
-            {(!session || isLoginTransitioning) && (
-              <div
-                className={
-                  isLoginTransitioning ? 'login-success-underlay' : undefined
-                }
-                aria-hidden={isLoginTransitioning || undefined}
-                inert={isLoginTransitioning || undefined}
-              >
-                <Login onLoginSuccess={handleLoginSuccess} />
-              </div>
-            )}
-            {session && (
-              <div
-                className={
-                  isLoginTransitioning ? 'login-success-view' : undefined
-                }
-                onAnimationEnd={(event) => {
-                  if (event.animationName === 'loginSuccessReveal') {
-                    setIsLoginTransitioning(false);
-                  }
-                }}
-              >
-                <Dashboard session={session} onLogout={handleLogout} />
-              </div>
+            {session ? (
+              <Dashboard session={session} onLogout={handleLogout} />
+            ) : (
+              <Login onLoginSuccess={handleLoginSuccess} />
             )}
           </Suspense>
         </div>

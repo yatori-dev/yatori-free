@@ -191,22 +191,26 @@ function StepperField({
   );
 }
 
-export function StudyIncrementSettings({
-  open,
-  onOpenChange,
-  course,
-  hasReadTaskPoints,
-  studyStats,
-  statsLoaded,
-  loadingStats,
-  values,
-  onSave,
-}: StudyIncrementSettingsProps) {
-  if (!open || !course) return null;
+export function StudyIncrementSettings(props: StudyIncrementSettingsProps) {
+  const [retained, setRetained] = useState({ props, open: props.open, sequence: 0 });
+  // Preserve the exit snapshot; reset the draft before painting a reopened dialog.
+  if (props.open && props.course && retained.props !== props) {
+    setRetained({
+      props,
+      open: true,
+      sequence: retained.sequence + (retained.open ? 0 : 1),
+    });
+  } else if (!props.open && retained.open) {
+    setRetained({ ...retained, open: false });
+  }
+  const displayProps = props.open && props.course ? props : retained.props;
+  const { course, hasReadTaskPoints, studyStats, statsLoaded, loadingStats, values } = displayProps;
+  if (!course) return null;
 
   return (
     <StudyIncrementDialog
-      key={course.key}
+      key={`${course.key}-${retained.sequence}`}
+      open={props.open && Boolean(props.course)}
       course={course}
       hasReadTaskPoints={hasReadTaskPoints}
       initialValue={
@@ -219,13 +223,14 @@ export function StudyIncrementSettings({
       studyStats={studyStats}
       statsLoaded={statsLoaded}
       loadingStats={loadingStats}
-      onOpenChange={onOpenChange}
-      onSave={onSave}
+      onOpenChange={props.onOpenChange}
+      onSave={props.onSave}
     />
   );
 }
 
 interface StudyIncrementDialogProps {
+  open: boolean;
   course: Course;
   hasReadTaskPoints: boolean;
   initialValue: StudyIncrement;
@@ -237,6 +242,7 @@ interface StudyIncrementDialogProps {
 }
 
 function StudyIncrementDialog({
+  open,
   course,
   hasReadTaskPoints,
   initialValue,
@@ -277,7 +283,7 @@ function StudyIncrementDialog({
   };
 
   return (
-    <Dialog open onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100dvh-1rem)] max-w-[calc(100%-1rem)] grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden p-0 sm:max-h-[calc(100dvh-2rem)] sm:max-w-xl">
         <DialogHeader className="border-b border-border px-4 py-4 pr-12 sm:px-6 sm:py-5 sm:pr-12">
           <DialogTitle className="flex items-center gap-2 text-base">

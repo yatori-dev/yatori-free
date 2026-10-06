@@ -11,6 +11,7 @@ import {
 import { desktopItems } from './dashboardNavigationData';
 import type { MobileDashboardTabId } from './dashboardNavigationData';
 import { MobileDashboardNavigation } from './MobileDashboardNavigation';
+import { MotionHighlight } from '@/components/ui/motion-highlight';
 
 interface DashboardNavigationProps {
   mode: 'desktop' | 'mobile';
@@ -122,7 +123,8 @@ function DesktopNavigation({
         appVersion={appVersion}
         collapsed={collapsed}
       />
-      <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3" aria-label="主导航">
+      <nav className="motion-highlight-host relative flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3" data-motion-nav aria-label="主导航">
+        <MotionHighlight selector='[aria-current="page"]' />
         {desktopItems.slice(0, 3).map((item) => (
           <NavigationItem
             key={item.id}

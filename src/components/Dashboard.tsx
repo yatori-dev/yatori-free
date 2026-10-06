@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Tabs } from './ui/tabs';
+import { changeView } from '@/lib/motion';
 
 import {
   createTask,
@@ -22,7 +23,6 @@ import { hasReadTaskPoints } from '@/lib/courseChapters';
 import { hasDeadlinePassed } from '@/lib/format';
 import { getCourseNameMap, getTaskCounts } from '@/lib/dashboardDerived';
 import { DashboardNavigation, type MobileDashboardTabId } from './dashboard/DashboardNavigation';
-import { mobileDashboardTabOrder } from './dashboard/dashboardNavigationData';
 import { DashboardMainContent } from './dashboard/DashboardMainContent';
 import { DashboardHeader } from './dashboard/DashboardHeader';
 import { DashboardOverlays } from './dashboard/DashboardOverlays';
@@ -122,14 +122,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [appVersion, setAppVersion] = useState('...');
   const [activeTab, setActiveTab] = useState<MobileDashboardTabId>('courses');
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
-  const [prevTab, setPrevTab] = useState<MobileDashboardTabId>('courses');
   const [taskFilter, setTaskFilter] = useState<'active' | 'completed'>('active');
   const [courseSearch, setCourseSearch] = useState('');
   const [courseSearchQuery, setCourseSearchQuery] = useState('');
   const dashboardMainRef = useRef<HTMLElement>(null);
-  const mobileTabAnimationRef = useRef<Animation | null>(null);
-  const mobileTabDirectionRef = useRef(1);
-  const lastAnimatedMobileTabRef = useRef<MobileDashboardTabId>('courses');
   const mobileTabScrollPositions = useRef<Record<MobileDashboardTabId, number>>({
     courses: 0,
     works: 0,
@@ -152,15 +148,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
     if (window.matchMedia('(max-width: 1023px)').matches) {
       mobileTabScrollPositions.current[activeTab] = dashboardMainRef.current?.scrollTop ?? 0;
-      mobileTabDirectionRef.current = mobileDashboardTabOrder.indexOf(tabId) >= mobileDashboardTabOrder.indexOf(activeTab) ? 1 : -1;
     }
 
     if (tabId === 'tasks' && !tasks.some((task) => isActiveTaskStatus(task.status))) {
       setTaskFilter('completed');
     }
 
-    setPrevTab(activeTab);
-    setActiveTab(tabId);
+    changeView(() => {
+      setActiveTab(tabId);
+    }, 'dashboard');
   }, [activeTab, tasks]);
 
   useEffect(() => {
@@ -169,45 +165,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     }
 
     const main = dashboardMainRef.current;
-    const content = main?.querySelector<HTMLElement>('[data-dashboard-tab-content]');
-    if (!main || !content) {
+    if (!main) {
       return;
     }
 
     main.scrollTop = mobileTabScrollPositions.current[activeTab];
-
-    if (lastAnimatedMobileTabRef.current === activeTab) {
-      return;
-    }
-    lastAnimatedMobileTabRef.current = activeTab;
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof content.animate !== 'function') {
-      return;
-    }
-
-    mobileTabAnimationRef.current?.cancel();
-    const animation = content.animate(
-      [
-        {
-          opacity: 0.92,
-          transform: `translate3d(${mobileTabDirectionRef.current * 8}px, 0, 0)`,
-        },
-        { opacity: 1, transform: 'translate3d(0, 0, 0)' },
-      ],
-      {
-        duration: 260,
-        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-        fill: 'both',
-      },
-    );
-    mobileTabAnimationRef.current = animation;
-
-    return () => {
-      animation.cancel();
-      if (mobileTabAnimationRef.current === animation) {
-        mobileTabAnimationRef.current = null;
-      }
-    };
   }, [activeTab]);
 
   const filteredTasks = useMemo(() => {
@@ -920,20 +882,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     };
   }, []);
 
-  const tabsList = mobileDashboardTabOrder;
-  const prevIndex = tabsList.indexOf(prevTab);
-  const currentIndex = tabsList.indexOf(activeTab);
-  const tabSwitchDistance = Math.abs(currentIndex - prevIndex);
-  const isMovingRight = currentIndex >= prevIndex;
-
-  const translateVal = tabSwitchDistance === 0 ? 0 : 8;
-  const startTranslateX = tabSwitchDistance === 0 ? '0px' : (isMovingRight ? `${translateVal}px` : `-${translateVal}px`);
-  const durationMs = 260;
-
-  const tabsStyle = {
-    '--tab-transition-duration': `${durationMs}ms`,
-    '--tab-transition-start-x': startTranslateX,
-  } as React.CSSProperties;
   const overlaySelectedCount = activeTab === 'works'
     ? selectedWorksCount
     : activeTab === 'exams'
@@ -962,7 +910,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   ].filter((warning): warning is string => warning !== null);
 
   return (
-    <div className="relative flex h-svh min-h-svh flex-col overflow-hidden bg-background font-sans text-foreground lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)]">
+    <div className="motion-view-enter relative flex h-svh min-h-svh flex-col overflow-hidden bg-background font-sans text-foreground lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[auto_minmax(0,1fr)]">
       <a href="#dashboard-main" className="sr-only z-[60] rounded-[var(--radius-md)] bg-primary px-3 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
         跳到主内容
       </a>
@@ -970,7 +918,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         value={activeTab}
         onValueChange={(value: string) => handleTabChange(value as MobileDashboardTabId)}
         className="contents"
-        style={tabsStyle}
       >
         <DashboardNavigation
           mode="desktop"

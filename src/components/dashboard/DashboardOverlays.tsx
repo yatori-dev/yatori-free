@@ -68,8 +68,8 @@ export function DashboardOverlays({
   return (
     <>
       {selectedCount > 0 && (
-        <div className="absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] left-1/2 z-30 -translate-x-1/2 animate-bottom-bar-enter lg:bottom-6">
-          <div className="flex flex-col items-center gap-1">
+        <div className="absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] left-1/2 z-30 -translate-x-1/2 lg:bottom-6">
+          <div className="motion-content-enter flex flex-col items-center gap-1">
             <Button
               type="button"
               onClick={onCreateTask}

@@ -26,6 +26,7 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs';
 import { BypassDailyStudyLimitConfirmDialog } from './BypassDailyStudyLimitConfirmDialog';
+import { changeView } from '@/lib/motion';
 
 type SettingSwitchKey = 'bypassDailyStudyLimit' | 'showDeadlineBadges';
 
@@ -51,6 +52,11 @@ export function TaskSettingsPanel({
   const [bypassConfirmOpen, setBypassConfirmOpen] = useState(false);
   const [activeSettingSection, setActiveSettingSection] = useState('behavior');
   const { theme, setTheme } = useTheme();
+  const changeSection = (value: string) => {
+    if (value !== activeSettingSection) {
+      changeView(() => setActiveSettingSection(value), 'settings');
+    }
+  };
 
   const handleBypassChange = (checked: boolean) => {
     if (checked) {
@@ -63,17 +69,17 @@ export function TaskSettingsPanel({
 
   return (
     <>
-      <section className="flex min-h-0 w-full min-w-0 flex-1" aria-label="设置分类与内容">
+      <section className="settings-view flex min-h-0 w-full min-w-0 flex-1" aria-label="设置分类与内容">
         <Tabs
           value={activeSettingSection}
-          onValueChange={setActiveSettingSection}
+          onValueChange={changeSection}
           orientation="vertical"
           className="min-h-0 min-w-0 flex-1 flex-col gap-0 md:flex-row"
         >
           <div className="shrink-0 border-b px-[var(--space-4)] py-[var(--space-3)] md:hidden">
             <Select
               value={activeSettingSection}
-              onValueChange={setActiveSettingSection}
+              onValueChange={changeSection}
             >
               <SelectTrigger aria-label="设置分类" className="w-full data-[size=default]:h-11">
                 <SelectValue />
