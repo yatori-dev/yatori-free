@@ -1,4 +1,4 @@
-import { useRef, type MouseEvent, type ReactNode } from 'react';
+import { useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import {
   AlertCircle,
   ChevronDown,
@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
 import { CollapsiblePanel } from '@/components/ui/collapsible-panel';
 import { CourseCheckbox } from './CourseCheckbox';
+import { StopTaskConfirmDialog } from './StopTaskConfirmDialog';
 
 interface CourseListSectionProps {
   accountId?: string;
@@ -109,6 +110,7 @@ export function CourseListSection({
   onToggleExpandCourse,
   onToggleFullCourseOutline,
 }: CourseListSectionProps) {
+  const [stopConfirmTaskId, setStopConfirmTaskId] = useState<string | null>(null);
   const isCourseSearchComposing = useRef(false);
 
   return (
@@ -282,7 +284,7 @@ export function CourseListSection({
                             size="icon"
                             disabled={isStoppingProcessing}
                             onClick={() =>
-                              onStopTask(course.processingTaskId as string)
+                              setStopConfirmTaskId(course.processingTaskId as string)
                             }
                             className="size-5 rounded border-danger/40 p-0 text-danger hover:border-danger hover:bg-danger-container/20 max-sm:min-h-5 max-sm:min-w-5"
                             aria-label={
@@ -419,6 +421,16 @@ export function CourseListSection({
             </div>
           )}
         </div>
+        <StopTaskConfirmDialog
+          open={stopConfirmTaskId !== null}
+          onOpenChange={(open) => {
+            if (!open) setStopConfirmTaskId(null);
+          }}
+          onConfirm={() => {
+            if (stopConfirmTaskId) onStopTask(stopConfirmTaskId);
+            setStopConfirmTaskId(null);
+          }}
+        />
       </section>
     </TabsContent>
   );

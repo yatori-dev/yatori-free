@@ -32,6 +32,7 @@ import { CollapsiblePanel } from "./ui/collapsible-panel";
 import { TaskProgressPanel } from "./task/TaskProgressPanel";
 import { TaskSettingsSnapshot } from "./task/TaskSettingsSnapshot";
 import { getTaskPresentation } from "@/lib/taskPresentation";
+import { StopTaskConfirmDialog } from "./dashboard/StopTaskConfirmDialog";
 
 interface TaskInlineItemProps {
   task: Task;
@@ -116,6 +117,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
   const [showDetails, setShowDetails] = useState(false);
   const [showCourseList, setShowCourseList] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [stopConfirmOpen, setStopConfirmOpen] = useState(false);
   const detailsId = useId();
   const { status: effectiveStatus, progress, configSnapshot } = getTaskPresentation(task, snapshot);
   const taskConfigSnapshot = getTaskConfigSnapshot(configSnapshot);
@@ -384,11 +386,17 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
           <Button size="icon" variant="ghost" onClick={() => setShowDetails(!showDetails)} aria-expanded={showDetails} aria-controls={detailsId} aria-label={showDetails ? "收起任务详情" : "展开任务详情"} title={showDetails ? "收起任务详情" : "展开任务详情"} className="h-9 w-9 text-muted-foreground">
             <ChevronDown className={`motion-disclosure-chevron h-4 w-4 ${showDetails ? "rotate-180" : ""}`} />
           </Button>
-          {canStopTask && <Button size="icon" variant="ghost" disabled={isStoppingTask || actionLoading} onClick={() => handleAction(onStopTask, task.id)} aria-label={isStoppingTask ? "任务停止中" : "停止任务"} title={isStoppingTask ? "任务停止中" : "停止任务"} className="h-9 w-9 text-danger hover:bg-danger-container hover:text-danger">
+          {canStopTask && <Button size="icon" variant="ghost" disabled={isStoppingTask || actionLoading} onClick={() => setStopConfirmOpen(true)} aria-label={isStoppingTask ? "任务停止中" : "停止任务"} title={isStoppingTask ? "任务停止中" : "停止任务"} className="h-9 w-9 text-danger hover:bg-danger-container hover:text-danger">
             {actionLoading || isStoppingTask ? <RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Square className="h-3.5 w-3.5" />}
           </Button>}
         </div>
       </div>
+
+      <StopTaskConfirmDialog
+        open={stopConfirmOpen}
+        onOpenChange={setStopConfirmOpen}
+        onConfirm={() => void handleAction(onStopTask, task.id)}
+      />
 
       <TaskCourseListDialog
         courses={hiddenCourses}

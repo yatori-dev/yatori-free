@@ -224,6 +224,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [tasksLoading, setTasksLoading] = useState(false);
   const [creatingTask, setCreatingTask] = useState(false);
   const [stoppingTaskId, setStoppingTaskId] = useState<string | null>(null);
+  const submittingCourseKeysRef = useRef(new Set<string>());
   const requestCoordinatorRef = useRef(new RequestCoordinator());
   const pendingDetailsRef = useRef(new Map<string, Promise<Awaited<ReturnType<typeof getCourseDetails>>>>());
   const accountIdRef = useRef(account?.id);
@@ -383,6 +384,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         toast.error(message);
       }
     } finally {
+      submittingCourseKeysRef.current.clear();
       setCoursesLoading(false);
     }
   }, [account, onLogout]);
@@ -591,11 +593,49 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const getSelectedProcessingCourses = (courseKeys: string[]) => {
     const courseKeySet = new Set(courseKeys);
-    return courses.filter((course) => course.processing && courseKeySet.has(course.key));
+    return courses.filter(
+      (course) =>
+        (course.processing || submittingCourseKeysRef.current.has(course.key)) &&
+        courseKeySet.has(course.key),
+    );
+  };
+
+  const getSelectedCourseKeysForActiveTab = () => {
+    if (activeTab === 'works') {
+      return Object.entries(selectedWorks)
+        .filter(([, itemIds]) => itemIds.size > 0)
+        .map(([classId]) => classId);
+    }
+
+    if (activeTab === 'exams') {
+      return Object.entries(selectedExams)
+        .filter(([, itemIds]) => itemIds.size > 0)
+        .map(([classId]) => classId);
+    }
+
+    return Array.from(selectedCourses);
+  };
+
+  const getProcessingCourseWarning = (courseKeys: string[]) => {
+    const processingCourses = getSelectedProcessingCourses(courseKeys);
+    return processingCourses.length > 0
+      ? `以下课程已有进行中的任务，请先停止前一个任务：${processingCourses.map((course) => course.courseName).join('、')}`
+      : null;
   };
 
   const executeSubmitTask = async () => {
     if (!account) return;
+
+    const selectedCourseKeys = getSelectedCourseKeysForActiveTab();
+    const processingWarning = getProcessingCourseWarning(selectedCourseKeys);
+    if (processingWarning) {
+      toast.error(processingWarning);
+      void fetchCourses();
+      setTaskStartConfirmOpen(false);
+      return;
+    }
+
+    selectedCourseKeys.forEach((courseKey) => submittingCourseKeysRef.current.add(courseKey));
     setCreatingTask(true);
 
     try {
@@ -738,6 +778,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         onLogout();
         return;
       }
+      submittingCourseKeysRef.current.clear();
       console.error(error);
       toast.error(getUserFacingErrorMessage(error, '创建任务失败，请稍后重试'));
     } finally {
@@ -766,9 +807,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         return;
       }
 
-      const processingCourses = getSelectedProcessingCourses(includeCoursesList);
-      if (processingCourses.length > 0) {
-        toast.error(`以下课程已有进行中的任务：${processingCourses.map((course) => course.courseName).join('、')}`);
+      const processingWarning = getProcessingCourseWarning(includeCoursesList);
+      if (processingWarning) {
+        toast.error(processingWarning);
         void fetchCourses();
         return;
       }
