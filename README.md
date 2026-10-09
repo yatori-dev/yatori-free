@@ -4,6 +4,7 @@
 
 > **服务地址：https://yatori.hungrym0.com**
 
+![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?style=flat&logo=shadcnui&logoColor=white)
 ![React](https://img.shields.io/badge/React-19.3.0-61DAFB.svg?style=flat-square&logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0.3-3178C6.svg?style=flat-square&logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.3-06B6D4.svg?style=flat-square&logo=tailwindcss&logoColor=white)
@@ -11,16 +12,13 @@
 
 [![部署状态](https://github.com/yatori-dev/yatori-free/actions/workflows/deploy.yml/badge.svg)](https://github.com/yatori-dev/yatori-free/actions/workflows/deploy.yml)
 ![Cloudflare Pages](https://img.shields.io/badge/Cloudflare-Pages-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
-![Google Style](https://img.shields.io/badge/Google-Style-red.svg?style=flat-square&logo=google&logoColor=white)
-![Material Design](https://img.shields.io/badge/Material_Design-3-blue.svg?style=flat-square&logo=materialdesign&logoColor=white)
 
 ## 功能
 
 > [!TIP]
 >
-> 💡 **该网页服务仅需提交自身所需的任务，可在云端无人值守自动完成。**
+> 💡 **仅需在该网页服务中提交任务，可在云端无人值守自动完成。**
 >
-> 创建任务之后，可以关闭网页
 
 ### 1. 自动完成章节任务点
 
@@ -29,6 +27,7 @@
 - 章节测试
 - 直播观看任务
 - 文档阅读任务
+- 带锁的“闯关型”任务
 
 ### 2. 自动完成作业/考试
 
@@ -36,25 +35,22 @@
 - 直接提交
 - 仅保存不提交
 
-### 3. 增加学习次数/学习时长
+### 3. 邮件通知
 
-该网页服务提供读取、增加学习次数与学习时长。
-
-你可以在 `学习通客户端 APP` - `课程` - `学习记录` 中查看到自己在该课程的学习次数与学习时长数据
-
-### 4. 邮件通知
-
-当任务完成/失败时，网页服务会通过邮件通知用户。
+当出现新动态时，网页服务会通过邮件通知用户，包括：
+- 任务成功/失败
+- 未完成的作业/考试即将截止
+- 含有未完成任务点的课程即将结课
 
 > （默认不启用该功能）
 
-### 5. 课程文档资源下载
+### 4. 课程文档资源下载
 
 该网页服务提供课程章节中的 PDF 文档、PPT 演示文稿等资源的下载功能，用于整理相关学习资料以便查阅。
 
 ## 服务端
 
-- ![Go 1.27.1](https://img.shields.io/badge/Go&nbsp;1.27.1-net/http-blue.svg?style=flat-square&logo=go&logoColor=white)
+- ![Go 1.27.2](https://img.shields.io/badge/Go&nbsp;1.27.2-net/http-blue.svg?style=flat-square&logo=go&logoColor=white)
 - ![SQLite](https://img.shields.io/badge/SQLite-3-yellow.svg?style=flat-square&logo=sqlite&logoColor=white)
 - ![systemd](https://img.shields.io/badge/systemd-257-red.svg?style=flat-square&logo=systemd&logoColor=white)
 - ![Cloudflare Tunnel](https://img.shields.io/badge/Cloudflare%20Tunnel-2026.10.0-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
