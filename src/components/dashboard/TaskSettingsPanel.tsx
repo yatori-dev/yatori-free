@@ -3,9 +3,11 @@ import { useTheme } from 'next-themes';
 import {
   AlarmClock,
   BellRing,
+  Gauge,
   Monitor,
   Moon,
   Palette,
+  Send,
   Sun,
   Zap,
 } from 'lucide-react';
@@ -148,7 +150,7 @@ export function TaskSettingsPanel({
               </div>
               <div className="flex items-start justify-between gap-[var(--space-4)] border-t pt-[var(--space-6)]">
                 <div className="flex min-w-0 items-start gap-[var(--space-3)]">
-                  <AlarmClock aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  <Send aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                   <div>
                     <Label htmlFor="autoSubmitWorksNearDeadline" className="block cursor-pointer text-sm font-semibold text-foreground">
                       作业临近截止自动提交
@@ -165,7 +167,7 @@ export function TaskSettingsPanel({
               </div>
               <div className="flex items-start justify-between gap-[var(--space-4)] border-t pt-[var(--space-6)]">
                 <div className="flex min-w-0 items-start gap-[var(--space-3)]">
-                  <Zap aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  <Gauge aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                   <div>
                     <Label htmlFor="accelerateBeforeCourseEnd" className="block cursor-pointer text-sm font-semibold text-foreground">
                       结课前自动提速
