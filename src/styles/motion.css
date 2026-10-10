@@ -47,6 +47,10 @@ html[data-view-motion="fallback"] .motion-tab-content[data-state="active"] {
   animation: motion-fade-in var(--motion-page) var(--ease-smooth-out);
 }
 
+html[data-view-motion="fallback"] .settings-view .motion-tab-content {
+  animation: none;
+}
+
 .motion-dialog-overlay[data-state="open"] {
   animation: motion-fade-in var(--motion-page) var(--ease-smooth-out);
 }
@@ -269,6 +273,11 @@ html:active-view-transition-type(yatori-view)::view-transition-old(yatori-conten
 
 html:active-view-transition-type(yatori-view)::view-transition-new(yatori-content) {
   animation: motion-content-in var(--motion-page) var(--ease-smooth-out) both;
+}
+
+html:active-view-transition-type(yatori-settings)::view-transition-old(yatori-content),
+html:active-view-transition-type(yatori-settings)::view-transition-new(yatori-content) {
+  animation: none;
 }
 
 /* The fixed mobile navigation should stay opaque while dashboard content changes. */
