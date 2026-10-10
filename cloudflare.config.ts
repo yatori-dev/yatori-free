@@ -16,6 +16,7 @@ export default defineConfig({
 		},
 		env: {
 			ASSETS: bindings.assets(),
+			MAINTENANCE_MODE: bindings.text("0"),
 		},
 	},
 });
