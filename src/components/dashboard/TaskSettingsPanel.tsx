@@ -170,7 +170,7 @@ export function TaskSettingsPanel({
                   <Gauge aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                   <div>
                     <Label htmlFor="accelerateBeforeCourseEnd" className="block cursor-pointer text-sm font-semibold text-foreground">
-                      结课前自动提速
+                      结课前自动完成
                     </Label>
                     <p className="mt-1 text-sm leading-5 text-muted-foreground">结课前 1 小时自动处理未完成任务点</p>
                   </div>
