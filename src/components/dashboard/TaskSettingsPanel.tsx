@@ -30,7 +30,7 @@ import {
 import { BypassDailyStudyLimitConfirmDialog } from './BypassDailyStudyLimitConfirmDialog';
 import { changeView } from '@/lib/motion';
 
-type SettingSwitchKey =
+export type SettingSwitchKey =
   | 'bypassDailyStudyLimit'
   | 'showDeadlineBadges'
   | 'autoSubmitWorksNearDeadline'

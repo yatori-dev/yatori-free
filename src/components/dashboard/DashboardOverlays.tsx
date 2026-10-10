@@ -6,6 +6,7 @@ import { LogoutConfirmDialog } from './LogoutConfirmDialog';
 import { StudyIncrementSettings } from '@/components/StudyIncrementSettings';
 import { TaskStartConfirmDialog } from './TaskStartConfirmDialog';
 import { SettingsDialog } from './SettingsDialog';
+import type { SettingSwitchKey } from './TaskSettingsPanel';
 
 interface DashboardOverlaysProps {
   selectedCount: number;
@@ -19,6 +20,8 @@ interface DashboardOverlaysProps {
   settingsDialogOpen: boolean;
   bypassDailyStudyLimit: boolean;
   showDeadlineBadges: boolean;
+  autoSubmitWorksNearDeadline: boolean;
+  accelerateBeforeCourseEnd: boolean;
   studyIncrementCourseKey: string | null;
   studyIncrementCourse: CourseSummary | null;
   studyIncrementCourseDetails?: CourseDetails;
@@ -28,10 +31,7 @@ interface DashboardOverlaysProps {
   onTaskStartConfirmChange: (open: boolean) => void;
   onLogoutConfirmChange: (open: boolean) => void;
   onSettingsDialogChange: (open: boolean) => void;
-  onSettingSwitch: (
-    key: 'bypassDailyStudyLimit' | 'showDeadlineBadges',
-    checked: boolean,
-  ) => void;
+  onSettingSwitch: (key: SettingSwitchKey, checked: boolean) => void;
   onExecuteSubmitTask: () => void;
   onStudyIncrementOpenChange: (open: boolean) => void;
   onSaveStudyIncrement: (classId: string, value: StudyIncrement) => void;
@@ -50,6 +50,8 @@ export function DashboardOverlays({
   settingsDialogOpen,
   bypassDailyStudyLimit,
   showDeadlineBadges,
+  autoSubmitWorksNearDeadline,
+  accelerateBeforeCourseEnd,
   studyIncrementCourseKey,
   studyIncrementCourse,
   studyIncrementCourseDetails,
@@ -117,6 +119,8 @@ export function DashboardOverlays({
         open={settingsDialogOpen}
         bypassDailyStudyLimit={bypassDailyStudyLimit}
         showDeadlineBadges={showDeadlineBadges}
+        autoSubmitWorksNearDeadline={autoSubmitWorksNearDeadline}
+        accelerateBeforeCourseEnd={accelerateBeforeCourseEnd}
         onOpenChange={onSettingsDialogChange}
         onUnauthorized={onLogout}
         onSettingSwitch={onSettingSwitch}

@@ -1089,6 +1089,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         settingsDialogOpen={settingsDialogOpen}
         bypassDailyStudyLimit={bypassDailyStudyLimit}
         showDeadlineBadges={showDeadlineBadges}
+        autoSubmitWorksNearDeadline={autoSubmitWorksNearDeadline}
+        accelerateBeforeCourseEnd={accelerateBeforeCourseEnd}
         studyIncrementCourseKey={studyIncrementCourseKey}
         studyIncrementCourse={studyIncrementCourse}
         studyIncrementCourseDetails={studyIncrementCourseDetails}

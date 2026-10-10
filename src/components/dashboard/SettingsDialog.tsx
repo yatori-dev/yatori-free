@@ -7,24 +7,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { TaskSettingsPanel } from './TaskSettingsPanel';
+import { TaskSettingsPanel, type SettingSwitchKey } from './TaskSettingsPanel';
 
 interface SettingsDialogProps {
   open: boolean;
   bypassDailyStudyLimit: boolean;
   showDeadlineBadges: boolean;
+  autoSubmitWorksNearDeadline: boolean;
+  accelerateBeforeCourseEnd: boolean;
   onOpenChange: (open: boolean) => void;
   onUnauthorized: () => void;
-  onSettingSwitch: (
-    key: 'bypassDailyStudyLimit' | 'showDeadlineBadges',
-    checked: boolean,
-  ) => void;
+  onSettingSwitch: (key: SettingSwitchKey, checked: boolean) => void;
 }
 
 export function SettingsDialog({
   open,
   bypassDailyStudyLimit,
   showDeadlineBadges,
+  autoSubmitWorksNearDeadline,
+  accelerateBeforeCourseEnd,
   onOpenChange,
   onUnauthorized,
   onSettingSwitch,
@@ -56,6 +57,8 @@ export function SettingsDialog({
         <TaskSettingsPanel
           bypassDailyStudyLimit={bypassDailyStudyLimit}
           showDeadlineBadges={showDeadlineBadges}
+          autoSubmitWorksNearDeadline={autoSubmitWorksNearDeadline}
+          accelerateBeforeCourseEnd={accelerateBeforeCourseEnd}
           onUnauthorized={onUnauthorized}
           onSettingSwitch={onSettingSwitch}
         />
