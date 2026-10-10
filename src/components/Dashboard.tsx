@@ -37,19 +37,23 @@ interface DashboardProps {
 interface SettingsFormState {
   bypassDailyStudyLimit: boolean;
   showDeadlineBadges: boolean;
-  workAutoSubmit: 0 | 1 | 2;
-  examAutoSubmit: 0 | 1 | 2;
+  autoSubmitWorksNearDeadline: boolean;
+  accelerateBeforeCourseEnd: boolean;
+  workAutoSubmit: 0 | 1;
+  examAutoSubmit: 0 | 1;
 }
 
 interface PersistedSettingsFormState {
   settingsVersion: number;
   showDeadlineBadges: boolean;
+  autoSubmitWorksNearDeadline: boolean;
+  accelerateBeforeCourseEnd: boolean;
 }
 
 interface TaskExecutionSettingsState {
   bypassDailyStudyLimit: boolean;
-  workAutoSubmit: 0 | 1 | 2;
-  examAutoSubmit: 0 | 1 | 2;
+  workAutoSubmit: 0 | 1;
+  examAutoSubmit: 0 | 1;
 }
 
 interface PersistedSettingsState {
@@ -58,10 +62,14 @@ interface PersistedSettingsState {
 }
 
 const TASK_SETTINGS_VERSION = 2;
+const WORK_AUTO_SUBMIT_BEFORE_DEADLINE_MINUTES = 5;
+const FORCE_AGGRESSIVE_BEFORE_COURSE_END_HOURS = 1;
 
 const DEFAULT_PERSISTED_SETTINGS: PersistedSettingsFormState = {
   settingsVersion: TASK_SETTINGS_VERSION,
   showDeadlineBadges: true,
+  autoSubmitWorksNearDeadline: false,
+  accelerateBeforeCourseEnd: false,
 };
 
 const DEFAULT_TASK_EXECUTION_SETTINGS: TaskExecutionSettingsState = {
@@ -107,6 +115,8 @@ function readPersistedSettings(accountId: string | null | undefined): PersistedS
     return {
       settingsVersion: TASK_SETTINGS_VERSION,
       showDeadlineBadges: settings.showDeadlineBadges !== false,
+      autoSubmitWorksNearDeadline: settings.autoSubmitWorksNearDeadline === true,
+      accelerateBeforeCourseEnd: settings.accelerateBeforeCourseEnd === true,
     };
   } catch (error) {
     console.error('Failed to parse task settings', error);
@@ -253,6 +263,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const {
     bypassDailyStudyLimit,
     showDeadlineBadges,
+    autoSubmitWorksNearDeadline,
+    accelerateBeforeCourseEnd,
     workAutoSubmit,
     examAutoSubmit,
   } = settingsForm;
@@ -656,6 +668,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           coursesCustom: buildCoursesCustom({
             doWork: true,
             workAutoSubmit,
+            workAutoSubmitBeforeDeadlineMinutes: autoSubmitWorksNearDeadline
+              ? WORK_AUTO_SUBMIT_BEFORE_DEADLINE_MINUTES
+              : 0,
             includeCourses: targets.map((t) => t.classId),
           }),
         });
@@ -720,7 +735,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
       const targets: TaskTarget[] = includeCoursesList.flatMap((classId) => {
         const itemIds = (selectedCourseDetails[classId]?.taskPoints ?? [])
-          .filter((taskPoint) => taskPoint.runnable)
+          .filter((taskPoint) => taskPoint.runnable && taskPoint.completed !== true)
           .map((taskPoint) => taskPoint.id);
         return itemIds.length > 0 ? [{ classId, itemIds }] : [];
       });
@@ -738,6 +753,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
       const customConfig: CoursesCustom = buildCoursesCustom({
         includeCourses: includeCoursesList,
+        forceAggressiveBeforeCourseEndHours: accelerateBeforeCourseEnd
+          ? FORCE_AGGRESSIVE_BEFORE_COURSE_END_HOURS
+          : 0,
         excludeCourses: [],
         coursesSettings: includeCoursesList.flatMap((classId) => {
           const studyIncrement = studyIncrements[classId] ?? DEFAULT_STUDY_INCREMENT;
@@ -818,18 +836,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
     setTaskStartConfirmOpen(true);
   };
 
-  const updateSettingSwitch = (key: 'bypassDailyStudyLimit' | 'showDeadlineBadges', checked: boolean) => {
+  const updateSettingSwitch = (
+    key:
+      | 'bypassDailyStudyLimit'
+      | 'showDeadlineBadges'
+      | 'autoSubmitWorksNearDeadline'
+      | 'accelerateBeforeCourseEnd',
+    checked: boolean,
+  ) => {
     if (key === 'bypassDailyStudyLimit') {
       setTaskExecutionSettings((previous) => ({ ...previous, bypassDailyStudyLimit: checked }));
       return;
     }
 
     const nextForm = { ...persistedSettingsForm, [key]: checked };
-
-    setPersistedSettingsState({
-      accountId: currentAccountId,
-      form: nextForm,
-    });
+    setPersistedSettingsState({ accountId: currentAccountId, form: nextForm });
   };
 
   const updateWorkAutoSubmit = (value: SettingsFormState['workAutoSubmit']) => {
@@ -1028,6 +1049,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
             courseNameByIdentifier={courseNameByIdentifier}
             courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
             showDeadlineBadges={showDeadlineBadges}
+            autoSubmitWorksNearDeadline={autoSubmitWorksNearDeadline}
+            accelerateBeforeCourseEnd={accelerateBeforeCourseEnd}
             workAutoSubmit={workAutoSubmit}
             examAutoSubmit={examAutoSubmit}
             bypassDailyStudyLimit={bypassDailyStudyLimit}

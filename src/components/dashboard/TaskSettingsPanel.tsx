@@ -28,11 +28,17 @@ import {
 import { BypassDailyStudyLimitConfirmDialog } from './BypassDailyStudyLimitConfirmDialog';
 import { changeView } from '@/lib/motion';
 
-type SettingSwitchKey = 'bypassDailyStudyLimit' | 'showDeadlineBadges';
+type SettingSwitchKey =
+  | 'bypassDailyStudyLimit'
+  | 'showDeadlineBadges'
+  | 'autoSubmitWorksNearDeadline'
+  | 'accelerateBeforeCourseEnd';
 
 interface TaskSettingsPanelProps {
   bypassDailyStudyLimit: boolean;
   showDeadlineBadges: boolean;
+  autoSubmitWorksNearDeadline: boolean;
+  accelerateBeforeCourseEnd: boolean;
   onUnauthorized: () => void;
   onSettingSwitch: (key: SettingSwitchKey, checked: boolean) => void;
 }
@@ -46,6 +52,8 @@ const settingSections = [
 export function TaskSettingsPanel({
   bypassDailyStudyLimit,
   showDeadlineBadges,
+  autoSubmitWorksNearDeadline,
+  accelerateBeforeCourseEnd,
   onUnauthorized,
   onSettingSwitch,
 }: TaskSettingsPanelProps) {
@@ -136,6 +144,40 @@ export function TaskSettingsPanel({
                   checked={bypassDailyStudyLimit}
                   onCheckedChange={handleBypassChange}
                   className="theme-switch mt-0.5 shrink-0"
+                />
+              </div>
+              <div className="flex items-start justify-between gap-[var(--space-4)] border-t pt-[var(--space-6)]">
+                <div className="flex min-w-0 items-start gap-[var(--space-3)]">
+                  <AlarmClock aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  <div>
+                    <Label htmlFor="autoSubmitWorksNearDeadline" className="block cursor-pointer text-sm font-semibold text-foreground">
+                      作业临近截止自动提交
+                    </Label>
+                    <p className="mt-1 text-sm leading-5 text-muted-foreground">截止前 5 分钟仍未完成时自动提交</p>
+                  </div>
+                </div>
+                <Switch
+                  id="autoSubmitWorksNearDeadline"
+                  checked={autoSubmitWorksNearDeadline}
+                  onCheckedChange={(checked) => onSettingSwitch('autoSubmitWorksNearDeadline', checked)}
+                  className="mt-0.5 shrink-0"
+                />
+              </div>
+              <div className="flex items-start justify-between gap-[var(--space-4)] border-t pt-[var(--space-6)]">
+                <div className="flex min-w-0 items-start gap-[var(--space-3)]">
+                  <Zap aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  <div>
+                    <Label htmlFor="accelerateBeforeCourseEnd" className="block cursor-pointer text-sm font-semibold text-foreground">
+                      结课前自动提速
+                    </Label>
+                    <p className="mt-1 text-sm leading-5 text-muted-foreground">结课前 1 小时自动处理未完成任务点</p>
+                  </div>
+                </div>
+                <Switch
+                  id="accelerateBeforeCourseEnd"
+                  checked={accelerateBeforeCourseEnd}
+                  onCheckedChange={(checked) => onSettingSwitch('accelerateBeforeCourseEnd', checked)}
+                  className="mt-0.5 shrink-0"
                 />
               </div>
             </div>

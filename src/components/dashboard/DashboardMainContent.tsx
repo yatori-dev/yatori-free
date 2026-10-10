@@ -45,12 +45,18 @@ interface DashboardMainContentProps {
   courseNameByIdentifier: Record<string, string>;
   courseTaskPointProgressByIdentifier: CourseTaskPointProgressMap;
   showDeadlineBadges: boolean;
-  workAutoSubmit: 0 | 1 | 2;
-  examAutoSubmit: 0 | 1 | 2;
+  autoSubmitWorksNearDeadline: boolean;
+  accelerateBeforeCourseEnd: boolean;
+  workAutoSubmit: 0 | 1;
+  examAutoSubmit: 0 | 1;
   bypassDailyStudyLimit: boolean;
   onUnauthorized: () => void;
   onSettingSwitch: (
-    key: 'bypassDailyStudyLimit' | 'showDeadlineBadges',
+    key:
+      | 'bypassDailyStudyLimit'
+      | 'showDeadlineBadges'
+      | 'autoSubmitWorksNearDeadline'
+      | 'accelerateBeforeCourseEnd',
     checked: boolean,
   ) => void;
   onRefreshCourses: () => void;
@@ -62,8 +68,8 @@ interface DashboardMainContentProps {
   onToggleFullCourseOutline: (courseKey: string) => void;
   onTaskFilterChange: (filter: 'active' | 'completed') => void;
   onRefreshTasks: () => void;
-  onWorkAutoSubmitChange: (value: 0 | 1 | 2) => void;
-  onExamAutoSubmitChange: (value: 0 | 1 | 2) => void;
+  onWorkAutoSubmitChange: (value: 0 | 1) => void;
+  onExamAutoSubmitChange: (value: 0 | 1) => void;
   onTabChange: (tab: MobileDashboardTabId) => void;
   onToggleSelectWork: (classId: string, workId: string) => void;
   onToggleSelectCourseWorks: (classId: string) => void;
@@ -96,6 +102,8 @@ export function DashboardMainContent({
   courseNameByIdentifier,
   courseTaskPointProgressByIdentifier,
   showDeadlineBadges,
+  autoSubmitWorksNearDeadline,
+  accelerateBeforeCourseEnd,
   workAutoSubmit,
   examAutoSubmit,
   bypassDailyStudyLimit,
@@ -149,6 +157,8 @@ export function DashboardMainContent({
           <TaskSettingsPanel
             bypassDailyStudyLimit={bypassDailyStudyLimit}
             showDeadlineBadges={showDeadlineBadges}
+            autoSubmitWorksNearDeadline={autoSubmitWorksNearDeadline}
+            accelerateBeforeCourseEnd={accelerateBeforeCourseEnd}
             onUnauthorized={onUnauthorized}
             onSettingSwitch={onSettingSwitch}
           />

@@ -89,17 +89,17 @@ function getProgressFallback(status: Task["status"], progressPercent = 0) {
   }
 }
 
-function getAutoSubmitLabel(value: 0 | 1 | 2 | undefined) {
+function getAutoSubmitLabel(value: number | undefined) {
   if (value === undefined) {
     return "未记录";
   }
 
-  if (value === 2) {
-    return "有空答案时仅保存不提交";
-  }
-
   if (value === 1) {
     return "直接提交";
+  }
+
+  if (value !== 0) {
+    return "旧版提交策略";
   }
 
   return "仅保存不提交";

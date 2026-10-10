@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { MotionHighlight } from '@/components/ui/motion-highlight';
 
-export type SubmitMode = 0 | 1 | 2;
+export type SubmitMode = 0 | 1;
 
 interface SubmitModeControlProps {
   value: SubmitMode;

@@ -34,8 +34,10 @@ export interface CoursesCustom {
   doChapterTest?: boolean;
   doWork?: boolean;
   doExam?: boolean;
-  workAutoSubmit?: 0 | 1 | 2;
-  examAutoSubmit?: 0 | 1 | 2;
+  workAutoSubmit?: 0 | 1;
+  examAutoSubmit?: 0 | 1;
+  workAutoSubmitBeforeDeadlineMinutes?: number;
+  forceAggressiveBeforeCourseEndHours?: number;
   answerMode?: '' | 'xxt' | 'builtin' | 'internal';
   includeCourses?: string[];
   excludeCourses?: string[];
@@ -318,8 +320,13 @@ export interface CourseTaskListItem<T> {
   error?: string;
 }
 
-export interface CourseTaskListResponseData<T> {
-  courses: CourseTaskListItem<T>[];
+export interface CourseWorkListResponseData {
+  courses: CourseTaskListItem<CourseWorkItem>[];
+  sourceStatus: CourseSourceStatus;
+}
+
+export interface CourseExamListResponseData {
+  courses: CourseTaskListItem<CourseExamItem>[];
   sourceStatus: CourseSourceStatus;
 }
 
@@ -978,12 +985,12 @@ export function getCourseDetails(
   );
 }
 
-function getCourseTaskList<T>(
+function getCourseTaskList<TResponse>(
   accountId: string,
   kind: 'works' | 'exams',
   options?: ApiRequestOptions,
-) {
-  return apiRequest<CourseTaskListResponseData<T>>(
+): Promise<ApiDataResponse<TResponse>> {
+  return apiRequest<TResponse>(
     `/accounts/${encodeApiPathSegment(accountId)}/${kind}`,
     options,
     true,
@@ -991,11 +998,11 @@ function getCourseTaskList<T>(
 }
 
 export function getWorks(accountId: string, options?: ApiRequestOptions) {
-  return getCourseTaskList<CourseWorkItem>(accountId, 'works', options);
+  return getCourseTaskList<CourseWorkListResponseData>(accountId, 'works', options);
 }
 
 export function getExams(accountId: string, options?: ApiRequestOptions) {
-  return getCourseTaskList<CourseExamItem>(accountId, 'exams', options);
+  return getCourseTaskList<CourseExamListResponseData>(accountId, 'exams', options);
 }
 
 export function getCourseDocumentDownloadUrl(

@@ -64,9 +64,19 @@ export function TaskSettingsSnapshot({
             {workAutoSubmitLabel}
           </DetailRow>
         )}
+        {showWorkStrategy && (coursesCustom.workAutoSubmitBeforeDeadlineMinutes ?? 0) > 0 && (
+          <DetailRow label="截止前强制提交">
+            {coursesCustom.workAutoSubmitBeforeDeadlineMinutes} 分钟
+          </DetailRow>
+        )}
         {showExamStrategy && (
           <DetailRow label={config?.kind ? '答题策略' : '考试答题策略'}>
             {examAutoSubmitLabel}
+          </DetailRow>
+        )}
+        {showChapterStrategy && (coursesCustom.forceAggressiveBeforeCourseEndHours ?? 0) > 0 && (
+          <DetailRow label="结课前自动提速">
+            {coursesCustom.forceAggressiveBeforeCourseEndHours} 小时
           </DetailRow>
         )}
         {coursesCustom.answerMode && (
