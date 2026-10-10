@@ -6,7 +6,7 @@ import {
   Clock,
   Loader2,
   Mail,
-  Plus,
+  ChevronRight,
   RotateCw,
   X,
 } from "lucide-react";
@@ -33,12 +33,14 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
 import { Switch } from "./ui/switch";
 
 interface EmailNotificationSettingsProps {
@@ -53,11 +55,8 @@ type PendingAction =
   | "deadline"
   | null;
 
-type TimeUnit = "minute" | "hour" | "day";
-
 const EMAIL_NOTIFICATION_CACHE_KEY = "email-notification-settings";
 const MAX_DEADLINE_REMINDERS = 5;
-const MAX_DEADLINE_MINUTES = 43_200;
 
 const PRESET_REMINDERS = [
   { label: "30 分钟前", minutes: 30 },
@@ -107,8 +106,6 @@ export function EmailNotificationSettings({
   );
 
   const [isEditingEmail, setIsEditingEmail] = useState(false);
-  const [customAmount, setCustomAmount] = useState("1");
-  const [customUnit, setCustomUnit] = useState<TimeUnit>("hour");
   const [resendCountdown, setResendCountdown] = useState(0);
 
   useEffect(() => {
@@ -253,36 +250,6 @@ export function EmailNotificationSettings({
       toast.error(`最多设置 ${MAX_DEADLINE_REMINDERS} 个提醒时间`);
       return;
     }
-    const next = [...current, minutes].sort((a, b) => a - b);
-    void handleDeadlineReminderChange(next);
-  };
-
-  const handleAddCustomReminder = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const amount = Number(customAmount);
-    if (!Number.isInteger(amount) || amount <= 0) {
-      toast.error("请输入正整数");
-      return;
-    }
-
-    const multiplier =
-      customUnit === "day" ? 1440 : customUnit === "hour" ? 60 : 1;
-    const minutes = amount * multiplier;
-
-    const current = settings?.deadlineReminderMinutes ?? [];
-    if (current.length >= MAX_DEADLINE_REMINDERS) {
-      toast.error(`最多设置 ${MAX_DEADLINE_REMINDERS} 个提醒时间`);
-      return;
-    }
-    if (minutes > MAX_DEADLINE_MINUTES) {
-      toast.error("提醒时间不能超过 30 天");
-      return;
-    }
-    if (current.includes(minutes)) {
-      toast.error("该提醒时间已存在");
-      return;
-    }
-
     const next = [...current, minutes].sort((a, b) => a - b);
     void handleDeadlineReminderChange(next);
   };
@@ -513,216 +480,146 @@ export function EmailNotificationSettings({
 
       <div className="h-px bg-border" />
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4 py-1">
-          <div className="flex min-w-0 items-start gap-3">
-            <Mail className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-            <div className="space-y-0.5">
-              <Label
-                htmlFor="emailNotificationEnabled"
-                className="block cursor-pointer text-sm font-semibold"
-              >
-                邮件通知
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                {!hasVerifiedEmail
-                  ? "需先完成邮箱绑定与验证"
-                  : "任务完成或临近截止时自动发送提醒"}
-              </p>
-            </div>
-          </div>
-          <Switch
-            id="emailNotificationEnabled"
-            checked={settings?.enabled ?? false}
-            disabled={!hasVerifiedEmail || !isAvailable || isBusy}
-            onCheckedChange={(checked) => void handleEnabledChange(checked)}
-            className="shrink-0"
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-4 py-1">
-          <div className="flex min-w-0 items-start gap-3">
-            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-            <div className="space-y-0.5">
-              <p className="text-sm font-semibold">任务状态通知</p>
-              <p className="text-xs text-muted-foreground">
-                学习任务执行完毕、暂停或异常中断时发送
-              </p>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Switch
-              checked={Boolean(
-                settings?.enabled && hasVerifiedEmail && isAvailable,
-              )}
-              disabled
-              aria-label="任务状态通知跟随总开关"
-              className="pointer-events-none"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="h-px bg-border" />
-
-      <div className="space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <Clock className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold">临期未完成提醒</h3>
-                <Badge variant="secondary" className="h-5 text-xs font-normal">
-                  {deadlineReminderMinutes.length} / {MAX_DEADLINE_REMINDERS}
-                </Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                在作业、考试或课程结课前指定时间提醒
-              </p>
-            </div>
-          </div>
-          {settings?.enabled === false && hasVerifiedEmail && (
-            <span className="shrink-0 text-xs text-warning">
-              邮件总开关已关闭
-            </span>
-          )}
-        </div>
-
-        {deadlineReminderMinutes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-[var(--radius-md)] border border-dashed py-8 text-center">
-            <Clock className="mb-2 size-5 text-muted-foreground/50" />
-            <p className="text-xs text-muted-foreground">暂未设置临期提醒</p>
-            <p className="mt-0.5 text-xs text-muted-foreground/70">
-              可从下方选择预设或自定义时间
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {deadlineReminderMinutes.map((minutes) => (
-              <div
-                key={minutes}
-                className="inline-flex items-center gap-2 rounded-[var(--radius-md)] border bg-muted/30 px-3 py-1.5 text-xs transition-colors duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] hover:bg-muted/60"
-              >
-                <span className="font-medium">
-                  提前 {formatReminderTime(minutes)}
-                </span>
-                <button
-                  type="button"
-                  aria-label={`删除提前 ${formatReminderTime(minutes)} 提醒`}
-                  disabled={!hasVerifiedEmail || !isAvailable || isBusy}
-                  onClick={() => handleRemoveDeadlineReminder(minutes)}
-                  className="inline-flex size-4 items-center justify-center rounded-[var(--radius-sm)] text-muted-foreground transition-colors duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] hover:bg-accent hover:text-foreground disabled:pointer-events-none"
-                >
-                  <X className="size-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>快捷预设</span>
-            {!canAddMoreReminders && (
-              <span className="text-destructive">已达上限</span>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {PRESET_REMINDERS.map(({ label, minutes }) => {
-              const isAdded = deadlineReminderMinutes.includes(minutes);
-              return (
-                <Button
-                  key={minutes}
-                  type="button"
-                  variant={isAdded ? "secondary" : "outline"}
-                  size="sm"
-                  disabled={
-                    isAdded ||
-                    !canAddMoreReminders ||
-                    !hasVerifiedEmail ||
-                    !isAvailable ||
-                    isBusy
-                  }
-                  onClick={() => handleAddPreset(minutes)}
-                  className="h-7 px-2.5 text-xs"
-                >
-                  {isAdded && <Check className="mr-1 size-3" />}
-                  {label}
-                </Button>
-              );
-            })}
-          </div>
-        </div>
-
-        <form
-          onSubmit={handleAddCustomReminder}
-          className="flex flex-col gap-2 sm:flex-row sm:items-center"
-        >
-          <div className="flex flex-1 items-center gap-2">
-            <span className="shrink-0 text-xs text-muted-foreground">
-              自定义：
-            </span>
-            <Label htmlFor="customReminderAmount" className="sr-only">
-              自定义提前数值
-            </Label>
-            <Input
-              id="customReminderAmount"
-              type="number"
-              min={1}
-              step={1}
-              value={customAmount}
-              disabled={
-                !canAddMoreReminders ||
-                !hasVerifiedEmail ||
-                !isAvailable ||
-                isBusy
-              }
-              onChange={(e) => setCustomAmount(e.target.value)}
-              className="h-9 w-20 font-mono text-sm"
-            />
-            <Label htmlFor="customReminderUnit" className="sr-only">
-              时间单位
-            </Label>
-            <Select
-              value={customUnit}
-              onValueChange={(val) => setCustomUnit(val as TimeUnit)}
-              disabled={
-                !canAddMoreReminders ||
-                !hasVerifiedEmail ||
-                !isAvailable ||
-                isBusy
-              }
-            >
-              <SelectTrigger id="customReminderUnit" className="h-9 w-20 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="minute">分钟</SelectItem>
-                <SelectItem value="hour">小时</SelectItem>
-                <SelectItem value="day">天</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button
-            type="submit"
-            variant="outline"
-            size="sm"
-            disabled={
-              !canAddMoreReminders ||
-              !hasVerifiedEmail ||
-              !isAvailable ||
-              isBusy ||
-              !customAmount.trim() ||
-              Number(customAmount) <= 0
-            }
-            className="h-9 shrink-0 gap-1.5 text-xs"
+      <Sheet>
+        <SheetTrigger asChild>
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-[var(--radius-md)] py-3 text-left outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <Plus className="size-3.5" />
-            添加
-          </Button>
-        </form>
-      </div>
+            <Mail className="size-4 shrink-0 text-muted-foreground" />
+            <span className="min-w-0 flex-1 space-y-1">
+              <span className="block text-sm font-semibold">邮件通知</span>
+              <span className="block text-xs text-muted-foreground">
+                {!settings
+                  ? "设置读取失败，请刷新页面重试"
+                  : !isAvailable
+                    ? "服务暂不可用"
+                    : !hasVerifiedEmail
+                      ? "需先完成邮箱绑定与验证"
+                      : settings.enabled
+                        ? `已开启${deadlineReminderMinutes.length ? `（已设 ${deadlineReminderMinutes.length} 个临期提醒）` : "未设置临期提醒"}`
+                        : "已关闭"}
+              </span>
+            </span>
+            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+          </button>
+        </SheetTrigger>
+        <SheetContent>
+          <SheetHeader className="shrink-0 pt-[max(1rem,env(safe-area-inset-top))]">
+            <div>
+              <SheetTitle>邮件通知</SheetTitle>
+              <SheetDescription>设置任务通知与临期提醒</SheetDescription>
+            </div>
+            <SheetClose asChild>
+              <Button type="button" variant="ghost" size="icon" className="size-11 shrink-0" aria-label="关闭邮件通知抽屉">
+                <X className="size-4" />
+              </Button>
+            </SheetClose>
+          </SheetHeader>
+          <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 pt-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-5">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4 py-1">
+                <div className="flex min-w-0 items-start gap-3">
+                  <Mail className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  <div className="space-y-0.5">
+                    <Label
+                      htmlFor="emailNotificationEnabled"
+                      className="block cursor-pointer text-sm font-semibold"
+                    >
+                      邮件通知
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {!hasVerifiedEmail
+                        ? "需先完成邮箱绑定与验证"
+                        : "任务完成或临近截止时自动发送提醒"}
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  id="emailNotificationEnabled"
+                  checked={settings?.enabled ?? false}
+                  disabled={!hasVerifiedEmail || !isAvailable || isBusy}
+                  onCheckedChange={(checked) => void handleEnabledChange(checked)}
+                  className="shrink-0"
+                />
+              </div>
+      
+              <div className="flex items-center justify-between gap-4 py-1">
+                <div className="flex min-w-0 items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-semibold">任务状态通知</p>
+                    <p className="text-xs text-muted-foreground">
+                      学习任务执行完毕、暂停或异常中断时发送
+                    </p>
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Switch
+                    checked={Boolean(
+                      settings?.enabled && hasVerifiedEmail && isAvailable,
+                    )}
+                    disabled
+                    aria-label="任务状态通知跟随总开关"
+                    className="pointer-events-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <section className="space-y-4 border-t pt-5" aria-labelledby="deadline-reminders-title">
+              <div className="space-y-1">
+                <h3 id="deadline-reminders-title" className="text-sm font-semibold">临期未完成提醒</h3>
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  在作业、考试或课程结课前发送邮件提醒
+                </p>
+              </div>
+              {settings?.enabled === false && hasVerifiedEmail && (
+                <p className="text-xs text-muted-foreground">邮件通知已关闭，开启后按所选时间提醒</p>
+              )}
+              <div className="divide-y">
+                {PRESET_REMINDERS.map(({ label, minutes }) => {
+                  const isSelected = deadlineReminderMinutes.includes(minutes);
+                  return (
+                    <div key={minutes} className="flex min-h-12 items-center justify-between gap-4 py-3">
+                      <Label htmlFor={`deadline-preset-${minutes}`} className="flex-1 cursor-pointer text-sm">
+                        {label}
+                      </Label>
+                      <Switch
+                        id={`deadline-preset-${minutes}`}
+                        checked={isSelected}
+                        disabled={!hasVerifiedEmail || !isAvailable || isBusy || (!isSelected && !canAddMoreReminders)}
+                        onCheckedChange={(checked) => checked ? handleAddPreset(minutes) : handleRemoveDeadlineReminder(minutes)}
+                        className="shrink-0"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+              {deadlineReminderMinutes.some((minutes) => !PRESET_REMINDERS.some((preset) => preset.minutes === minutes)) && (
+                <div className="space-y-2 border-t pt-4">
+                  <p className="text-xs text-muted-foreground">之前设置的时间</p>
+                  {deadlineReminderMinutes.filter((minutes) => !PRESET_REMINDERS.some((preset) => preset.minutes === minutes)).map((minutes) => (
+                    <div key={minutes} className="flex items-center justify-between gap-4 py-1">
+                      <span className="text-sm">提前 {formatReminderTime(minutes)}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={!hasVerifiedEmail || !isAvailable || isBusy}
+                        onClick={() => handleRemoveDeadlineReminder(minutes)}
+                        aria-label={`移除提前 ${formatReminderTime(minutes)} 的提醒`}
+                      >
+                        移除
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
