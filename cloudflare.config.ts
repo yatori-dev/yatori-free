@@ -10,6 +10,7 @@ export default defineConfig({
 		name: "yatori-free",
 		compatibilityDate: "2026-06-06",
 		entrypoint: "./worker/worker.ts",
+		domains: ["yatori.hungrym0.com"],
 		assets: {
 			notFoundHandling: "404-page",
 			runWorkerFirst: true,
