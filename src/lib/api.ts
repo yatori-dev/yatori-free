@@ -38,7 +38,6 @@ export interface CoursesCustom {
   examAutoSubmit?: 0 | 1;
   workAutoSubmitBeforeDeadlineMinutes?: number;
   forceAggressiveBeforeCourseEndHours?: number;
-  answerMode?: '' | 'xxt' | 'builtin' | 'internal';
   includeCourses?: string[];
   excludeCourses?: string[];
   coursesSettings?: CourseSetting[];
@@ -49,13 +48,6 @@ export interface CourseSetting {
   name?: string;
   includeExams?: string[];
   excludeExams?: string[];
-  studyIncrement?: StudyIncrement;
-}
-
-export interface StudyIncrement {
-  visitCount?: number;
-  videoStudyMinutes?: number;
-  readMinutes?: number;
 }
 
 export type TaskStatus =
@@ -65,8 +57,7 @@ export type TaskStatus =
   | 'stopping'
   | 'stopped'
   | 'success'
-  | 'failed'
-  | 'partial_success';
+  | 'failed';
 
 export interface Account {
   id: string;
@@ -200,15 +191,6 @@ export interface CourseDocument {
   size?: number;
 }
 
-export interface StudyStats {
-  available: boolean;
-  fetchedAt: string;
-  message: string;
-  visitCount?: number;
-  videoStudyMinutes?: number;
-  readMinutes?: number;
-}
-
 export interface CourseWorkItem {
   id: string;
   runnable: boolean;
@@ -241,7 +223,6 @@ export interface CourseDetails {
   documents?: CourseDocument[] | null;
   works?: CourseWorkItem[] | null;
   exams?: CourseExamItem[] | null;
-  studyStats?: StudyStats;
   taskPoints?: CourseTaskPoint[] | null;
   incomplete?: boolean;
   blockedChapterCount?: number;
@@ -335,6 +316,7 @@ export interface TaskListResponseData {
 }
 
 export type TaskKind = 'task_points' | 'works' | 'exams';
+export type TaskSnapshotKind = '' | TaskKind;
 
 export type TaskExecutionMode = 'normal' | 'aggressive';
 
@@ -468,17 +450,18 @@ export interface TaskConfigSnapshot {
   accountType?: string;
   executionMode?: TaskExecutionMode;
   coursesCustom?: CoursesCustom;
-  kind?: TaskKind;
-  targets?: TaskTarget[];
+  kind?: TaskSnapshotKind;
+  targets?: TaskTarget[] | null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function isOptionalTaskKind(value: unknown): value is TaskKind | undefined {
+function isOptionalTaskKind(value: unknown): value is TaskSnapshotKind | undefined {
   return (
     value === undefined ||
+    value === '' ||
     value === 'task_points' ||
     value === 'works' ||
     value === 'exams'
@@ -552,30 +535,6 @@ export function getExamItemTitle(item: CourseExamItem) {
   return (item.name || `考试 #${item.id}`).trim();
 }
 
-export type StudyMetricStatus =
-  | 'disabled'
-  | 'pending'
-  | 'running'
-  | 'success'
-  | 'failed'
-  | 'skipped';
-
-export interface StudyMetricProgress {
-  baseline: number;
-  current: number;
-  target: number;
-  status: StudyMetricStatus;
-  message: string;
-}
-
-export interface CourseStudyProgress {
-  classId: string;
-  courseName: string;
-  visitCount: StudyMetricProgress;
-  videoStudyMinutes: StudyMetricProgress;
-  readMinutes: StudyMetricProgress;
-}
-
 export interface TaskProgress {
   totalUnits: number;
   completedUnits: number;
@@ -586,7 +545,6 @@ export interface TaskProgress {
   currentKind?: string;
   currentTitle?: string;
   message: string;
-  studyProgress?: CourseStudyProgress[];
   updatedAt?: string;
 }
 

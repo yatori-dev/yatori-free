@@ -27,7 +27,7 @@ const OPEN_SOURCE_PROJECTS: OpenSourceProject[] = [
   },
   {
     name: "chaoxing_tool",
-    description: "学习通课程文档资源下载、学习次数/时长处理核心",
+    description: "学习通课程文档资源下载与处理核心",
     license: "GPL-3.0",
     url: "https://github.com/liuyunfz/chaoxing_tool",
   },

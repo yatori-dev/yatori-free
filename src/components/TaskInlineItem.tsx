@@ -1,13 +1,11 @@
 import React, { useId, useState } from "react";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
-import { getStudyProgressPercents } from "@/lib/studyProgress";
 import { formatLocalDateTime } from "@/lib/format";
 import {
   Square,
   CheckCircle2,
   XCircle,
-  AlertCircle,
   Clock,
   ChevronDown,
   RefreshCw,
@@ -61,12 +59,6 @@ function getProgressFallback(status: Task["status"], progressPercent = 0) {
         percent: 100,
         course: "已完成",
         chapter: "全部任务已结束",
-      };
-    case "partial_success":
-      return {
-        percent: progressPercent,
-        course: "部分完成",
-        chapter: "部分任务未完成",
       };
     case "waiting_daily_limit":
       return {
@@ -166,13 +158,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
           icon: <CheckCircle2 className="h-3 w-3" />,
           toneClass: "text-success",
         };
-      case "partial_success":
-        return {
-          label: "部分完成",
-          variant: "outline",
-          icon: <AlertCircle className="h-3 w-3" />,
-          toneClass: "text-warning",
-        };
       case "failed":
         return {
           label: "失败",
@@ -211,7 +196,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
     "stopping",
     "stopped",
     "success",
-    "partial_success",
     "failed",
   ];
   const stoppableStatuses: Task["status"][] = [
@@ -237,9 +221,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
   const unitPercent = derivedPercent ?? progressFallback.percent;
   const progressParts = [
     ...(derivedPercent === null ? [] : [unitPercent]),
-    ...(progress?.studyProgress
-      ? getStudyProgressPercents(progress.studyProgress)
-      : []),
   ];
   const calculatedPercent =
     progressParts.length > 0
@@ -286,15 +267,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
       ? currentPercent
       : Math.max(0, Math.min(100, Math.round(aggregatedPercent)));
   const hasProgress = effectiveStatus === "success" || derivedPercent !== null || progressParts.length > 0 || aggregatedPercent !== null;
-  const studyIncrementSettings =
-    coursesCustom?.coursesSettings?.flatMap((setting) => {
-      if (!setting.classId || !setting.studyIncrement) {
-        return [];
-      }
-      return [
-        { classId: setting.classId, studyIncrement: setting.studyIncrement },
-      ];
-    }) ?? [];
   const displayCourses = includeCourses?.map((courseIdentifier) => {
     const normalizedIdentifier = courseIdentifier.trim();
     const mappedName = courseNameByIdentifier[normalizedIdentifier];
@@ -307,7 +279,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
 
   const isTerminal = [
     "success",
-    "partial_success",
     "failed",
     "stopped",
   ].includes(effectiveStatus);
@@ -417,9 +388,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
           {effectiveStatus === "stopped" && (
             <Square className="h-4 w-4 shrink-0" />
           )}
-          {effectiveStatus === "partial_success" && (
-            <AlertCircle className="h-4 w-4 shrink-0" />
-          )}
           <span className="min-w-0 wrap-anywhere">{terminalSummary}</span>
         </div>
       )}
@@ -465,8 +433,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
             <TaskSettingsSnapshot
               config={taskConfigSnapshot}
               coursesCustom={coursesCustom ?? {}}
-              courseNameByIdentifier={courseNameByIdentifier}
-              studyIncrementSettings={studyIncrementSettings}
               workAutoSubmitLabel={workAutoSubmitLabel}
               examAutoSubmitLabel={examAutoSubmitLabel}
             />

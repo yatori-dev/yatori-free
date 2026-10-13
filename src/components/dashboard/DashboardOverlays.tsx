@@ -1,9 +1,6 @@
 import { Play, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { CourseDetails, CourseSummary, StudyIncrement } from '@/lib/api';
-import { hasReadTaskPoints } from '@/lib/courseChapters';
 import { LogoutConfirmDialog } from './LogoutConfirmDialog';
-import { StudyIncrementSettings } from '@/components/StudyIncrementSettings';
 import { TaskStartConfirmDialog } from './TaskStartConfirmDialog';
 import { SettingsDialog } from './SettingsDialog';
 import type { SettingSwitchKey } from './TaskSettingsPanel';
@@ -22,19 +19,12 @@ interface DashboardOverlaysProps {
   showDeadlineBadges: boolean;
   autoSubmitWorksNearDeadline: boolean;
   accelerateBeforeCourseEnd: boolean;
-  studyIncrementCourseKey: string | null;
-  studyIncrementCourse: CourseSummary | null;
-  studyIncrementCourseDetails?: CourseDetails;
-  loadingDetails: Record<string, boolean>;
-  studyIncrements: Record<string, StudyIncrement>;
   onCreateTask: () => void;
   onTaskStartConfirmChange: (open: boolean) => void;
   onLogoutConfirmChange: (open: boolean) => void;
   onSettingsDialogChange: (open: boolean) => void;
   onSettingSwitch: (key: SettingSwitchKey, checked: boolean) => void;
   onExecuteSubmitTask: () => void;
-  onStudyIncrementOpenChange: (open: boolean) => void;
-  onSaveStudyIncrement: (classId: string, value: StudyIncrement) => void;
   onLogout: () => void;
 }
 
@@ -52,19 +42,12 @@ export function DashboardOverlays({
   showDeadlineBadges,
   autoSubmitWorksNearDeadline,
   accelerateBeforeCourseEnd,
-  studyIncrementCourseKey,
-  studyIncrementCourse,
-  studyIncrementCourseDetails,
-  loadingDetails,
-  studyIncrements,
   onCreateTask,
   onTaskStartConfirmChange,
   onLogoutConfirmChange,
   onSettingsDialogChange,
   onSettingSwitch,
   onExecuteSubmitTask,
-  onStudyIncrementOpenChange,
-  onSaveStudyIncrement,
   onLogout,
 }: DashboardOverlaysProps) {
   return (
@@ -124,20 +107,6 @@ export function DashboardOverlays({
         onOpenChange={onSettingsDialogChange}
         onUnauthorized={onLogout}
         onSettingSwitch={onSettingSwitch}
-      />
-      <StudyIncrementSettings
-        open={studyIncrementCourseKey !== null}
-        onOpenChange={onStudyIncrementOpenChange}
-        course={studyIncrementCourse}
-        hasReadTaskPoints={hasReadTaskPoints(studyIncrementCourseDetails)}
-        studyStats={studyIncrementCourseDetails?.studyStats}
-        statsLoaded={studyIncrementCourseDetails !== undefined}
-        loadingStats={
-          studyIncrementCourseKey !== null &&
-          loadingDetails[studyIncrementCourseKey] === true
-        }
-        values={studyIncrements}
-        onSave={onSaveStudyIncrement}
       />
     </>
   );

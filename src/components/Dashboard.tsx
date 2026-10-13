@@ -14,12 +14,11 @@ import {
   isAuthExitError,
   stopTask,
 } from '@/lib/api';
-import type { AuthSession, CourseDetails, CourseSummary, Task, CoursesCustom, StudyIncrement, TaskTarget } from '@/lib/api';
+import type { AuthSession, CourseDetails, CourseSummary, Task, CoursesCustom, TaskTarget } from '@/lib/api';
 import { notifyAuthExit } from '@/lib/notifications';
 import { isActiveTaskStatus } from '@/lib/taskStatus';
 import { useTaskProgressPolling } from '@/hooks/useTaskProgressPolling';
 import { createCourseTaskPointProgressMap } from '@/lib/taskProgress';
-import { hasReadTaskPoints } from '@/lib/courseChapters';
 import { hasDeadlinePassed } from '@/lib/format';
 import { getCourseNameMap, getTaskCounts } from '@/lib/dashboardDerived';
 import { DashboardNavigation, type MobileDashboardTabId } from './dashboard/DashboardNavigation';
@@ -76,12 +75,6 @@ const DEFAULT_TASK_EXECUTION_SETTINGS: TaskExecutionSettingsState = {
   bypassDailyStudyLimit: false,
   workAutoSubmit: 0,
   examAutoSubmit: 0,
-};
-
-const DEFAULT_STUDY_INCREMENT: StudyIncrement = {
-  visitCount: 0,
-  videoStudyMinutes: 0,
-  readMinutes: 0,
 };
 
 const TASK_SETTINGS_STORAGE_PREFIX = 'yatori-task-settings:';
@@ -249,8 +242,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const [taskExecutionSettings, setTaskExecutionSettings] = useState<TaskExecutionSettingsState>(
     createDefaultTaskExecutionSettingsState,
   );
-  const [studyIncrements, setStudyIncrements] = useState<Record<string, StudyIncrement>>({});
-  const [studyIncrementCourseKey, setStudyIncrementCourseKey] = useState<string | null>(null);
 
   const persistedSettingsForm = persistedSettingsState.accountId === currentAccountId
     ? persistedSettingsState.form
@@ -282,15 +273,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       ...overrides,
     };
   }, []);
-
-  const studyIncrementCourse = useMemo(
-    () => courses.find((course) => course.key === studyIncrementCourseKey) ?? null,
-    [courses, studyIncrementCourseKey],
-  );
-
-  const studyIncrementCourseDetails = studyIncrementCourseKey
-    ? courseDetailsMap[studyIncrementCourseKey]
-    : undefined;
 
   const fetchCourses = useCallback(async () => {
     if (!account) return;
@@ -757,17 +739,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
           ? FORCE_AGGRESSIVE_BEFORE_COURSE_END_HOURS
           : 0,
         excludeCourses: [],
-        coursesSettings: includeCoursesList.flatMap((classId) => {
-          const studyIncrement = studyIncrements[classId] ?? DEFAULT_STUDY_INCREMENT;
-          const visitCount = studyIncrement.visitCount ?? 0;
-          const videoStudyMinutes = studyIncrement.videoStudyMinutes ?? 0;
-          const readMinutes = hasReadTaskPoints(selectedCourseDetails[classId]) ? (studyIncrement.readMinutes ?? 0) : 0;
-          if (visitCount === 0 && videoStudyMinutes === 0 && readMinutes === 0) {
-            return [];
-          }
-
-          return [{ classId, studyIncrement: { visitCount, videoStudyMinutes, readMinutes } }];
-        }),
       });
 
       await createTask({
@@ -785,11 +756,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
       void fetchCourses();
       setSelectedCourses(new Set());
       setTaskExecutionSettings((previous) => ({ ...previous, bypassDailyStudyLimit: false }));
-      setStudyIncrements((previous) => {
-        const next = { ...previous };
-        includeCoursesList.forEach((classId) => delete next[classId]);
-        return next;
-      });
     } catch (error) {
       if (isAuthExitError(error)) {
         notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
@@ -859,18 +825,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
 
   const updateExamAutoSubmit = (value: SettingsFormState['examAutoSubmit']) => {
     setTaskExecutionSettings((previous) => ({ ...previous, examAutoSubmit: value }));
-  };
-
-  const saveStudyIncrement = (classId: string, value: StudyIncrement) => {
-    setStudyIncrements((previous) => ({ ...previous, [classId]: value }));
-
-    if (
-      (value.visitCount ?? 0) > 0
-      || (value.videoStudyMinutes ?? 0) > 0
-      || (value.readMinutes ?? 0) > 0
-    ) {
-      setSelectedCourses((previous) => new Set(previous).add(classId));
-    }
   };
 
   const handleStopTask = async (taskId: string) => {
@@ -1091,19 +1045,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, onLogout }) => {
         showDeadlineBadges={showDeadlineBadges}
         autoSubmitWorksNearDeadline={autoSubmitWorksNearDeadline}
         accelerateBeforeCourseEnd={accelerateBeforeCourseEnd}
-        studyIncrementCourseKey={studyIncrementCourseKey}
-        studyIncrementCourse={studyIncrementCourse}
-        studyIncrementCourseDetails={studyIncrementCourseDetails}
-        loadingDetails={loadingDetails}
-        studyIncrements={studyIncrements}
         onCreateTask={createTaskWithSelection}
         onTaskStartConfirmChange={setTaskStartConfirmOpen}
         onLogoutConfirmChange={setLogoutConfirmOpen}
         onSettingsDialogChange={setSettingsDialogOpen}
         onSettingSwitch={updateSettingSwitch}
         onExecuteSubmitTask={executeSubmitTask}
-        onStudyIncrementOpenChange={(open) => { if (!open) setStudyIncrementCourseKey(null); }}
-        onSaveStudyIncrement={saveStudyIncrement}
         onLogout={() => { setLogoutConfirmOpen(false); onLogout(); }}
       />
       <DashboardNavigation

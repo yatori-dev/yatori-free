@@ -1,19 +1,13 @@
-import { Settings2, Target } from 'lucide-react';
+import { Settings2 } from 'lucide-react';
 import type {
   CoursesCustom,
   TaskConfigSnapshot,
-  StudyIncrement,
 } from '@/lib/api';
 import { DetailRow } from '@/components/common/DetailRow';
 
 interface TaskSettingsSnapshotProps {
   config?: TaskConfigSnapshot;
   coursesCustom: CoursesCustom;
-  courseNameByIdentifier: Record<string, string>;
-  studyIncrementSettings: Array<{
-    classId: string;
-    studyIncrement: StudyIncrement;
-  }>;
   workAutoSubmitLabel: string;
   examAutoSubmitLabel: string;
 }
@@ -21,8 +15,6 @@ interface TaskSettingsSnapshotProps {
 export function TaskSettingsSnapshot({
   config,
   coursesCustom,
-  courseNameByIdentifier,
-  studyIncrementSettings,
   workAutoSubmitLabel,
   examAutoSubmitLabel,
 }: TaskSettingsSnapshotProps) {
@@ -68,46 +60,6 @@ export function TaskSettingsSnapshot({
           <DetailRow label={config?.kind ? '答题策略' : '考试答题策略'}>
             {examAutoSubmitLabel}
           </DetailRow>
-        )}
-        {coursesCustom.answerMode && (
-          <DetailRow label="答题模式">{coursesCustom.answerMode}</DetailRow>
-        )}
-        {studyIncrementSettings.length > 0 && (
-          <div className="space-y-1.5 border-t border-border/50 pt-2.5">
-            <span className="flex items-center gap-1">
-              <Target className="h-3 w-3 text-muted-foreground" />
-              学习目标
-            </span>
-            {studyIncrementSettings.map(({ classId, studyIncrement }) => {
-              const name = courseNameByIdentifier[classId] ?? classId;
-              const increments = [
-                (studyIncrement.visitCount ?? 0) > 0
-                  ? `学习次数 +${studyIncrement.visitCount}`
-                  : null,
-                (studyIncrement.videoStudyMinutes ?? 0) > 0
-                  ? `视频观看 +${studyIncrement.videoStudyMinutes} 分钟`
-                  : null,
-                (studyIncrement.readMinutes ?? 0) > 0
-                  ? `阅读 +${studyIncrement.readMinutes} 分钟`
-                  : null,
-              ]
-                .filter(Boolean)
-                .join(' · ');
-              return (
-                <div
-                  key={classId}
-                  className="flex min-w-0 flex-col gap-1 py-1 text-foreground sm:flex-row sm:justify-between sm:gap-4"
-                >
-                  <span className="truncate" title={name}>
-                    {name}
-                  </span>
-                  <span className="min-w-0 font-medium tabular-nums wrap-anywhere sm:text-right">
-                    {increments || '未设置'}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
         )}
       </div>
     </div>

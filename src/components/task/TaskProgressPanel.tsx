@@ -1,4 +1,3 @@
-import { TaskStudyProgress } from '@/components/TaskStudyProgress';
 import type { TaskProgress } from '@/lib/api';
 import { AlertCircle } from 'lucide-react';
 
@@ -9,7 +8,7 @@ interface TaskProgressPanelProps {
 export function TaskProgressPanel({
   progress,
 }: TaskProgressPanelProps) {
-  if (!(progress.unresolvedUnits > 0) && !progress.studyProgress?.length) {
+  if (!(progress.unresolvedUnits > 0)) {
     return null;
   }
 
@@ -20,9 +19,6 @@ export function TaskProgressPanel({
           <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           有 {progress.unresolvedUnits} 个任务点无法确认状态
         </div>
-      )}
-      {progress.studyProgress && (
-        <TaskStudyProgress courses={progress.studyProgress} />
       )}
     </div>
   );

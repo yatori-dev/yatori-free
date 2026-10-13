@@ -8,7 +8,6 @@ export const taskStatusLabels: Record<Task['status'], string> = {
   stopping: '停止中',
   stopped: '已停止',
   success: '已完成',
-  partial_success: '部分完成',
   failed: '失败',
 };
 

@@ -12,13 +12,11 @@ export const TASK_DETAIL_SNAPSHOT_STATUSES = [
   'stopping',
   'stopped',
   'success',
-  'partial_success',
   'failed',
 ] as const;
 export const TERMINAL_TASK_STATUSES = [
   'stopped',
   'success',
-  'partial_success',
   'failed',
 ] as const;
 
