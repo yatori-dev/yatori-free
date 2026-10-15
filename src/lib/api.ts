@@ -28,6 +28,8 @@ export interface User {
   id: string;
   username: string;
   role: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CoursesCustom {
@@ -313,6 +315,9 @@ export interface CourseExamListResponseData {
 
 export interface TaskListResponseData {
   tasks: TaskSummary[];
+  page: number;
+  pageSize: number;
+  total: number;
 }
 
 export type TaskKind = 'task_points' | 'works' | 'exams';
