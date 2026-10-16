@@ -1,11 +1,19 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   apiRequest,
+  getCourseChapterDetails,
+  getCourseOutline,
   getCourses,
+  getExams,
   getSMSConfig,
   getTaskConfigSnapshot,
   getTaskCourseIdentifiers,
+  getTaskKind,
+  getTaskProgress,
+  getTasks,
+  getTaskStats,
   getUserFacingErrorMessage,
+  getWorks,
 } from './api';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -151,6 +159,126 @@ describe('api boundary', () => {
         targets: [{ classId: 'class-1', itemIds: ['point-1'] }],
       }),
     ).toEqual(['class-1']);
+  });
+
+  it('uses task summaries without loading their configuration', () => {
+    expect(getTaskCourseIdentifiers({ courseIdentifiers: ['class-3'] })).toEqual(['class-3']);
+    expect(getTaskCourseIdentifiers({
+      courseIdentifiers: [],
+      configSnapshot: { targets: [{ classId: 'old-class', itemIds: [] }] },
+    })).toEqual([]);
+    expect(getTaskCourseIdentifiers({
+      configSnapshot: { targets: [{ classId: 'class-2', itemIds: [] }] },
+    })).toEqual(['class-2']);
+    expect(getTaskKind({ kind: 'exams', configSnapshot: { kind: 'works' } })).toBe('exams');
+    expect(getTaskKind({ configSnapshot: { kind: 'task_points' } })).toBe('task_points');
+  });
+
+  it('requests server-side task filtering and preserves pagination and summary fields', async () => {
+    const data = {
+      tasks: [{
+        id: 'task-1', accountId: 'account-1', autoResume: false, status: 'success',
+        kind: 'works', courseNames: ['课程一'], courseIdentifiers: ['class-1'],
+      }],
+      page: 3,
+      pageSize: 10,
+      total: 41,
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ code: 200, data }), { status: 200 }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const controller = new AbortController();
+
+    const result = await getTasks({
+      group: 'completed', status: 'success', kind: 'works', q: '课程 一',
+      sort: 'oldest', page: 3, pageSize: 10,
+    }, { signal: controller.signal });
+
+    expect(result.data).toEqual(data);
+    const [url, init] = fetchMock.mock.calls[0];
+    const parsed = new URL(String(url), 'https://example.test');
+    expect(parsed.pathname).toBe('/api/tasks');
+    expect(Object.fromEntries(parsed.searchParams)).toEqual({
+      group: 'completed', status: 'success', kind: 'works', q: '课程 一',
+      sort: 'oldest', page: '3', pageSize: '10',
+    });
+    expect(init.signal.aborted).toBe(false);
+  });
+
+  it('keeps the existing task request options signature', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ code: 200, data: { tasks: [], page: 1, pageSize: 20, total: 0 } }), { status: 200 }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await getTasks({ headers: { 'X-Request': 'existing-caller' } });
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/tasks', expect.objectContaining({
+      headers: expect.objectContaining({ 'X-Request': 'existing-caller' }),
+    }));
+  });
+
+  it('delegates the attention status filter to the server', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ code: 200, data: { tasks: [], page: 1, pageSize: 10, total: 0 } }), { status: 200 }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await getTasks({ status: 'attention', page: 1, pageSize: 10 });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/tasks?status=attention&page=1&pageSize=10',
+      expect.any(Object),
+    );
+  });
+
+  it('uses separate endpoints for outlines, chapter details, task progress and statistics', async () => {
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(
+      new Response('{"code":200,"data":{}}', { status: 200 }),
+    ));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await getCourseOutline('account/1', 'class/1');
+    await getCourseChapterDetails('account/1', 'class/1', 'chapter/1');
+    await getTaskProgress('task/1');
+    await getTaskStats();
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      '/api/accounts/account%2F1/courses/class%2F1/outline',
+      '/api/accounts/account%2F1/courses/class%2F1/chapters/chapter%2F1',
+      '/api/tasks/task%2F1/progress',
+      '/api/tasks/stats',
+    ]);
+  });
+
+  it('refreshes only the selected course resource without forwarding custom options to fetch', async () => {
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(
+      new Response(JSON.stringify({
+        code: 200,
+        data: { courses: [], sourceStatus: { joined: 'ok' }, errors: [] },
+      }), { status: 200 }),
+    ));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await getCourses('account-1', { refresh: true });
+    await getCourseOutline('account-1', 'class-1', { refresh: true });
+    await getCourseChapterDetails('account-1', 'class-1', 42, { refresh: true });
+    await getWorks('account-1', { refresh: true });
+    await getExams('account-1', { refresh: true });
+    await getExams('account-1', { refresh: false });
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      '/api/accounts/account-1/courses?refresh=true',
+      '/api/accounts/account-1/courses/class-1/outline?refresh=true',
+      '/api/accounts/account-1/courses/class-1/chapters/42?refresh=true',
+      '/api/accounts/account-1/works?refresh=true',
+      '/api/accounts/account-1/exams?refresh=true',
+      '/api/accounts/account-1/exams',
+    ]);
+    for (const [, options] of fetchMock.mock.calls) {
+      expect(options).not.toHaveProperty('refresh');
+    }
   });
 
   it.each([false, true])(

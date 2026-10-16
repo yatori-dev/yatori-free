@@ -10,11 +10,11 @@ interface ActiveRequest {
 
 export class RequestCoordinator {
   private readonly active = new Map<string, ActiveRequest>();
+  private requestSequence = 0;
 
   begin(key: string): RequestHandle {
     this.cancel(key);
-    const current = this.active.get(key);
-    const requestId = (current?.requestId ?? 0) + 1;
+    const requestId = ++this.requestSequence;
     const controller = new AbortController();
     this.active.set(key, { controller, requestId });
     return { signal: controller.signal, requestId };
@@ -22,6 +22,14 @@ export class RequestCoordinator {
 
   isCurrent(key: string, requestId: number) {
     return this.active.get(key)?.requestId === requestId;
+  }
+
+  finish(key: string, requestId: number) {
+    if (!this.isCurrent(key, requestId)) {
+      return false;
+    }
+    this.active.delete(key);
+    return true;
   }
 
   cancel(key: string) {
