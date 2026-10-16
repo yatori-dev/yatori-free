@@ -1,4 +1,4 @@
-import React, { useId, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { formatLocalDateTime } from "@/lib/format";
@@ -13,7 +13,11 @@ import {
   Loader2,
 } from "lucide-react";
 import {
+  getTask,
   getTaskConfigSnapshot,
+  getTaskKind,
+  getUserFacingErrorMessage,
+  isAuthExitError,
   getTaskCourseIdentifiers,
   getTaskCoursesCustomSnapshot,
   type Task,
@@ -38,6 +42,7 @@ interface TaskInlineItemProps {
   courseTaskPointProgressByIdentifier?: CourseTaskPointProgressMap;
   snapshot?: TaskProgressSnapshot;
   onStopTask: (taskId: string) => void;
+  onUnauthorized?: () => void;
 }
 
 function getCompactErrorMessage(message: string) {
@@ -65,6 +70,12 @@ function getProgressFallback(status: Task["status"], progressPercent = 0) {
         percent: progressPercent,
         course: "等待次日继续",
         chapter: "今日任务点学时已达 1200 分钟",
+      };
+    case "queued":
+      return {
+        percent: progressPercent,
+        course: "排队中",
+        chapter: "等待账号执行名额",
       };
     case "failed":
       return {
@@ -105,14 +116,51 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
   courseTaskPointProgressByIdentifier = {},
   snapshot,
   onStopTask,
+  onUnauthorized,
 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showCourseList, setShowCourseList] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [stopConfirmOpen, setStopConfirmOpen] = useState(false);
+  const [detailTask, setDetailTask] = useState<Task | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailsError, setDetailsError] = useState("");
+  const detailsRequestRef = useRef<AbortController | null>(null);
   const detailsId = useId();
-  const { status: effectiveStatus, progress, configSnapshot } = getTaskPresentation(task, snapshot);
+  const { status: effectiveStatus, progress, configSnapshot } = getTaskPresentation({
+    ...task,
+    configSnapshot: detailTask?.configSnapshot ?? task.configSnapshot,
+  }, snapshot);
   const taskConfigSnapshot = getTaskConfigSnapshot(configSnapshot);
+  const taskKind = getTaskKind({ ...task, configSnapshot });
+
+  useEffect(() => () => detailsRequestRef.current?.abort(), []);
+
+  const loadTaskDetails = async () => {
+    if (detailsRequestRef.current || detailTask || task.configSnapshot) return;
+    const controller = new AbortController();
+    detailsRequestRef.current = controller;
+    setDetailsLoading(true);
+    setDetailsError("");
+    try {
+      const response = await getTask(task.id, { signal: controller.signal });
+      if (!controller.signal.aborted) setDetailTask(response.data);
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      if (isAuthExitError(error)) onUnauthorized?.();
+      setDetailsError(getUserFacingErrorMessage(error, "获取任务配置失败"));
+    } finally {
+      if (detailsRequestRef.current === controller) {
+        detailsRequestRef.current = null;
+        if (!controller.signal.aborted) setDetailsLoading(false);
+      }
+    }
+  };
+
+  const toggleDetails = () => {
+    if (!showDetails) void loadTaskDetails();
+    setShowDetails(!showDetails);
+  };
 
   const handleAction = async (
     actionFn: (id: string) => void | Promise<void>,
@@ -122,7 +170,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
     try {
       await actionFn(id);
     } catch {
-      // Ignore action errors here; loading state is cleared in finally.
+      return;
     } finally {
       setActionLoading(false);
     }
@@ -142,6 +190,13 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
           label: "运行中",
           variant: "outline",
           icon: <Loader2 className="h-3 w-3 animate-spin" />,
+          toneClass: "text-info",
+        };
+      case "queued":
+        return {
+          label: "排队中",
+          variant: "outline",
+          icon: <Hourglass className="h-3 w-3" />,
           toneClass: "text-info",
         };
       case "waiting_daily_limit":
@@ -191,6 +246,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
 
   const statusInfo = getStatusDisplay(effectiveStatus);
   const snapshotStatuses: Task["status"][] = [
+    "queued",
     "running",
     "waiting_daily_limit",
     "stopping",
@@ -200,6 +256,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
   ];
   const stoppableStatuses: Task["status"][] = [
     "pending",
+    "queued",
     "running",
     "waiting_daily_limit",
     "stopping",
@@ -231,10 +288,9 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
   const currentPercent = Math.max(0, Math.min(100, Math.round(rawPercent)));
   const showProgress = progress && snapshotStatuses.includes(effectiveStatus);
   const taskErrorMessage =
-    snapshot?.errorMessage ||
     task.errorMessage ||
     (effectiveStatus === "failed" ? progress?.message : "");
-  const isWorkTask = taskConfigSnapshot?.kind === "works";
+  const isWorkTask = taskKind === "works";
   const taskUnitLabel = isWorkTask ? "作业" : "任务点";
   const displayTaskErrorMessage = (taskErrorMessage ?? "").replaceAll(
     "任务点",
@@ -251,7 +307,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
   const examAutoSubmitValue = coursesCustom?.examAutoSubmit;
   const workAutoSubmitLabel = getAutoSubmitLabel(workAutoSubmitValue);
   const examAutoSubmitLabel = getAutoSubmitLabel(examAutoSubmitValue);
-  const includeCourses = getTaskCourseIdentifiers(configSnapshot);
+  const includeCourses = getTaskCourseIdentifiers({ ...task, configSnapshot });
   const taskCourseTaskPointProgress = getTaskCourseTaskPointProgress(
     includeCourses,
     courseTaskPointProgressByIdentifier,
@@ -267,7 +323,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
       ? currentPercent
       : Math.max(0, Math.min(100, Math.round(aggregatedPercent)));
   const hasProgress = effectiveStatus === "success" || derivedPercent !== null || progressParts.length > 0 || aggregatedPercent !== null;
-  const displayCourses = includeCourses?.map((courseIdentifier) => {
+  const displayCourses = task.courseNames?.length ? task.courseNames : includeCourses?.map((courseIdentifier) => {
     const normalizedIdentifier = courseIdentifier.trim();
     const mappedName = courseNameByIdentifier[normalizedIdentifier];
     if (mappedName) {
@@ -332,7 +388,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         <div className="min-w-0">
           <div className="mb-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
             <h4 className="text-sm font-semibold">
-              {taskConfigSnapshot?.kind === "works" ? "作业" : taskConfigSnapshot?.kind === "exams" ? "考试" : taskConfigSnapshot?.kind === "task_points" ? "章节任务" : "学习任务"}
+              {taskKind === "works" ? "作业" : taskKind === "exams" ? "考试" : taskKind === "task_points" ? "章节任务" : "学习任务"}
             </h4>
             <span className="text-xs tabular-nums text-muted-foreground" title={task.id}>#{task.id.substring(0, 8)}</span>
           </div>
@@ -354,7 +410,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
           {hasUnitCounts && <p className="text-xs tabular-nums text-muted-foreground">已处理 {processedUnits} / {totalUnits}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-1 self-end @3xl:col-start-4 @3xl:row-start-1 @3xl:self-center">
-          <Button size="icon" variant="ghost" onClick={() => setShowDetails(!showDetails)} aria-expanded={showDetails} aria-controls={detailsId} aria-label={showDetails ? "收起任务详情" : "展开任务详情"} title={showDetails ? "收起任务详情" : "展开任务详情"} className="h-9 w-9 text-muted-foreground">
+          <Button size="icon" variant="ghost" onClick={toggleDetails} aria-expanded={showDetails} aria-controls={detailsId} aria-label={showDetails ? "收起任务详情" : "展开任务详情"} title={showDetails ? "收起任务详情" : "展开任务详情"} className="h-9 w-9 text-muted-foreground">
             <ChevronDown className={`motion-disclosure-chevron h-4 w-4 ${showDetails ? "rotate-180" : ""}`} />
           </Button>
           {canStopTask && <Button size="icon" variant="ghost" disabled={isStoppingTask || actionLoading} onClick={() => setStopConfirmOpen(true)} aria-label={isStoppingTask ? "任务停止中" : "停止任务"} title={isStoppingTask ? "任务停止中" : "停止任务"} className="h-9 w-9 text-danger hover:bg-danger-container hover:text-danger">
@@ -401,6 +457,10 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         </InlineError>
       )}
 
+      {snapshot?.errorMessage && (
+        <InlineError title="任务进度加载失败">{snapshot.errorMessage}</InlineError>
+      )}
+
       <CollapsiblePanel
         id={detailsId}
         open={showDetails}
@@ -429,7 +489,16 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
               )}
             </div>
           </div>
-          {taskConfigSnapshot ? (
+          {detailsLoading ? (
+            <div className="flex items-center gap-2 border-t border-border pt-3 text-xs text-muted-foreground" role="status">
+              <RefreshCw className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden="true" />正在加载任务配置
+            </div>
+          ) : detailsError ? (
+            <InlineError title="任务配置加载失败">
+              {detailsError}
+              <Button variant="link" size="sm" className="ml-2 h-auto p-0 text-current" onClick={() => void loadTaskDetails()}>重试</Button>
+            </InlineError>
+          ) : taskConfigSnapshot ? (
             <TaskSettingsSnapshot
               config={taskConfigSnapshot}
               coursesCustom={coursesCustom ?? {}}
@@ -438,7 +507,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
             />
           ) : (
             <div className="mt-1 min-w-0 w-full border-t border-border pt-3 text-xs text-muted-foreground">
-              任务未保存配置快照
+              {detailTask ? "任务未保存配置快照" : "展开后加载任务配置"}
             </div>
           )}
         </div>

@@ -12,6 +12,7 @@ export interface ApiError extends Error {
 
 export interface ApiRequestOptions extends RequestInit {
   timeoutMs?: number;
+  refresh?: boolean;
 }
 
 export interface ApiResponse {
@@ -54,6 +55,7 @@ export interface CourseSetting {
 
 export type TaskStatus =
   | 'pending'
+  | 'queued'
   | 'running'
   | 'waiting_daily_limit'
   | 'stopping'
@@ -203,6 +205,8 @@ export interface CourseWorkItem {
   endAt?: number;
   finishStandard?: string;
   remain_time?: string;
+  canRedo?: boolean;
+  remainingRedoTimes?: number | null;
 }
 
 export interface CourseExamItem {
@@ -215,6 +219,8 @@ export interface CourseExamItem {
   endAt?: number;
   finishStandard?: string;
   remain_time?: string;
+  canRedo?: boolean;
+  remainingRedoTimes?: number | null;
 }
 
 export interface CourseDetails {
@@ -318,6 +324,22 @@ export interface TaskListResponseData {
   page: number;
   pageSize: number;
   total: number;
+}
+
+export interface TaskListQuery {
+  group?: 'active' | 'completed';
+  status?: TaskStatus | 'attention';
+  kind?: TaskKind;
+  q?: string;
+  sort?: 'newest' | 'oldest';
+  page?: number;
+  pageSize?: number;
+}
+
+export interface TaskStats {
+  total: number;
+  statusCounts: Record<string, number>;
+  creationHistory: Array<{ date: string; count: number }>;
 }
 
 export type TaskKind = 'task_points' | 'works' | 'exams';
@@ -439,6 +461,9 @@ export interface Task {
   accountId: string;
   status: TaskStatus;
   autoResume: boolean;
+  kind?: TaskSnapshotKind;
+  courseNames?: string[];
+  courseIdentifiers?: string[];
   configSnapshot?: TaskConfigSnapshot;
   startedAt?: string | null;
   stoppedAt?: string | null;
@@ -521,8 +546,17 @@ export function getTaskCoursesCustomSnapshot(
 }
 
 export function getTaskCourseIdentifiers(
-  configSnapshot: Task['configSnapshot'],
+  source: Task['configSnapshot'] | Pick<Task, 'courseIdentifiers' | 'configSnapshot'>,
 ) {
+  if (!source) {
+    return undefined;
+  }
+  if ('courseIdentifiers' in source && Array.isArray(source.courseIdentifiers)) {
+    return source.courseIdentifiers;
+  }
+  const configSnapshot = 'configSnapshot' in source
+    ? source.configSnapshot
+    : source as TaskConfigSnapshot;
   const config = getTaskConfigSnapshot(configSnapshot);
   const includedCourses = config?.coursesCustom?.includeCourses;
   if (includedCourses && includedCourses.length > 0) {
@@ -530,6 +564,10 @@ export function getTaskCourseIdentifiers(
   }
 
   return config?.targets?.map(({ classId }) => classId) ?? undefined;
+}
+
+export function getTaskKind(task: Pick<Task, 'kind' | 'configSnapshot'>) {
+  return task.kind || getTaskConfigSnapshot(task.configSnapshot)?.kind || '';
 }
 
 export function getWorkItemTitle(item: CourseWorkItem) {
@@ -545,6 +583,13 @@ export interface TaskProgress {
   completedUnits: number;
   failedUnits: number;
   unresolvedUnits: number;
+  unfinishedUnits?: number;
+  failedTaskPoints?: number;
+  failedWorks?: number;
+  failedExams?: number;
+  unresolvedTaskPoints?: number;
+  unresolvedWorks?: number;
+  unresolvedExams?: number;
   currentCourse?: string;
   currentChapter?: string;
   currentKind?: string;
@@ -888,11 +933,19 @@ export function getVersion() {
   return apiRequest<VersionData>('/version', undefined, true);
 }
 
+function getCourseResource<T>(path: string, options?: ApiRequestOptions) {
+  const { refresh, ...requestOptions } = options ?? {};
+  return apiRequest<T>(
+    refresh ? `${path}?refresh=true` : path,
+    requestOptions,
+    true,
+  );
+}
+
 export function getCourses(accountId: string, options?: ApiRequestOptions) {
-  return apiRequest<CourseListApiResponseData>(
+  return getCourseResource<CourseListApiResponseData>(
     `/accounts/${encodeApiPathSegment(accountId)}/courses`,
     options,
-    true,
   ).then((response) => {
     if (!isCourseListApiResponseData(response.data)) {
       throw new Error('课程接口响应结构异常，请稍后重试');
@@ -948,15 +1001,37 @@ export function getCourseDetails(
   );
 }
 
+export function getCourseOutline(
+  accountId: string,
+  classId: string,
+  options?: ApiRequestOptions,
+) {
+  return getCourseResource<CourseDetails>(
+    `/accounts/${encodeApiPathSegment(accountId)}/courses/${encodeApiPathSegment(classId)}/outline`,
+    options,
+  );
+}
+
+export function getCourseChapterDetails(
+  accountId: string,
+  classId: string,
+  chapterId: number | string,
+  options?: ApiRequestOptions,
+) {
+  return getCourseResource<CourseDetails>(
+    `/accounts/${encodeApiPathSegment(accountId)}/courses/${encodeApiPathSegment(classId)}/chapters/${encodeApiPathSegment(String(chapterId))}`,
+    options,
+  );
+}
+
 function getCourseTaskList<TResponse>(
   accountId: string,
   kind: 'works' | 'exams',
   options?: ApiRequestOptions,
 ): Promise<ApiDataResponse<TResponse>> {
-  return apiRequest<TResponse>(
+  return getCourseResource<TResponse>(
     `/accounts/${encodeApiPathSegment(accountId)}/${kind}`,
     options,
-    true,
   );
 }
 
@@ -976,8 +1051,34 @@ export function getCourseDocumentDownloadUrl(
   return `${API_BASE_URL}/accounts/${encodeApiPathSegment(accountId)}/courses/${encodeApiPathSegment(classId)}/documents/${encodeApiPathSegment(documentId)}/download`;
 }
 
-export function getTasks(options?: ApiRequestOptions) {
-  return apiRequest<TaskListResponseData>('/tasks', options, true);
+export function getTasks(options?: ApiRequestOptions): Promise<ApiDataResponse<TaskListResponseData>>;
+export function getTasks(query: TaskListQuery, options?: ApiRequestOptions): Promise<ApiDataResponse<TaskListResponseData>>;
+export function getTasks(
+  queryOrOptions: TaskListQuery | ApiRequestOptions = {},
+  options?: ApiRequestOptions,
+) {
+  const queryKeys: Array<keyof TaskListQuery> = [
+    'group', 'status', 'kind', 'q', 'sort', 'page', 'pageSize',
+  ];
+  const hasQuery = queryKeys.some((key) => key in queryOrOptions);
+  const query = hasQuery ? queryOrOptions as TaskListQuery : {};
+  const search = new URLSearchParams();
+  for (const key of queryKeys) {
+    const value = query[key];
+    if (value !== undefined && value !== '') {
+      search.set(key, String(value));
+    }
+  }
+  const suffix = search.size > 0 ? `?${search.toString()}` : '';
+  return apiRequest<TaskListResponseData>(
+    `/tasks${suffix}`,
+    options ?? (hasQuery ? undefined : queryOrOptions as ApiRequestOptions),
+    true,
+  );
+}
+
+export function getTaskStats(options?: ApiRequestOptions) {
+  return apiRequest<TaskStats>('/tasks/stats', options, true);
 }
 
 export function createTask(payload: CreateTaskRequest) {
@@ -994,6 +1095,14 @@ export function createTask(payload: CreateTaskRequest) {
 export function getTask(taskId: string, options?: ApiRequestOptions) {
   return apiRequest<Task>(
     `/tasks/${encodeApiPathSegment(taskId)}`,
+    options,
+    true,
+  );
+}
+
+export function getTaskProgress(taskId: string, options?: ApiRequestOptions) {
+  return apiRequest<TaskSummary>(
+    `/tasks/${encodeApiPathSegment(taskId)}/progress`,
     options,
     true,
   );

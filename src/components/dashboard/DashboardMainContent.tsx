@@ -37,6 +37,13 @@ interface DashboardMainContentProps {
   fullyExpandedCourseOutlines: Set<string>;
   courseDetailsMap: Record<string, CourseDetails>;
   loadingDetails: Record<string, boolean>;
+  detailErrors: Record<string, string>;
+  detailRevisions: Record<string, number>;
+  listLoading: Record<'works' | 'exams', boolean>;
+  listErrors: Record<'works' | 'exams', string | null>;
+  onRefreshOutline: (courseKey: string) => void;
+  onRefreshWorks: () => void;
+  onRefreshExams: () => void;
   stoppingTaskId: string | null;
   tasks: Task[];
   taskFilter: 'active' | 'completed';
@@ -94,6 +101,13 @@ export function DashboardMainContent({
   fullyExpandedCourseOutlines,
   courseDetailsMap,
   loadingDetails,
+  detailErrors,
+  detailRevisions,
+  listLoading,
+  listErrors,
+  onRefreshOutline,
+  onRefreshWorks,
+  onRefreshExams,
   stoppingTaskId,
   tasks,
   taskFilter,
@@ -239,6 +253,9 @@ export function DashboardMainContent({
               fullyExpandedCourseOutlines={fullyExpandedCourseOutlines}
               courseDetailsMap={courseDetailsMap}
               loadingDetails={loadingDetails}
+              detailErrors={detailErrors}
+              detailRevisions={detailRevisions}
+              onRefreshOutline={onRefreshOutline}
               stoppingTaskId={stoppingTaskId}
               onRefresh={onRefreshCourses}
               onSearchChange={onSearchChange}
@@ -252,37 +269,39 @@ export function DashboardMainContent({
             <WorksListSection
               hideUnavailable
               courses={courses}
-              coursesLoading={coursesLoading}
+              coursesLoading={coursesLoading || listLoading.works}
+              listError={listErrors.works}
               courseDetailsMap={courseDetailsMap}
-              loadingDetails={loadingDetails}
               selectedWorks={selectedWorks}
               showDeadlineBadges={showDeadlineBadges}
               submitMode={workAutoSubmit}
               onSubmitModeChange={onWorkAutoSubmitChange}
               onToggleSelectWork={onToggleSelectWork}
               onToggleSelectCourseWorks={onToggleSelectCourseWorks}
-              onRefreshCourses={onRefreshCourses}
+              onRefreshCourses={onRefreshWorks}
             />
 
             <ExamsListSection
               hideUnavailable
               courses={courses}
-              coursesLoading={coursesLoading}
+              coursesLoading={coursesLoading || listLoading.exams}
+              listError={listErrors.exams}
               courseDetailsMap={courseDetailsMap}
-              loadingDetails={loadingDetails}
               selectedExams={selectedExams}
               showDeadlineBadges={showDeadlineBadges}
               submitMode={examAutoSubmit}
               onSubmitModeChange={onExamAutoSubmitChange}
               onToggleSelectExam={onToggleSelectExam}
               onToggleSelectCourseExams={onToggleSelectCourseExams}
-              onRefreshCourses={onRefreshCourses}
+              onRefreshCourses={onRefreshExams}
             />
 
             <TabsContent value="tasks" className="m-0 min-h-full outline-none">
               <section className="min-h-full min-w-0" aria-label="任务">
                 <div className="flex min-h-[28rem] min-w-0 flex-col">
                   <TaskStatusContent
+                    visible={activeTab === 'tasks'}
+                    onUnauthorized={onUnauthorized}
                     tasks={tasks}
                     taskFilter={taskFilter}
                     tasksLoading={tasksLoading}

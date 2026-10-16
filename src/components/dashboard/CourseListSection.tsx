@@ -31,6 +31,8 @@ interface CourseListSectionProps {
   fullyExpandedCourseOutlines: Set<string>;
   courseDetailsMap: Record<string, CourseDetails>;
   loadingDetails: Record<string, boolean>;
+  detailErrors?: Record<string, string>;
+  detailRevisions?: Record<string, number>;
   stoppingTaskId: string | null;
   onRefresh: () => void;
   onSearchChange: (value: string) => void;
@@ -39,6 +41,7 @@ interface CourseListSectionProps {
   onStopTask: (taskId: string) => void;
   onToggleExpandCourse: (courseKey: string) => void;
   onToggleFullCourseOutline: (courseKey: string) => void;
+  onRefreshOutline?: (courseKey: string) => void;
 }
 
 function formatCourseDate(value?: string) {
@@ -101,6 +104,8 @@ export function CourseListSection({
   fullyExpandedCourseOutlines,
   courseDetailsMap,
   loadingDetails,
+  detailErrors = {},
+  detailRevisions = {},
   stoppingTaskId,
   onRefresh,
   onSearchChange,
@@ -109,6 +114,7 @@ export function CourseListSection({
   onStopTask,
   onToggleExpandCourse,
   onToggleFullCourseOutline,
+  onRefreshOutline,
 }: CourseListSectionProps) {
   const [stopConfirmTaskId, setStopConfirmTaskId] = useState<string | null>(null);
   const isCourseSearchComposing = useRef(false);
@@ -190,8 +196,11 @@ export function CourseListSection({
             </span>
           </div>
         )}
-        <div className="min-w-0 overflow-hidden rounded-[var(--radius-lg)] border border-border shadow-rest">
-          {coursesLoading ? (
+        {coursesError && courses.length > 0 && (
+          <p className="text-sm text-danger" role="alert">{coursesError}</p>
+        )}
+        <div className="min-w-0 overflow-hidden rounded-[var(--radius-lg)] border border-border shadow-rest" aria-busy={coursesLoading}>
+          {coursesLoading && courses.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-12 text-sm text-muted-foreground">
               <svg className="loading-spinner" viewBox="0 0 50 50">
                 <circle
@@ -205,7 +214,7 @@ export function CourseListSection({
               </svg>
               <p className="mt-4">拉取课程列表中...</p>
             </div>
-          ) : coursesError ? (
+          ) : coursesError && courses.length === 0 ? (
             <div className="p-12 text-center font-sans text-sm text-danger">
               <AlertCircle className="mx-auto mb-2 h-8 w-8" />
               {coursesError}
@@ -382,7 +391,21 @@ export function CourseListSection({
                       open={isExpanded}
                       className="border-t border-border/40 bg-muted/20 px-[var(--space-3)] pb-[var(--space-3)] pl-11 pt-[var(--space-3)] sm:px-[var(--space-5)] sm:pb-[var(--space-5)] sm:pl-12 sm:pt-[var(--space-4)]"
                     >
-                        {loadingDetails[course.key] ? (
+                        {courseDetailsMap[course.key]?.chapters ? (
+                          <CourseOutline
+                            accountId={accountId}
+                            courseKey={course.key}
+                            courseDetails={courseDetailsMap[course.key]}
+                            isFullyExpanded={isCourseOutlineFullyExpanded}
+                            onToggleFullOutline={() =>
+                              onToggleFullCourseOutline(course.key)
+                            }
+                            onRefresh={onRefreshOutline ? () => onRefreshOutline(course.key) : undefined}
+                            refreshing={loadingDetails[course.key]}
+                            error={detailErrors[course.key]}
+                            revision={detailRevisions[course.key]}
+                          />
+                        ) : loadingDetails[course.key] ? (
                           <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
                             <svg
                               className="loading-spinner h-4 w-4"
@@ -399,19 +422,21 @@ export function CourseListSection({
                             </svg>
                             <span>正在拉取章节...</span>
                           </div>
-                        ) : courseDetailsMap[course.key] ? (
-                          <CourseOutline
-                            accountId={accountId}
-                            courseKey={course.key}
-                            courseDetails={courseDetailsMap[course.key]}
-                            isFullyExpanded={isCourseOutlineFullyExpanded}
-                            onToggleFullOutline={() =>
-                              onToggleFullCourseOutline(course.key)
-                            }
-                          />
                         ) : (
-                          <div className="py-2 text-xs text-muted-foreground">
-                            无法加载章节，请点击右上角刷新重试
+                          <div className="flex flex-wrap items-center gap-2 py-2 text-xs">
+                            <span className="text-danger" role="alert">
+                              {detailErrors[course.key] || '无法加载章节'}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 gap-1 text-xs"
+                              onClick={() => onRefreshOutline ? onRefreshOutline(course.key) : onRefresh()}
+                            >
+                              <RefreshCw className="h-3 w-3" />
+                              重试
+                            </Button>
                           </div>
                         )}
                     </CollapsiblePanel>

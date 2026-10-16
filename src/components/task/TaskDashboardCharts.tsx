@@ -3,16 +3,16 @@ import {
   Bar, BarChart, CartesianGrid, Pie, PieChart,
   ResponsiveContainer, Tooltip, XAxis, YAxis, matchByDataKey,
 } from 'recharts';
-import type { Task } from '@/lib/api';
+import type { TaskStats } from '@/lib/api';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
-  getTaskCreationHistory, getTaskDistribution, type TaskGroup,
+  taskGroups, type TaskGroup,
 } from '@/lib/taskDashboard';
 
 interface TaskDashboardChartsProps {
-  tasks: Task[];
+  stats: TaskStats;
   onSelectGroup: (group: TaskGroup) => void;
 }
 
@@ -26,16 +26,34 @@ const tooltipStyle = {
 
 const matchHistoryDate = matchByDataKey('date');
 
-export default function TaskDashboardCharts({ tasks, onSelectGroup }: TaskDashboardChartsProps) {
+export default function TaskDashboardCharts({ stats, onSelectGroup }: TaskDashboardChartsProps) {
   const [days, setDays] = useState(7);
   const [barsAnimated, setBarsAnimated] = useState(false);
   const [pieAnimated, setPieAnimated] = useState(false);
+  const [today] = useState(() => Date.now());
   const [animationDuration] = useState(() => {
     const duration = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--motion-panel'));
     return Number.isFinite(duration) ? duration : 400;
   });
-  const { history, missingDates } = useMemo(() => getTaskCreationHistory(tasks, days), [tasks, days]);
-  const distribution = useMemo(() => getTaskDistribution(tasks), [tasks]);
+  const history = useMemo(() => {
+    const countsByDate = new Map(stats.creationHistory.map((day) => [day.date, day.count]));
+    const dateKey = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' });
+    const dateLabel = new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', month: 'numeric', day: 'numeric' });
+    return Array.from({ length: days }, (_, index) => {
+      const date = new Date(today - (days - index - 1) * 86_400_000);
+      const key = dateKey.format(date);
+      return { date: key, label: dateLabel.format(date), count: countsByDate.get(key) ?? 0 };
+    });
+  }, [stats.creationHistory, days, today]);
+  const distribution = useMemo(() => taskGroups.map((group) => ({
+    ...group,
+    fill: group.color,
+    count: group.key === 'active'
+      ? ['pending', 'queued', 'running', 'waiting_daily_limit', 'stopping'].reduce((count, status) => count + (stats.statusCounts[status] ?? 0), 0)
+      : group.key === 'attention'
+        ? (stats.statusCounts.failed ?? 0) + (stats.statusCounts.partial_success ?? 0)
+        : stats.statusCounts[group.key] ?? 0,
+  })), [stats.statusCounts]);
   const pieData = useMemo(() => distribution.filter((group) => group.count > 0), [distribution]);
   const totalCreated = history.reduce((sum, day) => sum + day.count, 0);
 
@@ -78,7 +96,6 @@ export default function TaskDashboardCharts({ tasks, onSelectGroup }: TaskDashbo
             </BarChart>
           </ResponsiveContainer>
         </div>
-        {missingDates > 0 && <p className="mt-2 text-xs text-muted-foreground">{missingDates} 项缺少创建时间，未计入图表</p>}
       </section>
       <section className="min-w-0 border-t border-border py-6 xl:w-72 xl:shrink-0 xl:border-t-0 xl:border-l xl:pl-8" aria-label="任务状态分布">
         <h3 className="text-sm font-semibold">状态分布</h3>
@@ -91,7 +108,7 @@ export default function TaskDashboardCharts({ tasks, onSelectGroup }: TaskDashbo
               </PieChart>
             </ResponsiveContainer>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-semibold tabular-nums">{tasks.length}</span>
+              <span className="text-2xl font-semibold tabular-nums">{stats.total}</span>
               <span className="mt-1 text-xs text-muted-foreground">任务总数</span>
             </div>
           </div>

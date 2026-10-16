@@ -23,8 +23,8 @@ import { SubmitModeControl, type SubmitMode } from './SubmitModeControl';
 interface ExamsListSectionProps {
   courses: CourseSummary[];
   coursesLoading: boolean;
+  listError?: string | null;
   courseDetailsMap: Record<string, CourseDetails>;
-  loadingDetails: Record<string, boolean>;
   selectedExams: Record<string, Set<string>>;
   showDeadlineBadges: boolean;
   hideUnavailable: boolean;
@@ -45,8 +45,8 @@ function getVisibleExams(exams: CourseExamItem[], hideUnavailable: boolean) {
 export function ExamsListSection({
   courses,
   coursesLoading,
+  listError,
   courseDetailsMap,
-  loadingDetails,
   selectedExams,
   showDeadlineBadges,
   hideUnavailable,
@@ -73,14 +73,14 @@ export function ExamsListSection({
     return courses.filter((course) => {
       const details = courseDetailsMap[course.key];
       return (
-        !details ||
+        !details || Boolean(details.examsError) ||
         getVisibleExams(details.exams ?? [], hideUnavailable).length > 0
       );
     });
   }, [courses, courseDetailsMap, hideUnavailable]);
 
   const hasLoadedDetails = useMemo(() => {
-    return courses.some((course) => Boolean(courseDetailsMap[course.key]));
+    return courses.some((course) => courseDetailsMap[course.key]?.exams !== undefined);
   }, [courses, courseDetailsMap]);
 
   return (
@@ -109,8 +109,8 @@ export function ExamsListSection({
               onClick={onRefreshCourses}
               disabled={coursesLoading}
               className="h-9 w-9 shrink-0 rounded-[var(--radius-md)] hover:bg-muted"
-              title="刷新课程"
-              aria-label="刷新课程"
+              title="刷新考试"
+              aria-label="刷新考试"
             >
               <RefreshCw
                 className={`h-4 w-4 ${coursesLoading ? 'animate-spin' : ''}`}
@@ -119,11 +119,20 @@ export function ExamsListSection({
           </div>
         </div>
 
+        {listError && (
+          <div role="alert" className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3 text-sm text-danger">
+            <span className="min-w-0 break-words">{listError}</span>
+            <Button size="sm" variant="outline" onClick={onRefreshCourses} disabled={coursesLoading}>重试</Button>
+          </div>
+        )}
+        {coursesLoading && courses.length > 0 && (
+          <p role="status" className="text-xs text-muted-foreground">正在读取考试列表…</p>
+        )}
         <div className="min-w-0">
           {coursesLoading && courses.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
               <RefreshCw className="h-7 w-7 animate-spin text-primary/70 mb-3" />
-              <p className="text-sm">正在加载课程...</p>
+              <p className="text-sm">正在加载考试列表…</p>
             </div>
           ) : filteredCourses.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
@@ -143,7 +152,7 @@ export function ExamsListSection({
                 </div>
               )}
 
-              {hasLoadedDetails && totalExamsCount === 0 && (
+              {hasLoadedDetails && !coursesLoading && !listError && totalExamsCount === 0 && (
                 <div className="flex items-start gap-2.5 border-b border-border pb-4 text-sm text-muted-foreground">
                   <AlertCircle className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="flex-1">
@@ -156,7 +165,7 @@ export function ExamsListSection({
 
               {filteredCourses.map((course) => {
                 const details = courseDetailsMap[course.key];
-                const isLoading = loadingDetails[course.key] === true;
+                const isLoading = coursesLoading && courseDetailsMap[course.key]?.exams === undefined;
                 const allExams = details?.exams ?? [];
                 const exams = getVisibleExams(allExams, hideUnavailable);
                 const runnableExams = exams.filter((exam) => exam.runnable);

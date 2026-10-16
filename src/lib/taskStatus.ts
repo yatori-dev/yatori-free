@@ -2,11 +2,13 @@ import type { Task } from '@/lib/api';
 
 export const ACTIVE_TASK_STATUSES = [
   'pending',
+  'queued',
   'running',
   'waiting_daily_limit',
   'stopping',
 ] as const;
 export const TASK_DETAIL_SNAPSHOT_STATUSES = [
+  'queued',
   'running',
   'waiting_daily_limit',
   'stopping',
