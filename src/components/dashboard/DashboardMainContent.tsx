@@ -167,19 +167,7 @@ export function DashboardMainContent({
       id="dashboard-main"
       className={`min-h-0 flex-1 overflow-x-clip overflow-y-auto bg-background pb-[calc(10rem+env(safe-area-inset-bottom))] lg:pb-24 ${activeTab === 'settings' ? 'no-scrollbar' : ''}`}
     >
-      {activeTab === 'settings' ? (
-        <div data-dashboard-tab-content className="mx-auto flex min-h-full w-full min-w-0 max-w-[1600px] px-3 py-4 sm:px-5 lg:px-6 lg:py-6">
-          <TaskSettingsPanel
-            bypassDailyStudyLimit={bypassDailyStudyLimit}
-            showDeadlineBadges={showDeadlineBadges}
-            autoSubmitWorksNearDeadline={autoSubmitWorksNearDeadline}
-            accelerateBeforeCourseEnd={accelerateBeforeCourseEnd}
-            onUnauthorized={onUnauthorized}
-            onSettingSwitch={onSettingSwitch}
-          />
-        </div>
-      ) : (
-        <div className="mx-auto w-full min-w-0 max-w-[1600px] px-3 py-4 sm:px-5 lg:px-6 lg:py-6">
+      <div className={activeTab === 'settings' ? 'hidden' : 'mx-auto w-full min-w-0 max-w-[1600px] px-3 py-4 sm:px-5 lg:px-6 lg:py-6'}>
           <div className="min-w-0 space-y-4 sm:space-y-6">
           {isLearningTab && (
             <div className="lg:hidden">
@@ -297,7 +285,7 @@ export function DashboardMainContent({
               onRefreshCourses={onRefreshExams}
             />}
 
-            {activeTab === 'tasks' && <TabsContent forceMount value="tasks" className="m-0 min-h-full outline-none">
+            <TabsContent forceMount value="tasks" className="m-0 min-h-full outline-none data-[state=inactive]:hidden">
               <section className="min-h-full min-w-0" aria-label="任务">
                 <div className="flex min-h-[28rem] min-w-0 flex-col">
                   <TaskStatusContent
@@ -316,11 +304,23 @@ export function DashboardMainContent({
                   />
                 </div>
               </section>
-            </TabsContent>}
+            </TabsContent>
           </div>
           </div>
-        </div>
-      )}
+      </div>
+      <div
+        data-dashboard-tab-content
+        className={activeTab === 'settings' ? 'mx-auto flex min-h-full w-full min-w-0 max-w-[1600px] px-3 py-4 sm:px-5 lg:px-6 lg:py-6' : 'hidden'}
+      >
+        <TaskSettingsPanel
+          bypassDailyStudyLimit={bypassDailyStudyLimit}
+          showDeadlineBadges={showDeadlineBadges}
+          autoSubmitWorksNearDeadline={autoSubmitWorksNearDeadline}
+          accelerateBeforeCourseEnd={accelerateBeforeCourseEnd}
+          onUnauthorized={onUnauthorized}
+          onSettingSwitch={onSettingSwitch}
+        />
+      </div>
     </main>
   );
 }
