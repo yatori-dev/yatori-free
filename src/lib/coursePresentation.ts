@@ -28,6 +28,49 @@ export function courseHasTaskPoints(course: CourseSummary) {
   return course.jobCount > 0;
 }
 
+export function isCourseEnded(course: Pick<CourseSummary, 'state' | 'endDate'>) {
+  if (course.state === 1) {
+    return true;
+  }
+
+  if (course.state === 0) {
+    return false;
+  }
+
+  const endDate = course.endDate;
+  if (typeof endDate !== 'string' || !endDate.trim()) {
+    return false;
+  }
+
+  const endAt = Date.parse(endDate);
+  return Number.isFinite(endAt) && endAt <= Date.now();
+}
+
+export function isSubmittedWorkStatus(status: string) {
+  const normalized = status.trim().toLowerCase();
+  if (/^(未交|未提交|未完成|待提交|待完成)$/.test(normalized)) {
+    return false;
+  }
+
+  return [
+    '已交',
+    '已提交',
+    '已交卷',
+    '已完成',
+    'submitted',
+    'finished',
+    'completed',
+  ].some((value) => normalized === value || normalized.includes(value));
+}
+
+export function getRemainingRedoCount(value?: number | null) {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    return null;
+  }
+
+  return value;
+}
+
 export function formatFileSize(size?: number) {
   if (typeof size !== 'number' || !Number.isFinite(size) || size <= 0) {
     return '';

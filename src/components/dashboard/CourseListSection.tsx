@@ -17,6 +17,7 @@ import { TabsContent } from '@/components/ui/tabs';
 import { CollapsiblePanel } from '@/components/ui/collapsible-panel';
 import { CourseCheckbox } from './CourseCheckbox';
 import { StopTaskConfirmDialog } from './StopTaskConfirmDialog';
+import { ResourceListLoading } from './ResourceListLoading';
 
 interface CourseListSectionProps {
   accountId?: string;
@@ -201,19 +202,7 @@ export function CourseListSection({
         )}
         <div className="min-w-0 overflow-hidden rounded-[var(--radius-lg)] border border-border shadow-rest" aria-busy={coursesLoading}>
           {coursesLoading && courses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 text-sm text-muted-foreground">
-              <svg className="loading-spinner" viewBox="0 0 50 50">
-                <circle
-                  className="path"
-                  cx="25"
-                  cy="25"
-                  r="20"
-                  fill="none"
-                  strokeWidth="4"
-                />
-              </svg>
-              <p className="mt-4">拉取课程列表中...</p>
-            </div>
+            <ResourceListLoading label="正在加载章节任务" rows={4} />
           ) : coursesError && courses.length === 0 ? (
             <div className="p-12 text-center font-sans text-sm text-danger">
               <AlertCircle className="mx-auto mb-2 h-8 w-8" />
@@ -406,22 +395,7 @@ export function CourseListSection({
                             revision={detailRevisions[course.key]}
                           />
                         ) : loadingDetails[course.key] ? (
-                          <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
-                            <svg
-                              className="loading-spinner h-4 w-4"
-                              viewBox="0 0 50 50"
-                            >
-                              <circle
-                                className="path"
-                                cx="25"
-                                cy="25"
-                                r="20"
-                                fill="none"
-                                strokeWidth="4"
-                              />
-                            </svg>
-                            <span>正在拉取章节...</span>
-                          </div>
+                          <ResourceListLoading label="正在读取章节任务" rows={2} compact />
                         ) : (
                           <div className="flex flex-wrap items-center gap-2 py-2 text-xs">
                             <span className="text-danger" role="alert">

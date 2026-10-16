@@ -869,7 +869,6 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
             onRefreshWorks={() => void fetchTaskList('works', true)}
             onRefreshExams={() => void fetchTaskList('exams', true)}
             stoppingTaskId={stoppingTaskId}
-            tasks={tasks}
             taskFilter={taskFilter}
             tasksLoading={tasksLoading}
             taskSnapshots={taskSnapshots}

@@ -24,6 +24,7 @@ import {
 import { useCourseChapterDetails } from '@/hooks/useCourseChapterDetails';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ResourceListLoading } from './ResourceListLoading';
 
 interface CourseOutlineProps {
   accountId?: string;
@@ -159,7 +160,7 @@ function CourseOutlineContent({
                   variant={taskMeta.isLocked || total === 0 ? 'secondary' : isDone ? 'success' : 'warning'}
                   className="shrink-0 text-xs font-normal"
                 >
-                  {taskMeta.isLocked ? `未开放: ${total}` : total > 0 ? `任务点: ${finished}/${total}` : '无任务点'}
+                  {taskMeta.isLocked ? '未开放' : total > 0 ? `${finished}/${total} 已完成` : '无任务点'}
                 </Badge>
               </button>
               {expanded && (
@@ -207,6 +208,9 @@ function CourseOutlineContent({
                       )}
                     </div>
                   ))}
+                  {state?.loading && (
+                    <ResourceListLoading label="正在读取章节任务点" rows={3} compact />
+                  )}
                   {accountId && documents.map((document) => {
                     const fileSize = formatFileSize(document.size);
                     return (

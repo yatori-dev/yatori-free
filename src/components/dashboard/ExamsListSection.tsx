@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import {
   AlertCircle,
   CheckSquare,
-  FolderSync,
   GraduationCap,
   RefreshCw,
   Square,
@@ -14,11 +13,16 @@ import {
   getDeadlineUrgencyLabel,
   hasDeadlinePassed,
 } from '@/lib/format';
+import {
+  isCourseEnded,
+} from '@/lib/coursePresentation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
 import { CourseCheckbox } from './CourseCheckbox';
 import { SubmitModeControl, type SubmitMode } from './SubmitModeControl';
+import { ResourceListLoading } from './ResourceListLoading';
+import { RedoCountBlock } from './RedoCountBlock';
 
 interface ExamsListSectionProps {
   courses: CourseSummary[];
@@ -60,6 +64,7 @@ export function ExamsListSection({
     let totalExamsCount = 0;
 
     courses.forEach((course) => {
+      if (isCourseEnded(course)) return;
       const details = courseDetailsMap[course.key];
       const allExams = details?.exams ?? [];
       const exams = getVisibleExams(allExams, hideUnavailable);
@@ -71,6 +76,7 @@ export function ExamsListSection({
 
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
+      if (isCourseEnded(course)) return false;
       const details = courseDetailsMap[course.key];
       return (
         !details || Boolean(details.examsError) ||
@@ -80,7 +86,7 @@ export function ExamsListSection({
   }, [courses, courseDetailsMap, hideUnavailable]);
 
   const hasLoadedDetails = useMemo(() => {
-    return courses.some((course) => courseDetailsMap[course.key]?.exams !== undefined);
+    return courses.some((course) => !isCourseEnded(course) && courseDetailsMap[course.key]?.exams !== undefined);
   }, [courses, courseDetailsMap]);
 
   return (
@@ -125,15 +131,9 @@ export function ExamsListSection({
             <Button size="sm" variant="outline" onClick={onRefreshCourses} disabled={coursesLoading}>重试</Button>
           </div>
         )}
-        {coursesLoading && courses.length > 0 && (
-          <p role="status" className="text-xs text-muted-foreground">正在读取考试列表…</p>
-        )}
         <div className="min-w-0">
           {coursesLoading && courses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
-              <RefreshCw className="h-7 w-7 animate-spin text-primary/70 mb-3" />
-              <p className="text-sm">正在加载考试列表…</p>
-            </div>
+            <ResourceListLoading label="正在加载考试列表" rows={4} />
           ) : filteredCourses.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
               <AlertCircle className="h-8 w-8 text-muted-foreground/60 mb-2" />
@@ -141,17 +141,6 @@ export function ExamsListSection({
             </div>
           ) : (
             <div className="space-y-3">
-              {!hasLoadedDetails && (
-                <div className="flex items-start gap-2.5 border-b border-border pb-4 text-sm text-foreground">
-                  <FolderSync className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                  <div className="flex-1">
-                    <p className="font-semibold text-primary">
-                      尚未读取考试明细
-                    </p>
-                  </div>
-                </div>
-              )}
-
               {hasLoadedDetails && !coursesLoading && !listError && totalExamsCount === 0 && (
                 <div className="flex items-start gap-2.5 border-b border-border pb-4 text-sm text-muted-foreground">
                   <AlertCircle className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
@@ -214,26 +203,12 @@ export function ExamsListSection({
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
-                        {isLoading ? (
-                          <Badge
-                            variant="outline"
-                            className="text-xs text-muted-foreground gap-1"
-                          >
-                            <RefreshCw className="h-3 w-3 animate-spin" />
-                            <span>加载中</span>
-                          </Badge>
-                        ) : null}
-                      </div>
                     </div>
 
                     {
                       <div className="min-w-0">
                         {isLoading ? (
-                          <div className="flex items-center justify-center py-6 text-xs text-muted-foreground gap-2">
-                            <RefreshCw className="h-4 w-4 animate-spin text-primary" />
-                            <span>正在读取考试列表...</span>
-                          </div>
+                          <ResourceListLoading label="正在读取考试列表" rows={2} compact />
                         ) : !details ? (
                           <div className="py-4 text-center text-xs text-muted-foreground">
                             <span>考试明细暂未加载</span>
@@ -258,7 +233,7 @@ export function ExamsListSection({
                             </span>
                           </div>
                         ) : (
-                          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                          <div className="divide-y divide-border">
                             {exams.map((exam) => {
                               const title = getExamItemTitle(exam);
                               const isSelected = courseSelected.has(exam.id);
@@ -266,7 +241,6 @@ export function ExamsListSection({
                               const urgencyLabel = showDeadlineBadges
                                 ? getDeadlineUrgencyLabel(exam.endAt)
                                 : null;
-
                               return (
                                 <button
                                   type="button"
@@ -276,17 +250,12 @@ export function ExamsListSection({
                                     onToggleSelectExam(course.key, exam.id)
                                   }
                                   disabled={!isRunnable}
-                                  aria-pressed={isSelected}
-                                  className={`flex min-w-0 items-start gap-2.5 rounded-[var(--radius-lg)] border p-3 text-left text-xs transition-colors duration-[var(--motion-fast)] ease-[var(--ease-standard)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                                    isSelected
-                                      ? 'border-primary bg-muted'
-                                      : 'border-border bg-background hover:bg-muted/50'
-                                  } ${isRunnable ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}`}
+                                  className={`flex w-full items-start gap-2.5 py-2 text-left text-xs transition-colors duration-[var(--motion-fast)] ease-[var(--ease-standard)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${isRunnable ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}`}
                                 >
                                   <div className="mt-0.5 shrink-0">
                                     {isRunnable ? (
                                       isSelected ? (
-                                        <CheckSquare className="h-4 w-4 text-primary fill-primary/10" />
+                                        <CheckSquare className="h-4 w-4 text-primary" />
                                       ) : (
                                         <Square className="h-4 w-4 text-muted-foreground" />
                                       )
@@ -298,37 +267,38 @@ export function ExamsListSection({
                                   <div className="min-w-0 flex-1 space-y-1">
                                     <div className="flex flex-wrap items-start justify-between gap-2">
                                       <span
-                                        className="min-w-0 flex-1 basis-28 break-words font-medium text-foreground"
+                                        className="min-w-0 flex-1 break-words text-foreground"
                                         title={title}
                                       >
                                         {title}
                                       </span>
-                                      <Badge
-                                        variant={
-                                          urgencyLabel
-                                            ? 'destructive'
-                                            : isRunnable
-                                              ? 'warning'
-                                              : 'secondary'
-                                        }
-                                        className="shrink-0 text-[10px] font-normal"
-                                      >
-                                        {urgencyLabel ??
-                                          (isRunnable ? '未完成' : '不可执行')}
-                                      </Badge>
+                                      <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+                                        <Badge
+                                          variant={
+                                            urgencyLabel
+                                              ? 'destructive'
+                                              : isRunnable
+                                                ? 'warning'
+                                                : 'secondary'
+                                          }
+                                          className="shrink-0 text-[10px] font-normal"
+                                        >
+                                          {urgencyLabel ??
+                                            (isRunnable ? '未完成' : exam.openAt && exam.openAt > Date.now() ? '未开放' : '不可执行')}
+                                        </Badge>
+                                        <RedoCountBlock value={exam.remainingRedoTimes} />
+                                      </div>
                                     </div>
 
-                                    <div className="flex min-h-4 flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] leading-4 text-muted-foreground">
-                                      {exam.endAt !== undefined && (
-                                        <span>
-                                          截止时间：
-                                          {formatLocalDateTime(exam.endAt, {
-                                            includeYear: true,
-                                            includeSeconds: false,
-                                          })}
-                                        </span>
-                                      )}
-                                    </div>
+                                    {exam.endAt !== undefined && (
+                                      <div className="text-[11px] leading-4 text-muted-foreground">
+                                        截止时间：
+                                        {formatLocalDateTime(exam.endAt, {
+                                          includeYear: true,
+                                          includeSeconds: false,
+                                        })}
+                                      </div>
+                                    )}
                                   </div>
                                 </button>
                               );

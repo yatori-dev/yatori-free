@@ -4,11 +4,11 @@ import { MotionHighlight } from '@/components/ui/motion-highlight';
 import type {
   CourseDetails,
   CourseSummary,
-  Task,
 } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 import type { CourseTaskPointProgressMap } from '@/lib/taskProgress';
 import { getDeadlineUrgencyLabel } from '@/lib/format';
+import { isCourseEnded } from '@/lib/coursePresentation';
 import { TaskStatusContent } from './TaskStatusContent';
 import { CourseListSection } from './CourseListSection';
 import { CourseProgressSummary } from './CourseProgressSummary';
@@ -45,7 +45,6 @@ interface DashboardMainContentProps {
   onRefreshWorks: () => void;
   onRefreshExams: () => void;
   stoppingTaskId: string | null;
-  tasks: Task[];
   taskFilter: 'active' | 'completed';
   tasksLoading: boolean;
   taskSnapshots: Record<string, TaskProgressSnapshot>;
@@ -109,7 +108,6 @@ export function DashboardMainContent({
   onRefreshWorks,
   onRefreshExams,
   stoppingTaskId,
-  tasks,
   taskFilter,
   tasksLoading,
   taskSnapshots,
@@ -146,7 +144,10 @@ export function DashboardMainContent({
     let works = 0;
     let exams = 0;
 
-    Object.values(courseDetailsMap).forEach((details) => {
+    courses.forEach((course) => {
+      if (isCourseEnded(course)) return;
+      const details = courseDetailsMap[course.key];
+      if (!details) return;
       if (showDeadlineBadges) {
         works += (details.works ?? []).filter(
           (work) => work.runnable && getDeadlineUrgencyLabel(work.endAt),
@@ -158,7 +159,7 @@ export function DashboardMainContent({
     });
 
     return { works, exams };
-  }, [courseDetailsMap, showDeadlineBadges]);
+  }, [courses, courseDetailsMap, showDeadlineBadges]);
 
   return (
     <main
@@ -240,7 +241,7 @@ export function DashboardMainContent({
               />
             )}
 
-            <CourseListSection
+            {activeTab === 'courses' && <CourseListSection
               accountId={accountId}
               courses={courses}
               filteredCourses={filteredCourses}
@@ -264,9 +265,9 @@ export function DashboardMainContent({
               onStopTask={onStopTask}
               onToggleExpandCourse={onToggleExpandCourse}
               onToggleFullCourseOutline={onToggleFullCourseOutline}
-            />
+            />}
 
-            <WorksListSection
+            {activeTab === 'works' && <WorksListSection
               hideUnavailable
               courses={courses}
               coursesLoading={coursesLoading || listLoading.works}
@@ -279,9 +280,9 @@ export function DashboardMainContent({
               onToggleSelectWork={onToggleSelectWork}
               onToggleSelectCourseWorks={onToggleSelectCourseWorks}
               onRefreshCourses={onRefreshWorks}
-            />
+            />}
 
-            <ExamsListSection
+            {activeTab === 'exams' && <ExamsListSection
               hideUnavailable
               courses={courses}
               coursesLoading={coursesLoading || listLoading.exams}
@@ -294,15 +295,14 @@ export function DashboardMainContent({
               onToggleSelectExam={onToggleSelectExam}
               onToggleSelectCourseExams={onToggleSelectCourseExams}
               onRefreshCourses={onRefreshExams}
-            />
+            />}
 
-            <TabsContent value="tasks" className="m-0 min-h-full outline-none">
+            {activeTab === 'tasks' && <TabsContent forceMount value="tasks" className="m-0 min-h-full outline-none">
               <section className="min-h-full min-w-0" aria-label="任务">
                 <div className="flex min-h-[28rem] min-w-0 flex-col">
                   <TaskStatusContent
                     visible={activeTab === 'tasks'}
                     onUnauthorized={onUnauthorized}
-                    tasks={tasks}
                     taskFilter={taskFilter}
                     tasksLoading={tasksLoading}
                     taskSnapshots={taskSnapshots}
@@ -316,7 +316,7 @@ export function DashboardMainContent({
                   />
                 </div>
               </section>
-            </TabsContent>
+            </TabsContent>}
           </div>
           </div>
         </div>

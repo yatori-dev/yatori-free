@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useEffectEvent, useState } from 'react';
+import { lazy, Suspense, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { Activity, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InlineError } from '@/components/common/InlineError';
@@ -16,7 +16,6 @@ const PAGE_SIZE = 10;
 const ignoreUnauthorized = () => {};
 
 interface TaskStatusContentProps {
-  tasks: Task[];
   taskFilter: 'active' | 'completed';
   tasksLoading: boolean;
   taskSnapshots: Record<string, TaskProgressSnapshot>;
@@ -30,7 +29,7 @@ interface TaskStatusContentProps {
 }
 
 export function TaskStatusContent({
-  tasks, taskFilter, tasksLoading, taskSnapshots, courseNameByIdentifier,
+  taskFilter, tasksLoading, taskSnapshots, courseNameByIdentifier,
   courseTaskPointProgressByIdentifier, onTaskFilterChange, onRefresh, onStopTask,
   onUnauthorized = ignoreUnauthorized, visible = true,
 }: TaskStatusContentProps) {
@@ -49,16 +48,31 @@ export function TaskStatusContent({
   const [statsError, setStatsError] = useState('');
   const [refreshVersion, setRefreshVersion] = useState(0);
   const [loadedQueryKey, setLoadedQueryKey] = useState('');
+  const [loadedPageRequestKey, setLoadedPageRequestKey] = useState('');
+  const [loadedStatsRequestKey, setLoadedStatsRequestKey] = useState('');
+  const [snapshotRevision, setSnapshotRevision] = useState(0);
+  const previousSnapshotChangeKeyRef = useRef('');
   const queryKey = JSON.stringify([taskFilter, status, kind, query, sort, page]);
   const hasCurrentPage = loadedQueryKey === queryKey;
   const pageSnapshots = useTaskProgressPolling({ tasks: pageTasks, onUnauthorized, enabled: visible && hasCurrentPage && !listError });
   const snapshots = { ...taskSnapshots, ...pageSnapshots };
-  const taskChangeKey = tasks.map((task) => `${task.id}:${task.status}`).sort().join('|');
   const snapshotChangeKey = pageTasks.filter((task) => isActiveTaskStatus(task.status) && isTerminalTaskStatus(pageSnapshots[task.id]?.status ?? task.status)).map((task) => `${task.id}:${pageSnapshots[task.id].status}`).sort().join('|');
+  const pageRequestKey = JSON.stringify([queryKey, refreshVersion, snapshotRevision]);
+  const statsRequestKey = JSON.stringify([refreshVersion, snapshotRevision]);
   const activeCount = stats ? ACTIVE_TASK_STATUSES.reduce((count, value) => count + (stats.statusCounts[value] ?? 0), 0) : 0;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const loading = listLoading || tasksLoading;
   const hasFilters = Boolean(query) || status !== 'all' || kind !== 'all';
+
+  useEffect(() => {
+    if (
+      snapshotChangeKey &&
+      snapshotChangeKey !== previousSnapshotChangeKeyRef.current
+    ) {
+      setSnapshotRevision((value) => value + 1);
+    }
+    previousSnapshotChangeKeyRef.current = snapshotChangeKey;
+  }, [snapshotChangeKey]);
 
   useEffect(() => {
     if (query === search.trim()) return;
@@ -69,7 +83,7 @@ export function TaskStatusContent({
     return () => window.clearTimeout(timer);
   }, [search, query]);
 
-  const loadPage = useEffectEvent(async (controller: AbortController) => {
+  const loadPage = useEffectEvent(async (controller: AbortController, requestKey: string) => {
     setListLoading(true);
     setListError('');
     try {
@@ -84,6 +98,7 @@ export function TaskStatusContent({
       setPageTasks(response.data.tasks);
       setTotal(response.data.total);
       setLoadedQueryKey(queryKey);
+      setLoadedPageRequestKey(requestKey);
       const lastPage = Math.max(1, Math.ceil(response.data.total / PAGE_SIZE));
       if (page > lastPage) setPage(lastPage);
     } catch (error) {
@@ -95,12 +110,15 @@ export function TaskStatusContent({
     }
   });
 
-  const loadStats = useEffectEvent(async (controller: AbortController) => {
+  const loadStats = useEffectEvent(async (controller: AbortController, requestKey: string) => {
     setStatsLoading(true);
     setStatsError('');
     try {
       const response = await getTaskStats({ signal: controller.signal });
-      if (!controller.signal.aborted) setStats(response.data);
+      if (!controller.signal.aborted) {
+        setStats(response.data);
+        setLoadedStatsRequestKey(requestKey);
+      }
     } catch (error) {
       if (controller.signal.aborted) return;
       if (isAuthExitError(error)) onUnauthorized();
@@ -111,18 +129,18 @@ export function TaskStatusContent({
   });
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible || loadedPageRequestKey === pageRequestKey) return;
     const controller = new AbortController();
-    const timer = window.setTimeout(() => void loadPage(controller), 0);
+    const timer = window.setTimeout(() => void loadPage(controller, pageRequestKey), 0);
     return () => { window.clearTimeout(timer); controller.abort(); };
-  }, [taskFilter, status, kind, query, sort, page, refreshVersion, taskChangeKey, snapshotChangeKey, visible]);
+  }, [pageRequestKey, loadedPageRequestKey]);
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible || loadedStatsRequestKey === statsRequestKey) return;
     const controller = new AbortController();
-    const timer = window.setTimeout(() => void loadStats(controller), 0);
+    const timer = window.setTimeout(() => void loadStats(controller, statsRequestKey), 0);
     return () => { window.clearTimeout(timer); controller.abort(); };
-  }, [refreshVersion, taskChangeKey, snapshotChangeKey, visible]);
+  }, [statsRequestKey, loadedStatsRequestKey]);
 
   const refresh = () => {
     setRefreshVersion((value) => value + 1);
