@@ -1,7 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { QRCodeSVG } from "qrcode.react";
-import { BrandMark } from "./BrandMark";
-import { RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 import {
   createQRSession,
   exchangeQRSession,
@@ -14,25 +11,10 @@ import {
   readQRLoginSession,
   writeQRLoginSession,
 } from "@/lib/qrLoginSession";
-import { Button } from "./ui/button";
+import { QRLoginPane } from "./login/QRLoginPane";
 
 interface QRCodeLoginProps {
   onLoginSuccess: (data: LoginData) => void;
-}
-
-function getStatusMessage(session: QRSessionData) {
-  switch (session.status) {
-    case "scanned":
-      return session.scannedName
-        ? `已识别 ${session.scannedName}，请在学习通中确认`
-        : "已扫码，请在学习通中确认登录";
-    case "confirmed":
-      return "正在进入 Yatori...";
-    case "failed":
-      return "扫码会话不可用";
-    default:
-      return "";
-  }
 }
 
 function isMissingQRSession(error: unknown) {
@@ -52,9 +34,11 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [isExchanging, setIsExchanging] = useState(false);
   const [error, setError] = useState("");
+  const [exchangeAttempt, setExchangeAttempt] = useState(0);
   const claimedSessionIdRef = useRef<string | null>(null);
   const createAbortRef = useRef<AbortController | null>(null);
   const exchangeAbortRef = useRef<AbortController | null>(null);
+  const completeLogin = useEffectEvent(onLoginSuccess);
 
   const createSession = useCallback(async () => {
     createAbortRef.current?.abort();
@@ -197,10 +181,11 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
     exchangeAbortRef.current = controller;
     let cancelled = false;
     clearQRLoginSession();
+    setError("");
     setIsExchanging(true);
     exchangeQRSession(session.id, { signal: controller.signal })
       .then((response) => {
-        if (!cancelled) onLoginSuccess(response.data);
+        if (!cancelled) completeLogin(response.data);
       })
       .catch((requestError) => {
         if (
@@ -221,7 +206,7 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
       cancelled = true;
       controller.abort();
     };
-  }, [onLoginSuccess, session]);
+  }, [exchangeAttempt, session]);
 
   useEffect(
     () => () => {
@@ -235,112 +220,22 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
     return null;
   }
 
-  const canRefresh = !isCreating && !isExchanging;
-  const statusMessage = error || (session ? getStatusMessage(session) : "");
-  const isExpired = session?.status === "expired";
-  const isScanned = session?.status === "scanned";
-  const isConfirmed = session?.status === "confirmed";
-  const isError = Boolean(error) || session?.status === "failed";
+  const retryExchange = () => {
+    if (!session || session.status !== "confirmed" || isCreating || isExchanging) {
+      return;
+    }
+    claimedSessionIdRef.current = null;
+    setExchangeAttempt((attempt) => attempt + 1);
+  };
 
   return (
-    <section className="login-qr-pane hidden min-h-[560px] flex-col items-center justify-center border-r border-border bg-card px-8 py-12 text-center text-foreground md:flex">
-      <BrandMark className="mb-5 text-3xl text-foreground" />
-      <h2 className="text-xl font-semibold text-foreground">
-        扫码登录
-      </h2>
-      <p className="mt-2 text-sm text-muted-foreground">使用学习通 App 扫码</p>
-
-      {isScanned || isConfirmed ? (
-        <div className="motion-content-enter mt-7 flex h-[208px] w-[208px] flex-col items-center justify-center gap-3 rounded-[var(--radius-lg)] border border-border bg-muted/40 p-4 shadow-xs">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg shadow-sm">
-            {session?.scannedName ? session.scannedName.substring(0, 1) : "通"}
-          </div>
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="max-w-[170px] truncate text-sm font-semibold text-foreground">
-              {session?.scannedName || "学习通账号"}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {isConfirmed ? "已确认，跳转中..." : "已扫码，请在手机端确认"}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 rounded-[var(--radius-md)] border border-border bg-card px-3 py-1 text-xs font-medium text-primary shadow-xs">
-            <span className="h-2 w-2 rounded-full bg-primary" />
-            <span>{isConfirmed ? "验证通过" : "等待确认"}</span>
-          </div>
-        </div>
-      ) : (
-        <div className="login-qr-code relative mt-7 flex h-[208px] w-[208px] items-center justify-center overflow-hidden rounded-[var(--radius-lg)] border border-border bg-white p-3 shadow-xs transition-[border-color,box-shadow] duration-[var(--motion-fast)] ease-[var(--ease-standard)] hover:shadow-raised">
-          {session?.qrContent ? (
-            <QRCodeSVG
-              value={session.qrContent}
-              size={176}
-              level="M"
-              includeMargin={false}
-              title="学习通登录二维码"
-            />
-          ) : isCreating ? (
-            <svg
-              className="loading-spinner"
-              viewBox="0 0 50 50"
-              role="status"
-              aria-label="正在生成二维码"
-            >
-              <circle
-                className="path"
-                cx="25"
-                cy="25"
-                r="20"
-                fill="none"
-                strokeWidth="4"
-              />
-            </svg>
-          ) : error ? (
-            <p className="px-4 text-sm leading-6 text-danger">
-              二维码暂时无法生成
-            </p>
-          ) : null}
-
-          {isError && (
-            <div
-              className="absolute inset-0 flex items-center justify-center bg-card/95 px-5 text-center"
-              aria-live="polite"
-              role="alert"
-            >
-              <p className="text-sm leading-6 text-danger">{statusMessage}</p>
-            </div>
-          )}
-
-          {isExpired && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card px-4 text-foreground">
-              <p className="text-base font-medium">二维码已过期</p>
-              <Button
-                type="button"
-                size="sm"
-                className="h-9 gap-2 px-3"
-                disabled={!canRefresh}
-                onClick={() => void createSession()}
-              >
-                <RefreshCw className="h-4 w-4" />
-                刷新二维码
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {!isExpired && !isScanned && !isConfirmed && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="mt-5 h-9 gap-2 px-3 text-muted-foreground hover:bg-muted hover:text-foreground"
-          disabled={!canRefresh}
-          onClick={() => void createSession()}
-        >
-          <RefreshCw className="h-4 w-4" />
-          刷新二维码
-        </Button>
-      )}
-    </section>
+    <QRLoginPane
+      session={session}
+      isCreating={isCreating}
+      isExchanging={isExchanging}
+      error={error}
+      onRefresh={() => void createSession()}
+      onRetry={retryExchange}
+    />
   );
 }

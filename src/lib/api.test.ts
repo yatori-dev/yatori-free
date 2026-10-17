@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   apiRequest,
+  exchangeQRSession,
   getCourseChapterDetails,
   getCourseOutline,
   getCourses,
@@ -84,6 +85,42 @@ describe('api boundary', () => {
       message: '请求超时 (10ms)',
     });
     expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it.each([
+    {
+      status: 409,
+      error: 'PASSWORD_LOGIN_REQUIRED',
+      message: '请先使用最新的学习通账号密码登录一次，之后才能使用扫码或短信验证码登录',
+    },
+    {
+      status: 503,
+      error: 'PASSWORD_VALIDATION_UNAVAILABLE',
+      message: '暂时无法校验学习通账号密码，请稍后重试',
+    },
+  ])('preserves QR password validation errors and allows the same session to retry: $error', async ({ status, error, message }) => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(
+        JSON.stringify({ code: status, error, message }),
+        { status },
+      ))
+      .mockResolvedValueOnce(new Response(
+        JSON.stringify({ code: 200, data: { expiresAt: '2099-01-01T00:00:00Z' } }),
+        { status: 200 },
+      ));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const rejected = await exchangeQRSession('same-qr-session').catch((cause: unknown) => cause);
+    expect(rejected).toMatchObject({ status, payload: { error, message } });
+    expect(getUserFacingErrorMessage(rejected)).toBe(message);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await expect(exchangeQRSession('same-qr-session')).resolves.toMatchObject({ code: 200 });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      '/api/auth/qr-sessions/same-qr-session/session',
+      '/api/auth/qr-sessions/same-qr-session/session',
+    ]);
   });
 
   it('reads course summaries using the documented response shape', async () => {
