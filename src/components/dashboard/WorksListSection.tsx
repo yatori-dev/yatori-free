@@ -199,6 +199,11 @@ export function WorksListSection({
                               </span>
                             )}
                           </div>
+                          {course.endDate && (
+                            <p className="mt-1 break-words text-xs text-muted-foreground">
+                              结课时间：{course.endDate}
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -292,7 +297,10 @@ export function WorksListSection({
                                                   ? '未开放'
                                                   : '不可执行')}
                                         </Badge>
-                                        <RedoCountBlock value={work.remainingRedoTimes} />
+                                        <RedoCountBlock
+                                          status={work.status}
+                                          value={work.remainingRedoTimes}
+                                        />
                                       </div>
                                     </div>
 

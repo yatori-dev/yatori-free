@@ -1,11 +1,12 @@
-import { getRemainingRedoCount } from '@/lib/coursePresentation';
+import { getSubmittedRedoCount } from '@/lib/coursePresentation';
 
 interface RedoCountBlockProps {
+  status: string;
   value?: number | null;
 }
 
-export function RedoCountBlock({ value }: RedoCountBlockProps) {
-  const count = getRemainingRedoCount(value);
+export function RedoCountBlock({ status, value }: RedoCountBlockProps) {
+  const count = getSubmittedRedoCount(status, value);
   if (count === null) return null;
 
   return (
