@@ -5,7 +5,7 @@ export const taskStatusLabels: Record<Task['status'], string> = {
   pending: '待执行',
   queued: '排队中',
   running: '运行中',
-  waiting_daily_limit: '等待次日继续',
+  waiting_daily_limit: '等待调度恢复',
   stopping: '停止中',
   stopped: '已停止',
   success: '已完成',
