@@ -287,9 +287,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
   const rawPercent = effectiveStatus === "success" ? 100 : calculatedPercent;
   const currentPercent = Math.max(0, Math.min(100, Math.round(rawPercent)));
   const showProgress = progress && snapshotStatuses.includes(effectiveStatus);
-  const taskErrorMessage =
-    task.errorMessage ||
-    (effectiveStatus === "failed" ? progress?.message : "");
+  const taskErrorMessage = "";
   const isWorkTask = taskKind === "works";
   const taskUnitLabel = isWorkTask ? "作业" : "任务点";
   const displayTaskErrorMessage = (taskErrorMessage ?? "").replaceAll(
@@ -351,10 +349,20 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         : "任务已停止";
     }
 
+    const categoryFailures = ([
+      ["章节任务点", progress?.failedTaskPoints ?? 0],
+      ["作业", progress?.failedWorks ?? 0],
+      ["考试", progress?.failedExams ?? 0],
+    ] as Array<[string, number]>).filter(([, count]) => count > 0);
+    const failureSummary = categoryFailures.length
+      ? `失败：${categoryFailures.map(([label, count]) => `${label} ${count} 个`).join("、")}`
+      : (failedUnits ?? 0) > 0
+        ? `${taskUnitLabel}失败 ${failedUnits} 个`
+        : "";
     const unitSummary =
       hasUnitCounts && totalUnits
         ? (failedUnits ?? 0) > 0
-          ? `${taskUnitLabel}失败 ${failedUnits} 个`
+          ? `已完成 ${completedUnits ?? 0} 个，${failureSummary}`
           : processedUnits >= totalUnits
             ? `${taskUnitLabel}已完成`
             : `已处理 ${processedUnits} / ${totalUnits} 个${taskUnitLabel}`
