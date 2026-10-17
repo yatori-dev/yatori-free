@@ -62,6 +62,9 @@ export function isSubmittedWorkStatus(status: string) {
     '保存成功',
     '已作答',
     '已答题',
+    '待批阅',
+    '待评分',
+    '已批阅',
     '已完成',
     'submitted',
     'finished',
@@ -75,6 +78,14 @@ export function getRemainingRedoCount(value?: number | null) {
   }
 
   return value;
+}
+
+export function getSubmittedRedoCount(status: string, value?: number | null) {
+  if (!isSubmittedWorkStatus(status)) {
+    return null;
+  }
+
+  return getRemainingRedoCount(value);
 }
 
 export function formatFileSize(size?: number) {

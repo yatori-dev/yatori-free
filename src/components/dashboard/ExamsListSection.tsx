@@ -286,7 +286,10 @@ export function ExamsListSection({
                                           {urgencyLabel ??
                                             (isRunnable ? '未完成' : exam.openAt && exam.openAt > Date.now() ? '未开放' : '不可执行')}
                                         </Badge>
-                                        <RedoCountBlock value={exam.remainingRedoTimes} />
+                                        <RedoCountBlock
+                                          status={exam.status}
+                                          value={exam.remainingRedoTimes}
+                                        />
                                       </div>
                                     </div>
 
