@@ -68,8 +68,8 @@ function getProgressFallback(status: Task["status"], progressPercent = 0) {
     case "waiting_daily_limit":
       return {
         percent: progressPercent,
-        course: "等待次日继续",
-        chapter: "今日任务点学时已达 1200 分钟",
+        course: "等待调度恢复",
+        chapter: "额度或休息限制，恢复后继续",
       };
     case "queued":
       return {
@@ -201,7 +201,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         };
       case "waiting_daily_limit":
         return {
-          label: "等待次日继续",
+          label: "等待调度恢复",
           variant: "outline",
           icon: <Hourglass className="h-3 w-3" />,
           toneClass: "text-warning",
