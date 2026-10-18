@@ -133,14 +133,14 @@ export function TaskStatusContent({
     const controller = new AbortController();
     const timer = window.setTimeout(() => void loadPage(controller, pageRequestKey), 0);
     return () => { window.clearTimeout(timer); controller.abort(); };
-  }, [pageRequestKey, loadedPageRequestKey]);
+  }, [pageRequestKey, loadedPageRequestKey, visible]);
 
   useEffect(() => {
     if (!visible || loadedStatsRequestKey === statsRequestKey) return;
     const controller = new AbortController();
     const timer = window.setTimeout(() => void loadStats(controller, statsRequestKey), 0);
     return () => { window.clearTimeout(timer); controller.abort(); };
-  }, [statsRequestKey, loadedStatsRequestKey]);
+  }, [statsRequestKey, loadedStatsRequestKey, visible]);
 
   const refresh = () => {
     setRefreshVersion((value) => value + 1);
