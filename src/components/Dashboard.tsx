@@ -279,7 +279,14 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
     submittingCourseKeysRef.current.clear();
     const processingKeys = new Set(nextCourses.filter((course) => course.processing).map((course) => course.key));
     setSelectedCourses((previous) => new Set([...previous].filter((key) => !processingKeys.has(key))));
+    return nextCourses;
   }, [fetchCatalog]);
+
+  const refreshExams = useCallback(async () => {
+    const nextCourses = await fetchCourses(true);
+    if (!nextCourses) return;
+    await fetchTaskList('exams', true);
+  }, [fetchCourses, fetchTaskList]);
 
   const fetchTasks = useCallback(async (options: { showLoading?: boolean; notifyOnError?: boolean } = {}) => {
     const showLoading = options.showLoading ?? true;
@@ -867,7 +874,7 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
             listErrors={listErrors}
             onRefreshOutline={(key) => void fetchOutline(key, true)}
             onRefreshWorks={() => void fetchTaskList('works', true)}
-            onRefreshExams={() => void fetchTaskList('exams', true)}
+            onRefreshExams={() => void refreshExams()}
             stoppingTaskId={stoppingTaskId}
             taskFilter={taskFilter}
             tasksLoading={tasksLoading}
