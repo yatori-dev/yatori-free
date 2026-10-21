@@ -60,6 +60,7 @@ export function TaskStatusContent({
   const pageRequestKey = JSON.stringify([queryKey, refreshVersion, snapshotRevision]);
   const statsRequestKey = JSON.stringify([refreshVersion, snapshotRevision]);
   const activeCount = stats ? ACTIVE_TASK_STATUSES.reduce((count, value) => count + (stats.statusCounts[value] ?? 0), 0) : 0;
+  const completedCount = stats ? Math.max(0, stats.total - activeCount - (stats.statusCounts.stopped ?? 0)) : 0;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const loading = listLoading || tasksLoading;
   const hasFilters = Boolean(query) || status !== 'all' || kind !== 'all';
@@ -185,7 +186,7 @@ export function TaskStatusContent({
           <TaskDashboardCharts stats={stats} onSelectGroup={selectGroup} />
         </Suspense>
       ) : <TaskChartsSkeleton />}
-      <TaskListToolbar taskFilter={taskFilter} counts={{ active: activeCount, completed: Math.max(0, (stats?.total ?? 0) - activeCount) }} search={search} status={status} kind={kind} sort={sort}
+      <TaskListToolbar taskFilter={taskFilter} counts={{ active: activeCount, completed: completedCount }} search={search} status={status} kind={kind} sort={sort}
         onTabChange={changeTab}
         onSearchChange={setSearch}
         onStatusChange={(value) => { setStatus(value); setPage(1); }}
