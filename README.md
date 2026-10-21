@@ -50,10 +50,10 @@
 
 ## 服务端
 
-- ![Go 1.27.2](https://img.shields.io/badge/Go&nbsp;1.27.2-net/http-blue.svg?style=flat-square&logo=go&logoColor=white)
+- ![Go 1.27.3](https://img.shields.io/badge/Go&nbsp;1.27.3-net/http-blue.svg?style=flat-square&logo=go&logoColor=white)
 - ![SQLite](https://img.shields.io/badge/SQLite-3-yellow.svg?style=flat-square&logo=sqlite&logoColor=white)
 - ![systemd](https://img.shields.io/badge/systemd-257-red.svg?style=flat-square&logo=systemd&logoColor=white)
-- ![Cloudflare Tunnel](https://img.shields.io/badge/Cloudflare%20Tunnel-2026.10.1-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
+- ![Cloudflare Tunnel](https://img.shields.io/badge/Cloudflare%20Tunnel-2026.10.2-orange.svg?style=flat-square&logo=cloudflare&logoColor=white)
 
 **后端以闭源方式提供网络服务，该仓库仅提供网页服务的前端面板**
 
