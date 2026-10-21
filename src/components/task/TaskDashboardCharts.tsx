@@ -55,6 +55,7 @@ export default function TaskDashboardCharts({ stats, onSelectGroup }: TaskDashbo
         : stats.statusCounts[group.key] ?? 0,
   })), [stats.statusCounts]);
   const pieData = useMemo(() => distribution.filter((group) => group.count > 0), [distribution]);
+  const visibleTaskCount = distribution.reduce((total, group) => total + group.count, 0);
   const totalCreated = history.reduce((sum, day) => sum + day.count, 0);
 
   const handleDaysChange = (value: string) => {
@@ -108,7 +109,7 @@ export default function TaskDashboardCharts({ stats, onSelectGroup }: TaskDashbo
               </PieChart>
             </ResponsiveContainer>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-semibold tabular-nums">{stats.total}</span>
+              <span className="text-2xl font-semibold tabular-nums">{visibleTaskCount}</span>
               <span className="mt-1 text-xs text-muted-foreground">任务总数</span>
             </div>
           </div>

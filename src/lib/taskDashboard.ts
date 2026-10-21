@@ -7,7 +7,7 @@ export const taskStatusLabels: Record<Task['status'], string> = {
   running: '运行中',
   waiting_daily_limit: '等待调度恢复',
   stopping: '停止中',
-  stopped: '已停止',
+  stopped: '已结束',
   success: '已完成',
   failed: '失败',
 };
@@ -16,21 +16,23 @@ export const taskGroups = [
   { key: 'active', label: '进行中', color: 'var(--info)' },
   { key: 'success', label: '已完成', color: 'var(--success)' },
   { key: 'attention', label: '需关注', color: 'var(--danger)' },
-  { key: 'stopped', label: '已停止', color: 'var(--muted-foreground)' },
 ] as const;
 
 export type TaskGroup = (typeof taskGroups)[number]['key'];
 
-export function getTaskGroup(status: Task['status']): TaskGroup {
+export function getTaskGroup(status: Task['status']): TaskGroup | null {
   if (isActiveTaskStatus(status)) return 'active';
   if (status === 'success') return 'success';
-  if (status === 'stopped') return 'stopped';
+  if (status === 'stopped') return null;
   return 'attention';
 }
 
 export function getTaskDistribution(tasks: Task[]) {
-  const counts = { active: 0, success: 0, attention: 0, stopped: 0 };
-  for (const task of tasks) counts[getTaskGroup(task.status)] += 1;
+  const counts: Record<TaskGroup, number> = { active: 0, success: 0, attention: 0 };
+  for (const task of tasks) {
+    const group = getTaskGroup(task.status);
+    if (group) counts[group] += 1;
+  }
   return taskGroups.map((group) => ({
     ...group,
     count: counts[group.key],

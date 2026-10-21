@@ -229,9 +229,9 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         };
       case "stopped":
         return {
-          label: "已停止",
+          label: "已结束",
           variant: "outline",
-          icon: <Square className="h-3 w-3" />,
+          icon: <Clock className="h-3 w-3" />,
           toneClass: "text-muted-foreground",
         };
       default:
@@ -345,8 +345,8 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
     }
     if (effectiveStatus === "stopped") {
       return hasUnitCounts && totalUnits
-        ? `停止前已处理 ${processedUnits} / ${totalUnits} 个${taskUnitLabel}`
-        : "任务已停止";
+        ? `已处理 ${processedUnits} / ${totalUnits} 个${taskUnitLabel}`
+        : "任务已结束";
     }
 
     const categoryFailures = ([
@@ -448,9 +448,6 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
           )}
           {effectiveStatus === "failed" && (
             <XCircle className="h-4 w-4 shrink-0" />
-          )}
-          {effectiveStatus === "stopped" && (
-            <Square className="h-4 w-4 shrink-0" />
           )}
           <span className="min-w-0 wrap-anywhere">{terminalSummary}</span>
         </div>
