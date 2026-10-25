@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   apiRequest,
+  createTask,
   exchangeQRSession,
   getCourseChapterDetails,
   getCourseOutline,
@@ -20,6 +21,39 @@ import {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('api boundary', () => {
+  it('sends only the current task creation contract', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ code: 201, data: { id: 'task-1' } }), { status: 201 }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await createTask({
+      accountId: 'account-1',
+      kind: 'works',
+      targets: [{ classId: 'class-1', itemIds: ['work-1'] }],
+      coursesCustom: {
+        workAutoSubmit: 1,
+        workAutoSubmitBeforeDeadlineMinutes: 5,
+      },
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/tasks',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          accountId: 'account-1',
+          kind: 'works',
+          targets: [{ classId: 'class-1', itemIds: ['work-1'] }],
+          coursesCustom: {
+            workAutoSubmit: 1,
+            workAutoSubmitBeforeDeadlineMinutes: 5,
+          },
+        }),
+      }),
+    );
+  });
+
   it('sends JSON requests with the session cookie', async () => {
     const fetchMock = vi
       .fn()

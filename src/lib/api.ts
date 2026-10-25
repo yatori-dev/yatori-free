@@ -46,6 +46,15 @@ export interface CoursesCustom {
   coursesSettings?: CourseSetting[];
 }
 
+export type CreateTaskCoursesCustom = Pick<
+  CoursesCustom,
+  | 'workAutoSubmit'
+  | 'examAutoSubmit'
+  | 'workAutoSubmitBeforeDeadlineMinutes'
+  | 'forceAggressiveBeforeCourseEndHours'
+  | 'coursesSettings'
+>;
+
 export interface CourseSetting {
   classId?: string;
   name?: string;
@@ -356,21 +365,13 @@ interface CreateTaskBase {
   accountId: string;
   autoResume?: boolean;
   executionMode?: TaskExecutionMode;
-  coursesCustom?: CoursesCustom;
+  coursesCustom?: CreateTaskCoursesCustom;
 }
 
-export type CreateTaskRequest = CreateTaskBase &
-  (
-    | {
-        kind: TaskKind;
-        targets: TaskTarget[];
-      }
-    | {
-        kind?: '';
-        coursesCustom: CoursesCustom;
-        targets?: TaskTarget[];
-      }
-  );
+export type CreateTaskRequest = CreateTaskBase & {
+  kind: TaskKind;
+  targets: TaskTarget[];
+};
 
 export interface EmailNotificationSettings {
   available: boolean;

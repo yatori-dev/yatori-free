@@ -11,7 +11,7 @@ import {
   isAuthExitError,
   stopTask,
 } from '@/lib/api';
-import type { AuthSession, Task, CoursesCustom, TaskTarget } from '@/lib/api';
+import type { AuthSession, Task, CreateTaskCoursesCustom, TaskTarget } from '@/lib/api';
 import { notifyAuthExit } from '@/lib/notifications';
 import { isActiveTaskStatus } from '@/lib/taskStatus';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
@@ -253,15 +253,10 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
     examAutoSubmit,
   } = settingsForm;
 
-  const buildCoursesCustom = useCallback((overrides: Partial<CoursesCustom> = {}): CoursesCustom => {
+  const buildCoursesCustom = useCallback((overrides: Partial<CreateTaskCoursesCustom> = {}): CreateTaskCoursesCustom => {
     return {
-      doChapterTest: true,
-      doWork: false,
       workAutoSubmit: 0,
-      doExam: false,
       examAutoSubmit: 0,
-      includeCourses: [],
-      excludeCourses: [],
       coursesSettings: [],
       ...overrides,
     };
@@ -511,12 +506,10 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
           kind: 'works',
           targets,
           coursesCustom: buildCoursesCustom({
-            doWork: true,
             workAutoSubmit,
             workAutoSubmitBeforeDeadlineMinutes: autoSubmitWorksNearDeadline
               ? WORK_AUTO_SUBMIT_BEFORE_DEADLINE_MINUTES
               : 0,
-            includeCourses: targets.map((t) => t.classId),
           }),
         });
 
@@ -544,9 +537,7 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
           kind: 'exams',
           targets,
           coursesCustom: buildCoursesCustom({
-            doExam: true,
             examAutoSubmit,
-            includeCourses: targets.map((t) => t.classId),
           }),
         });
 
@@ -600,12 +591,10 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
         return;
       }
 
-      const customConfig: CoursesCustom = buildCoursesCustom({
-        includeCourses: includeCoursesList,
+      const customConfig: CreateTaskCoursesCustom = buildCoursesCustom({
         forceAggressiveBeforeCourseEndHours: accelerateBeforeCourseEnd
           ? FORCE_AGGRESSIVE_BEFORE_COURSE_END_HOURS
           : 0,
-        excludeCourses: [],
       });
 
       await createTask({
