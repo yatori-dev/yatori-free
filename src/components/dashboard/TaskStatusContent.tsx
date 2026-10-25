@@ -8,7 +8,6 @@ import { TaskListToolbar, type TaskListKind, type TaskListSort, type TaskListSta
 import { type TaskGroup } from '@/lib/taskDashboard';
 import { getTasks, getTaskStats, getUserFacingErrorMessage, isAuthExitError, type Task, type TaskStats } from '@/lib/api';
 import { useTaskProgressPolling, type TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
-import type { CourseTaskPointProgressMap } from '@/lib/taskProgress';
 import { ACTIVE_TASK_STATUSES, isActiveTaskStatus, isTerminalTaskStatus } from '@/lib/taskStatus';
 
 const TaskDashboardCharts = lazy(() => import('@/components/task/TaskDashboardCharts'));
@@ -20,7 +19,6 @@ interface TaskStatusContentProps {
   tasksLoading: boolean;
   taskSnapshots: Record<string, TaskProgressSnapshot>;
   courseNameByIdentifier: Record<string, string>;
-  courseTaskPointProgressByIdentifier: CourseTaskPointProgressMap;
   onTaskFilterChange: (filter: 'active' | 'completed') => void;
   onRefresh: () => void;
   onStopTask: (taskId: string) => void;
@@ -30,7 +28,7 @@ interface TaskStatusContentProps {
 
 export function TaskStatusContent({
   taskFilter, tasksLoading, taskSnapshots, courseNameByIdentifier,
-  courseTaskPointProgressByIdentifier, onTaskFilterChange, onRefresh, onStopTask,
+  onTaskFilterChange, onRefresh, onStopTask,
   onUnauthorized = ignoreUnauthorized, visible = true,
 }: TaskStatusContentProps) {
   const [search, setSearch] = useState('');
@@ -60,7 +58,7 @@ export function TaskStatusContent({
   const pageRequestKey = JSON.stringify([queryKey, refreshVersion, snapshotRevision]);
   const statsRequestKey = JSON.stringify([refreshVersion, snapshotRevision]);
   const activeCount = stats ? ACTIVE_TASK_STATUSES.reduce((count, value) => count + (stats.statusCounts[value] ?? 0), 0) : 0;
-  const completedCount = stats ? Math.max(0, stats.total - activeCount - (stats.statusCounts.stopped ?? 0)) : 0;
+  const completedCount = stats ? Math.max(0, stats.total - activeCount) : 0;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const loading = listLoading || tasksLoading;
   const hasFilters = Boolean(query) || status !== 'all' || kind !== 'all';
@@ -198,7 +196,7 @@ export function TaskStatusContent({
         ) : !hasCurrentPage ? (
           <div className="flex min-h-48 items-center justify-center gap-2 text-sm text-muted-foreground" role="status"><RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />正在加载任务</div>
         ) : pageTasks.length > 0 ? pageTasks.map((task) => (
-          <TaskInlineItem key={task.id} task={task} snapshot={snapshots[task.id]} courseNameByIdentifier={courseNameByIdentifier} courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier} onStopTask={onStopTask} onUnauthorized={onUnauthorized} />
+          <TaskInlineItem key={task.id} task={task} snapshot={snapshots[task.id]} courseNameByIdentifier={courseNameByIdentifier} onStopTask={onStopTask} onUnauthorized={onUnauthorized} />
         )) : (
           <div className="flex min-h-48 flex-col items-center justify-center gap-3 px-4 text-center">
             <Activity className="h-6 w-6 text-muted-foreground" aria-hidden="true" />

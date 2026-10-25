@@ -16,7 +16,6 @@ import { notifyAuthExit } from '@/lib/notifications';
 import { isActiveTaskStatus } from '@/lib/taskStatus';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 import { useCourseData } from '@/hooks/useCourseData';
-import { createCourseTaskPointProgressMap } from '@/lib/taskProgress';
 import { hasDeadlinePassed } from '@/lib/format';
 import { getCourseNameMap, getTaskCounts } from '@/lib/dashboardDerived';
 import { DashboardNavigation, type MobileDashboardTabId } from './dashboard/DashboardNavigation';
@@ -209,11 +208,6 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const taskCounts = useMemo(() => getTaskCounts(tasks), [tasks]);
 
   const courseNameByIdentifier = useMemo(() => getCourseNameMap(courses), [courses]);
-
-  const courseTaskPointProgressByIdentifier = useMemo(
-    () => createCourseTaskPointProgressMap(courses),
-    [courses],
-  );
 
   const [selectedCourses, setSelectedCourses] = useState<Set<string>>(new Set());
   const [selectedWorks, setSelectedWorks] = useState<Record<string, Set<string>>>({});
@@ -844,7 +838,6 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
             tasksLoading={tasksLoading}
             taskSnapshots={taskSnapshots}
             courseNameByIdentifier={courseNameByIdentifier}
-            courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
             onAccountMenuChange={setAccountMenuOpen}
             onTaskFilterChange={setTaskFilter}
             onRefreshTasks={() => void fetchTasks()}
@@ -880,7 +873,6 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
             tasksLoading={tasksLoading}
             taskSnapshots={taskSnapshots}
             courseNameByIdentifier={courseNameByIdentifier}
-            courseTaskPointProgressByIdentifier={courseTaskPointProgressByIdentifier}
             showDeadlineBadges={showDeadlineBadges}
             autoSubmitWorksNearDeadline={autoSubmitWorksNearDeadline}
             accelerateBeforeCourseEnd={accelerateBeforeCourseEnd}

@@ -24,9 +24,9 @@ import {
 } from "@/lib/api";
 import type { TaskProgressSnapshot } from "@/hooks/useTaskProgressPolling";
 import {
-  getTaskCourseTaskPointProgress,
-  type CourseTaskPointProgressMap,
-} from "@/lib/taskProgress";
+  getTaskProgressBreakdown,
+  getTaskProgressPercent,
+} from "@/lib/taskProgressPresentation";
 import { InlineError } from "./common/InlineError";
 import { TaskCourseBadges } from "./task/TaskCourseBadges";
 import { TaskCourseListDialog } from "./task/TaskCourseListDialog";
@@ -39,7 +39,6 @@ import { StopTaskConfirmDialog } from "./dashboard/StopTaskConfirmDialog";
 interface TaskInlineItemProps {
   task: Task;
   courseNameByIdentifier?: Record<string, string>;
-  courseTaskPointProgressByIdentifier?: CourseTaskPointProgressMap;
   snapshot?: TaskProgressSnapshot;
   onStopTask: (taskId: string) => void;
   onUnauthorized?: () => void;
@@ -113,7 +112,6 @@ const VISIBLE_COURSE_COUNT = 3;
 export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
   task,
   courseNameByIdentifier = {},
-  courseTaskPointProgressByIdentifier = {},
   snapshot,
   onStopTask,
   onUnauthorized,
@@ -264,28 +262,15 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
   const hasUnitCounts =
     typeof progress?.totalUnits === "number" &&
     typeof progress?.completedUnits === "number";
-  const totalUnits = progress?.totalUnits;
-  const completedUnits = progress?.completedUnits;
-  const failedUnits = progress?.failedUnits;
-  const derivedPercent =
-    typeof totalUnits === "number" &&
-    typeof completedUnits === "number" &&
-    typeof failedUnits === "number" &&
-    totalUnits > 0
-      ? ((completedUnits + failedUnits) / totalUnits) * 100
-      : null;
+  const progressBreakdown = getTaskProgressBreakdown(progress);
+  const totalUnits = progressBreakdown.total;
+  const completedUnits = progressBreakdown.completed;
+  const derivedPercent = getTaskProgressPercent(progress);
   const progressFallback = getProgressFallback(effectiveStatus);
-  const unitPercent = derivedPercent ?? progressFallback.percent;
-  const progressParts = [
-    ...(derivedPercent === null ? [] : [unitPercent]),
-  ];
-  const calculatedPercent =
-    progressParts.length > 0
-      ? progressParts.reduce((sum, percent) => sum + percent, 0) /
-        progressParts.length
-      : progressFallback.percent;
-  const rawPercent = effectiveStatus === "success" ? 100 : calculatedPercent;
-  const currentPercent = Math.max(0, Math.min(100, Math.round(rawPercent)));
+  const currentPercent =
+    effectiveStatus === "success"
+      ? 100
+      : (derivedPercent ?? progressFallback.percent);
   const showProgress = progress && snapshotStatuses.includes(effectiveStatus);
   const taskErrorMessage = "";
   const isWorkTask = taskKind === "works";
@@ -306,21 +291,8 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
   const workAutoSubmitLabel = getAutoSubmitLabel(workAutoSubmitValue);
   const examAutoSubmitLabel = getAutoSubmitLabel(examAutoSubmitValue);
   const includeCourses = getTaskCourseIdentifiers({ ...task, configSnapshot });
-  const taskCourseTaskPointProgress = getTaskCourseTaskPointProgress(
-    includeCourses,
-    courseTaskPointProgressByIdentifier,
-  );
-  const aggregatedPercent =
-    taskCourseTaskPointProgress && taskCourseTaskPointProgress.total > 0
-      ? (taskCourseTaskPointProgress.completed /
-          taskCourseTaskPointProgress.total) *
-        100
-      : null;
-  const percent =
-    aggregatedPercent === null
-      ? currentPercent
-      : Math.max(0, Math.min(100, Math.round(aggregatedPercent)));
-  const hasProgress = effectiveStatus === "success" || derivedPercent !== null || progressParts.length > 0 || aggregatedPercent !== null;
+  const percent = currentPercent;
+  const hasProgress = effectiveStatus === "success" || derivedPercent !== null;
   const displayCourses = task.courseNames?.length ? task.courseNames : includeCourses?.map((courseIdentifier) => {
     const normalizedIdentifier = courseIdentifier.trim();
     const mappedName = courseNameByIdentifier[normalizedIdentifier];
@@ -336,11 +308,11 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
     "failed",
     "stopped",
   ].includes(effectiveStatus);
-  const processedUnits = (completedUnits ?? 0) + (failedUnits ?? 0);
+  const processedUnits = progressBreakdown.processed;
   const terminalSummary = (() => {
     if (effectiveStatus === "success") {
       return hasUnitCounts && totalUnits
-        ? `已完成 ${processedUnits} / ${totalUnits} 个${taskUnitLabel}`
+        ? `已完成 ${completedUnits} / ${totalUnits} 个${taskUnitLabel}`
         : "任务已完成";
     }
     if (effectiveStatus === "stopped") {
@@ -349,41 +321,31 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         : "任务已结束";
     }
 
-    const categoryFailures = ([
-      ["章节任务点", progress?.failedTaskPoints ?? 0],
-      ["作业", progress?.failedWorks ?? 0],
-      ["考试", progress?.failedExams ?? 0],
-    ] as Array<[string, number]>).filter(([, count]) => count > 0);
-    const failureSummary = categoryFailures.length
-      ? `失败：${categoryFailures.map(([label, count]) => `${label} ${count} 个`).join("、")}`
-      : (failedUnits ?? 0) > 0
-        ? `${taskUnitLabel}失败 ${failedUnits} 个`
-        : "";
-    const unitSummary =
-      hasUnitCounts && totalUnits
-        ? (failedUnits ?? 0) > 0
-          ? `已完成 ${completedUnits ?? 0} 个，${failureSummary}`
-          : processedUnits >= totalUnits
-            ? `${taskUnitLabel}已完成`
-            : `已处理 ${processedUnits} / ${totalUnits} 个${taskUnitLabel}`
-        : "";
+    const failureSummary = progressBreakdown.failedCategories.length
+      ? `失败：${progressBreakdown.failedCategories
+          .map(({ label, count }) => `${label} ${count} 个`)
+          .join("、")}`
+      : "";
+    const unresolvedSummary = progressBreakdown.unresolvedCategories.length
+      ? `待确认：${progressBreakdown.unresolvedCategories
+          .map(({ label, count }) => `${label} ${count} 个`)
+          .join("、")}`
+      : "";
+    const unfinishedSummary = progressBreakdown.unfinished > 0
+      ? `学习通未完成章节任务点 ${progressBreakdown.unfinished} 个`
+      : "";
+    const unitSummary = hasUnitCounts && totalUnits
+      ? `已处理 ${processedUnits} / ${totalUnits} 个${taskUnitLabel}`
+      : "";
     const compactError = displayTaskErrorMessage
       ? getCompactErrorMessage(displayTaskErrorMessage)
       : "";
     const errorSummary =
-      (failedUnits ?? 0) > 0
-        ? compactError
-            .split("，")
-            .filter((part) => {
-              const normalizedPart = part.trim();
-              return !new RegExp(
-                `^${taskUnitLabel}(?:处理)?失败\\s*${failedUnits}\\s*个$`,
-              ).test(normalizedPart);
-            })
-            .join("，")
-        : compactError;
+      compactError;
     return (
-      [unitSummary, errorSummary].filter(Boolean).join("，") ||
+      [unitSummary, failureSummary, unresolvedSummary, unfinishedSummary, errorSummary]
+        .filter(Boolean)
+        .join("，") ||
       (effectiveStatus === "failed" ? "任务未成功完成" : "部分任务未完成")
     );
   })();
@@ -411,7 +373,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
         </span>
         <div className="min-w-0 space-y-1.5 @3xl:col-start-3 @3xl:row-start-1">
           <div className="flex items-center justify-between gap-2 text-xs">
-            <span className="text-muted-foreground">{aggregatedPercent !== null ? "课程进度" : "执行进度"}</span>
+            <span className="text-muted-foreground">执行进度</span>
             <span className="font-medium tabular-nums">{hasProgress ? `${percent}%` : "暂无进度"}</span>
           </div>
           {hasProgress && <Progress value={percent} className="h-1.5 bg-muted" />}

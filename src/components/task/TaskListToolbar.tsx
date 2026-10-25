@@ -30,7 +30,7 @@ export function TaskListToolbar({
   onTabChange, onSearchChange, onStatusChange, onKindChange, onSortChange,
 }: TaskListToolbarProps) {
   const statuses = (Object.keys(taskStatusLabels) as Task['status'][])
-    .filter((value) => value !== 'stopped' && isActiveTaskStatus(value) === (taskFilter === 'active'));
+    .filter((value) => isActiveTaskStatus(value) === (taskFilter === 'active'));
 
   return (
     <div className="space-y-4 py-5">
