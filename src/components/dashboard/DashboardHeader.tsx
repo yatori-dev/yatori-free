@@ -21,7 +21,6 @@ import {
 import announcementMarkdown from '@/content/announcement.md?raw';
 import type { Task } from '@/lib/api';
 import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
-import type { CourseTaskPointProgressMap } from '@/lib/taskProgress';
 import {
   QQ_LOGO_URL,
   YATORI_QQ_GROUP_URL,
@@ -47,7 +46,6 @@ interface DashboardHeaderProps {
   tasksLoading: boolean;
   taskSnapshots: Record<string, TaskProgressSnapshot>;
   courseNameByIdentifier: Record<string, string>;
-  courseTaskPointProgressByIdentifier: CourseTaskPointProgressMap;
   onAccountMenuChange: (open: boolean) => void;
   onTaskFilterChange: (filter: 'active' | 'completed') => void;
   onRefreshTasks: () => void;
