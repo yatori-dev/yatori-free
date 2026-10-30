@@ -68,6 +68,25 @@ export function useTaskProgressPolling({
         return;
       }
       if (latestRequestIdRef.current.get(taskId) === requestId) {
+        const task = tasks.find((item) => item.id === taskId);
+        if (
+          task?.status === 'stopping' &&
+          typeof error === 'object' &&
+          error !== null &&
+          'status' in error &&
+          error.status === 404 &&
+          getUserFacingErrorMessage(error) === '任务不存在'
+        ) {
+          setSnapshots((previous) => ({
+            ...previous,
+            [taskId]: {
+              status: 'stopped',
+              progress: previous[taskId]?.progress ?? null,
+              errorMessage: '',
+            },
+          }));
+          return;
+        }
         setSnapshots((previous) => ({
           ...previous,
           [taskId]: {
