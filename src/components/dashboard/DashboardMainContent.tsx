@@ -5,7 +5,6 @@ import type {
   CourseDetails,
   CourseSummary,
 } from '@/lib/api';
-import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 import { getDeadlineUrgencyLabel } from '@/lib/format';
 import { isCourseEnded } from '@/lib/coursePresentation';
 import { TaskStatusContent } from './TaskStatusContent';
@@ -46,7 +45,6 @@ interface DashboardMainContentProps {
   stoppingTaskId: string | null;
   taskFilter: 'active' | 'completed';
   tasksLoading: boolean;
-  taskSnapshots: Record<string, TaskProgressSnapshot>;
   courseNameByIdentifier: Record<string, string>;
   showDeadlineBadges: boolean;
   autoSubmitWorksNearDeadline: boolean;
@@ -108,7 +106,6 @@ export function DashboardMainContent({
   stoppingTaskId,
   taskFilter,
   tasksLoading,
-  taskSnapshots,
   courseNameByIdentifier,
   showDeadlineBadges,
   autoSubmitWorksNearDeadline,
@@ -290,7 +287,6 @@ export function DashboardMainContent({
                     onUnauthorized={onUnauthorized}
                     taskFilter={taskFilter}
                     tasksLoading={tasksLoading}
-                    taskSnapshots={taskSnapshots}
                     courseNameByIdentifier={courseNameByIdentifier}
                     onTaskFilterChange={onTaskFilterChange}
                     onRefresh={onRefreshTasks}

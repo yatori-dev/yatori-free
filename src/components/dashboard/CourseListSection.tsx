@@ -202,7 +202,7 @@ export function CourseListSection({
         )}
         <div className="min-w-0 overflow-hidden rounded-[var(--radius-lg)] border border-border shadow-rest" aria-busy={coursesLoading}>
           {coursesLoading && courses.length === 0 ? (
-            <ResourceListLoading label="正在加载章节任务" rows={4} />
+            <ResourceListLoading label="正在加载课程列表" rows={4} />
           ) : coursesError && courses.length === 0 ? (
             <div className="p-12 text-center font-sans text-sm text-danger">
               <AlertCircle className="mx-auto mb-2 h-8 w-8" />
@@ -211,7 +211,7 @@ export function CourseListSection({
           ) : courses.length === 0 ? (
             <div className="p-12 text-center font-sans text-sm text-muted-foreground">
               <AlertCircle className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-              暂无关联课程，您可以尝试点击右上角刷新重试
+              暂无关联课程，请点击刷新按钮重试
             </div>
           ) : filteredCourses.length === 0 ? (
             <div className="p-12 text-center font-sans text-sm text-muted-foreground">

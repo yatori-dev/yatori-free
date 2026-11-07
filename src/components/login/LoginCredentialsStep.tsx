@@ -360,11 +360,21 @@ export function LoginCredentialsStep({
       );
       if (method === 'password') {
         setPasswordError(message);
+        toast.error(message);
+      } else if (
+        typeof error === 'object' &&
+        error !== null &&
+        'status' in error &&
+        error.status === 409
+      ) {
+        changeView(() => setMethod('password'), 'credentials');
+        setPasswordError(message);
+        toast.error(message);
       } else {
         setSMSError(message);
         turnstileRef.current?.reset();
+        toast.error(message);
       }
-      toast.error(message);
     } finally {
       setIsLoggingIn(false);
     }

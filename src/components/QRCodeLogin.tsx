@@ -196,7 +196,17 @@ export function QRCodeLogin({ onLoginSuccess }: QRCodeLoginProps) {
             requestError.kind === "aborted"
           )
         ) {
-          setError(getUserFacingErrorMessage(requestError, "登录态换取失败"));
+          const is409 =
+            typeof requestError === "object" &&
+            requestError !== null &&
+            "status" in requestError &&
+            requestError.status === 409;
+          setError(
+            is409
+              ? getUserFacingErrorMessage(requestError, "登录态换取失败") +
+                "，请使用密码登录"
+              : getUserFacingErrorMessage(requestError, "登录态换取失败"),
+          );
         }
       })
       .finally(() => {
