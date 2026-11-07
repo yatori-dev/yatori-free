@@ -80,7 +80,7 @@ export function DashboardOverlays({
                 className="whitespace-nowrap rounded-[var(--radius-md)] bg-background px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
                 role="status"
               >
-                预计所需{estimatedTaskDuration}
+                预计约需 {estimatedTaskDuration}
               </span>
             )}
           </div>

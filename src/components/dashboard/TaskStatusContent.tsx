@@ -7,7 +7,7 @@ import { TaskChartsSkeleton } from '@/components/task/TaskChartsSkeleton';
 import { TaskListToolbar, type TaskListKind, type TaskListSort, type TaskListStatus } from '@/components/task/TaskListToolbar';
 import { type TaskGroup } from '@/lib/taskDashboard';
 import { getTasks, getTaskStats, getUserFacingErrorMessage, isAuthExitError, type Task, type TaskStats } from '@/lib/api';
-import { useTaskProgressPolling, type TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
+import { useTaskProgressPolling } from '@/hooks/useTaskProgressPolling';
 import { ACTIVE_TASK_STATUSES, isActiveTaskStatus, isTerminalTaskStatus } from '@/lib/taskStatus';
 
 const TaskDashboardCharts = lazy(() => import('@/components/task/TaskDashboardCharts'));
@@ -17,7 +17,6 @@ const ignoreUnauthorized = () => {};
 interface TaskStatusContentProps {
   taskFilter: 'active' | 'completed';
   tasksLoading: boolean;
-  taskSnapshots: Record<string, TaskProgressSnapshot>;
   courseNameByIdentifier: Record<string, string>;
   onTaskFilterChange: (filter: 'active' | 'completed') => void;
   onRefresh: () => void;
@@ -27,7 +26,7 @@ interface TaskStatusContentProps {
 }
 
 export function TaskStatusContent({
-  taskFilter, tasksLoading, taskSnapshots, courseNameByIdentifier,
+  taskFilter, tasksLoading, courseNameByIdentifier,
   onTaskFilterChange, onRefresh, onStopTask,
   onUnauthorized = ignoreUnauthorized, visible = true,
 }: TaskStatusContentProps) {
@@ -53,7 +52,7 @@ export function TaskStatusContent({
   const queryKey = JSON.stringify([taskFilter, status, kind, query, sort, page]);
   const hasCurrentPage = loadedQueryKey === queryKey;
   const pageSnapshots = useTaskProgressPolling({ tasks: pageTasks, onUnauthorized, enabled: visible && hasCurrentPage && !listError });
-  const snapshots = { ...taskSnapshots, ...pageSnapshots };
+  const snapshots = { ...pageSnapshots };
   const snapshotChangeKey = pageTasks.filter((task) => isActiveTaskStatus(task.status) && isTerminalTaskStatus(pageSnapshots[task.id]?.status ?? task.status)).map((task) => `${task.id}:${pageSnapshots[task.id].status}`).sort().join('|');
   const pageRequestKey = JSON.stringify([queryKey, refreshVersion, snapshotRevision]);
   const statsRequestKey = JSON.stringify([refreshVersion, snapshotRevision]);

@@ -14,7 +14,6 @@ import {
 import type { AuthSession, Task, CreateTaskCoursesCustom, TaskTarget } from '@/lib/api';
 import { notifyAuthExit } from '@/lib/notifications';
 import { isActiveTaskStatus } from '@/lib/taskStatus';
-import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 import { useCourseData } from '@/hooks/useCourseData';
 import { hasDeadlinePassed } from '@/lib/format';
 import { getCourseNameMap, getTaskCounts } from '@/lib/dashboardDerived';
@@ -196,14 +195,6 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
     loadingDetails, detailErrors, detailRevisions,
     fetchCourses: fetchCatalog, fetchTaskList, fetchOutline,
   } = useCourseData(account.id, handleTaskUnauthorized);
-
-  const filteredTasks = useMemo(() => {
-    return tasks.filter(task => {
-      const isActive = isActiveTaskStatus(task.status);
-      if (taskFilter === 'active') return isActive;
-      return !isActive;
-    });
-  }, [tasks, taskFilter]);
 
   const taskCounts = useMemo(() => getTaskCounts(tasks), [tasks]);
 
@@ -611,7 +602,12 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
       void fetchTasks();
       void fetchCourses();
       setSelectedCourses(new Set());
-      setTaskExecutionSettings((previous) => ({ ...previous, bypassDailyStudyLimit: false }));
+      setTaskExecutionSettings((previous) => {
+        if (previous.bypassDailyStudyLimit) {
+          toast.info('暴力模式已自动关闭');
+        }
+        return { ...previous, bypassDailyStudyLimit: false };
+      });
     } catch (error) {
       if (isAuthExitError(error)) {
         notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
@@ -701,8 +697,6 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
       setStoppingTaskId(null);
     }
   };
-
-  const taskSnapshots: Record<string, TaskProgressSnapshot> = {};
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -820,17 +814,7 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
             accountMenuOpen={accountMenuOpen}
             sidebarCollapsed={sidebarCollapsed}
             onSidebarToggle={() => setSidebarCollapsed((collapsed) => !collapsed)}
-            taskCounts={taskCounts}
-            tasks={tasks}
-            filteredTasks={filteredTasks}
-            taskFilter={taskFilter}
-            tasksLoading={tasksLoading}
-            taskSnapshots={taskSnapshots}
-            courseNameByIdentifier={courseNameByIdentifier}
             onAccountMenuChange={setAccountMenuOpen}
-            onTaskFilterChange={setTaskFilter}
-            onRefreshTasks={() => void fetchTasks()}
-            onStopTask={handleStopTask}
             onLogoutRequest={() => setLogoutConfirmOpen(true)}
           />
           <DashboardMainContent
@@ -860,7 +844,6 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
             stoppingTaskId={stoppingTaskId}
             taskFilter={taskFilter}
             tasksLoading={tasksLoading}
-            taskSnapshots={taskSnapshots}
             courseNameByIdentifier={courseNameByIdentifier}
             showDeadlineBadges={showDeadlineBadges}
             autoSubmitWorksNearDeadline={autoSubmitWorksNearDeadline}

@@ -19,8 +19,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import announcementMarkdown from '@/content/announcement.md?raw';
-import type { Task } from '@/lib/api';
-import type { TaskProgressSnapshot } from '@/hooks/useTaskProgressPolling';
 import {
   QQ_LOGO_URL,
   YATORI_QQ_GROUP_URL,
@@ -39,17 +37,7 @@ interface DashboardHeaderProps {
   accountMenuOpen: boolean;
   sidebarCollapsed: boolean;
   onSidebarToggle: () => void;
-  taskCounts: { active: number; completed: number };
-  tasks: Task[];
-  filteredTasks: Task[];
-  taskFilter: 'active' | 'completed';
-  tasksLoading: boolean;
-  taskSnapshots: Record<string, TaskProgressSnapshot>;
-  courseNameByIdentifier: Record<string, string>;
   onAccountMenuChange: (open: boolean) => void;
-  onTaskFilterChange: (filter: 'active' | 'completed') => void;
-  onRefreshTasks: () => void;
-  onStopTask: (taskId: string) => void;
   onLogoutRequest: () => void;
 }
 
