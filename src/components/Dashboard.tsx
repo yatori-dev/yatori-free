@@ -5,6 +5,8 @@ import { changeView } from '@/lib/motion';
 import {
   createTask,
   getCourseDetails,
+  getTask,
+  getTaskKind,
   getVersion,
   getTasks,
   getUserFacingErrorMessage,
@@ -698,6 +700,30 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
     }
   };
 
+  const handleStopCourseTask = async (taskId: string) => {
+    try {
+      const response = await getTask(taskId);
+      const task = response.data;
+      const createdAt = task.createdAt ? Date.parse(task.createdAt) : Number.NaN;
+      const age = Date.now() - createdAt;
+      if (getTaskKind(task) === 'task_points' && Number.isFinite(age) && age < 5 * 60 * 1000) {
+        const remainingMinutes = Math.ceil((5 * 60 * 1000 - age) / 60000);
+        toast.info(`视频/章测任务创建后 5 分钟内不能取消，还需等待约 ${remainingMinutes} 分钟`);
+        return;
+      }
+    } catch (error) {
+      if (isAuthExitError(error)) {
+        notifyAuthExit(getUserFacingErrorMessage(error, '登录已失效，请重新登录'));
+        onLogout();
+        return;
+      }
+      toast.error(getUserFacingErrorMessage(error, '读取任务状态失败，请稍后重试'));
+      return;
+    }
+
+    await handleStopTask(taskId);
+  };
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
       void fetchTasks();
@@ -861,7 +887,7 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
             onSearchChange={setCourseSearch}
             onSearchQueryChange={setCourseSearchQuery}
             onToggleCourseSelection={toggleCourseSelection}
-            onStopTask={handleStopTask}
+            onStopTask={handleStopCourseTask}
             onToggleExpandCourse={toggleExpandCourse}
             onToggleFullCourseOutline={toggleFullCourseOutline}
             onTaskFilterChange={setTaskFilter}
