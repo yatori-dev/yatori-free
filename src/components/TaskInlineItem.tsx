@@ -33,6 +33,7 @@ import { TaskCourseListDialog } from "./task/TaskCourseListDialog";
 import { CollapsiblePanel } from "./ui/collapsible-panel";
 import { TaskProgressPanel } from "./task/TaskProgressPanel";
 import { TaskSettingsSnapshot } from "./task/TaskSettingsSnapshot";
+import { isStoppedTaskNotFound } from "@/lib/taskStatus";
 import { getTaskPresentation } from "@/lib/taskPresentation";
 import { StopTaskConfirmDialog } from "./dashboard/StopTaskConfirmDialog";
 
@@ -41,6 +42,7 @@ interface TaskInlineItemProps {
   courseNameByIdentifier?: Record<string, string>;
   snapshot?: TaskProgressSnapshot;
   onStopTask: (taskId: string) => void;
+  hasAcceptedTaskStop: (taskId: string) => boolean;
   onUnauthorized?: () => void;
 }
 
@@ -114,6 +116,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
   courseNameByIdentifier = {},
   snapshot,
   onStopTask,
+  hasAcceptedTaskStop,
   onUnauthorized,
 }) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -146,6 +149,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
     } catch (error) {
       if (controller.signal.aborted) return;
       if (isAuthExitError(error)) onUnauthorized?.();
+      if (isStoppedTaskNotFound(error, effectiveStatus === "stopping" || effectiveStatus === "stopped" || hasAcceptedTaskStop(task.id))) return;
       setDetailsError(getUserFacingErrorMessage(error, "获取任务配置失败"));
     } finally {
       if (detailsRequestRef.current === controller) {

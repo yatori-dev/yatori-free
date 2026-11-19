@@ -1,4 +1,4 @@
-import type { Task } from '@/lib/api';
+import { getUserFacingErrorMessage, type Task } from '@/lib/api';
 
 export const ACTIVE_TASK_STATUSES = [
   'pending',
@@ -31,5 +31,16 @@ export function isActiveTaskStatus(status: Task['status']) {
 export function isTerminalTaskStatus(status: Task['status']) {
   return TERMINAL_TASK_STATUSES.includes(
     status as (typeof TERMINAL_TASK_STATUSES)[number],
+  );
+}
+
+export function isStoppedTaskNotFound(error: unknown, stopKnown: boolean) {
+  return (
+    stopKnown &&
+    typeof error === 'object' &&
+    error !== null &&
+    'status' in error &&
+    error.status === 404 &&
+    getUserFacingErrorMessage(error) === '任务不存在'
   );
 }

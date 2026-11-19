@@ -21,13 +21,14 @@ interface TaskStatusContentProps {
   onTaskFilterChange: (filter: 'active' | 'completed') => void;
   onRefresh: () => void;
   onStopTask: (taskId: string) => void;
+  hasAcceptedTaskStop: (taskId: string) => boolean;
   onUnauthorized?: () => void;
   visible?: boolean;
 }
 
 export function TaskStatusContent({
   taskFilter, tasksLoading, courseNameByIdentifier,
-  onTaskFilterChange, onRefresh, onStopTask,
+  onTaskFilterChange, onRefresh, onStopTask, hasAcceptedTaskStop,
   onUnauthorized = ignoreUnauthorized, visible = true,
 }: TaskStatusContentProps) {
   const [search, setSearch] = useState('');
@@ -51,7 +52,7 @@ export function TaskStatusContent({
   const previousSnapshotChangeKeyRef = useRef('');
   const queryKey = JSON.stringify([taskFilter, status, kind, query, sort, page]);
   const hasCurrentPage = loadedQueryKey === queryKey;
-  const pageSnapshots = useTaskProgressPolling({ tasks: pageTasks, onUnauthorized, enabled: visible && hasCurrentPage && !listError });
+  const pageSnapshots = useTaskProgressPolling({ tasks: pageTasks, onUnauthorized, hasAcceptedTaskStop, enabled: visible && hasCurrentPage && !listError });
   const snapshots = { ...pageSnapshots };
   const snapshotChangeKey = pageTasks.filter((task) => isActiveTaskStatus(task.status) && isTerminalTaskStatus(pageSnapshots[task.id]?.status ?? task.status)).map((task) => `${task.id}:${pageSnapshots[task.id].status}`).sort().join('|');
   const pageRequestKey = JSON.stringify([queryKey, refreshVersion, snapshotRevision]);
@@ -195,7 +196,7 @@ export function TaskStatusContent({
         ) : !hasCurrentPage ? (
           <div className="flex min-h-48 items-center justify-center gap-2 text-sm text-muted-foreground" role="status"><RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />正在加载任务</div>
         ) : pageTasks.length > 0 ? pageTasks.map((task) => (
-          <TaskInlineItem key={task.id} task={task} snapshot={snapshots[task.id]} courseNameByIdentifier={courseNameByIdentifier} onStopTask={onStopTask} onUnauthorized={onUnauthorized} />
+          <TaskInlineItem key={task.id} task={task} snapshot={snapshots[task.id]} courseNameByIdentifier={courseNameByIdentifier} onStopTask={onStopTask} hasAcceptedTaskStop={hasAcceptedTaskStop} onUnauthorized={onUnauthorized} />
         )) : (
           <div className="flex min-h-48 flex-col items-center justify-center gap-3 px-4 text-center">
             <Activity className="h-6 w-6 text-muted-foreground" aria-hidden="true" />

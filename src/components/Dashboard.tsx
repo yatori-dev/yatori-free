@@ -119,6 +119,8 @@ function readPersistedSettings(accountId: string | null | undefined): PersistedS
 const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
   const account = session.account;
   const [tasks, setTasks] = useState<Task[]>([]);
+  const acceptedTaskStops = useRef(new Set<string>());
+  const hasAcceptedTaskStop = useCallback((taskId: string) => acceptedTaskStops.current.has(taskId), []);
   const [appVersion, setAppVersion] = useState('...');
   const [activeTab, setActiveTab] = useState<MobileDashboardTabId>('courses');
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
@@ -685,6 +687,7 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
     setStoppingTaskId(taskId);
     try {
       await stopTask(taskId);
+      acceptedTaskStops.current.add(taskId);
       toast.info('已发送停止请求');
       void fetchTasks({ showLoading: false });
       void fetchCourses();
@@ -701,6 +704,7 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
   };
 
   const handleStopCourseTask = async (taskId: string) => {
+    if (hasAcceptedTaskStop(taskId)) return;
     try {
       const response = await getTask(taskId);
       const task = response.data;
@@ -888,6 +892,7 @@ const DashboardContent: React.FC<DashboardProps> = ({ session, onLogout }) => {
             onSearchQueryChange={setCourseSearchQuery}
             onToggleCourseSelection={toggleCourseSelection}
             onStopTask={handleStopCourseTask}
+            hasAcceptedTaskStop={hasAcceptedTaskStop}
             onToggleExpandCourse={toggleExpandCourse}
             onToggleFullCourseOutline={toggleFullCourseOutline}
             onTaskFilterChange={setTaskFilter}
