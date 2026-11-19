@@ -66,6 +66,7 @@ interface DashboardMainContentProps {
   onSearchQueryChange: (value: string) => void;
   onToggleCourseSelection: (courseKey: string) => void;
   onStopTask: (taskId: string) => void;
+  hasAcceptedTaskStop: (taskId: string) => boolean;
   onToggleExpandCourse: (courseKey: string) => void;
   onToggleFullCourseOutline: (courseKey: string) => void;
   onTaskFilterChange: (filter: 'active' | 'completed') => void;
@@ -120,6 +121,7 @@ export function DashboardMainContent({
   onSearchQueryChange,
   onToggleCourseSelection,
   onStopTask,
+  hasAcceptedTaskStop,
   onToggleExpandCourse,
   onToggleFullCourseOutline,
   onTaskFilterChange,
@@ -291,6 +293,7 @@ export function DashboardMainContent({
                     onTaskFilterChange={onTaskFilterChange}
                     onRefresh={onRefreshTasks}
                     onStopTask={onStopTask}
+                    hasAcceptedTaskStop={hasAcceptedTaskStop}
                   />
                 </div>
               </section>

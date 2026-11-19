@@ -7,7 +7,7 @@ import {
   type TaskConfigSnapshot,
   type TaskProgress,
 } from '@/lib/api';
-import { isActiveTaskStatus, isTerminalTaskStatus } from '@/lib/taskStatus';
+import { isActiveTaskStatus, isStoppedTaskNotFound, isTerminalTaskStatus } from '@/lib/taskStatus';
 
 export interface TaskProgressSnapshot {
   status: Task['status'];
@@ -19,6 +19,7 @@ export interface TaskProgressSnapshot {
 interface UseTaskProgressPollingOptions {
   tasks: Task[];
   onUnauthorized: () => void;
+  hasAcceptedTaskStop: (taskId: string) => boolean;
   enabled?: boolean;
 }
 
@@ -30,7 +31,7 @@ function canReplaceProgress(current: TaskProgress | null, next: TaskProgress | n
 }
 
 export function useTaskProgressPolling({
-  tasks, onUnauthorized, enabled = true,
+  tasks, onUnauthorized, hasAcceptedTaskStop, enabled = true,
 }: UseTaskProgressPollingOptions) {
   const [snapshots, setSnapshots] = useState<Record<string, TaskProgressSnapshot>>({});
   const latestRequestIdRef = useRef(new Map<string, number>());
@@ -69,14 +70,7 @@ export function useTaskProgressPolling({
       }
       if (latestRequestIdRef.current.get(taskId) === requestId) {
         const task = tasks.find((item) => item.id === taskId);
-        if (
-          task?.status === 'stopping' &&
-          typeof error === 'object' &&
-          error !== null &&
-          'status' in error &&
-          error.status === 404 &&
-          getUserFacingErrorMessage(error) === '任务不存在'
-        ) {
+        if (isStoppedTaskNotFound(error, task?.status === 'stopping' || hasAcceptedTaskStop(taskId))) {
           setSnapshots((previous) => ({
             ...previous,
             [taskId]: {
