@@ -91,22 +91,22 @@ export function TaskSettingsPanel({
 
   return (
     <>
-      <section className="settings-view flex min-h-0 w-full min-w-0 flex-1" aria-label="设置分类与内容">
+      <section className="settings-view flex w-full min-w-0 flex-1 md:min-h-0" aria-label="设置分类与内容">
         <Tabs
           value={activeSettingSection}
           onValueChange={changeSection}
           orientation={isDesktop ? 'vertical' : 'horizontal'}
-          className="min-w-0 flex-1 flex-col gap-3 md:flex-row md:gap-0"
+          className="min-w-0 flex-1 flex-col gap-0 md:min-h-0 md:flex-row"
         >
           <TabsList
             aria-label="设置分类"
-            className="flex w-full shrink-0 items-stretch justify-start gap-0 rounded-[var(--radius-lg)] bg-muted p-1 text-xs font-medium text-muted-foreground group-data-horizontal/tabs:h-auto md:w-44 md:flex-col md:gap-1 md:self-stretch md:rounded-none md:bg-muted/30 md:p-[var(--space-3)] md:text-sm md:border-r group-data-vertical/tabs:h-auto"
+            className="hidden shrink-0 items-stretch justify-start gap-1 self-stretch rounded-none border-r bg-muted/30 p-[var(--space-3)] text-sm font-medium text-muted-foreground md:flex md:w-44 md:flex-col group-data-vertical/tabs:h-auto"
           >
             {settingSections.map(({ value, label, Icon }) => (
               <TabsTrigger
                 key={value}
                 value={value}
-                className="relative h-10 min-w-0 flex-1 justify-center gap-1.5 rounded-[var(--radius-md)] border-0 px-2 text-xs font-medium text-muted-foreground transition-colors duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] hover:text-foreground focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-active:text-foreground md:h-11 md:w-full md:flex-none md:justify-start md:gap-2 md:px-[var(--space-3)] md:text-sm"
+                className="relative h-11 w-full flex-none justify-start gap-2 rounded-[var(--radius-md)] border-0 px-[var(--space-3)] text-sm font-medium text-muted-foreground transition-colors duration-[var(--duration-fast)] ease-[var(--ease-smooth-out)] hover:text-foreground focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-active:text-foreground"
               >
                 <Icon aria-hidden="true" className="size-4" />
                 {label}
@@ -117,19 +117,19 @@ export function TaskSettingsPanel({
           <TabsContent
             value="behavior"
             forceMount
-            className="min-w-0 flex-1 overflow-visible overscroll-contain p-[var(--space-4)] [overflow-wrap:anywhere] md:min-h-0 md:overflow-y-auto sm:p-[var(--space-6)] data-[state=inactive]:hidden"
+            className="min-w-0 shrink-0 px-[var(--space-4)] py-[var(--space-5)] [overflow-wrap:anywhere] sm:px-[var(--space-6)] md:min-h-0 md:flex-1 md:overflow-y-auto md:overscroll-contain md:py-[var(--space-6)] md:data-[state=inactive]:hidden"
           >
-            <div className="space-y-[var(--space-6)]">
-              <div className="border-b pb-[var(--space-4)]">
+            <div className="space-y-[var(--space-5)]">
+              <div className="border-b pb-[var(--space-3)]">
                 <h2 className="text-lg font-medium">任务行为</h2>
               </div>
               <div className="flex items-start justify-between gap-[var(--space-4)]">
-                <div className="flex min-w-0 items-start gap-[var(--space-3)]">
+                <div className="flex min-w-0 flex-1 items-start gap-[var(--space-3)]">
                   <Zap
                     aria-hidden="true"
                     className="mt-0.5 size-4 shrink-0 text-muted-foreground"
                   />
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <Label
                       htmlFor="bypassDailyStudyLimit"
                       className="block cursor-pointer text-sm font-semibold text-foreground"
@@ -148,10 +148,10 @@ export function TaskSettingsPanel({
                   className="theme-switch mt-0.5 shrink-0"
                 />
               </div>
-              <div className="flex items-start justify-between gap-[var(--space-4)] border-t pt-[var(--space-6)]">
-                <div className="flex min-w-0 items-start gap-[var(--space-3)]">
+              <div className="flex items-start justify-between gap-[var(--space-4)]">
+                <div className="flex min-w-0 flex-1 items-start gap-[var(--space-3)]">
                   <Send aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <Label htmlFor="autoSubmitWorksNearDeadline" className="block cursor-pointer text-sm font-semibold text-foreground">
                       作业临近截止自动提交
                     </Label>
@@ -165,10 +165,10 @@ export function TaskSettingsPanel({
                   className="mt-0.5 shrink-0"
                 />
               </div>
-              <div className="flex items-start justify-between gap-[var(--space-4)] border-t pt-[var(--space-6)]">
-                <div className="flex min-w-0 items-start gap-[var(--space-3)]">
+              <div className="flex items-start justify-between gap-[var(--space-4)]">
+                <div className="flex min-w-0 flex-1 items-start gap-[var(--space-3)]">
                   <Gauge aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <Label htmlFor="accelerateBeforeCourseEnd" className="block cursor-pointer text-sm font-semibold text-foreground">
                       结课前自动完成
                     </Label>
@@ -188,20 +188,20 @@ export function TaskSettingsPanel({
           <TabsContent
             value="appearance"
             forceMount
-            className="min-w-0 flex-1 overflow-visible overscroll-contain p-[var(--space-4)] [overflow-wrap:anywhere] md:min-h-0 md:overflow-y-auto sm:p-[var(--space-6)] data-[state=inactive]:hidden"
+            className="min-w-0 shrink-0 px-[var(--space-4)] py-[var(--space-5)] [overflow-wrap:anywhere] sm:px-[var(--space-6)] md:min-h-0 md:flex-1 md:overflow-y-auto md:overscroll-contain md:py-[var(--space-6)] md:data-[state=inactive]:hidden"
           >
-            <div className="space-y-[var(--space-6)]">
-              <div className="border-b pb-[var(--space-4)]">
+            <div className="space-y-[var(--space-5)]">
+              <div className="border-b pb-[var(--space-3)]">
                 <h2 className="text-lg font-medium">显示</h2>
               </div>
 
-              <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)] border-b pb-[var(--space-6)]">
-                <div className="flex min-w-0 items-start gap-[var(--space-3)]">
+              <div className="flex items-center justify-between gap-[var(--space-4)]">
+                <div className="flex min-w-0 flex-1 items-start gap-[var(--space-3)]">
                   <Palette
                     aria-hidden="true"
                     className="mt-0.5 size-4 shrink-0 text-muted-foreground"
                   />
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <Label htmlFor="theme-setting" className="text-sm font-semibold text-foreground">主题</Label>
                     <p className="mt-1 text-sm text-muted-foreground">
                       选择浅色、深色或跟随系统
@@ -209,7 +209,7 @@ export function TaskSettingsPanel({
                   </div>
                 </div>
                 <Select value={theme ?? 'system'} onValueChange={setTheme}>
-                  <SelectTrigger id="theme-setting" className="w-40 shrink-0 data-[size=default]:h-11">
+                  <SelectTrigger id="theme-setting" className="w-32 shrink-0 sm:w-40 data-[size=default]:h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -228,12 +228,12 @@ export function TaskSettingsPanel({
               </div>
 
               <div className="flex items-start justify-between gap-[var(--space-4)]">
-                <div className="flex min-w-0 items-start gap-[var(--space-3)]">
+                <div className="flex min-w-0 flex-1 items-start gap-[var(--space-3)]">
                   <AlarmClock
                     aria-hidden="true"
                     className="mt-0.5 size-4 shrink-0 text-muted-foreground"
                   />
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <Label
                       htmlFor="showDeadlineBadges"
                       className="block cursor-pointer text-sm font-semibold text-foreground"
@@ -260,10 +260,10 @@ export function TaskSettingsPanel({
           <TabsContent
             value="notifications"
             forceMount
-            className="min-w-0 flex-1 overflow-visible overscroll-contain p-[var(--space-4)] [overflow-wrap:anywhere] md:min-h-0 md:overflow-y-auto sm:p-[var(--space-6)] data-[state=inactive]:hidden"
+            className="min-w-0 shrink-0 px-[var(--space-4)] py-[var(--space-5)] [overflow-wrap:anywhere] sm:px-[var(--space-6)] md:min-h-0 md:flex-1 md:overflow-y-auto md:overscroll-contain md:py-[var(--space-6)] md:data-[state=inactive]:hidden"
           >
-            <div className="space-y-[var(--space-6)]">
-              <div className="border-b pb-[var(--space-4)]">
+            <div className="space-y-[var(--space-5)]">
+              <div className="border-b pb-[var(--space-3)]">
                 <h2 className="text-lg font-medium">通知</h2>
               </div>
               <EmailNotificationSettings onUnauthorized={onUnauthorized} />

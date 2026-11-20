@@ -118,6 +118,7 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showCourseList, setShowCourseList] = useState(false);
+  const [showAllCoursesInDialog, setShowAllCoursesInDialog] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [stopConfirmOpen, setStopConfirmOpen] = useState(false);
   const [detailTask, setDetailTask] = useState<Task | null>(null);
@@ -301,7 +302,8 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
     }
     return /^\d+$/.test(normalizedIdentifier) ? "未匹配课程" : courseIdentifier;
   });
-  const hiddenCourses = displayCourses?.slice(VISIBLE_COURSE_COUNT) ?? [];
+  const allCourses = displayCourses ?? [];
+  const hiddenCourses = allCourses.slice(VISIBLE_COURSE_COUNT);
 
   const isTerminal = [
     "success",
@@ -354,38 +356,58 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
     <article
       className="@container group flex w-full min-w-0 flex-col gap-3 border-b border-border py-4 sm:py-5"
     >
-      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-3 @3xl:grid-cols-[minmax(0,1.4fr)_8rem_minmax(14rem,1fr)_auto] @3xl:items-center @3xl:gap-x-6">
-        <div className="min-w-0">
-          <div className="mb-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-            <h4 className="text-sm font-semibold">
-              {taskKind === "works" ? "作业" : taskKind === "exams" ? "考试" : taskKind === "task_points" ? "章节任务" : "学习任务"}
-            </h4>
-            <span className="text-xs tabular-nums text-muted-foreground" title={task.id}>#{task.id.substring(0, 8)}</span>
+      <div className="flex min-w-0 flex-col gap-2.5 @3xl:grid @3xl:grid-cols-[minmax(0,1.4fr)_8rem_minmax(14rem,1fr)_auto] @3xl:items-center @3xl:gap-x-6 @3xl:gap-y-3">
+        <div className="min-w-0 space-y-1.5">
+          <div className="flex min-w-0 items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <h4 className="truncate text-sm font-semibold">
+                {taskKind === "works" ? "作业" : taskKind === "exams" ? "考试" : taskKind === "task_points" ? "章节任务" : "学习任务"}
+              </h4>
+              <span className="shrink-0 text-xs tabular-nums text-muted-foreground" title={task.id}>#{task.id.substring(0, 8)}</span>
+            </div>
+            <span className={`flex shrink-0 items-center gap-1.5 text-xs @3xl:hidden ${statusInfo.toneClass}`}>
+              {statusInfo.icon}<span>{statusInfo.label}</span>
+            </span>
           </div>
-          <TaskCourseBadges courses={displayCourses} onShowMore={() => setShowCourseList(true)} />
-          {!isTerminal && (progress?.currentTitle || progress?.currentChapter) && <p className="mt-1.5 truncate text-xs text-muted-foreground" title={progress.currentTitle || progress.currentChapter}>{progress.currentTitle || progress.currentChapter}</p>}
-          <p className="mt-2 text-xs text-muted-foreground">
+          <TaskCourseBadges
+            courses={displayCourses}
+            onShowMore={(showAll) => {
+              setShowAllCoursesInDialog(Boolean(showAll));
+              setShowCourseList(true);
+            }}
+          />
+          {!isTerminal && (progress?.currentTitle || progress?.currentChapter) && (
+            <p className="truncate text-xs text-muted-foreground" title={progress.currentTitle || progress.currentChapter}>
+              {progress.currentTitle || progress.currentChapter}
+            </p>
+          )}
+          <p className="truncate text-xs text-muted-foreground">
             {task.createdAt ? `创建于 ${formatLocalDateTime(task.createdAt)}` : task.startedAt ? `启动于 ${formatLocalDateTime(task.startedAt)}` : "尚未启动"}
           </p>
         </div>
-        <span className={`flex min-w-0 items-center gap-1.5 text-xs @3xl:col-start-2 @3xl:row-start-1 ${statusInfo.toneClass}`}>
+
+        <span className={`hidden min-w-0 items-center gap-1.5 text-xs @3xl:col-start-2 @3xl:row-start-1 @3xl:flex ${statusInfo.toneClass}`}>
           {statusInfo.icon}<span>{statusInfo.label}</span>
         </span>
-        <div className="min-w-0 space-y-1.5 @3xl:col-start-3 @3xl:row-start-1">
-          <div className="flex items-center justify-between gap-2 text-xs">
-            <span className="text-muted-foreground">执行进度</span>
-            <span className="font-medium tabular-nums">{hasProgress ? `${percent}%` : "暂无进度"}</span>
+
+        <div className="flex items-center justify-between gap-3 @3xl:contents">
+          <div className="min-w-0 flex-1 space-y-1.5 @3xl:col-start-3 @3xl:row-start-1">
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="truncate text-muted-foreground">
+                {hasUnitCounts ? `已处理 ${processedUnits} / ${totalUnits}` : "执行进度"}
+              </span>
+              <span className="shrink-0 font-medium tabular-nums">{hasProgress ? `${percent}%` : "暂无进度"}</span>
+            </div>
+            {hasProgress && <Progress value={percent} className="h-1.5 bg-muted" />}
           </div>
-          {hasProgress && <Progress value={percent} className="h-1.5 bg-muted" />}
-          {hasUnitCounts && <p className="text-xs tabular-nums text-muted-foreground">已处理 {processedUnits} / {totalUnits}</p>}
-        </div>
-        <div className="flex shrink-0 items-center gap-1 self-end @3xl:col-start-4 @3xl:row-start-1 @3xl:self-center">
-          <Button size="icon" variant="ghost" onClick={toggleDetails} aria-expanded={showDetails} aria-controls={detailsId} aria-label={showDetails ? "收起任务详情" : "展开任务详情"} title={showDetails ? "收起任务详情" : "展开任务详情"} className="h-9 w-9 text-muted-foreground">
-            <ChevronDown className={`motion-disclosure-chevron h-4 w-4 ${showDetails ? "rotate-180" : ""}`} />
-          </Button>
-          {canStopTask && <Button size="icon" variant="ghost" disabled={isStoppingTask || actionLoading} onClick={() => setStopConfirmOpen(true)} aria-label={isStoppingTask ? "任务停止中" : "停止任务"} title={isStoppingTask ? "任务停止中" : "停止任务"} className="h-9 w-9 text-danger hover:bg-danger-container hover:text-danger">
-            {actionLoading || isStoppingTask ? <RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Square className="h-3.5 w-3.5" />}
-          </Button>}
+          <div className="flex shrink-0 items-center gap-1 @3xl:col-start-4 @3xl:row-start-1 @3xl:self-center">
+            <Button size="icon" variant="ghost" onClick={toggleDetails} aria-expanded={showDetails} aria-controls={detailsId} aria-label={showDetails ? "收起任务详情" : "展开任务详情"} title={showDetails ? "收起任务详情" : "展开任务详情"} className="h-9 w-9 text-muted-foreground">
+              <ChevronDown className={`motion-disclosure-chevron h-4 w-4 ${showDetails ? "rotate-180" : ""}`} />
+            </Button>
+            {canStopTask && <Button size="icon" variant="ghost" disabled={isStoppingTask || actionLoading} onClick={() => setStopConfirmOpen(true)} aria-label={isStoppingTask ? "任务停止中" : "停止任务"} title={isStoppingTask ? "任务停止中" : "停止任务"} className="h-9 w-9 text-danger hover:bg-danger-container hover:text-danger">
+              {actionLoading || isStoppingTask ? <RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Square className="h-3.5 w-3.5" />}
+            </Button>}
+          </div>
         </div>
       </div>
 
@@ -396,7 +418,8 @@ export const TaskInlineItem: React.FC<TaskInlineItemProps> = ({
       />
 
       <TaskCourseListDialog
-        courses={hiddenCourses}
+        courses={showAllCoursesInDialog ? allCourses : hiddenCourses}
+        title={showAllCoursesInDialog ? `全部 ${allCourses.length} 门课程` : undefined}
         open={showCourseList}
         onOpenChange={setShowCourseList}
       />

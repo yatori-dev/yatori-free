@@ -54,14 +54,16 @@ export function SettingsDialog({
             <X aria-hidden="true" />
           </Button>
         </div>
-        <TaskSettingsPanel
-          bypassDailyStudyLimit={bypassDailyStudyLimit}
-          showDeadlineBadges={showDeadlineBadges}
-          autoSubmitWorksNearDeadline={autoSubmitWorksNearDeadline}
-          accelerateBeforeCourseEnd={accelerateBeforeCourseEnd}
-          onUnauthorized={onUnauthorized}
-          onSettingSwitch={onSettingSwitch}
-        />
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain md:flex md:overflow-hidden">
+          <TaskSettingsPanel
+            bypassDailyStudyLimit={bypassDailyStudyLimit}
+            showDeadlineBadges={showDeadlineBadges}
+            autoSubmitWorksNearDeadline={autoSubmitWorksNearDeadline}
+            accelerateBeforeCourseEnd={accelerateBeforeCourseEnd}
+            onUnauthorized={onUnauthorized}
+            onSettingSwitch={onSettingSwitch}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

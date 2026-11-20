@@ -159,7 +159,7 @@ export function DashboardMainContent({
     <main
       ref={mainRef}
       id="dashboard-main"
-      className={`min-h-0 flex-1 overflow-x-clip overflow-y-auto bg-background pb-[calc(10rem+env(safe-area-inset-bottom))] lg:pb-24 ${activeTab === 'settings' ? 'no-scrollbar' : ''}`}
+      className="min-h-0 flex-1 overflow-x-clip overflow-y-auto bg-background pb-[calc(10rem+env(safe-area-inset-bottom))] lg:pb-24"
     >
       <div className={activeTab === 'settings' ? 'hidden' : 'mx-auto w-full min-w-0 max-w-[1600px] px-3 py-4 sm:px-5 lg:px-6 lg:py-6'}>
           <div className="min-w-0 space-y-4 sm:space-y-6">

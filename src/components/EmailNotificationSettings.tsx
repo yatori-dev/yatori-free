@@ -295,9 +295,9 @@ export function EmailNotificationSettings({
 
       <div className="space-y-4">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
             <Mail className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-            <div className="space-y-0.5">
+            <div className="min-w-0 flex-1 space-y-0.5">
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-semibold">通知邮箱</h3>
                 {hasVerifiedEmail && !hasPendingEmail && (
@@ -337,9 +337,9 @@ export function EmailNotificationSettings({
         </div>
 
         {hasVerifiedEmail && !hasPendingEmail && !isEditingEmail && (
-          <div className="flex items-center gap-2 rounded-[var(--radius-md)] bg-muted/40 px-3 py-2 text-sm">
+          <div className="flex min-w-0 items-center gap-2 rounded-[var(--radius-md)] bg-muted/40 px-3 py-2 text-sm">
             <CheckCircle2 className="size-4 shrink-0 text-success" />
-            <span className="font-mono text-xs">{settings?.email}</span>
+            <span className="min-w-0 truncate font-mono text-xs">{settings?.email}</span>
           </div>
         )}
 
@@ -478,8 +478,6 @@ export function EmailNotificationSettings({
         )}
       </div>
 
-      <div className="h-px bg-border" />
-
       <Sheet>
         <SheetTrigger asChild>
           <button
@@ -519,9 +517,9 @@ export function EmailNotificationSettings({
           <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 pt-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-5">
             <div className="space-y-4">
               <div className="flex items-center justify-between gap-4 py-1">
-                <div className="flex min-w-0 items-start gap-3">
+                <div className="flex min-w-0 flex-1 items-start gap-3">
                   <Mail className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                  <div className="space-y-0.5">
+                  <div className="min-w-0 flex-1 space-y-0.5">
                     <Label
                       htmlFor="emailNotificationEnabled"
                       className="block cursor-pointer text-sm font-semibold"
@@ -545,9 +543,9 @@ export function EmailNotificationSettings({
               </div>
       
               <div className="flex items-center justify-between gap-4 py-1">
-                <div className="flex min-w-0 items-start gap-3">
+                <div className="flex min-w-0 flex-1 items-start gap-3">
                   <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                  <div className="space-y-0.5">
+                  <div className="min-w-0 flex-1 space-y-0.5">
                     <p className="text-sm font-semibold">任务状态通知</p>
                     <p className="text-xs text-muted-foreground">
                       学习任务执行完毕、暂停或异常中断时发送
