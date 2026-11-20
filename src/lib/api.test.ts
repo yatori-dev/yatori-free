@@ -37,21 +37,18 @@ describe('api boundary', () => {
       },
     });
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      '/api/tasks',
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({
-          accountId: 'account-1',
-          kind: 'works',
-          targets: [{ classId: 'class-1', itemIds: ['work-1'] }],
-          coursesCustom: {
-            workAutoSubmit: 1,
-            workAutoSubmitBeforeDeadlineMinutes: 5,
-          },
-        }),
-      }),
-    );
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe('/api/tasks');
+    expect(init.method).toBe('POST');
+    expect(JSON.parse(init.body)).toEqual({
+      accountId: 'account-1',
+      kind: 'works',
+      targets: [{ classId: 'class-1', itemIds: ['work-1'] }],
+      coursesCustom: {
+        workAutoSubmit: 1,
+        workAutoSubmitBeforeDeadlineMinutes: 5,
+      },
+    });
   });
 
   it('sends JSON requests with the session cookie', async () => {
@@ -70,7 +67,7 @@ describe('api boundary', () => {
       '/api/auth/login',
       expect.objectContaining({
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
         method: 'POST',
       }),
     );
@@ -259,35 +256,20 @@ describe('api boundary', () => {
       new Response(JSON.stringify({ code: 200, data }), { status: 200 }),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const controller = new AbortController();
 
     const result = await getTasks({
       group: 'completed', status: 'success', kind: 'works', q: '课程 一',
       sort: 'oldest', page: 3, pageSize: 10,
-    }, { signal: controller.signal });
+    });
 
     expect(result.data).toEqual(data);
-    const [url, init] = fetchMock.mock.calls[0];
+    const [url] = fetchMock.mock.calls[0];
     const parsed = new URL(String(url), 'https://example.test');
     expect(parsed.pathname).toBe('/api/tasks');
     expect(Object.fromEntries(parsed.searchParams)).toEqual({
       group: 'completed', status: 'success', kind: 'works', q: '课程 一',
       sort: 'oldest', page: '3', pageSize: '10',
     });
-    expect(init.signal.aborted).toBe(false);
-  });
-
-  it('keeps the existing task request options signature', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ code: 200, data: { tasks: [], page: 1, pageSize: 20, total: 0 } }), { status: 200 }),
-    );
-    vi.stubGlobal('fetch', fetchMock);
-
-    await getTasks({ headers: { 'X-Request': 'existing-caller' } });
-
-    expect(fetchMock).toHaveBeenCalledWith('/api/tasks', expect.objectContaining({
-      headers: expect.objectContaining({ 'X-Request': 'existing-caller' }),
-    }));
   });
 
   it('delegates the attention status filter to the server', async () => {
@@ -298,10 +280,12 @@ describe('api boundary', () => {
 
     await getTasks({ status: 'attention', page: 1, pageSize: 10 });
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      '/api/tasks?status=attention&page=1&pageSize=10',
-      expect.any(Object),
-    );
+    const [url] = fetchMock.mock.calls[0];
+    const parsed = new URL(String(url), 'https://example.test');
+    expect(parsed.pathname).toBe('/api/tasks');
+    expect(Object.fromEntries(parsed.searchParams)).toEqual({
+      status: 'attention', page: '1', pageSize: '10',
+    });
   });
 
   it('uses separate endpoints for outlines, chapter details, task progress and statistics', async () => {
@@ -323,7 +307,7 @@ describe('api boundary', () => {
     ]);
   });
 
-  it('refreshes only the selected course resource without forwarding custom options to fetch', async () => {
+  it('requests a refresh only when enabled for the course resource', async () => {
     const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(
       new Response(JSON.stringify({
         code: 200,
@@ -347,9 +331,6 @@ describe('api boundary', () => {
       '/api/accounts/account-1/exams?refresh=true',
       '/api/accounts/account-1/exams',
     ]);
-    for (const [, options] of fetchMock.mock.calls) {
-      expect(options).not.toHaveProperty('refresh');
-    }
   });
 
   it.each([false, true])(

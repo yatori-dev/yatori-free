@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   clearSessionCache,
   getSessionCached,
@@ -11,18 +11,21 @@ afterEach(() => clearSessionCache());
 describe('session cache', () => {
   it('deduplicates concurrent requests and reuses the resolved value', async () => {
     let resolveRequest!: (value: string) => void;
-    const request = () =>
+    const request = vi.fn(() =>
       new Promise<string>((resolve) => {
         resolveRequest = resolve;
-      });
+      }),
+    );
 
     const first = getSessionCached('session', request);
     const second = getSessionCached('session', request);
-    expect(first).toBe(second);
+    expect(request).toHaveBeenCalledOnce();
 
     resolveRequest('fresh');
     await expect(first).resolves.toBe('fresh');
+    await expect(second).resolves.toBe('fresh');
     await expect(getSessionCached('session', request)).resolves.toBe('fresh');
+    expect(request).toHaveBeenCalledOnce();
   });
 
   it('does not repopulate the cache with a response from before clear', async () => {

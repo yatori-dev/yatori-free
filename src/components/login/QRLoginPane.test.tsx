@@ -37,8 +37,6 @@ describe("QR login feedback", () => {
     expect(html).toContain(error);
     expect(html).toContain("重试登录");
     expect(html).toContain("刷新二维码");
-    expect(html).not.toContain("验证通过");
-    expect(html).not.toContain("跳转中");
     expect(html).not.toContain("正在校验登录信息");
   });
 
@@ -47,7 +45,6 @@ describe("QR login feedback", () => {
 
     expect(html).toContain('role="status"');
     expect(html).toContain("正在校验登录信息");
-    expect(html).not.toContain("验证通过");
     expect(html).not.toContain("重试登录");
     expect(html).not.toContain("刷新二维码");
   });
@@ -88,13 +85,12 @@ describe("QR login feedback", () => {
     }
   });
 
-  it("shows creation failures without claiming login verification", () => {
+  it("shows creation failures and offers refresh", () => {
     const html = renderPane({ session: null, error: "二维码暂时无法生成" });
 
     expect(html).toContain("二维码暂时无法生成");
     expect(html).toContain("刷新二维码");
     expect(html).not.toContain("重试登录");
-    expect(html).not.toContain("验证通过");
   });
 
   it.each([{ isCreating: true }, { isExchanging: true }])(

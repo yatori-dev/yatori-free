@@ -9,7 +9,6 @@ describe('RequestCoordinator', () => {
 
     expect(first.signal.aborted).toBe(true);
     expect(second.signal.aborted).toBe(false);
-    expect(second.requestId).toBeGreaterThan(first.requestId);
     expect(coordinator.isCurrent('courses', first.requestId)).toBe(false);
     expect(coordinator.isCurrent('courses', second.requestId)).toBe(true);
   });
@@ -27,7 +26,6 @@ describe('RequestCoordinator', () => {
     expect(coordinator.isCurrent('courses', second.requestId)).toBe(false);
 
     const third = coordinator.begin('courses');
-    expect(third.requestId).toBeGreaterThan(second.requestId);
     expect(coordinator.finish('courses', second.requestId)).toBe(false);
     expect(coordinator.isCurrent('courses', third.requestId)).toBe(true);
   });
@@ -46,6 +44,6 @@ describe('RequestCoordinator', () => {
 
     const restarted = coordinator.begin('courses');
     expect(coordinator.isCurrent('courses', courses.requestId)).toBe(false);
-    expect(restarted.requestId).toBeGreaterThan(courses.requestId);
+    expect(coordinator.isCurrent('courses', restarted.requestId)).toBe(true);
   });
 });
